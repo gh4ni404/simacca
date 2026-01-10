@@ -64,7 +64,7 @@ class AbsensiController extends BaseController
         print_r($absensi);
 
         $absensiId = $this->request->getGet('absensi_id');
-        print_r($absensiId);
+        print_r("Absensi ID: " . $absensiId);
         // Get all classes taught by this teacher
         $kelasOptions = $this->getKelasOptions($guruId);
 
