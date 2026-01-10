@@ -210,7 +210,6 @@ class GuruController extends BaseController
         }
 
         // Start transaction
-        // Testing transaction
         $db = \Config\Database::connect();
         $db->transStart();
 
