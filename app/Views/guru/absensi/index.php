@@ -154,7 +154,7 @@
                         <?php $no = 1; ?>
                         <?php foreach ($absensi as $item): ?>
                             <pre>
-                                <?= print_r($item); ?>
+                                <?= print_r("Absensi Data: " . $item); ?>
                             </pre>
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= $no++; ?></td>
@@ -180,7 +180,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <?php
-                                    
+
                                     $total = 0;
                                     $hadir = 0;
 
