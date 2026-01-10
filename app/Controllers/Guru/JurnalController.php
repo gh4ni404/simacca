@@ -26,7 +26,7 @@ class JurnalController extends BaseController
     public function index()
     {
         // Get guru data from session
-        $userId = session()->get('user_id');
+        $userId = session()->get('userId');
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
