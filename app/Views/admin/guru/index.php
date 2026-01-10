@@ -1,5 +1,5 @@
-<?= $this->extend('templates/main_layout');; ?>
-<?= $this->section('styles'); ?>
+<?= $this->extend('templates/main_layout') ?>
+<?= $this->section('styles') ?>
 <style>
     .table-responsive {
         overflow-x: auto;
@@ -15,9 +15,9 @@
         color: #1E40AF;
     }
 </style>
-<?= $this->endSection(); ?>
+<?= $this->endSection() ?>
 
-<?= $this->section('content'); ?>
+<?= $this->section('content') ?>
 <div class="bg-white rounded-xl shadow p-6">
     <!-- Header -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
@@ -324,4 +324,4 @@
         }
     }
 </script>
-<?= $this->endSection(); ?>
+<?= $this->endSection() ?>

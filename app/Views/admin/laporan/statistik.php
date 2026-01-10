@@ -1,6 +1,6 @@
-<?= $this->extend('templates/main_layout'); ?>
+<?= $this->extend('templates/main_layout') ?>
 
-<?= $this->section('content'); ?>
+<?= $this->section('content') ?>
 <div class="mb-6">
     <h1 class="text-2xl font-bold text-gray-800 mb-2">Laporan Statistik</h1>
     <p class="text-gray-600">Ringkasan statistik sistem</p>
@@ -70,9 +70,9 @@
         </div>
     </div>
 </div>
-<?= $this->endSection(); ?>
+<?= $this->endSection() ?>
 
-<?= $this->section('scripts'); ?>
+<?= $this->section('scripts') ?>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 (function() {
@@ -129,4 +129,4 @@
     document.addEventListener('DOMContentLoaded', initCharts);
 })();
 </script>
-<?= $this->endSection(); ?>
+<?= $this->endSection() ?>

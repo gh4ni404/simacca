@@ -1,6 +1,6 @@
-<?= $this->extend('templates/main_layout'); ?>
+<?= $this->extend('templates/main_layout') ?>
 
-<?= $this->section('styles'); ?>
+<?= $this->section('styles') ?>
 <style>
     .stat-card:hover {
         transform: translateY(-2px);
@@ -12,9 +12,9 @@
         height: 300px;
     }
 </style>
-<?= $this->endSection(); ?>
+<?= $this->endSection() ?>
 
-<?= $this->section('content'); ?>
+<?= $this->section('content') ?>
 <!-- Welcome Section -->
 <div class="mb-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white">
     <div class="flex flex-col md:flex-row justify-between items-center">
@@ -329,9 +329,9 @@
         </a>
     </div>
 </div>
-<?= $this->endSection(); ?>
+<?= $this->endSection() ?>
 
-<?= $this->section('scripts'); ?>
+<?= $this->section('scripts') ?>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // Initialize Charts
@@ -421,4 +421,4 @@
         });
     }
 </script>
-<?= $this->endSection(); ?>
+<?= $this->endSection() ?>

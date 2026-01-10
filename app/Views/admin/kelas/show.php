@@ -1,6 +1,6 @@
-<?= $this->extend('templates/main_layout'); ?>
+<?= $this->extend('templates/main_layout') ?>
 
-<?= $this->section('content'); ?>
+<?= $this->section('content') ?>
 <div class="mb-6">
     <h1 class="text-2xl font-bold text-gray-800 mb-2">Detail Kelas: <?= esc($kelas['nama_kelas'] ?? '-'); ?></h1>
     <p class="text-gray-600">Informasi lengkap data kelas dan siswa</p>
@@ -48,4 +48,4 @@
         </div>
     </div>
 </div>
-<?= $this->endSection(); ?>
+<?= $this->endSection() ?>

@@ -1,6 +1,6 @@
-<?= $this->extend('templates/main_layout'); ?>
+<?= $this->extend('templates/main_layout') ?>
 
-<?= $this->section('content'); ?>
+<?= $this->section('content') ?>
 <div class="p-6">
     <!-- Welcome Section -->
     <div class="mb-6 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white">
@@ -420,9 +420,9 @@
     </div>
 </div>
 
-<?= $this->endSection(); ?>
+<?= $this->endSection() ?>
 
-<?= $this->section('scripts'); ?>
+<?= $this->section('scripts') ?>
 <script>
     // Update time every minute
     function updateTime() {
@@ -462,4 +462,4 @@
             .catch(error => console.error('Error:', error));
     }, 30000);
 </script>
-<?= $this->endSection(); ?>
+<?= $this->endSection() ?>

@@ -1,6 +1,6 @@
-<?= $this->extend('templates/main_layout'); ?>
+<?= $this->extend('templates/main_layout') ?>
 
-<?= $this->section('content'); ?>
+<?= $this->section('content') ?>
 <div class="mb-6">
     <h1 class="text-2xl font-bold text-gray-800 mb-2">Laporan Absensi</h1>
     <p class="text-gray-600">Rekapitulasi absensi per periode dan kelas</p>
@@ -74,4 +74,4 @@
         </table>
     </div>
 </div>
-<?= $this->endSection(); ?>
+<?= $this->endSection() ?>

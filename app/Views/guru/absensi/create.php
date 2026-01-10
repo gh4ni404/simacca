@@ -1,6 +1,6 @@
-<?= $this->extend('templates/main_layout'); ?>
+<?= $this->extend('templates/main_layout') ?>
 
-<?= $this->section('content'); ?>
+<?= $this->section('content') ?>
 <div class="p-6">
     <!-- Header -->
     <div class="mb-6">
@@ -422,4 +422,4 @@
             });
     });
 </script>
-<?= $this->endSection(); ?>
+<?= $this->endSection() ?>
