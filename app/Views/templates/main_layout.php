@@ -29,6 +29,31 @@
             }
         }
     </script>
+    <style>
+        /* Global UI helpers */
+        .btn { display:inline-flex; align-items:center; gap:.5rem; padding:.5rem 1rem; border-radius:.5rem; font-weight:600; }
+        .btn-primary { background:#3B82F6; color:#fff; }
+        .btn-primary:hover { background:#2563EB; }
+        .btn-secondary { background:#E5E7EB; color:#111827; }
+        .btn-secondary:hover { background:#D1D5DB; }
+        .btn-danger { background:#EF4444; color:#fff; }
+        .btn-danger:hover { background:#DC2626; }
+        .badge { display:inline-flex; align-items:center; padding:.125rem .5rem; font-size:.75rem; border-radius:9999px; }
+        .badge-green { background:#D1FAE5; color:#065F46; }
+        .badge-yellow { background:#FEF3C7; color:#92400E; }
+        .badge-red { background:#FEE2E2; color:#991B1B; }
+        .card { background:#fff; border-radius:.75rem; box-shadow:0 1px 2px rgba(0,0,0,0.05); }
+        .card-header { padding:1rem 1.5rem; border-bottom:1px solid #E5E7EB; }
+        .card-body { padding:1.5rem; }
+        .chart-container { position:relative; height:300px; }
+        .breadcrumb a { color:#6B7280; }
+        .breadcrumb a:hover { color:#111827; }
+        .flash { display:flex; align-items:flex-start; gap:.75rem; border-radius:.5rem; padding:.75rem 1rem; }
+        .flash-success { background:#ECFDF5; color:#065F46; border:1px solid #A7F3D0; }
+        .flash-error { background:#FEF2F2; color:#991B1B; border:1px solid #FECACA; }
+        .flash-warn { background:#FFFBEB; color:#92400E; border:1px solid #FDE68A; }
+        .flash .close { margin-left:auto; color:inherit; }
+    </style>
     <?= $this->renderSection('styles'); ?>
 </head>
 
@@ -166,31 +191,64 @@
     <main class="py-6">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Page Header -->
-            <!-- <div class="mb-6">
-                <h1 class="text-2xl font-bold text-gray-900"><?= $pageTitle ?? $title ?? 'Test'; ?></h1>
-                <?php if (isset($pageDescription)): ?>
-                    <p class="mt-1 text-sm text-gray-600"><?= $pageDescription; ?></p>
-                <?php endif; ?>
-            </div> -->
+            <div class="mb-6">
+                <?php $segments = service('uri')->getSegments(); $crumbPath=''; ?>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <nav class="breadcrumb text-sm mb-1" aria-label="Breadcrumb">
+                            <ol class="flex items-center space-x-2">
+                                <li><a href="<?= base_url('/'); ?>" class="hover:underline">Home</a></li>
+                                <?php foreach ($segments as $i => $seg): $crumbPath .= '/'.$seg; ?>
+                                    <li class="text-gray-400">/</li>
+                                    <li>
+                                        <a href="<?= base_url($crumbPath); ?>" class="hover:underline capitalize"><?= esc(str_replace(['-', '_'], ' ', $seg)); ?></a>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ol>
+                        </nav>
+                        <h1 class="text-2xl font-bold text-gray-900"><?= $pageTitle ?? $title ?? 'Dashboard'; ?></h1>
+                        <?php if (isset($pageDescription)): ?>
+                            <p class="mt-1 text-sm text-gray-600"><?= $pageDescription; ?></p>
+                        <?php endif; ?>
+                    </div>
+                    <div class="ml-4 flex-shrink-0">
+                        <?= $this->renderSection('actions'); ?>
+                    </div>
+                </div>
+            </div>
 
             <!-- Flash Messages -->
             <?php if (session()->getFlashdata('success')): ?>
-                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                    <span class="block sm:inline"><?= session()->getFlashdata('success'); ?></span>
+                <div class="mb-4 flash flash-success" role="alert">
+                    <i class="fas fa-check-circle mt-0.5"></i>
+                    <div><?= session()->getFlashdata('success'); ?></div>
+                    <button type="button" class="close" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
             <?php endif; ?>
             <?php if (session()->getFlashdata('error')): ?>
-                <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                    <span class="block sm:inline"><?= session()->getFlashdata('error'); ?></span>
+                <div class="mb-4 flash flash-error" role="alert">
+                    <i class="fas fa-exclamation-triangle mt-0.5"></i>
+                    <div><?= session()->getFlashdata('error'); ?></div>
+                    <button type="button" class="close" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
             <?php endif; ?>
             <?php if (session()->getFlashdata('errors')): ?>
-                <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                    <ul class="list-disc list-inside">
-                        <?php foreach (session()->getFlashdata('errors') as $error): ?>
-                            <li><?= $error; ?></li>
-                        <?php endforeach; ?>
-                    </ul>
+                <div class="mb-4 flash flash-error" role="alert">
+                    <i class="fas fa-exclamation-circle mt-0.5"></i>
+                    <div>
+                        <ul class="list-disc list-inside">
+                            <?php foreach (session()->getFlashdata('errors') as $error): ?>
+                                <li><?= $error; ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                    <button type="button" class="close" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
             <?php endif; ?>
 
@@ -214,28 +272,42 @@
         if (mobileMenuButton) {
             mobileMenuButton.addEventListener('click', function() {
                 const mobileMenu = document.getElementById('mobile-menu');
-                mobileMenu.classList.toggle('hidden');
+                if (mobileMenu) mobileMenu.classList.toggle('hidden');
             });
         }
         // User dropdown toggle
-        document.getElementById('user-menu-button').addEventListener('click', function() {
-            const dropdown = document.getElementById('user-dropdown');
-            dropdown.classList.toggle('hidden');
-        });
+        const userMenuButton = document.getElementById('user-menu-button');
+        if (userMenuButton) {
+            userMenuButton.addEventListener('click', function() {
+                const dropdown = document.getElementById('user-dropdown');
+                if (dropdown) dropdown.classList.toggle('hidden');
+            });
+        }
 
         // Close dropdown when clicking outside
         document.addEventListener('click', function(event) {
             const dropdown = document.getElementById('user-dropdown');
             const button = document.getElementById('user-menu-button');
-
+            if (!dropdown || !button) return;
             if (!button.contains(event.target) && !dropdown.contains(event.target)) {
                 dropdown.classList.add('hidden');
             }
         });
 
+        // Flash close buttons
+        document.querySelectorAll('.flash .close').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                const wrap = e.currentTarget.closest('.flash');
+                if (!wrap) return;
+                wrap.style.transition = 'opacity 0.2s';
+                wrap.style.opacity = 0;
+                setTimeout(() => wrap.remove(), 200);
+            });
+        });
+
         // Auto-hide flash messages after 5 seconds
         setTimeout(() => {
-            const flashMessages = document.querySelectorAll('[role="alert"]');
+            const flashMessages = document.querySelectorAll('.flash');
             flashMessages.forEach(message => {
                 message.style.transition = 'opacity 0.5s';
                 message.style.opacity = '0';
