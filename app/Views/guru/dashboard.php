@@ -389,14 +389,11 @@
                                 <?= isset($mapel['nama_mapel']) ? $mapel['nama_mapel'] : 'Belum diatur' ?>
                             </span>
                         </div>
-                        <?php if ($guru['is_wali_kelas'] && $guru['kelas_id']): ?>
+                        <?php if (isset($guru['is_wali_kelas']) && $guru['is_wali_kelas'] == 1 && isset($guru['kelas_id']) && $guru['kelas_id'] > 0): ?>
                             <div class="flex items-center text-sm text-gray-600">
                                 <i class="fas fa-user-tie mr-3 w-5"></i>
                                 <span>
-                                    <?php
-                                    $kelas = $this->kelasModel->find($guru['kelas_id']);
-                                    echo $kelas ? $kelas['nama_kelas'] : 'Kelas tidak ditemukan';
-                                    ?>
+                                    Wali Kelas
                                 </span>
                             </div>
                         <?php endif; ?>

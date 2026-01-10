@@ -244,7 +244,7 @@
                 <div class="card-body">
                     <h5 class="card-title"><i class="fas fa-list me-2"></i>Riwayat Absensi</h5>
                     <p class="card-text">Lihat riwayat absensi kelas ini</p>
-                    <a href="<?= base_url('guru/absensi?kelas_id=' . ($absensi['kelas_id'] ?? '')) ?>" class="btn btn-secondary">
+                    <a href="<?= base_url('guru/absensi' . (isset($absensi['kelas_id']) ? '?kelas_id=' . $absensi['kelas_id'] : '')) ?>" class="btn btn-secondary">
                         <i class="fas fa-history me-1"></i> Lihat Riwayat
                     </a>
                 </div>

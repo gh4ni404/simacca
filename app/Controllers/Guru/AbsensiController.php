@@ -126,11 +126,11 @@ class AbsensiController extends BaseController
         }
 
         // Get next pertemuan number
-        $pertemuanKe = $this->getNextPertemuan($guruId, $jadwal ? $jadwal['kelas_id'] : null);
+        $pertemuanKe = $this->getNextPertemuan($guruId, $jadwal && isset($jadwal['kelas_id']) ? $jadwal['kelas_id'] : null);
 
         // Get approved izin for this date and class
         $approvedIzin = [];
-        if ($jadwal) {
+        if ($jadwal && isset($jadwal['kelas_id'])) {
             $approvedIzin = $this->izinModel->getApprovedIzinByDate($tanggal, $jadwal['kelas_id']);
         }
 
@@ -352,10 +352,14 @@ class AbsensiController extends BaseController
         $absensiDetails = $this->absensiDetailModel->getByAbsensi($id);
 
         // Get students in the class
-        $siswaList = $this->siswaModel->getByKelas($absensi['kelas_id']);
+        $kelasId = $absensi['kelas_id'] ?? null;
+        $siswaList = $kelasId ? $this->siswaModel->getByKelas($kelasId) : [];
 
         // Get approved izin for this date and class
-        $approvedIzin = $this->izinModel->getApprovedIzinByDate($absensi['tanggal'], $absensi['kelas_id']);
+        $approvedIzin = [];
+        if ($kelasId && isset($absensi['tanggal'])) {
+            $approvedIzin = $this->izinModel->getApprovedIzinByDate($absensi['tanggal'], $kelasId);
+        }
 
         $data = [
             'title' => 'Edit Absensi',
