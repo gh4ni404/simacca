@@ -1,43 +1,103 @@
 <?= $this->extend('templates/main_layout') ?>
 
 <?= $this->section('content') ?>
-<div class="p-6">
-    <!-- Header -->
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Input Absensi</h1>
-        <p class="text-gray-600">Isi absensi siswa untuk pertemuan pembelajaran</p>
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+    <!-- Header Section -->
+    <div class="mb-8">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+                <i class="fas fa-user-check text-white text-2xl"></i>
+            </div>
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">
+                    <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        Input Absensi Siswa
+                    </span>
+                </h1>
+                <p class="text-gray-600 flex items-center mt-1">
+                    <i class="fas fa-info-circle mr-2 text-blue-500 text-sm"></i>
+                    <span class="text-sm">Catat kehadiran siswa untuk pertemuan pembelajaran</span>
+                </p>
+            </div>
+        </div>
     </div>
 
-    <!-- Flash Message -->
+    <!-- Flash Messages -->
     <?php if (session()->getFlashdata('error')): ?>
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            <?= session()->getFlashdata('error'); ?>
+        <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm animate-fade-in">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-red-800 font-medium"><?= session()->getFlashdata('error'); ?></p>
+                </div>
+            </div>
         </div>
     <?php endif; ?>
 
-    <!-- Form -->
-    <div class="bg-white rounded-lg shadow p-6">
+    <!-- Main Form Container -->
+    <div class="bg-white rounded-2xl shadow-xl p-8">
         <form action="<?= base_url('guru/absensi/simpan'); ?>" method="post" id="absensiForm">
             <?= csrf_field(); ?>
 
-            <!-- Jadwal Selection -->
+            <!-- Jadwal Selection Section -->
             <div class="mb-8">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Pilih Jadwal</h3>
+                <div class="flex items-center mb-6">
+                    <div class="p-2 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg mr-3">
+                        <i class="fas fa-calendar-check text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800">Pilih Jadwal Mengajar</h3>
+                </div>
 
                 <?php if ($jadwal): ?>
-                    <!-- Selected Jadwal -->
-                    <div class="border border-green-200 bg-green-50 rounded-lg p-4 mb-4">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <h4 class="font-medium text-gray-900"><?= $jadwal['nama_mapel']; ?></h4>
-                                <div class="text-sm text-gray-600 mt-1">
-                                    <i class="fas fa-calendar-alt mr-2"></i> <?= $jadwal['hari']; ?>
-                                    <i class="fas fa-clock ml-4 mr-2"></i> <?= date('H:i', strtotime($jadwal['jam_mulai'])); ?> - <?= date('H:i', strtotime($jadwal['jam_selesai'])); ?>
-                                    <i class="fas fa-school ml-4 mr-2"></i> <?= $jadwal['nama_kelas']; ?>
+                    <!-- Selected Jadwal Card -->
+                    <div class="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-6 mb-6 shadow-md">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-3">
+                                    <div class="p-2 bg-green-500 rounded-lg mr-3">
+                                        <i class="fas fa-check-circle text-white"></i>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs font-semibold text-green-700 uppercase tracking-wide">Jadwal Dipilih</span>
+                                        <h4 class="text-xl font-bold text-gray-900"><?= $jadwal['nama_mapel']; ?></h4>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                                    <div class="flex items-center text-gray-700">
+                                        <div class="p-2 bg-white rounded-lg mr-2 shadow-sm">
+                                            <i class="fas fa-calendar-alt text-blue-500"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-gray-500">Hari</p>
+                                            <p class="font-semibold"><?= $jadwal['hari']; ?></p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center text-gray-700">
+                                        <div class="p-2 bg-white rounded-lg mr-2 shadow-sm">
+                                            <i class="fas fa-clock text-purple-500"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-gray-500">Waktu</p>
+                                            <p class="font-semibold"><?= date('H:i', strtotime($jadwal['jam_mulai'])); ?> - <?= date('H:i', strtotime($jadwal['jam_selesai'])); ?></p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center text-gray-700">
+                                        <div class="p-2 bg-white rounded-lg mr-2 shadow-sm">
+                                            <i class="fas fa-school text-green-500"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-gray-500">Kelas</p>
+                                            <p class="font-semibold"><?= $jadwal['nama_kelas']; ?></p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <a href="<?= base_url('guru/absensi/tambah'); ?>" class="text-sm text-blue-500 hover:text-blue-700">
-                                Ganti Jadwal
+                            <a href="<?= base_url('guru/absensi/tambah'); ?>" 
+                                class="ml-4 inline-flex items-center px-4 py-2 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 font-medium rounded-lg shadow-sm transition-all">
+                                <i class="fas fa-exchange-alt mr-2"></i>
+                                Ganti
                             </a>
                         </div>
                     </div>
@@ -106,109 +166,145 @@
             </div>
 
             <?php if ($jadwal): ?>
-                <!-- Absensi Details -->
+                <!-- Absensi Details Section -->
                 <div class="mb-8">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-medium text-gray-900">Data Absensi</h3>
-                        <div class="text-sm text-gray-600">
-                            Tanggal: <span class="font-medium"><?= date('d/m/Y', strtotime($tanggal)); ?></span>
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg mr-3">
+                                <i class="fas fa-clipboard-list text-white"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-800">Detail Absensi</h3>
+                        </div>
+                        <div class="px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+                            <span class="text-sm text-gray-600">Tanggal:</span>
+                            <span class="font-bold text-blue-700 ml-2"><?= date('d/m/Y', strtotime($tanggal)); ?></span>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
-                            <label for="pertemuan_ke" class="block text-sm font-medium text-gray-700 mb-2">
-                                Pertemuan Ke-*
+                            <label for="pertemuan_ke" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-hashtag mr-2 text-indigo-500"></i>
+                                Pertemuan Ke-
+                                <span class="text-red-500 ml-1">*</span>
                             </label>
                             <input type="number"
                                 id="pertemuan_ke"
                                 name="pertemuan_ke"
                                 value="<?= $pertemuanKe; ?>"
                                 min="1"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                 required>
                         </div>
                         <div>
-                            <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-2">
-                                Tanggal Absensi*
+                            <label for="tanggal" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-calendar-alt mr-2 text-blue-500"></i>
+                                Tanggal Absensi
+                                <span class="text-red-500 ml-1">*</span>
                             </label>
                             <input type="date"
                                 id="tanggal"
                                 name="tanggal"
                                 value="<?= $tanggal; ?>"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                 required>
                         </div>
                     </div>
 
                     <div class="mb-6">
-                        <label for="materi_pembelajaran" class="block text-sm font-medium text-gray-700 mb-2">
+                        <label for="materi_pembelajaran" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                            <i class="fas fa-book-open mr-2 text-green-500"></i>
                             Materi Pembelajaran
                         </label>
                         <textarea id="materi_pembelajaran"
                             name="materi_pembelajaran"
                             rows="3"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Isi materi yang diajarkan pada pertemuan ini..."></textarea>
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                            placeholder="Contoh: Bab 3 - Sistem Persamaan Linear, membahas metode eliminasi dan substitusi..."></textarea>
                     </div>
 
                     <!-- Approved Izin Info -->
                     <?php if (!empty($approvedIzin)): ?>
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                            <h4 class="text-sm font-medium text-blue-800 mb-2">
-                                <i class="fas fa-info-circle mr-2"></i> Informasi Izin yang Disetujui
-                            </h4>
-                            <p class="text-sm text-blue-700 mb-2">Siswa berikut telah mengajukan izin dan disetujui:</p>
-                            <ul class="text-sm text-blue-600 list-disc list-inside">
-                                <?php foreach ($approvedIzin as $izin): ?>
-                                    <li><?= $izin['nama_lengkap']; ?> (<?= $izin['nis']; ?>) - <?= ucfirst($izin['jenis_izin']); ?></li>
-                                <?php endforeach; ?>
-                            </ul>
+                        <div class="bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-300 rounded-xl p-5 mb-6 shadow-sm">
+                            <div class="flex items-start">
+                                <div class="p-2 bg-blue-500 rounded-lg mr-3">
+                                    <i class="fas fa-info-circle text-white"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-sm font-bold text-blue-800 mb-2">
+                                        Informasi Izin yang Disetujui
+                                    </h4>
+                                    <p class="text-sm text-blue-700 mb-3">Siswa berikut telah mengajukan izin dan disetujui:</p>
+                                    <div class="space-y-2">
+                                        <?php foreach ($approvedIzin as $izin): ?>
+                                            <div class="flex items-center bg-white rounded-lg p-3 shadow-sm">
+                                                <i class="fas fa-user-check text-blue-500 mr-3"></i>
+                                                <div class="flex-1">
+                                                    <p class="font-semibold text-gray-800"><?= $izin['nama_lengkap']; ?></p>
+                                                    <p class="text-xs text-gray-500">NIS: <?= $izin['nis']; ?></p>
+                                                </div>
+                                                <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
+                                                    <?= ucfirst($izin['jenis_izin']); ?>
+                                                </span>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     <?php endif; ?>
 
                     <!-- Students Table -->
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIS</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Siswa</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Keterangan</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200" id="siswaTableBody">
-                                <!-- Will be populated by AJAX -->
-                                <tr>
-                                    <td colspan="5" class="px-4 py-8 text-center text-gray-500">
-                                        <i class="fas fa-spinner fa-spin text-xl mb-2"></i>
-                                        <p>Memuat data siswa...</p>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div class="bg-gray-50 rounded-xl p-1 mb-6">
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gradient-to-r from-gray-100 to-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">No</th>
+                                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">NIS</th>
+                                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Nama Siswa</th>
+                                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Status Kehadiran</th>
+                                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Keterangan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200" id="siswaTableBody">
+                                        <!-- Will be populated by AJAX -->
+                                        <tr>
+                                            <td colspan="5" class="px-6 py-12 text-center">
+                                                <div class="flex flex-col items-center justify-center">
+                                                    <div class="p-4 bg-blue-100 rounded-full mb-3">
+                                                        <i class="fas fa-spinner fa-spin text-blue-500 text-3xl"></i>
+                                                    </div>
+                                                    <p class="text-gray-600 font-medium">Memuat data siswa...</p>
+                                                    <p class="text-gray-400 text-sm mt-1">Mohon tunggu sebentar</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="flex justify-between items-center pt-6 border-t border-gray-200">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t-2 border-gray-200">
                     <a href="<?= base_url('guru/absensi'); ?>"
-                        class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+                        class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all shadow-sm">
                         <i class="fas fa-arrow-left mr-2"></i> Kembali
                     </a>
-                    <div class="flex space-x-3">
+                    <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                         <button type="submit"
                             name="next_action"
                             value="list"
-                            class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center">
-                            <i class="fas fa-save mr-2"></i> Simpan
+                            class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
+                            <i class="fas fa-save mr-2"></i> Simpan Absensi
                         </button>
                         <button type="submit"
                             name="next_action"
                             value="jurnal"
-                            class="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition flex items-center">
+                            class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
                             <i class="fas fa-book mr-2"></i> Simpan & Buat Jurnal
                         </button>
                     </div>

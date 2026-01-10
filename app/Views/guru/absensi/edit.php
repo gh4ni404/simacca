@@ -1,58 +1,106 @@
 <?= $this->extend('templates/main_layout') ?>
 
 <?= $this->section('content') ?>
-<div class="container-fluid px-4">
-    <h1 class="mt-4"><?= $title ?? 'Edit Absensi' ?></h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="<?= base_url('guru/dashboard') ?>">Dashboard</a></li>
-        <li class="breadcrumb-item"><a href="<?= base_url('guru/absensi') ?>">Absensi</a></li>
-        <li class="breadcrumb-item"><a href="<?= base_url('guru/absensi/detail/' . $absensi['id']) ?>">Detail</a></li>
-        <li class="breadcrumb-item active">Edit</li>
-    </ol>
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+    <!-- Breadcrumb -->
+    <nav class="mb-6">
+        <ol class="flex items-center space-x-2 text-sm">
+            <li><a href="<?= base_url('guru/dashboard') ?>" class="text-blue-600 hover:text-blue-800 font-medium"><i class="fas fa-home mr-1"></i>Dashboard</a></li>
+            <li class="text-gray-400">/</li>
+            <li><a href="<?= base_url('guru/absensi') ?>" class="text-blue-600 hover:text-blue-800 font-medium">Absensi</a></li>
+            <li class="text-gray-400">/</li>
+            <li><a href="<?= base_url('guru/absensi/detail/' . $absensi['id']) ?>" class="text-blue-600 hover:text-blue-800 font-medium">Detail</a></li>
+            <li class="text-gray-400">/</li>
+            <li class="text-gray-600 font-semibold">Edit</li>
+        </ol>
+    </nav>
 
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center gap-3">
+            <div class="p-3 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl shadow-lg">
+                <i class="fas fa-edit text-white text-2xl"></i>
+            </div>
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">
+                    <span class="bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
+                        Edit Absensi
+                    </span>
+                </h1>
+                <p class="text-gray-600 text-sm mt-1">Perbarui data absensi siswa</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
     <?php if (session()->getFlashdata('error')): ?>
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-circle me-1"></i>
-        <?= session()->getFlashdata('error') ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm">
+        <div class="flex items-center">
+            <i class="fas fa-exclamation-circle text-red-500 text-xl mr-3"></i>
+            <p class="text-red-800 font-medium"><?= session()->getFlashdata('error') ?></p>
+        </div>
     </div>
     <?php endif; ?>
 
     <?php if (isset($errors)): ?>
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-circle me-1"></i>
-        <ul class="mb-0">
-            <?php foreach ($errors as $error): ?>
-                <li><?= $error ?></li>
-            <?php endforeach; ?>
-        </ul>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm">
+        <div class="flex items-start">
+            <i class="fas fa-exclamation-circle text-red-500 text-xl mr-3 mt-1"></i>
+            <div class="flex-1">
+                <p class="text-red-800 font-bold mb-2">Terdapat kesalahan:</p>
+                <ul class="list-disc list-inside text-red-700 space-y-1">
+                    <?php foreach ($errors as $error): ?>
+                        <li><?= $error ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        </div>
     </div>
     <?php endif; ?>
 
     <!-- Absensi Info Card -->
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <i class="fas fa-info-circle me-1"></i>
-            Informasi Absensi
+    <div class="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-300 rounded-2xl shadow-lg p-6 mb-8">
+        <div class="flex items-center mb-4">
+            <div class="p-2 bg-blue-500 rounded-lg mr-3">
+                <i class="fas fa-info-circle text-white"></i>
+            </div>
+            <h2 class="text-lg font-bold text-gray-800">Informasi Absensi</h2>
         </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-3">
-                    <strong>Tanggal:</strong><br>
-                    <?= date('d F Y', strtotime($absensi['tanggal'])) ?>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="flex items-center bg-white rounded-lg p-4 shadow-sm">
+                <div class="p-2 bg-blue-100 rounded-lg mr-3">
+                    <i class="fas fa-calendar-day text-blue-600"></i>
                 </div>
-                <div class="col-md-3">
-                    <strong>Mata Pelajaran:</strong><br>
-                    <?= $absensi['nama_mapel'] ?>
+                <div>
+                    <p class="text-xs text-gray-500 font-medium">Tanggal</p>
+                    <p class="text-sm font-bold text-gray-800"><?= date('d F Y', strtotime($absensi['tanggal'])) ?></p>
                 </div>
-                <div class="col-md-3">
-                    <strong>Kelas:</strong><br>
-                    <?= $absensi['nama_kelas'] ?>
+            </div>
+            <div class="flex items-center bg-white rounded-lg p-4 shadow-sm">
+                <div class="p-2 bg-green-100 rounded-lg mr-3">
+                    <i class="fas fa-book text-green-600"></i>
                 </div>
-                <div class="col-md-3">
-                    <strong>Hari:</strong><br>
-                    <?= $absensi['hari'] ?? '-' ?>
+                <div>
+                    <p class="text-xs text-gray-500 font-medium">Mata Pelajaran</p>
+                    <p class="text-sm font-bold text-gray-800"><?= $absensi['nama_mapel'] ?></p>
+                </div>
+            </div>
+            <div class="flex items-center bg-white rounded-lg p-4 shadow-sm">
+                <div class="p-2 bg-purple-100 rounded-lg mr-3">
+                    <i class="fas fa-school text-purple-600"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-medium">Kelas</p>
+                    <p class="text-sm font-bold text-gray-800"><?= $absensi['nama_kelas'] ?></p>
+                </div>
+            </div>
+            <div class="flex items-center bg-white rounded-lg p-4 shadow-sm">
+                <div class="p-2 bg-indigo-100 rounded-lg mr-3">
+                    <i class="fas fa-calendar-week text-indigo-600"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-medium">Hari</p>
+                    <p class="text-sm font-bold text-gray-800"><?= $absensi['hari'] ?? '-' ?></p>
                 </div>
             </div>
         </div>
@@ -62,37 +110,57 @@
     <form action="<?= base_url('guru/absensi/update/' . $absensi['id']) ?>" method="POST" id="formEditAbsensi">
         <?= csrf_field() ?>
 
-        <div class="card mb-4">
-            <div class="card-header">
-                <i class="fas fa-edit me-1"></i>
-                Edit Data Absensi
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+            <div class="bg-gradient-to-r from-yellow-500 to-orange-500 px-6 py-4">
+                <h2 class="text-white font-bold text-lg flex items-center">
+                    <i class="fas fa-edit mr-2"></i>
+                    Edit Data Absensi
+                </h2>
             </div>
-            <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="pertemuan_ke" class="form-label">Pertemuan Ke <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" id="pertemuan_ke" name="pertemuan_ke" 
-                               value="<?= old('pertemuan_ke', $absensi['pertemuan_ke']) ?>" required min="1">
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="pertemuan_ke" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                            <i class="fas fa-hashtag mr-2 text-indigo-500"></i>
+                            Pertemuan Ke
+                            <span class="text-red-500 ml-1">*</span>
+                        </label>
+                        <input type="number" 
+                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all" 
+                               id="pertemuan_ke" 
+                               name="pertemuan_ke" 
+                               value="<?= old('pertemuan_ke', $absensi['pertemuan_ke']) ?>" 
+                               required 
+                               min="1">
                     </div>
-                    <div class="col-md-6">
-                        <label for="materi_pembelajaran" class="form-label">Materi Pembelajaran</label>
-                        <input type="text" class="form-control" id="materi_pembelajaran" name="materi_pembelajaran" 
-                               value="<?= old('materi_pembelajaran', $absensi['materi_pembelajaran']) ?>">
+                    <div>
+                        <label for="materi_pembelajaran" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                            <i class="fas fa-book-open mr-2 text-green-500"></i>
+                            Materi Pembelajaran
+                        </label>
+                        <input type="text" 
+                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all" 
+                               id="materi_pembelajaran" 
+                               name="materi_pembelajaran" 
+                               value="<?= old('materi_pembelajaran', $absensi['materi_pembelajaran']) ?>"
+                               placeholder="Isi materi pembelajaran...">
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Daftar Siswa -->
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span>
-                    <i class="fas fa-users me-1"></i>
-                    Daftar Kehadiran Siswa
-                </span>
-                <div>
-                    <button type="button" class="btn btn-sm btn-success" onclick="setAllStatus('hadir')">
-                        <i class="fas fa-check me-1"></i> Semua Hadir
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+            <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <h2 class="text-lg font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-users mr-2 text-blue-500"></i>
+                        Daftar Kehadiran Siswa
+                    </h2>
+                    <button type="button" 
+                            onclick="setAllStatus('hadir')"
+                            class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+                        <i class="fas fa-check mr-2"></i> Semua Hadir
                     </button>
                 </div>
             </div>
@@ -177,16 +245,17 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <a href="<?= base_url('guru/absensi/detail/' . $absensi['id']) ?>" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left me-1"></i> Kembali
-                    </a>
-                    <button type="submit" class="btn btn-primary" id="btnSubmit">
-                        <i class="fas fa-save me-1"></i> Simpan Perubahan
-                    </button>
-                </div>
+        <div class="bg-white rounded-2xl shadow-xl p-6">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <a href="<?= base_url('guru/absensi/detail/' . $absensi['id']) ?>" 
+                   class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all shadow-sm">
+                    <i class="fas fa-arrow-left mr-2"></i> Kembali
+                </a>
+                <button type="submit" 
+                        class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5" 
+                        id="btnSubmit">
+                    <i class="fas fa-save mr-2"></i> Simpan Perubahan
+                </button>
             </div>
         </div>
     </form>

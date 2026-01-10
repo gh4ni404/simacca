@@ -1,97 +1,164 @@
 <?= $this->extend('templates/main_layout') ?>
 
 <?= $this->section('content') ?>
-<div class="p-6">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800">Manajemen Absensi</h1>
-            <p class="text-gray-600">Kelola data absensi siswa</p>
-        </div>
-        <div>
-            <a href="<?= base_url('guru/absensi/tambah'); ?>"
-                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center">
-                <i class="fas fa-plus mr-2"></i> Input Absensi
-            </a>
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+    <!-- Header Section -->
+    <div class="mb-8">
+        <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2 flex items-center">
+                    <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        Manajemen Absensi
+                    </span>
+                </h1>
+                <p class="text-gray-600 flex items-center">
+                    <i class="fas fa-info-circle mr-2 text-blue-500"></i>
+                    Kelola data absensi siswa dengan mudah dan efisien
+                </p>
+            </div>
+            <div>
+                <a href="<?= base_url('guru/absensi/tambah'); ?>"
+                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
+                    <i class="fas fa-plus-circle mr-2 text-lg"></i> 
+                    <span>Input Absensi Baru</span>
+                </a>
+            </div>
         </div>
     </div>
 
-    <!-- Flash Message -->
+    <!-- Flash Messages -->
     <?php if (session()->getFlashdata('success')): ?>
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            <?= session()->getFlashdata('success'); ?>
+        <div class="mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded-lg shadow-sm animate-fade-in">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle text-green-500 text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-green-800 font-medium"><?= session()->getFlashdata('success'); ?></p>
+                </div>
+            </div>
         </div>
     <?php endif; ?>
 
     <?php if (session()->getFlashdata('error')): ?>
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            <?= session()->getFlashdata('error'); ?>
+        <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm animate-fade-in">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-red-800 font-medium"><?= session()->getFlashdata('error'); ?></p>
+                </div>
+            </div>
         </div>
     <?php endif; ?>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white rounded-lg shadow p-4">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
-                    <i class="fas fa-clipboard-list text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-500">Total Absensi</p>
-                    <p class="text-2xl font-bold"><?= $stats['total']; ?></p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total Absensi Card -->
+        <div class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">Total Absensi</p>
+                        <p class="text-3xl font-bold text-gray-800"><?= $stats['total']; ?></p>
+                        <p class="text-xs text-gray-400 mt-1">Semua data</p>
+                    </div>
+                    <div class="flex-shrink-0 ml-4">
+                        <div class="p-4 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 shadow-lg">
+                            <i class="fas fa-clipboard-list text-white text-2xl"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
+            <div class="h-1 bg-gradient-to-r from-blue-400 to-blue-600"></div>
         </div>
-        <div class="bg-white rounded-lg shadow p-4">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
-                    <i class="fas fa-user-check text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-500">Hadir</p>
-                    <p class="text-2xl font-bold"><?= $stats['hadir']; ?></p>
+
+        <!-- Hadir Card -->
+        <div class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">Hadir</p>
+                        <p class="text-3xl font-bold text-green-600"><?= $stats['hadir']; ?></p>
+                        <p class="text-xs text-gray-400 mt-1">Siswa hadir</p>
+                    </div>
+                    <div class="flex-shrink-0 ml-4">
+                        <div class="p-4 rounded-full bg-gradient-to-br from-green-400 to-green-600 shadow-lg">
+                            <i class="fas fa-user-check text-white text-2xl"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
+            <div class="h-1 bg-gradient-to-r from-green-400 to-green-600"></div>
         </div>
-        <div class="bg-white rounded-lg shadow p-4">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-yellow-100 text-yellow-600 mr-4">
-                    <i class="fas fa-user-clock text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-500">Izin & Sakit</p>
-                    <p class="text-2xl font-bold"><?= $stats['izin'] + $stats['sakit']; ?></p>
+
+        <!-- Izin & Sakit Card -->
+        <div class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">Izin & Sakit</p>
+                        <p class="text-3xl font-bold text-yellow-600"><?= $stats['izin'] + $stats['sakit']; ?></p>
+                        <p class="text-xs text-gray-400 mt-1">Izin: <?= $stats['izin']; ?>, Sakit: <?= $stats['sakit']; ?></p>
+                    </div>
+                    <div class="flex-shrink-0 ml-4">
+                        <div class="p-4 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-lg">
+                            <i class="fas fa-user-clock text-white text-2xl"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
+            <div class="h-1 bg-gradient-to-r from-yellow-400 to-yellow-600"></div>
         </div>
-        <div class="bg-white rounded-lg shadow p-4">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-red-100 text-red-600 mr-4">
-                    <i class="fas fa-user-times text-xl"></i>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-500">Alpa</p>
-                    <p class="text-2xl font-bold"><?= $stats['alpa']; ?></p>
+
+        <!-- Alpa Card -->
+        <div class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-1">Alpa</p>
+                        <p class="text-3xl font-bold text-red-600"><?= $stats['alpa']; ?></p>
+                        <p class="text-xs text-gray-400 mt-1">Tanpa keterangan</p>
+                    </div>
+                    <div class="flex-shrink-0 ml-4">
+                        <div class="p-4 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-lg">
+                            <i class="fas fa-user-times text-white text-2xl"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
+            <div class="h-1 bg-gradient-to-r from-red-400 to-red-600"></div>
         </div>
     </div>
 
-    <!-- Filter -->
-    <div class="bg-white rounded-lg shadow p-4 mb-6">
-        <form method="get" class="flex flex-col md:flex-row md:items-center md:space-x-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
+    <!-- Filter Section -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+        <div class="flex items-center mb-4">
+            <div class="p-2 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg mr-3">
+                <i class="fas fa-filter text-white"></i>
+            </div>
+            <h2 class="text-lg font-semibold text-gray-800">Filter Data Absensi</h2>
+        </div>
+        <form method="get">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                        <i class="fas fa-calendar-alt mr-2 text-blue-500"></i>
+                        Tanggal
+                    </label>
                     <input type="date"
                         name="tanggal"
                         value="<?= $tanggal ?>"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                        <i class="fas fa-school mr-2 text-green-500"></i>
+                        Kelas
+                    </label>
                     <select name="kelas_id"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                         <option value="">Semua Kelas</option>
                         <?php foreach ($kelasOptions as $id => $nama): ?>
                             <option value="<?= $id; ?>" <?= $kelasId == $id ? 'selected' : ''; ?>>
@@ -101,78 +168,110 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Cari</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                        <i class="fas fa-search mr-2 text-purple-500"></i>
+                        Pencarian
+                    </label>
                     <input type="text"
                         name="search"
                         value="<?= $search ?>"
                         placeholder="Cari mapel atau kelas..."
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                 </div>
             </div>
-            <div class="flex space-x-2 mt-4 md:mt-0">
+            <div class="flex flex-wrap gap-3">
                 <button type="submit"
-                    class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 flex items-center">
-                    <i class="fas fa-filter mr-2"></i> Filter
+                    class="inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+                    <i class="fas fa-filter mr-2"></i> Terapkan Filter
                 </button>
                 <?php if ($tanggal || $kelasId || $search): ?>
                     <a href="<?= base_url('guru/absensi'); ?>"
-                        class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 flex items-center">
-                        <i class="fas fa-redo mr-2"></i> Reset
+                        class="inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+                        <i class="fas fa-redo mr-2"></i> Reset Filter
                     </a>
                 <?php endif; ?>
             </div>
         </form>
     </div>
 
-    <!-- Table -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <!-- Table Section -->
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div class="px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-800 flex items-center">
+                <i class="fas fa-list-ul mr-2 text-blue-500"></i>
+                Daftar Data Absensi
+            </h2>
+        </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mata Pelajaran</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kelas</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pertemuan</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">No</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Tanggal</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Mata Pelajaran</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Kelas</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Pertemuan</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Kehadiran</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     <?php if (empty($absensi)): ?>
                         <tr>
-                            <td colspan="7" class="px-6 py-8 text-center text-gray-500">
-                                <i class="fas fa-clipboard-list text-4xl mb-2"></i>
-                                <p class="text-lg">Belum ada data absensi</p>
-                                <a href="<?= base_url('guru/absensi/tambah'); ?>" class="text-blue-500 hover:text-blue-700 mt-2 inline-block">
-                                    <i class="fas fa-plus mr-1"></i> Input absensi pertama
-                                </a>
+                            <td colspan="7" class="px-6 py-16 text-center">
+                                <div class="flex flex-col items-center justify-center">
+                                    <div class="p-6 bg-gray-100 rounded-full mb-4">
+                                        <i class="fas fa-clipboard-list text-6xl text-gray-400"></i>
+                                    </div>
+                                    <p class="text-xl font-semibold text-gray-600 mb-2">Belum Ada Data Absensi</p>
+                                    <p class="text-gray-500 mb-4">Mulai dengan menginput data absensi pertama Anda</p>
+                                    <a href="<?= base_url('guru/absensi/tambah'); ?>" 
+                                        class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all">
+                                        <i class="fas fa-plus-circle mr-2"></i> Input Absensi Pertama
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     <?php else: ?>
                         <?php $no = 1; ?>
                         <?php foreach ($absensi as $item): ?>
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= $no++; ?></td>
+                            <tr class="hover:bg-blue-50 transition-colors duration-150">
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900">
-                                        <?= date('d/m/Y', strtotime($item['tanggal'])); ?>
-                                    </div>
-                                    <div class="text-xs text-gray-500">
-                                        <?= date('H:i', strtotime($item['created_at'])); ?>
+                                    <span class="text-sm font-semibold text-gray-700"><?= $no++; ?></span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="p-2 bg-blue-100 rounded-lg mr-3">
+                                            <i class="fas fa-calendar-day text-blue-600"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-sm font-semibold text-gray-900">
+                                                <?= date('d/m/Y', strtotime($item['tanggal'])); ?>
+                                            </div>
+                                            <div class="text-xs text-gray-500 flex items-center mt-0.5">
+                                                <i class="far fa-clock mr-1"></i>
+                                                <?= date('H:i', strtotime($item['created_at'])); ?>
+                                            </div>
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="text-sm font-medium text-gray-900"><?= $item['nama_mapel']; ?></div>
-                                    <div class="text-xs text-gray-500"><?= $item['nama_guru']; ?></div>
+                                    <div class="text-sm font-semibold text-gray-900"><?= $item['nama_mapel']; ?></div>
+                                    <div class="text-xs text-gray-500 flex items-center mt-0.5">
+                                        <i class="fas fa-user-tie mr-1"></i>
+                                        <?= $item['nama_guru']; ?>
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900"><?= $item['nama_kelas']; ?></div>
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                                        <i class="fas fa-school mr-1.5"></i>
+                                        <?= $item['nama_kelas']; ?>
+                                    </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                                        Pertemuan <?= $item['pertemuan_ke']; ?>
+                                    <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm">
+                                        <i class="fas fa-hashtag mr-1"></i>
+                                        <?= $item['pertemuan_ke']; ?>
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -181,38 +280,39 @@
                                     $percentage = isset($item['percentage']) ? $item['percentage'] : 0;
                                     $hadir = isset($item['hadir']) ? $item['hadir'] : 0;
                                     $total = isset($item['total_siswa']) ? $item['total_siswa'] : 0;
+                                    $barColor = $percentage >= 80 ? 'bg-green-500' : ($percentage >= 60 ? 'bg-yellow-500' : 'bg-red-500');
                                     ?>
-                                    <div class="flex items-center">
-                                        <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                                            <div class="bg-green-500 h-2 rounded-full" style="width: <?= $percentage ?>%"></div>
+                                    <div class="w-32">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-xs font-medium text-gray-700"><?= $hadir ?>/<?= $total ?></span>
+                                            <span class="text-xs font-bold text-gray-900"><?= $percentage ?>%</span>
                                         </div>
-                                        <span class="text-sm text-gray-700"><?= $percentage ?>%</span>
-                                    </div>
-                                    <div class="text-xs text-gray-500 mt-1">
-                                        <?= $hadir ?>/<?= $total ?> siswa
+                                        <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                                            <div class="<?= $barColor ?> h-2.5 rounded-full transition-all duration-300" style="width: <?= $percentage ?>%"></div>
+                                        </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <div class="flex space-x-2">
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <div class="flex justify-center space-x-2">
                                         <a href="<?= base_url('guru/absensi/detail/' . $item['id']); ?>"
-                                            class="text-blue-600 hover:text-blue-900" title="Detail">
+                                            class="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-all transform hover:scale-110" title="Detail">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         <?php if (is_absensi_editable($item)): ?>
                                             <a href="<?= base_url('guru/absensi/edit/' . $item['id']); ?>"
-                                                class="text-yellow-600 hover:text-yellow-900" title="Edit">
+                                                class="p-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-600 rounded-lg transition-all transform hover:scale-110" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                         <?php endif; ?>
                                         <a href="<?= base_url('guru/absensi/print/' . $item['id']); ?>"
-                                            class="text-purple-600 hover:text-purple-900" title="Cetak" target="_blank">
+                                            class="p-2 bg-purple-100 hover:bg-purple-200 text-purple-600 rounded-lg transition-all transform hover:scale-110" title="Cetak" target="_blank">
                                             <i class="fas fa-print"></i>
                                         </a>
                                         <?php if (is_absensi_editable($item)): ?>
                                             <a href="#"
                                                 onclick="confirmDelete('<?= $item['id']; ?>')"
-                                                class="text-red-600 hover:text-red-900" title="Hapus">
-                                                <i class="fas fa-trash"></i>
+                                                class="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-all transform hover:scale-110" title="Hapus">
+                                                <i class="fas fa-trash-alt"></i>
                                             </a>
                                         <?php endif; ?>
                                     </div>
