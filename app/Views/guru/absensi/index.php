@@ -180,7 +180,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <?php
-
+                                    
                                     $total = 0;
                                     $hadir = 0;
 

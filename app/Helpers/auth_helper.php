@@ -37,7 +37,7 @@ if (!function_exists('get_user_data')) {
     }
 }
 
-if (!function_exists('has_roie')) {
+if (!function_exists('has_role')) {
     /**
      * Check if user has specific role
      */
