@@ -1,37 +1,38 @@
-# TODO List - Sistem Monitoring Absensi dan Catatan Cara Ajar
+# TODO: Missing Controllers Based on Routes.php
 
-## HARI 1: ✅ SETUP ENVIRONMENT & AUTHENTICATION SYSTEM
-- [x] Install XAMPP/Laragon
-- [x] Install Composer
-- [x] Create Codeigniter 4.6.4 Project
-```bash
-composer create-project codeigniter4/appstarter simacca
-cd simacca
-```
-- [x] Setup .env file
-- [x] Create Database `simacca_database` With Migration CI4
-- [x] Create Migration file for:
-`users`
-`kelas`
-`mata_pelajaran`
-`guru`
-`siswa`
-`jadwal_mengajar`
-`absensi`
-`absensi_detail`
-`jurnal_kbm`
-`izin_siswa`
-- [x] Create model for each table
-- [x] Create Auth Controller
-- [x] Create Filters (Middleware) for all roles
-- [x] Create Helpers Functions on BaseController
-- [x] Create AuthHelper in Helpers folder
-- [x] Implement Login/Logout
-- [x] Create session management
-- [x] Create Layout for Authentication
-- [x] Create Template Layout
-- [x] Configure Routes
+## Admin Controllers
 
-## Hari 2: ADMIN MODULE
-- [x] Create Admin Dashboard Controller
-- [x] Create View for Admin Dashboard
+- [x] Admin/LaporanController.php (routes: /admin/laporan/absensi, /admin/laporan/statistik)
+
+## Guru Controllers
+
+- [x] Guru/JadwalController.php (routes: /guru/jadwal)
+- [x] Guru/JurnalController.php (routes: /guru/jurnal/tambah/:num, /guru/jurnal/simpan, /guru/jurnal/edit/:num, /guru/jurnal/update/:num)
+- [x] Guru/LaporanController.php (routes: /guru/laporan)
+
+## Wali Kelas Controllers
+
+- [x] WaliKelas/DashboardController.php (routes: /walikelas/dashboard)
+- [x] WaliKelas/SiswaController.php (routes: /walikelas/siswa)
+- [x] WaliKelas/AbsensiController.php (routes: /walikelas/absensi)
+- [x] WaliKelas/IzinController.php (routes: /walikelas/izin, /walikelas/izin/setujui/:num, /walikelas/izin/tolak/:num)
+- [x] WaliKelas/LaporanController.php (routes: /walikelas/laporan)
+
+## Siswa Controllers
+
+- [x] Siswa/DashboardController.php (routes: /siswa/dashboard)
+- [x] Siswa/JadwalController.php (routes: /siswa/jadwal)
+- [x] Siswa/AbsensiController.php (routes: /siswa/absensi)
+- [x] Siswa/IzinController.php (routes: /siswa/izin, /siswa/izin/tambah, /siswa/izin/simpan)
+- [x] Siswa/ProfilController.php (routes: /siswa/profil)
+
+## Other Controllers
+
+- [ ] ProfileController.php (routes: /profile/, /profile/update)
+
+## Notes
+
+- All controllers need to extend BaseController
+- Include proper authentication checks using session
+- Create corresponding view files
+- Test all routes after creation

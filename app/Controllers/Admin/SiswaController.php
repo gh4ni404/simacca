@@ -719,4 +719,28 @@ class SiswaController extends BaseController
         $writer->save('php://output');
         exit();
     }
+
+    /**
+     * AJAX: Check username availability for siswa
+     */
+    public function checkUsername()
+    {
+        if (!$this->request->isAJAX()) {
+            return redirect()->to('/admin/siswa');
+        }
+
+        $username = $this->request->getPost('username');
+        $userId = $this->request->getPost('user_id');
+
+        $query = $this->userModel->where('username', $username);
+        if ($userId) {
+            $query->where('id !=', $userId);
+        }
+        $exists = $query->countAllResults() > 0;
+
+        return $this->response->setJSON([
+            'available' => !$exists,
+            'message' => $exists ? 'Username sudah digunakan' : 'Username tersedia'
+        ]);
+    }
 }

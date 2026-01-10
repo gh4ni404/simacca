@@ -80,5 +80,34 @@ class DashboardController extends BaseController
         return view('admin/dashboard', $data);
     }
 
-    
+    /**
+     * Handle dashboard quick actions (AJAX/POST)
+     */
+    public function quickActions()
+    {
+        if (!$this->request->is('post')) {
+            return $this->response->setStatusCode(405)->setJSON(['success' => false, 'message' => 'Method Not Allowed']);
+        }
+
+        if (!session()->get('isLoggedIn') || session()->get('role') !== 'admin') {
+            return $this->response->setStatusCode(403)->setJSON(['success' => false, 'message' => 'Forbidden']);
+        }
+
+        $action = $this->request->getPost('action');
+
+        try {
+            switch ($action) {
+                case 'refresh_stats':
+                    $stats = $this->dashboardModel->getAdminStats();
+                    return $this->response->setJSON(['success' => true, 'data' => $stats]);
+                case 'clear_cache':
+                    cache()->clean();
+                    return $this->response->setJSON(['success' => true, 'message' => 'Cache dibersihkan']);
+                default:
+                    return $this->response->setStatusCode(400)->setJSON(['success' => false, 'message' => 'Aksi tidak dikenali']);
+            }
+        } catch (\Throwable $e) {
+            return $this->response->setStatusCode(500)->setJSON(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
 }

@@ -3,6 +3,7 @@
 namespace Config;
 
 use CodeIgniter\Router\RouteCollection;
+use Config\Services;
 
 
 // Create a new instance of our RouteCollection class.
@@ -42,10 +43,11 @@ $routes->setAutoRoute(false);
  * @var RouteCollection $routes
  */
 $routes->get('/', 'Home::index');
+$routes->get('health', static function () { return 'OK'; });
 
 // Auth Routes
 $routes->group('', ['filter' => 'guest'], function ($routes) {
-    $routes->get('/login', 'AuthController::login');
+    $routes->get('/login', 'AuthController::login', ['as' => 'login']);
     $routes->post('login/process', 'AuthController::processLogin');
     $routes->get('forgot-password', 'AuthController::forgotPassword');
     $routes->post('forgot-password/process', 'AuthController::processForgotPassword');
@@ -54,15 +56,15 @@ $routes->group('', ['filter' => 'guest'], function ($routes) {
 });
 
 $routes->group('', ['filter' => 'auth'], function ($routes) {
-    $routes->get('logout', 'AuthController::logout');
+    $routes->get('logout', 'AuthController::logout', ['as' => 'logout']);
     $routes->get('change-password', 'AuthController::changePassword');
-    $routes->post('change-password/process', 'AuthController:processChangePassword');
+    $routes->post('change-password/process', 'AuthController::processChangePassword');
     $routes->get('access-denied', 'AuthController::accessDenied');
 });
 
 // Admin Routes
 $routes->group('admin', ['filter' => 'auth'], function ($routes) {
-    $routes->get('dashboard', 'Admin\DashboardController::index', ['filter' => 'role:admin']);
+    $routes->get('dashboard', 'Admin\DashboardController::index', ['filter' => 'role:admin', 'as' => 'admin.dashboard']);
     $routes->post('dashboard/quick-action', 'Admin\DashboardController::quickActions', ['filter' => 'role:admin']);
 
     // Guru Management
@@ -72,7 +74,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('guru/simpan', 'Admin\GuruController::store', ['filter' => 'role:admin']);
     $routes->get('guru/edit/(:num)', 'Admin\GuruController::edit/$1', ['filter' => 'role:admin']);
     $routes->post('guru/update/(:num)', 'Admin\GuruController::update/$1', ['filter' => 'role:admin']);
-    $routes->get('guru/hapus/(:num)', 'Admin\GuruController::delete/$1', ['filter' => 'role:admin']);
+    $routes->post('guru/hapus/(:num)', 'Admin\GuruController::delete/$1', ['filter' => 'role:admin']);
     $routes->get('guru/detail/(:num)', 'Admin\GuruController::show/$1', ['filter' => 'role:admin']);
     $routes->get('guru/nonaktifkan/(:num)', 'Admin\GuruController::changeStatus/$1', ['filter' => 'role:admin']);
     $routes->get('guru/aktifkan/(:num)', 'Admin\GuruController::changeStatus/$1', ['filter' => 'role:admin']);
@@ -90,7 +92,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('siswa/simpan', 'Admin\SiswaController::store', ['filter' => 'role:admin']);
     $routes->get('siswa/edit/(:num)', 'Admin\SiswaController::edit/$1', ['filter' => 'role:admin']);
     $routes->post('siswa/update/(:num)', 'Admin\SiswaController::update/$1', ['filter' => 'role:admin']);
-    $routes->get('siswa/hapus/(:num)', 'Admin\SiswaController::delete/$1', ['filter' => 'role:admin']);
+    $routes->post('siswa/hapus/(:num)', 'Admin\SiswaController::delete/$1', ['filter' => 'role:admin']);
     $routes->get('siswa/detail/(:num)', 'Admin\SiswaController::show/$1', ['filter' => 'role:admin']);
     $routes->get('siswa/nonaktifkan/(:num)', 'Admin\SiswaController::changeStatus/$1', ['filter' => 'role:admin']);
     $routes->get('siswa/aktifkan/(:num)', 'Admin\SiswaController::changeStatus/$1', ['filter' => 'role:admin']);
@@ -108,7 +110,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('kelas/simpan', 'Admin\KelasController::store', ['filter' => 'role:admin']);
     $routes->get('kelas/edit/(:num)', 'Admin\KelasController::edit/$1', ['filter' => 'role:admin']);
     $routes->post('kelas/update/(:num)', 'Admin\KelasController::update/$1', ['filter' => 'role:admin']);
-    $routes->get('kelas/hapus/(:num)', 'Admin\KelasController::delete/$1', ['filter' => 'role:admin']);
+    $routes->post('kelas/hapus/(:num)', 'Admin\KelasController::delete/$1', ['filter' => 'role:admin']);
     $routes->get('kelas/detail/(:num)', 'Admin\KelasController::show/$1', ['filter' => 'role:admin']);
     $routes->post('kelas/assign-wali-kelas/(:num)', 'Admin\KelasController::assignWaliKelas/$1', ['filter' => 'role:admin']);
     $routes->post('kelas/remove-wali-kelas/(:num)', 'Admin\KelasController::removeWaliKelas/$1', ['filter' => 'role:admin']);
@@ -130,7 +132,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('jadwal/simpan', 'Admin\JadwalController::store', ['filter' => 'role:admin']);
     $routes->get('jadwal/edit/(:num)', 'Admin\JadwalController::edit/$1', ['filter' => 'role:admin']);
     $routes->post('jadwal/update/(:num)', 'Admin\JadwalController::update/$1', ['filter' => 'role:admin']);
-    $routes->get('jadwal/hapus/(:num)', 'Admin\JadwalController::delete/$1', ['filter' => 'role:admin']);
+    $routes->post('jadwal/hapus/(:num)', 'Admin\JadwalController::delete/$1', ['filter' => 'role:admin']);
     $routes->post('jadwal/checkConflict', 'Admin\JadwalController::checkConflict', ['filter' => 'role:admin']);
     $routes->get('jadwal/export', 'Admin\JadwalController::export', ['filter' => 'role:admin']);
 
@@ -141,7 +143,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
 
 // Guru Routes
 $routes->group('guru', ['filter' => 'auth'], function ($routes) {
-    $routes->get('dashboard', 'Guru\DashboardController::index', ['filter' => 'role:guru_mapel']);
+    $routes->get('dashboard', 'Guru\DashboardController::index', ['filter' => 'role:guru_mapel', 'as' => 'guru.dashboard']);
     $routes->get('jadwal', 'Guru\JadwalController::index', ['filter' => 'role:guru_mapel']);
      // Absensi Routes
     $routes->get('absensi', 'Guru\AbsensiController::index', ['filter' => 'role:guru_mapel']);
@@ -150,7 +152,7 @@ $routes->group('guru', ['filter' => 'auth'], function ($routes) {
     $routes->get('absensi/detail/(:num)', 'Guru\AbsensiController::show/$1', ['filter' => 'role:guru_mapel']);
     $routes->get('absensi/edit/(:num)', 'Guru\AbsensiController::edit/$1', ['filter' => 'role:guru_mapel']);
     $routes->post('absensi/update/(:num)', 'Guru\AbsensiController::update/$1', ['filter' => 'role:guru_mapel']);
-    $routes->get('absensi/delete/(:num)', 'Guru\AbsensiController::delete/$1', ['filter' => 'role:guru_mapel']);
+    $routes->post('absensi/delete/(:num)', 'Guru\AbsensiController::delete/$1', ['filter' => 'role:guru_mapel']);
     $routes->get('absensi/print/(:num)', 'Guru\AbsensiController::print/$1', ['filter' => 'role:guru_mapel']);
     $routes->get('absensi/getSiswaByKelas', 'Guru\AbsensiController::getSiswaByKelas', ['filter' => 'role:guru_mapel']);
     $routes->get('absensi/getJadwalByHari', 'Guru\AbsensiController::getJadwalByHari', ['filter' => 'role:guru_mapel']);
@@ -165,7 +167,7 @@ $routes->group('guru', ['filter' => 'auth'], function ($routes) {
 
 // Wali Kelas Routes
 $routes->group('walikelas', ['filter' => 'auth'], function ($routes) {
-    $routes->get('dashboard', 'WaliKelas\DashboardController::index', ['filter' => 'role:wali_kelas']);
+    $routes->get('dashboard', 'WaliKelas\DashboardController::index', ['filter' => 'role:wali_kelas', 'as' => 'walikelas.dashboard']);
     $routes->get('siswa', 'WaliKelas\SiswaController::index', ['filter' => 'role:wali_kelas']);
     $routes->get('absensi', 'WaliKelas\AbsensiController::index', ['filter' => 'role:wali_kelas']);
     $routes->get('izin', 'WaliKelas\IzinController::index', ['filter' => 'role:wali_kelas']);
@@ -183,7 +185,7 @@ $routes->group('walikelas', ['filter' => 'auth'], function ($routes) {
 
 // Siswa Routes
 $routes->group('siswa', ['filter' => 'auth'], function ($routes) {
-    $routes->get('dashboard', 'Siswa\DashboardController::index', ['filter' => 'role:siswa']);
+    $routes->get('dashboard', 'Siswa\DashboardController::index', ['filter' => 'role:siswa', 'as' => 'siswa.dashboard']);
     $routes->get('jadwal', 'Siswa\JadwalController::index', ['filter' => 'role:siswa']);
     $routes->get('absensi', 'Siswa\AbsensiController::index', ['filter' => 'role:siswa']);
     $routes->get('izin', 'Siswa\IzinController::index', ['filter' => 'role:siswa']);
