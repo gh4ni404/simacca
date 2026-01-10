@@ -192,25 +192,8 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Page Header -->
             <div class="mb-6">
-                <?php $segments = service('uri')->getSegments(); $crumbPath=''; ?>
                 <div class="flex items-center justify-between">
-                    <div>
-                        <nav class="breadcrumb text-sm mb-1" aria-label="Breadcrumb">
-                            <ol class="flex items-center space-x-2">
-                                <li><a href="<?= base_url('/'); ?>" class="hover:underline">Home</a></li>
-                                <?php foreach ($segments as $i => $seg): $crumbPath .= '/'.$seg; ?>
-                                    <li class="text-gray-400">/</li>
-                                    <li>
-                                        <a href="<?= base_url($crumbPath); ?>" class="hover:underline capitalize"><?= esc(str_replace(['-', '_'], ' ', $seg)); ?></a>
-                                    </li>
-                                <?php endforeach; ?>
-                            </ol>
-                        </nav>
-                        <h1 class="text-2xl font-bold text-gray-900"><?= $pageTitle ?? $title ?? 'Dashboard'; ?></h1>
-                        <?php if (isset($pageDescription)): ?>
-                            <p class="mt-1 text-sm text-gray-600"><?= $pageDescription; ?></p>
-                        <?php endif; ?>
-                    </div>
+                    
                     <div class="ml-4 flex-shrink-0">
                         <?= $this->renderSection('actions'); ?>
                     </div>
