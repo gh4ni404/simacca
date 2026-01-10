@@ -63,7 +63,7 @@ class AbsensiController extends BaseController
         $absensi = $this->absensiModel->getByGuru($guruId, $tanggal);
         print_r($absensi);
 
-        $absensiId = $absensi['id'] ?? null;
+        $absensiId = $this->request->getGet('absensi_id');
         // Get all classes taught by this teacher
         $kelasOptions = $this->getKelasOptions($guruId);
 
@@ -78,7 +78,7 @@ class AbsensiController extends BaseController
             'kelasOptions' => $kelasOptions,
             'guru' => $guru,
             'stats' => $this->getAbsensiStats($guruId, $tanggal),
-            'detailStats' => $this->absensiDetailModel->getDetailStats($absensiId[]['id'])
+            'detailStats' => $this->absensiDetailModel->getDetailStats($absensiId)
         ];
 
         return view('guru/absensi/index', $data);
