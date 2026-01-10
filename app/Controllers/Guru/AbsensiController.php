@@ -778,14 +778,4 @@ class AbsensiController extends BaseController
 
         return $statistics;
     }
-
-    // private function isAbsensiEditable($absensi)
-    // {
-    //     $createdAt = strtotime($absensi['created_at']);
-    //     $now = time();
-    //     $diffHours = ($now - $createdAt) / 3600;
-
-    //     // Allow editing within 24 hours
-    //     return $diffHours <= 24;
-    // }
 }

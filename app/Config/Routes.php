@@ -43,7 +43,9 @@ $routes->setAutoRoute(false);
  * @var RouteCollection $routes
  */
 $routes->get('/', 'Home::index');
-$routes->get('health', static function () { return 'OK'; });
+$routes->get('health', static function () {
+    return 'OK';
+});
 
 // Auth Routes
 $routes->group('', ['filter' => 'guest'], function ($routes) {
@@ -144,8 +146,9 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
 // Guru Routes
 $routes->group('guru', ['filter' => 'auth'], function ($routes) {
     $routes->get('dashboard', 'Guru\DashboardController::index', ['filter' => 'role:guru_mapel', 'as' => 'guru.dashboard']);
+    $routes->post('dashboard/quick-action', 'Guru\DashboardController::quickAction', ['filter' => 'role:guru_mapel']);
     $routes->get('jadwal', 'Guru\JadwalController::index', ['filter' => 'role:guru_mapel']);
-     // Absensi Routes
+    // Absensi Routes
     $routes->get('absensi', 'Guru\AbsensiController::index', ['filter' => 'role:guru_mapel']);
     $routes->get('absensi/tambah', 'Guru\AbsensiController::create', ['filter' => 'role:guru_mapel']);
     $routes->post('absensi/simpan', 'Guru\AbsensiController::store', ['filter' => 'role:guru_mapel']);
