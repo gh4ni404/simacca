@@ -181,7 +181,7 @@
                                     $total = 0;
                                     $hadir = 0;
                                     foreach ($stats as $stat) {
-                                        $total += $stat['jumlah'];
+                                        $total += $stat['total'];
                                         if ($stat['status'] == 'hadir') {
                                             $hadir = $stat['jumlah'];
                                         }
