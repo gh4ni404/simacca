@@ -285,10 +285,7 @@
         <div class="header">
             <div class="header-content">
                 <div class="logo">
-                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="50" cy="50" r="45" fill="#4f46e5" stroke="#000" stroke-width="2"/>
-                        <text x="50" y="60" font-size="40" font-weight="bold" text-anchor="middle" fill="#fff">S</text>
-                    </svg>
+                    <img src="" alt="Logo Sekolah" />
                 </div>
                 <div class="header-text">
                     <h1>PEMERINTAH PROPINSI SULAWESI SELATAN</h1>
@@ -299,10 +296,7 @@
                     <p><em>Email : smkn8bone@gmail.com</em></p>
                 </div>
                 <div class="logo">
-                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="50" cy="50" r="45" fill="#dc2626" stroke="#000" stroke-width="2"/>
-                        <text x="50" y="60" font-size="40" font-weight="bold" text-anchor="middle" fill="#fff">B</text>
-                    </svg>
+                    <img src="" alt="Logo Provinsi">
                 </div>
             </div>
         </div>
