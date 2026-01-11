@@ -18,19 +18,45 @@ if (!function_exists('validate_file_upload')) {
     {
         // Check if file is valid
         if (!$file->isValid()) {
-            return ['valid' => false, 'error' => 'File tidak valid atau tidak ada file yang diupload'];
+            $error = $file->getErrorString();
+            return [
+                'valid' => false, 
+                'error' => 'File tidak dapat diupload. ' . ($error ? 'Detail: ' . $error : 'Pastikan file yang dipilih valid.')
+            ];
         }
 
         // Check file size
         if ($file->getSize() > $maxSize) {
             $maxSizeMB = round($maxSize / 1048576, 2);
-            return ['valid' => false, 'error' => "Ukuran file terlalu besar. Maksimal {$maxSizeMB}MB"];
+            $actualSizeMB = round($file->getSize() / 1048576, 2);
+            return [
+                'valid' => false, 
+                'error' => "Ukuran file terlalu besar ({$actualSizeMB}MB). Maksimal yang diizinkan adalah {$maxSizeMB}MB."
+            ];
         }
 
         // Check MIME type
         $mimeType = $file->getMimeType();
         if (!in_array($mimeType, $allowedTypes)) {
-            return ['valid' => false, 'error' => 'Tipe file tidak diizinkan'];
+            // Build friendly type list
+            $friendlyTypes = [];
+            foreach ($allowedTypes as $type) {
+                if (strpos($type, 'image/') === 0) {
+                    $friendlyTypes[] = strtoupper(str_replace('image/', '', $type));
+                } elseif (strpos($type, 'application/') === 0) {
+                    if (strpos($type, 'excel') !== false) {
+                        $friendlyTypes[] = 'Excel';
+                    } elseif (strpos($type, 'pdf') !== false) {
+                        $friendlyTypes[] = 'PDF';
+                    }
+                }
+            }
+            $typeList = implode(', ', array_unique($friendlyTypes));
+            
+            return [
+                'valid' => false, 
+                'error' => "Tipe file tidak didukung. Hanya file {$typeList} yang diperbolehkan."
+            ];
         }
 
         // Additional check: verify file extension matches MIME type
@@ -45,7 +71,10 @@ if (!function_exists('validate_file_upload')) {
         ];
 
         if (isset($validExtensions[$mimeType]) && !in_array(strtolower($extension), $validExtensions[$mimeType])) {
-            return ['valid' => false, 'error' => 'Extension file tidak sesuai dengan tipe file'];
+            return [
+                'valid' => false, 
+                'error' => 'File tidak sesuai. Extension file (.' . $extension . ') tidak cocok dengan tipe file sebenarnya.'
+            ];
         }
 
         return ['valid' => true, 'error' => null];
@@ -132,14 +161,16 @@ if (!function_exists('safe_error_message')) {
      */
     function safe_error_message(\Exception $e, string $userMessage = 'Terjadi kesalahan sistem'): string
     {
-        // Log the detailed error
-        log_message('error', $e->getMessage() . "\n" . $e->getTraceAsString());
+        // Log the detailed error with timestamp
+        log_message('error', '[ERROR] ' . $userMessage);
+        log_message('error', '[EXCEPTION] ' . $e->getMessage());
+        log_message('error', '[TRACE] ' . $e->getTraceAsString());
         
         // Return generic message to user (don't expose internals)
         if (ENVIRONMENT === 'development') {
-            return $userMessage . ' (Dev: ' . $e->getMessage() . ')';
+            return '⚠️ ' . $userMessage . "\n\nDetail (Dev Mode):\n" . $e->getMessage();
         }
         
-        return $userMessage . '. Silakan hubungi administrator jika masalah berlanjut.';
+        return '⚠️ ' . $userMessage . '.\n\nJika masalah terus terjadi, silakan hubungi tim support dengan kode error: ERR-' . date('YmdHis');
     }
 }

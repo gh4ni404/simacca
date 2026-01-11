@@ -99,14 +99,20 @@ class JurnalController extends BaseController
         ];
 
         if (!$this->validate($rules)) {
-            session()->setFlashdata('error', 'Validasi gagal: ' . implode(', ', $this->validator->getErrors()));
+            $errors = $this->validator->getErrors();
+            $errorList = '<ul class="list-disc ml-4">';
+            foreach ($errors as $field => $error) {
+                $errorList .= '<li>' . $error . '</li>';
+            }
+            $errorList .= '</ul>';
+            session()->setFlashdata('error', '❌ Mohon lengkapi data berikut:' . $errorList);
             return redirect()->back()->withInput();
         }
 
         // Cek apakah sudah ada jurnal untuk absensi ini
         $absensiId = $this->request->getPost('absensi_id');
         if ($this->jurnalModel->isJurnalExist($absensiId)) {
-            session()->setFlashdata('error', 'Jurnal untuk absensi ini sudah dibuat');
+            session()->setFlashdata('error', '⚠️ Jurnal untuk pertemuan ini sudah dibuat sebelumnya. Silakan edit jurnal yang sudah ada atau pilih pertemuan lain.');
             return redirect()->to('/guru/jurnal');
         }
 
@@ -126,7 +132,7 @@ class JurnalController extends BaseController
             $validation = validate_file_upload($file, $allowedTypes, 5242880); // 5MB
             
             if (!$validation['valid']) {
-                session()->setFlashdata('error', $validation['error']);
+                session()->setFlashdata('error', '📁 ' . $validation['error']);
                 return redirect()->back()->withInput();
             }
             
@@ -138,7 +144,15 @@ class JurnalController extends BaseController
                 $file->move(WRITEPATH . 'uploads/jurnal', $fotoName);
             } catch (\Exception $e) {
                 log_message('error', 'Failed to upload jurnal foto: ' . $e->getMessage());
-                session()->setFlashdata('error', 'Gagal mengupload foto dokumentasi');
+                
+                $userMessage = '📷 Gagal menyimpan foto dokumentasi. ';
+                if (ENVIRONMENT === 'development') {
+                    $userMessage .= 'Detail: ' . $e->getMessage();
+                } else {
+                    $userMessage .= 'Silakan coba lagi atau gunakan foto yang berbeda.';
+                }
+                
+                session()->setFlashdata('error', $userMessage);
                 return redirect()->back()->withInput();
             }
         }
@@ -157,7 +171,7 @@ class JurnalController extends BaseController
 
         try {
             if ($this->jurnalModel->insert($data)) {
-                session()->setFlashdata('success', 'Jurnal KBM berhasil disimpan');
+                session()->setFlashdata('success', '✅ Jurnal KBM berhasil disimpan! Data pembelajaran telah tercatat.');
                 return redirect()->to('/guru/jurnal');
             } else {
                 // Delete uploaded file if database insert fails
@@ -165,7 +179,18 @@ class JurnalController extends BaseController
                     unlink(WRITEPATH . 'uploads/jurnal/' . $fotoName);
                 }
                 
-                session()->setFlashdata('error', 'Gagal menyimpan jurnal KBM');
+                $modelErrors = $this->jurnalModel->errors();
+                if (!empty($modelErrors)) {
+                    $errorList = '<ul class="list-disc ml-4">';
+                    foreach ($modelErrors as $field => $error) {
+                        $errorList .= '<li>' . $error . '</li>';
+                    }
+                    $errorList .= '</ul>';
+                    session()->setFlashdata('error', '❌ Gagal menyimpan jurnal KBM:' . $errorList);
+                } else {
+                    session()->setFlashdata('error', '❌ Gagal menyimpan jurnal KBM. Silakan coba lagi atau hubungi administrator.');
+                }
+                
                 return redirect()->back()->withInput();
             }
         } catch (\Exception $e) {
@@ -174,7 +199,7 @@ class JurnalController extends BaseController
                 unlink(WRITEPATH . 'uploads/jurnal/' . $fotoName);
             }
             
-            $safeMessage = safe_error_message($e, 'Gagal menyimpan jurnal KBM');
+            $safeMessage = safe_error_message($e, '❌ Gagal menyimpan jurnal KBM');
             session()->setFlashdata('error', $safeMessage);
             return redirect()->back()->withInput();
         }
@@ -305,8 +330,9 @@ class JurnalController extends BaseController
             
             // Additional validation for file size and type
             if ($file->getSize() > 5242880) {
+                $sizeMB = round($file->getSize() / 1048576, 2);
                 log_message('error', '[JURNAL UPDATE] File too large: ' . $file->getSize());
-                session()->setFlashdata('error', 'Ukuran file terlalu besar. Maksimal 5MB');
+                session()->setFlashdata('error', '📦 Ukuran file terlalu besar (' . $sizeMB . 'MB). Maksimal yang diperbolehkan adalah 5MB. Silakan kompres atau pilih file yang lebih kecil.');
                 return redirect()->back()->withInput();
             }
             
@@ -351,7 +377,15 @@ class JurnalController extends BaseController
             } catch (\Exception $e) {
                 log_message('error', '[JURNAL UPDATE] Failed to upload foto: ' . $e->getMessage());
                 log_message('error', '[JURNAL UPDATE] Stack trace: ' . $e->getTraceAsString());
-                session()->setFlashdata('error', 'Gagal mengupload foto dokumentasi: ' . $e->getMessage());
+                
+                $userMessage = '📷 Gagal menyimpan foto dokumentasi. ';
+                if (ENVIRONMENT === 'development') {
+                    $userMessage .= 'Detail: ' . $e->getMessage();
+                } else {
+                    $userMessage .= 'Silakan coba lagi atau gunakan foto yang berbeda.';
+                }
+                
+                session()->setFlashdata('error', $userMessage);
                 return redirect()->back()->withInput();
             }
         } else {
@@ -370,7 +404,7 @@ class JurnalController extends BaseController
             
             if ($updateResult) {
                 log_message('info', '[JURNAL UPDATE] Jurnal updated successfully');
-                session()->setFlashdata('success', 'Jurnal KBM berhasil diperbarui');
+                session()->setFlashdata('success', '✅ Jurnal KBM berhasil diperbarui! Perubahan telah disimpan.');
                 return redirect()->to('/guru/jurnal');
             } else {
                 // Get model errors
@@ -383,8 +417,17 @@ class JurnalController extends BaseController
                     log_message('info', '[JURNAL UPDATE] Rolled back foto upload');
                 }
                 
-                $errorMsg = !empty($modelErrors) ? implode(', ', $modelErrors) : 'Unknown error';
-                session()->setFlashdata('error', 'Gagal memperbarui jurnal KBM: ' . $errorMsg);
+                if (!empty($modelErrors)) {
+                    $errorList = '<ul class="list-disc ml-4">';
+                    foreach ($modelErrors as $field => $error) {
+                        $errorList .= '<li>' . $error . '</li>';
+                    }
+                    $errorList .= '</ul>';
+                    session()->setFlashdata('error', '❌ Gagal memperbarui jurnal KBM:' . $errorList);
+                } else {
+                    session()->setFlashdata('error', '❌ Gagal memperbarui jurnal KBM. Silakan coba lagi atau hubungi administrator.');
+                }
+                
                 return redirect()->back()->withInput();
             }
         } catch (\Exception $e) {
@@ -397,7 +440,7 @@ class JurnalController extends BaseController
                 log_message('info', '[JURNAL UPDATE] Rolled back foto upload after exception');
             }
             
-            $safeMessage = safe_error_message($e, 'Gagal memperbarui jurnal KBM');
+            $safeMessage = safe_error_message($e, '❌ Gagal memperbarui jurnal KBM');
             session()->setFlashdata('error', $safeMessage);
             return redirect()->back()->withInput();
         }
