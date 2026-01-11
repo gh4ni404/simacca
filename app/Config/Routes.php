@@ -163,6 +163,7 @@ $routes->group('guru', ['filter' => 'auth'], function ($routes) {
     $routes->get('jurnal', 'Guru\JurnalController::index', ['filter' => 'role:guru_mapel']);
     $routes->get('jurnal/tambah/(:num)', 'Guru\JurnalController::create/$1', ['filter' => 'role:guru_mapel']);
     $routes->post('jurnal/simpan', 'Guru\JurnalController::store', ['filter' => 'role:guru_mapel']);
+    $routes->get('jurnal/show/(:num)', 'Guru\JurnalController::show/$1', ['filter' => 'role:guru_mapel']);
     $routes->get('jurnal/edit/(:num)', 'Guru\JurnalController::edit/$1', ['filter' => 'role:guru_mapel']);
     $routes->post('jurnal/update/(:num)', 'Guru\JurnalController::update/$1', ['filter' => 'role:guru_mapel']);
     $routes->get('laporan', 'Guru\LaporanController::index', ['filter' => 'role:guru_mapel']);

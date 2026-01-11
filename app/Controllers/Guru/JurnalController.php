@@ -172,6 +172,37 @@ class JurnalController extends BaseController
         return view('guru/jurnal/edit', $data);
     }
 
+    public function show($jurnalId)
+    {
+        // Get guru data from session
+        $userId = session()->get('user_id');
+        $guru = $this->guruModel->getByUserId($userId);
+
+        if (!$guru) {
+            return redirect()->to('/guru/dashboard')->with('error', 'Data guru tidak ditemukan');
+        }
+
+        // Get jurnal with detail
+        $jurnal = $this->jurnalModel->getJurnalWithDetail($jurnalId);
+
+        if (!$jurnal) {
+            return redirect()->to('/guru/jurnal')->with('error', 'Data jurnal tidak ditemukan');
+        }
+
+        // Cek apakah jurnal milik guru yang login
+        if ($jurnal['nama_guru'] !== $guru['nama_lengkap']) {
+            return redirect()->to('/guru/jurnal')->with('error', 'Anda tidak memiliki akses ke jurnal ini');
+        }
+
+        $data = [
+            'title' => 'Preview Jurnal KBM',
+            'guru' => $guru,
+            'jurnal' => $jurnal
+        ];
+
+        return view('guru/jurnal/show', $data);
+    }
+
     public function update($jurnalId)
     {
         // Validasi input
