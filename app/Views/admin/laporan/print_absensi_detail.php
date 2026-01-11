@@ -484,12 +484,13 @@
                 <!-- <th style="width: 85px;">Nama<br>Wali Kelas</th> -->
                 <!-- <th style="width: 45px;">Nama<br>Wali Kelas</th> -->
                 <!-- <th style="width: 15px;">Nama<br>Wali Kelas</th> -->
+                <!-- <th style="width: 0px;">Nama<br>Wali Kelas</th> -->
                 <th style="width: 28px;">Hadir</th>
                 <th style="width: 28px;">Sakit</th>
                 <th style="width: 28px;">Izin</th>
                 <th style="width: 28px;">Alpa</th>
                 <th style="width: 90px;">Catatan<br>Khusus</th>
-                <th style="width: 85px;">Foto</th>
+                <th style="width: 100px;">Foto</th>
                 <th style="width: 85px;">Guru Piket<br>Pengganti</th>
             </tr>
         </thead>
