@@ -39,8 +39,10 @@ class Session extends BaseConfig
      *
      * The number of SECONDS you want the session to last.
      * Setting to 0 (zero) means expire when the browser is closed.
+     * 
+     * Changed to 28800 (8 hours) for better user experience
      */
-    public int $expiration = 7200;
+    public int $expiration = 28800;
 
     /**
      * --------------------------------------------------------------------------
@@ -69,9 +71,9 @@ class Session extends BaseConfig
      * WARNING: If you're using the database driver, don't forget to update
      *          your session table's PRIMARY KEY when changing this setting.
      * 
-     * SECURITY: Set to true for additional security layer
+     * SECURITY: Set to false to prevent logout when IP changes (mobile networks, proxies)
      */
-    public bool $matchIP = true;
+    public bool $matchIP = false;
 
     /**
      * --------------------------------------------------------------------------
@@ -79,8 +81,10 @@ class Session extends BaseConfig
      * --------------------------------------------------------------------------
      *
      * How many seconds between CI regenerating the session ID.
+     * 
+     * Changed to 600 (10 minutes) to reduce regeneration frequency
      */
-    public int $timeToUpdate = 300;
+    public int $timeToUpdate = 600;
 
     /**
      * --------------------------------------------------------------------------
@@ -91,9 +95,9 @@ class Session extends BaseConfig
      * when auto-regenerating the session ID. When set to FALSE, the data
      * will be later deleted by the garbage collector.
      * 
-     * SECURITY: Set to true to prevent session fixation attacks
+     * SECURITY: Set to false to prevent session data loss during regeneration
      */
-    public bool $regenerateDestroy = true;
+    public bool $regenerateDestroy = false;
 
     /**
      * --------------------------------------------------------------------------

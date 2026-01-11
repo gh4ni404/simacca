@@ -120,11 +120,15 @@ class AuthController extends BaseController
                     break;
             }
 
-            // Regenerate session ID to prevent session fixation attacks
-            session()->regenerate();
-            
-            // Set session
+            // Set session first
             session()->set($sessionData);
+            
+            // Set initial last activity time
+            session()->set('last_activity', time());
+            
+            // Then regenerate session ID to prevent session fixation attacks
+            // Do this AFTER setting session data to prevent data loss
+            session()->regenerate(false);
 
             // Update last login (jika ada field di database)
             // $this->userModel->updateLastLogin($user['id']);
@@ -164,7 +168,26 @@ class AuthController extends BaseController
      */
     public function Logout()
     {
-        // Destroy session
+        // Get user info before destroying session
+        $username = session()->get('username');
+        
+        // Remove all session data
+        session()->remove('user_id');
+        session()->remove('userId');
+        session()->remove('username');
+        session()->remove('role');
+        session()->remove('email');
+        session()->remove('isLoggedIn');
+        session()->remove('loginTime');
+        session()->remove('last_activity');
+        session()->remove('guru_id');
+        session()->remove('siswa_id');
+        session()->remove('nama_lengkap');
+        session()->remove('kelas_id');
+        session()->remove('nip');
+        session()->remove('nis');
+        
+        // Destroy session completely
         session()->destroy();
 
         // Redirect to login page

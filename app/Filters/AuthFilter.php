@@ -31,11 +31,23 @@ class AuthFilter implements FilterInterface
     {
         // Check if user is logged in
         if (!session()->get('isLoggedIn')) {
-            // Save intended URL for redirect after login
-            session()->set('redirect_url', current_url());
+            // Save intended URL for redirect after login (only for non-AJAX requests)
+            if (!$request->isAJAX()) {
+                session()->set('redirect_url', current_url());
+            }
 
             // Redirect to login page
             return redirect()->to('/login')->with('error', 'Silahkan login terlebih dahulu');
+        }
+
+        // Update last activity time to keep session alive
+        // This helps prevent unexpected logouts
+        $lastActivity = session()->get('last_activity');
+        $currentTime = time();
+        
+        // Update last activity every 5 minutes to extend session
+        if (!$lastActivity || ($currentTime - $lastActivity) > 300) {
+            session()->set('last_activity', $currentTime);
         }
 
         return $request;
