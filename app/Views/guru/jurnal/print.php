@@ -375,7 +375,7 @@
                             <em style="color: #999; font-size: 9pt;">Tidak ada foto</em>
                         <?php endif; ?>
                     </td>
-                    <td><?= !empty($jurnal['catatan_khusus']) ? nl2br(esc($jurnal['catatan_khusus'])) : '<em style="color: #999;">-</em>' ?></td>
+                    <td><?= !empty($jurnal['catatan_khusus']) ? nl2br(esc($jurnal['catatan_khusus'])) : '<em style="color: #999; text-align:center;">-</em>' ?></td>
                 </tr>
             </tbody>
         </table>
