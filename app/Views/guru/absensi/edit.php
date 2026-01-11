@@ -118,7 +118,7 @@
                 </h2>
             </div>
             <div class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                         <label for="pertemuan_ke" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
                             <i class="fas fa-hashtag mr-2 text-indigo-500"></i>
@@ -132,6 +132,39 @@
                                value="<?= old('pertemuan_ke', $absensi['pertemuan_ke']) ?>" 
                                required 
                                min="1">
+                    </div>
+                    <div>
+                        <label for="materi_pembelajaran" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                            <i class="fas fa-book-open mr-2 text-green-500"></i>
+                            Materi Pembelajaran
+                        </label>
+                        <input type="text"
+                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
+                               id="materi_pembelajaran"
+                               name="materi_pembelajaran"
+                               value="<?= old('materi_pembelajaran', $absensi['materi_pembelajaran']) ?>"
+                               placeholder="Contoh: Sistem Persamaan Linear">
+                    </div>
+                    <div>
+                        <label for="guru_pengganti_id" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                            <i class="fas fa-user-tie mr-2 text-purple-500"></i>
+                            Guru Pengganti (Opsional)
+                        </label>
+                        <select
+                            id="guru_pengganti_id"
+                            name="guru_pengganti_id"
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all">
+                            <option value="">-- Tidak ada pengganti --</option>
+                            <?php foreach ($guruList as $guruItem): ?>
+                                <option value="<?= $guruItem['id']; ?>" <?= old('guru_pengganti_id', $absensi['guru_pengganti_id'] ?? '') == $guruItem['id'] ? 'selected' : ''; ?>>
+                                    <?= esc($guruItem['nama_lengkap']); ?> (<?= esc($guruItem['nip']); ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Pilih guru pengganti jika ada yang menggantikan
+                        </p>
                     </div>
                 </div>
             </div>

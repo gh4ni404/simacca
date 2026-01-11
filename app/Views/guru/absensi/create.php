@@ -181,7 +181,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                         <div>
                             <label for="pertemuan_ke" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
                                 <i class="fas fa-hashtag mr-2 text-indigo-500"></i>
@@ -208,6 +208,27 @@
                                 value="<?= $tanggal; ?>"
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                                 required>
+                        </div>
+                        <div>
+                            <label for="guru_pengganti_id" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-user-tie mr-2 text-purple-500"></i>
+                                Guru Pengganti (Opsional)
+                            </label>
+                            <select
+                                id="guru_pengganti_id"
+                                name="guru_pengganti_id"
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                                <option value="">-- Tidak ada pengganti --</option>
+                                <?php foreach ($guruList as $guruItem): ?>
+                                    <option value="<?= $guruItem['id']; ?>">
+                                        <?= esc($guruItem['nama_lengkap']); ?> (<?= esc($guruItem['nip']); ?>)
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Pilih guru pengganti jika ada yang menggantikan
+                            </p>
                         </div>
                     </div>
 

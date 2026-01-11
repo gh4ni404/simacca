@@ -74,12 +74,14 @@ class AbsensiModel extends Model
     {
         $builder = $this->select('absensi.*, 
                                 guru.nama_lengkap as nama_guru,
+                                guru_pengganti.nama_lengkap as nama_guru_pengganti,
                                 mata_pelajaran.nama_mapel,
                                 kelas.nama_kelas,
                                 jadwal_mengajar.kelas_id as kelas_id,
                                 jadwal_mengajar.hari')
             ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
             ->join('guru', 'guru.id = jadwal_mengajar.guru_id')
+            ->join('guru guru_pengganti', 'guru_pengganti.id = absensi.guru_pengganti_id', 'left')
             ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
             ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
             ->orderBy('absensi.tanggal', 'DESC');

@@ -128,6 +128,11 @@ class AbsensiController extends BaseController
             $approvedIzin = $this->izinModel->getApprovedIzinByDate($tanggal, $jadwal['kelas_id']);
         }
 
+        // Get all teachers for substitute teacher dropdown
+        $guruList = $this->guruModel->select('id, nama_lengkap, nip')
+            ->orderBy('nama_lengkap', 'ASC')
+            ->findAll();
+
         $data = [
             'title' => 'Input Absensi',
             'pageTitle' => 'Input Absensi',
@@ -140,7 +145,8 @@ class AbsensiController extends BaseController
             'pertemuanKe' => $pertemuanKe,
             'hariList' => $this->getHariList(),
             'statusOptions' => $this->getStatusOptions(),
-            'approvedIzin' => $approvedIzin
+            'approvedIzin' => $approvedIzin,
+            'guruList' => $guruList
         ];
 
         return view('guru/absensi/create', $data);
@@ -197,6 +203,7 @@ class AbsensiController extends BaseController
             'pertemuan_ke' => $this->request->getPost('pertemuan_ke'),
             'materi_pembelajaran' => $this->request->getPost('materi_pembelajaran'),
             'created_by' => $userId,
+            'guru_pengganti_id' => $this->request->getPost('guru_pengganti_id') ?: null,
             'created_at' => date('Y-m-d H:i:s')
         ];
 
@@ -346,6 +353,11 @@ class AbsensiController extends BaseController
             $approvedIzin = $this->izinModel->getApprovedIzinByDate($absensi['tanggal'], $kelasId);
         }
 
+        // Get all teachers for substitute teacher dropdown
+        $guruList = $this->guruModel->select('id, nama_lengkap, nip')
+            ->orderBy('nama_lengkap', 'ASC')
+            ->findAll();
+
         $data = [
             'title' => 'Edit Absensi',
             'pageTitle' => 'Edit Absensi',
@@ -356,7 +368,8 @@ class AbsensiController extends BaseController
             'siswaList' => $siswaList,
             'approvedIzin' => $approvedIzin,
             'guru' => $guru,
-            'statusOptions' => $this->getStatusOptions()
+            'statusOptions' => $this->getStatusOptions(),
+            'guruList' => $guruList
         ];
 
         return view('guru/absensi/edit', $data);
@@ -410,7 +423,8 @@ class AbsensiController extends BaseController
         $absensiData = [
             'id' => $id,
             'pertemuan_ke' => $this->request->getPost('pertemuan_ke'),
-            'materi_pembelajaran' => $this->request->getPost('materi_pembelajaran')
+            'materi_pembelajaran' => $this->request->getPost('materi_pembelajaran'),
+            'guru_pengganti_id' => $this->request->getPost('guru_pengganti_id') ?: null
         ];
 
         // Start database transaction

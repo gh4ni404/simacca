@@ -119,6 +119,21 @@
                                     <p class="text-sm font-bold text-gray-800"><?= $absensi['nama_guru'] ?></p>
                                 </div>
                             </div>
+                            <?php if (!empty($absensi['guru_pengganti_id'])): ?>
+                            <div class="flex items-start">
+                                <div class="p-2 bg-purple-100 rounded-lg mr-3">
+                                    <i class="fas fa-user-plus text-purple-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500 font-medium">Guru Pengganti</p>
+                                    <p class="text-sm font-bold text-gray-800"><?= $absensi['nama_guru_pengganti'] ?? '-' ?></p>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 mt-1">
+                                        <i class="fas fa-exchange-alt mr-1"></i>
+                                        Piket Pengganti
+                                    </span>
+                                </div>
+                            </div>
+                            <?php endif; ?>
                             <div class="flex items-start">
                                 <div class="p-2 bg-gray-100 rounded-lg mr-3">
                                     <i class="fas fa-clock text-gray-600"></i>
