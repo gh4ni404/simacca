@@ -213,8 +213,8 @@
         }
 
         .data-table .foto-cell img {
-            max-width: 40px;
-            max-height: 40px;
+            max-width: 100px;
+            max-height: 100px;
             object-fit: cover;
             border: 1px solid #ccc;
         }
@@ -531,7 +531,7 @@
                                 <td class="catatan-cell <?= ($jadwal['catatan_khusus'] !== '-') ? 'left' : 'center'; ?>"><?= esc($jadwal['catatan_khusus'] ?: '-'); ?></td>
                                 <td class="foto-cell">
                                     <?php if (!empty($jadwal['foto_dokumentasi'])): ?>
-                                        <img src="<?= base_url('files/jurnal/' . $jadwal['foto_dokumentasi']); ?>" alt="Foto" width="100px">
+                                        <img src="<?= base_url('files/jurnal/' . $jadwal['foto_dokumentasi']); ?>" alt="Foto">
                                     <?php else: ?>
                                         -
                                     <?php endif; ?>
