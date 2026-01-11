@@ -104,10 +104,14 @@ class AbsensiController extends BaseController
         // If jadwal_id is provided, use that
         if ($jadwalId) {
             $jadwal = $this->jadwalModel->getJadwalWithDetail($jadwalId);
-            if (!$jadwal || $jadwal['guru_id'] != $guruId) {
-                $this->session->setFlashdata('error', 'Jadwal tidak ditemukan atau tidak memiliki akses.');
+            if (!$jadwal) {
+                $this->session->setFlashdata('error', 'Jadwal tidak ditemukan.');
                 return redirect()->to('/guru/absensi/tambah');
             }
+            // Allow access if:
+            // 1. Jadwal belongs to current teacher (normal mode)
+            // 2. Jadwal belongs to another teacher (substitute mode)
+            // Both are valid scenarios
         } else {
             $jadwal = null;
         }
