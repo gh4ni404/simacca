@@ -164,7 +164,7 @@
                             </div>
                             <p class="text-sm text-gray-500">
                                 <i class="fas fa-calendar-alt mr-1"></i>
-                                Diajukan pada: <?= date('d F Y H:i', strtotime($izin['created_at'])); ?>
+                                Tanggal Izin: <?= date('d F Y', strtotime($izin['tanggal'])); ?>
                             </p>
                         </div>
                     </div>
