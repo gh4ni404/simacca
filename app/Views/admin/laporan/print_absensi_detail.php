@@ -486,7 +486,7 @@
                 <th style="width: 28px;">Sakit</th>
                 <th style="width: 28px;">Izin</th>
                 <th style="width: 28px;">Alpa</th>
-                <th style="width: 90px;">Catatan Khusus</th>
+                <th style="width: 90px;">Catatan<br>Khusus</th>
                 <th style="width: 45px;">Foto</th>
                 <th style="width: 85px;">Guru Piket<br>Pengganti</th>
             </tr>
