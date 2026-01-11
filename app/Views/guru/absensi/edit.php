@@ -133,18 +133,6 @@
                                required 
                                min="1">
                     </div>
-                    <div>
-                        <label for="materi_pembelajaran" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                            <i class="fas fa-book-open mr-2 text-green-500"></i>
-                            Materi Pembelajaran
-                        </label>
-                        <input type="text" 
-                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all" 
-                               id="materi_pembelajaran" 
-                               name="materi_pembelajaran" 
-                               value="<?= old('materi_pembelajaran', $absensi['materi_pembelajaran']) ?>"
-                               placeholder="Isi materi pembelajaran...">
-                    </div>
                 </div>
             </div>
         </div>

@@ -220,10 +220,6 @@
                 <td>Jam</td>
                 <td>: <?= date('H:i', strtotime($absensi['created_at'])) ?> WIB</td>
             </tr>
-            <tr>
-                <td>Materi Pembelajaran</td>
-                <td colspan="3">: <?= $absensi['materi_pembelajaran'] ?? '-' ?></td>
-            </tr>
         </table>
     </div>
 

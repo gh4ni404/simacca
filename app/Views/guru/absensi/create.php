@@ -211,17 +211,6 @@
                         </div>
                     </div>
 
-                    <div class="mb-6">
-                        <label for="materi_pembelajaran" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                            <i class="fas fa-book-open mr-2 text-green-500"></i>
-                            Materi Pembelajaran
-                        </label>
-                        <textarea id="materi_pembelajaran"
-                            name="materi_pembelajaran"
-                            rows="3"
-                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
-                            placeholder="Contoh: Bab 3 - Sistem Persamaan Linear, membahas metode eliminasi dan substitusi..."></textarea>
-                    </div>
 
                     <!-- Approved Izin Info -->
                     <?php if (!empty($approvedIzin)): ?>

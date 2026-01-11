@@ -120,15 +120,6 @@
                                 </div>
                             </div>
                             <div class="flex items-start">
-                                <div class="p-2 bg-yellow-100 rounded-lg mr-3">
-                                    <i class="fas fa-book-open text-yellow-600"></i>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-gray-500 font-medium">Materi</p>
-                                    <p class="text-sm font-bold text-gray-800"><?= $absensi['materi_pembelajaran'] ?? '-' ?></p>
-                                </div>
-                            </div>
-                            <div class="flex items-start">
                                 <div class="p-2 bg-gray-100 rounded-lg mr-3">
                                     <i class="fas fa-clock text-gray-600"></i>
                                 </div>

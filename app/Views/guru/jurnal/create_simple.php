@@ -154,14 +154,6 @@
                 </div>
             </div>
 
-            <?php if (!empty($absensi['materi_pembelajaran'])): ?>
-            <div class="mt-4 bg-white/60 backdrop-blur-sm rounded-xl p-4">
-                <span class="text-sm text-gray-600 block mb-2">
-                    <i class="fas fa-clipboard-list mr-2"></i>Materi dari Absensi
-                </span>
-                <p class="text-gray-800"><?= esc($absensi['materi_pembelajaran']) ?></p>
-            </div>
-            <?php endif; ?>
         </div>
 
         <!-- Form Card -->
