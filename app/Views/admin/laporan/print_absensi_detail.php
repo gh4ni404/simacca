@@ -213,8 +213,8 @@
         }
 
         .data-table .foto-cell img {
-            max-width: 110px;
-            max-height: 110px;
+            max-width: 100px;
+            max-height: 100px;
             object-fit: cover;
             border: 1px solid #ccc;
         }
