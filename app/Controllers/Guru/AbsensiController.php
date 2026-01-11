@@ -297,8 +297,11 @@ class AbsensiController extends BaseController
             throw new PageNotFoundException('Data absensi tidak ditemukan.');
         }
 
-        // Verify the absensi belongs to this teacher
-        if ($absensi['created_by'] != $userId) {
+        // Verify access: Allow if user created the absensi OR if schedule belongs to this teacher
+        $jadwal = $this->jadwalModel->find($absensi['jadwal_mengajar_id']);
+        $hasAccess = ($absensi['created_by'] == $userId) || ($jadwal && $jadwal['guru_id'] == $guru['id']);
+        
+        if (!$hasAccess) {
             $this->session->setFlashdata('error', 'Anda tidak memiliki akses ke absensi ini.');
             return redirect()->to('/guru/absensi');
         }
@@ -345,8 +348,11 @@ class AbsensiController extends BaseController
             throw new PageNotFoundException('Data absensi tidak ditemukan.');
         }
 
-        // Verify the absensi belongs to this teacher
-        if ($absensi['created_by'] != $userId) {
+        // Verify access: Allow if user created the absensi OR if schedule belongs to this teacher
+        $jadwal = $this->jadwalModel->find($absensi['jadwal_mengajar_id']);
+        $hasAccess = ($absensi['created_by'] == $userId) || ($jadwal && $jadwal['guru_id'] == $guru['id']);
+        
+        if (!$hasAccess) {
             $this->session->setFlashdata('error', 'Anda tidak memiliki akses ke absensi ini.');
             return redirect()->to('/guru/absensi');
         }
@@ -413,8 +419,11 @@ class AbsensiController extends BaseController
             throw new PageNotFoundException('Data absensi tidak ditemukan.');
         }
 
-        // Verify the absensi belongs to this teacher
-        if ($absensi['created_by'] != $userId) {
+        // Verify access: Allow if user created the absensi OR if schedule belongs to this teacher
+        $jadwal = $this->jadwalModel->find($absensi['jadwal_mengajar_id']);
+        $hasAccess = ($absensi['created_by'] == $userId) || ($jadwal && $jadwal['guru_id'] == $guru['id']);
+        
+        if (!$hasAccess) {
             $this->session->setFlashdata('error', 'Anda tidak memiliki akses ke absensi ini.');
             return redirect()->to('/guru/absensi');
         }
@@ -515,8 +524,11 @@ class AbsensiController extends BaseController
             throw new PageNotFoundException('Data absensi tidak ditemukan.');
         }
 
-        // Verify the absensi belongs to this teacher
-        if ($absensi['created_by'] != $userId) {
+        // Verify access: Allow if user created the absensi OR if schedule belongs to this teacher
+        $jadwal = $this->jadwalModel->find($absensi['jadwal_mengajar_id']);
+        $hasAccess = ($absensi['created_by'] == $userId) || ($jadwal && $jadwal['guru_id'] == $guru['id']);
+        
+        if (!$hasAccess) {
             $this->session->setFlashdata('error', 'Anda tidak memiliki akses ke absensi ini.');
             return redirect()->to('/guru/absensi');
         }
@@ -643,8 +655,11 @@ class AbsensiController extends BaseController
             throw new PageNotFoundException('Data absensi tidak ditemukan.');
         }
 
-        // Verify the absensi belongs to this teacher
-        if ($absensi['created_by'] != $userId) {
+        // Verify access: Allow if user created the absensi OR if schedule belongs to this teacher
+        $jadwal = $this->jadwalModel->find($absensi['jadwal_mengajar_id']);
+        $hasAccess = ($absensi['created_by'] == $userId) || ($jadwal && $jadwal['guru_id'] == $guru['id']);
+        
+        if (!$hasAccess) {
             $this->session->setFlashdata('error', 'Anda tidak memiliki akses ke absensi ini.');
             return redirect()->to('/guru/absensi');
         }
