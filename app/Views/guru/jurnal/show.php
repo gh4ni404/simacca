@@ -95,11 +95,12 @@
 
         <!-- Action Buttons -->
         <div class="flex flex-wrap gap-3 mb-8 no-print animate-slide-in-right">
-            <button onclick="window.print()" 
-                    class="print-button flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl hover:from-blue-700 hover:to-cyan-700 transition-all font-semibold shadow-lg">
+            <a href="<?= base_url('guru/jurnal/print/' . $jurnal['id']) ?>" 
+               target="_blank"
+               class="print-button flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl hover:from-blue-700 hover:to-cyan-700 transition-all font-semibold shadow-lg">
                 <i class="fas fa-print mr-2 text-lg"></i>
                 Cetak Jurnal
-            </button>
+            </a>
             <a href="<?= base_url('guru/jurnal/edit/' . $jurnal['id']) ?>" 
                class="flex items-center px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-xl hover:from-amber-700 hover:to-orange-700 transition-all font-semibold shadow-lg">
                 <i class="fas fa-edit mr-2 text-lg"></i>
