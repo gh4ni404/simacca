@@ -4,13 +4,21 @@
  * Run: php tmp_rovodev_check_walikelas_setup.php
  */
 
-require 'vendor/autoload.php';
+// Bootstrap CodeIgniter
+define('FCPATH', __DIR__ . DIRECTORY_SEPARATOR);
+chdir(FCPATH);
 
-// Load CodeIgniter
-$app = require_once FCPATH . '../app/Config/App.php';
-$paths = new \Config\Paths();
-$app = \Config\Services::codeigniter();
+$pathsPath = FCPATH . 'app/Config/Paths.php';
+require realpath($pathsPath) ?: $pathsPath;
+
+$paths = new Config\Paths();
+$bootstrap = rtrim($paths->systemDirectory, '\\/ ') . DIRECTORY_SEPARATOR . 'bootstrap.php';
+require realpath($bootstrap) ?: $bootstrap;
+
+$app = Config\Services::codeigniter();
 $app->initialize();
+$context = is_cli() ? 'php-cli' : 'web';
+$app->setContext($context);
 
 $db = \Config\Database::connect();
 
