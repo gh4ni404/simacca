@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,9 +29,11 @@
             body {
                 padding: 0;
             }
+
             .no-print {
                 display: none;
             }
+
             .page-break {
                 page-break-after: always;
             }
@@ -368,6 +371,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Print Button -->
     <button onclick="window.print()" class="print-button no-print">
@@ -375,35 +379,35 @@
     </button>
 
     <!-- Header dengan Logo -->
-        <div class="header">
-            <div class="header-content">
-                <div class="logo">
-                    <img src="<?= base_url('/assets/images/sekolah.png') ?>" alt="Logo Sekolah" height="64px"/>
-                </div>
-                <div class="header-text">
-                    <h3>PEMERINTAH PROPINSI SULAWESI SELATAN</h1>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <img src="<?= base_url('/assets/images/sekolah.png') ?>" alt="Logo Sekolah" height="64px" />
+            </div>
+            <div class="header-text">
+                <h3>PEMERINTAH PROPINSI SULAWESI SELATAN</h1>
                     <h3>DINAS PENDIDIKAN</h2>
-                    <h3>CABANG DINAS PENDIDIKAN WILAYAH III</h3>
-                    <h2>UPT SMKN 8 BONE</h2>
-                    <p><em>Alamat : Jln. Poros Bone – Sengkang Welado Kec. Ajangale Kode Pos 92755</em></p>
-                    <p><em>Email : smkn8bone@gmail.com</em></p>
-                </div>
-                <div class="logo">
-                    <img src="<?= base_url('/assets/images/provinsi.png') ?>" alt="Logo Provinsi" height="64px">
-                </div>
+                        <h3>CABANG DINAS PENDIDIKAN WILAYAH III</h3>
+                        <h2>UPT SMKN 8 BONE</h2>
+                        <p><em>Alamat : Jln. Poros Bone – Sengkang Welado Kec. Ajangale Kode Pos 92755</em></p>
+                        <p><em>Email : smkn8bone@gmail.com</em></p>
+            </div>
+            <div class="logo">
+                <img src="<?= base_url('/assets/images/provinsi.png') ?>" alt="Logo Provinsi" height="64px">
             </div>
         </div>
+    </div>
 
     <!-- Header -->
-    <div class="header">
-        <h1>Laporan Absensi Pembelajaran</h1>
-        <strong>Tanggal:</strong> <?= date('d F Y', strtotime($tanggal)); ?>
-        <?php if ($kelasId): ?>
-            <br><strong>Kelas:</strong> <?= esc($kelasList[$kelasId] ?? '-'); ?>
-        <?php else: ?>
-            <br><strong>Semua Kelas</strong>
-        <?php endif; ?>
-    </div>
+    <!-- <div class="header">
+    </div> -->
+    <h1>Laporan Absensi Pembelajaran</h1>
+    <strong>Tanggal:</strong> <?= date('d F Y', strtotime($tanggal)); ?>
+    <?php if ($kelasId): ?>
+        <br><strong>Kelas:</strong> <?= esc($kelasList[$kelasId] ?? '-'); ?>
+    <?php else: ?>
+        <br><strong>Semua Kelas</strong>
+    <?php endif; ?>
 
     <!-- Summary Section -->
     <div class="summary-section">
@@ -484,9 +488,9 @@
                             <?= $hariData['hari']; ?>, <?= date('d F Y', strtotime($hariData['tanggal'])); ?>
                         </td>
                     </tr>
-                    
+
                     <?php foreach ($hariData['jadwal_list'] as $jadwal): ?>
-                        <?php 
+                        <?php
                         $belumIsi = empty($jadwal['absensi_id']);
                         $rowClass = $belumIsi ? 'belum-isi' : '';
                         ?>
@@ -497,7 +501,7 @@
                             <td><?= esc($jadwal['nama_guru']); ?></td>
                             <td><?= esc($jadwal['nama_mapel']); ?></td>
                             <td><?= esc($jadwal['nama_wali_kelas'] ?? '-'); ?></td>
-                            
+
                             <?php if ($belumIsi): ?>
                                 <td class="center" colspan="4">
                                     <span class="badge-belum">BELUM ISI</span>
@@ -523,7 +527,7 @@
                         </tr>
                     <?php endforeach; ?>
                 <?php endforeach; ?>
-                
+
                 <!-- Total Row -->
                 <tr style="background-color: #e5e7eb; font-weight: bold;">
                     <td colspan="6" class="right" style="padding-right: 5px;">TOTAL</td>
@@ -595,4 +599,5 @@
         // }
     </script>
 </body>
+
 </html>
