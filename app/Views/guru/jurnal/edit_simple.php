@@ -470,6 +470,14 @@
             }
             
             try {
+                console.log('[JURNAL EDIT] Submitting form...');
+                console.log('[JURNAL EDIT] FormData entries:', Array.from(formData.entries()).map(([k, v]) => {
+                    if (v instanceof Blob) {
+                        return [k, `Blob(${v.size} bytes, ${v.type})`];
+                    }
+                    return [k, v];
+                }));
+                
                 const response = await fetch(e.target.action, {
                     method: 'POST',  // Still POST, but with _method=PUT for Laravel/CI4 spoofing
                     body: formData,
@@ -478,29 +486,52 @@
                     }
                 });
                 
+                console.log('[JURNAL EDIT] Response status:', response.status);
+                console.log('[JURNAL EDIT] Response ok:', response.ok);
+                console.log('[JURNAL EDIT] Response redirected:', response.redirected);
+                
                 // Check response
                 if (response.ok || response.redirected) {
+                    console.log('[JURNAL EDIT] Success! Redirecting...');
                     // Success - redirect to jurnal list
                     window.location.href = '<?= base_url('guru/jurnal') ?>';
                 } else {
                     // Try to get error message
-                    const text = await response.text();
-                    console.error('Server response:', text);
+                    const contentType = response.headers.get('content-type');
+                    let errorMessage = 'Terjadi kesalahan saat menyimpan jurnal.';
+                    
+                    if (contentType && contentType.includes('application/json')) {
+                        const json = await response.json();
+                        console.error('[JURNAL EDIT] JSON response:', json);
+                        errorMessage = json.message || json.error || errorMessage;
+                    } else {
+                        const text = await response.text();
+                        console.error('[JURNAL EDIT] HTML response:', text.substring(0, 500));
+                        
+                        // Try to extract error from HTML
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(text, 'text/html');
+                        const errorDiv = doc.querySelector('.alert-danger, .error-message');
+                        if (errorDiv) {
+                            errorMessage = errorDiv.textContent.trim();
+                        }
+                    }
                     
                     // Restore button
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = originalBtnText;
                     
-                    alert('Terjadi kesalahan saat menyimpan jurnal. Silakan coba lagi.');
+                    alert(errorMessage + '\n\nSilakan periksa console browser (F12) untuk detail error.');
                 }
             } catch (error) {
-                console.error('Error:', error);
+                console.error('[JURNAL EDIT] Exception:', error);
+                console.error('[JURNAL EDIT] Stack:', error.stack);
                 
                 // Restore button
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalBtnText;
                 
-                alert('Terjadi kesalahan jaringan. Pastikan koneksi internet Anda stabil dan coba lagi.');
+                alert('Terjadi kesalahan jaringan: ' + error.message + '\n\nPastikan koneksi internet Anda stabil dan coba lagi.');
             }
         }
     });
