@@ -482,12 +482,13 @@
                 <th style="width: 95px;">Nama Guru<br>Mapel</th>
                 <th style="width: 85px;">Mata<br>Pelajaran</th>
                 <!-- <th style="width: 85px;">Nama<br>Wali Kelas</th> -->
-                <th style="width: 24px;">Hadir</th>
-                <th style="width: 24px;">Sakit</th>
-                <th style="width: 24px;">Izin</th>
-                <th style="width: 24px;">Alpa</th>
-                <th style="width: 85px;">Catatan<br>Khusus</th>
-                <th style="width: 60px;">Foto</th>
+                <!-- <th style="width: 45px;">Nama<br>Wali Kelas</th> -->
+                <th style="width: 28px;">Hadir</th>
+                <th style="width: 28px;">Sakit</th>
+                <th style="width: 28px;">Izin</th>
+                <th style="width: 28px;">Alpa</th>
+                <th style="width: 90px;">Catatan<br>Khusus</th>
+                <th style="width: 85px;">Foto</th>
                 <th style="width: 85px;">Guru Piket<br>Pengganti</th>
             </tr>
         </thead>
