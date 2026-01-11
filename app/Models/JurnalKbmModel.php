@@ -76,6 +76,7 @@ class JurnalKbmModel extends Model
                                 jadwal_mengajar.jam_mulai,
                                 jadwal_mengajar.jam_selesai,
                                 guru.nama_lengkap as nama_guru,
+                                guru.nip,
                                 mata_pelajaran.nama_mapel,
                                 kelas.nama_kelas')
             ->join('absensi', 'absensi.id = jurnal_kbm.absensi_id')
