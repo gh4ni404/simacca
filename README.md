@@ -178,22 +178,8 @@ Untuk informasi lebih detail tentang fitur dan development:
 - **[TODO.md](TODO.md)** - Task list pengembangan dan bug tracking
 - **[CodeIgniter 4 User Guide](https://codeigniter.com/user_guide/)** - Dokumentasi framework
 
-### Feature-Specific Documentation 🆕 (2026-01-12)
-- **[GURU_PENGGANTI_FEATURE.md](GURU_PENGGANTI_FEATURE.md)** - Guru Pengganti feature overview & usage
-- **[SUBSTITUTE_TEACHER_MODE_FIX.md](SUBSTITUTE_TEACHER_MODE_FIX.md)** - Technical implementation details
-- **[SUBSTITUTE_MODE_ACCESS_FIX.md](SUBSTITUTE_MODE_ACCESS_FIX.md)** - Access validation fixes
-- **[JURNAL_SUBSTITUTE_ACCESS_FIX.md](JURNAL_SUBSTITUTE_ACCESS_FIX.md)** - Jurnal KBM integration
-- **[ABSENSI_LIST_AND_ACCESS_FIX.md](ABSENSI_LIST_AND_ACCESS_FIX.md)** - List display & access control
-- **[DATABASE_MIGRATION_GURU_PENGGANTI.md](DATABASE_MIGRATION_GURU_PENGGANTI.md)** - Migration guide
-- **[QUICK_DEPLOYMENT_GUIDE.md](QUICK_DEPLOYMENT_GUIDE.md)** - 5-minute deployment checklist
-
-### Security & Fixes Documentation
-- **[SECURITY_FIXES_REPORT.md](SECURITY_FIXES_REPORT.md)** - Comprehensive security improvements
-- **[CSRF_FIX.md](CSRF_FIX.md)** - CSRF protection implementation
-- **[SESSION_KEY_FIXES.md](SESSION_KEY_FIXES.md)** - Session security fixes
-- **[SESSION_LOGOUT_FIX.md](SESSION_LOGOUT_FIX.md)** - Logout mechanism fixes
-- **[REDIRECT_LOOP_FIX.md](REDIRECT_LOOP_FIX.md)** - Authentication redirect fixes
-- **[ERROR_MESSAGES_IMPROVEMENT_REPORT.md](ERROR_MESSAGES_IMPROVEMENT_REPORT.md)** - Error handling
+### Technical Notes
+All detailed technical documentation has been archived. Key information about recent updates and fixes can be found in the **Recent Updates & Fixes** section of FEATURES.md.
 
 ## 🚀 Quick Start
 

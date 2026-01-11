@@ -4,8 +4,41 @@
 **Framework:** CodeIgniter 4.6.4  
 **Database:** MySQL  
 **Styling:** Tailwind CSS  
-**Version:** 1.0.0  
-**Last Updated:** 2026-01-11
+**Version:** 1.1.0  
+**Last Updated:** 2026-01-12
+
+---
+
+## 📋 Recent Updates & Fixes
+
+### 🆕 Guru Pengganti/Piket System (2026-01-12)
+**Status:** ✅ Complete
+
+**Key Features:**
+- Mode Selection UI: Toggle antara "Jadwal Saya Sendiri" dan "Guru Pengganti"
+- Auto-detect substitute teacher mode berdasarkan guru_id jadwal
+- Dual ownership access control: `hasAccess = (created_by == user) OR (jadwal.guru_id == teacher)`
+- Full integration: Absensi, Jurnal KBM, dan Admin Reports
+
+**Database Changes:**
+- Field: `guru_pengganti_id` (INT, NULLABLE, FK to guru.id)
+- Migration: `2026-01-11-183700_AddGuruPenggantiToAbsensi.php`
+- Enhanced queries dengan groupStart/groupEnd untuk OR conditions
+
+**Files Modified:** 5 controllers/models, 5 views
+
+### 🔒 Security Enhancements (2026-01-12)
+- ✅ CSRF Protection across all forms
+- ✅ Session security fixes (key handling, logout mechanism)
+- ✅ Fixed authentication redirect loops
+- ✅ XSS protection improvements
+- ✅ Error message sanitization
+
+### 🐛 Bug Fixes (2026-01-12)
+- ✅ Guru pengganti access issues in CRUD operations
+- ✅ Absensi list display with dual ownership
+- ✅ Jurnal KBM access for substitute teachers
+- ✅ Edit/Delete access for original teachers
 
 ---
 
