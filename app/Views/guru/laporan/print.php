@@ -6,8 +6,8 @@
     <title>Laporan Absensi - <?= esc($namaKelas) ?></title>
     <style>
         @page {
-            size: A4 landscape;
-            margin: 1.5cm;
+            size: A4 portrait;
+            margin: 2cm 1.5cm;
         }
 
         * {
@@ -18,8 +18,8 @@
 
         body {
             font-family: 'Times New Roman', Times, serif;
-            font-size: 11pt;
-            line-height: 1.4;
+            font-size: 10pt;
+            line-height: 1.3;
             color: #000;
         }
 
@@ -93,14 +93,14 @@
         }
 
         .title h3 {
-            font-size: 14pt;
+            font-size: 12pt;
             font-weight: bold;
             text-decoration: underline;
             margin-bottom: 5px;
         }
 
         .title p {
-            font-size: 11pt;
+            font-size: 10pt;
             font-style: italic;
         }
 
@@ -156,7 +156,7 @@
         }
 
         .stat-cell.value {
-            font-size: 16pt;
+            font-size: 12pt;
             font-weight: bold;
         }
 
@@ -164,7 +164,7 @@
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
+            margin: 15px 0;
             page-break-inside: auto;
         }
 
@@ -175,18 +175,18 @@
         .data-table th,
         .data-table td {
             border: 1px solid #000;
-            padding: 6px 8px;
+            padding: 4px 6px;
             text-align: center;
             vertical-align: middle;
         }
 
         .data-table th {
             font-weight: bold;
-            font-size: 10pt;
+            font-size: 9pt;
         }
 
         .data-table td {
-            font-size: 10pt;
+            font-size: 9pt;
         }
 
         .data-table td.left {
@@ -208,7 +208,7 @@
 
         /* Signature Section */
         .signature-section {
-            margin-top: 30px;
+            margin-top: 20px;
             display: table;
             width: 100%;
             page-break-inside: avoid;
@@ -218,16 +218,17 @@
             display: table-cell;
             width: 50%;
             text-align: center;
-            padding: 10px;
+            padding: 5px;
         }
 
         .signature-box p {
-            margin: 5px 0;
+            margin: 3px 0;
+            font-size: 10pt;
         }
 
         .signature-space {
-            height: 60px;
-            margin: 10px 0;
+            height: 50px;
+            margin: 8px 0;
         }
 
         .signature-name {
@@ -255,17 +256,17 @@
         }
 
         .notes h4 {
-            font-size: 11pt;
+            font-size: 10pt;
             margin-bottom: 5px;
         }
 
         .notes ul {
-            margin-left: 20px;
+            margin-left: 15px;
         }
 
         .notes li {
-            font-size: 10pt;
-            margin: 3px 0;
+            font-size: 9pt;
+            margin: 2px 0;
         }
 
         /* Print Styles */
@@ -400,17 +401,17 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th rowspan="2" style="width: 30px;">NO</th>
-                    <th rowspan="2" style="width: 80px;">NIS</th>
-                    <th rowspan="2" style="width: 200px;">NAMA SISWA</th>
+                    <th rowspan="2" style="width: 5%;">NO</th>
+                    <th rowspan="2" style="width: 15%;">NIS</th>
+                    <th rowspan="2" style="width: 30%;">NAMA SISWA</th>
                     <th colspan="4">JUMLAH</th>
-                    <th rowspan="2" style="width: 80px;">PERSENTASE<br>HADIR (%)</th>
+                    <th rowspan="2" style="width: 10%;">%<br>HADIR</th>
                 </tr>
                 <tr>
-                    <th style="width: 60px;">Hadir</th>
-                    <th style="width: 60px;">Sakit</th>
-                    <th style="width: 60px;">Izin</th>
-                    <th style="width: 60px;">Alpa</th>
+                    <th style="width: 10%;">H</th>
+                    <th style="width: 10%;">S</th>
+                    <th style="width: 10%;">I</th>
+                    <th style="width: 10%;">A</th>
                 </tr>
             </thead>
             <tbody>
