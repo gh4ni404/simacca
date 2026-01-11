@@ -331,6 +331,8 @@
         </div>
     </div>
 
+    <?= print_r($hariData['jadwal_list']); ?>
+
     <!-- Summary Section -->
     <div class="summary-section">
         <div class="summary-box">
@@ -477,12 +479,18 @@
                 <td style="width: 25px;">H</td>
                 <td style="width: 8px;">:</td>
                 <td style="width: 100px;">Hadir</td>
+            </tr>
+            <tr>
                 <td style="width: 25px;">S</td>
                 <td style="width: 8px;">:</td>
                 <td style="width: 100px;">Sakit</td>
+            </tr>
+            <tr>
                 <td style="width: 25px;">I</td>
                 <td style="width: 8px;">:</td>
                 <td style="width: 100px;">Izin</td>
+            </tr>
+            <tr>
                 <td style="width: 25px;">A</td>
                 <td style="width: 8px;">:</td>
                 <td>Alpa (Tanpa Keterangan)</td>
