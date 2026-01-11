@@ -418,8 +418,8 @@
         <strong>Tanggal:</strong> <?= $formatter->format(strtotime($tanggal)); ?>
         <?php if ($kelasId): ?>
             <br><strong>Kelas:</strong> <?= esc($kelasList[$kelasId] ?? '-'); ?>
-        <?php else: ?>
-            <br><strong>Semua Kelas</strong>
+        <?php /**else:*/ ?>
+            <!-- <br><strong>Semua Kelas</strong> -->
         <?php endif; ?>
     </div>
 
