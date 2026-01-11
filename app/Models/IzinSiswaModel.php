@@ -41,9 +41,9 @@ class IzinSiswaModel extends Model
     protected $validationRules      = [
         'siswa_id'      => 'required|numeric',
         'tanggal'       => 'required|valid_date',
-        'jenis_izin'    => 'required|in_list[sakit,izin,lainnya]',
+        'jenis_izin'    => 'required|in_list[Sakit,Izin,sakit,izin]',
         'alasan'        => 'required',
-        'status'        => 'required|in_list[pending, disetujui, ditolak]',
+        'status'        => 'required|in_list[pending,disetujui,ditolak]',
     ];
     protected $validationMessages   = [];
     protected $skipValidation       = false;
