@@ -157,29 +157,29 @@
         }
 
         .jurnal-table .col-no {
-            width: 5%;
+            width: 4%;
             text-align: center;
         }
 
         .jurnal-table .col-tanggal {
-            width: 15%;
+            width: 12%;
         }
 
-        .jurnal-table .col-jenis {
+        .jurnal-table .col-materi {
+            width: 22%;
+        }
+
+        .jurnal-table .col-kegiatan {
+            width: 22%;
+        }
+
+        .jurnal-table .col-foto {
             width: 18%;
-        }
-
-        .jurnal-table .col-deskripsi {
-            width: 32%;
-        }
-
-        .jurnal-table .col-dokumentasi {
-            width: 20%;
             text-align: center;
         }
 
-        .jurnal-table .col-paraf {
-            width: 10%;
+        .jurnal-table .col-catatan {
+            width: 22%;
         }
 
         .jurnal-table td.center {
@@ -189,8 +189,9 @@
         .dokumentasi-img {
             max-width: 100%;
             height: auto;
-            max-height: 100px;
+            max-height: 120px;
             border: 1px solid #ddd;
+            border-radius: 4px;
         }
 
         /* Signature Section */
@@ -351,40 +352,31 @@
             <thead>
                 <tr>
                     <th class="col-no">No</th>
-                    <th class="col-tanggal">Komponen</th>
-                    <th class="col-deskripsi" colspan="2">Deskripsi</th>
+                    <th class="col-tanggal">Tanggal</th>
+                    <th class="col-materi">Materi Pembelajaran</th>
+                    <th class="col-kegiatan">Kegiatan Pembelajaran</th>
+                    <th class="col-foto">Foto</th>
+                    <th class="col-catatan">Catatan Khusus</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td class="center">1</td>
-                    <td><strong>Materi Pembelajaran</strong></td>
-                    <td colspan="2"><?= esc($jurnal['materi_pembelajaran']) ?></td>
-                </tr>
-                <tr>
-                    <td class="center">2</td>
-                    <td><strong>Tujuan Pembelajaran</strong></td>
-                    <td colspan="2"><?= nl2br(esc($jurnal['tujuan_pembelajaran'])) ?></td>
-                </tr>
-                <tr>
-                    <td class="center">3</td>
-                    <td><strong>Kegiatan Pembelajaran</strong></td>
-                    <td colspan="2"><?= nl2br(esc($jurnal['kegiatan_pembelajaran'])) ?></td>
-                </tr>
-                <tr>
-                    <td class="center">4</td>
-                    <td><strong>Media & Alat</strong></td>
-                    <td colspan="2"><?= !empty($jurnal['media_alat']) ? nl2br(esc($jurnal['media_alat'])) : '<em>Tidak ada data</em>' ?></td>
-                </tr>
-                <tr>
-                    <td class="center">5</td>
-                    <td><strong>Penilaian</strong></td>
-                    <td colspan="2"><?= !empty($jurnal['penilaian']) ? nl2br(esc($jurnal['penilaian'])) : '<em>Tidak ada data</em>' ?></td>
-                </tr>
-                <tr>
-                    <td class="center">6</td>
-                    <td><strong>Catatan Khusus</strong></td>
-                    <td colspan="2"><?= !empty($jurnal['catatan_khusus']) ? nl2br(esc($jurnal['catatan_khusus'])) : '<em>Tidak ada catatan khusus</em>' ?></td>
+                    <td><?= date('d/m/Y', strtotime($jurnal['tanggal'])) ?><br>
+                        <small style="color: #666;">Jam: <?= date('H:i', strtotime($jurnal['jam_mulai'])) ?> - <?= date('H:i', strtotime($jurnal['jam_selesai'])) ?></small>
+                    </td>
+                    <td><?= nl2br(esc($jurnal['materi_pembelajaran'])) ?></td>
+                    <td><?= nl2br(esc($jurnal['kegiatan_pembelajaran'])) ?></td>
+                    <td class="center">
+                        <?php if (!empty($jurnal['foto_kegiatan'])): ?>
+                            <img src="<?= base_url('writable/uploads/' . $jurnal['foto_kegiatan']) ?>" 
+                                 alt="Foto Kegiatan" 
+                                 class="dokumentasi-img">
+                        <?php else: ?>
+                            <em style="color: #999; font-size: 9pt;">Tidak ada foto</em>
+                        <?php endif; ?>
+                    </td>
+                    <td><?= !empty($jurnal['catatan_khusus']) ? nl2br(esc($jurnal['catatan_khusus'])) : '<em style="color: #999;">-</em>' ?></td>
                 </tr>
             </tbody>
         </table>
