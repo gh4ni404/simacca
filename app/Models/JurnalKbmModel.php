@@ -73,6 +73,8 @@ class JurnalKbmModel extends Model
                                 absensi.tanggal,
                                 absensi.pertemuan_ke,
                                 absensi.materi_pembelajaran,
+                                jadwal_mengajar.jam_mulai,
+                                jadwal_mengajar.jam_selesai,
                                 guru.nama_lengkap as nama_guru,
                                 mata_pelajaran.nama_mapel,
                                 kelas.nama_kelas')

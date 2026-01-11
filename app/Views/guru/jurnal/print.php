@@ -363,13 +363,13 @@
                 <tr>
                     <td class="center">1</td>
                     <td><?= date('d/m/Y', strtotime($jurnal['tanggal'])) ?><br>
-                        <small style="color: #666;">Jam: <?= date('H:i', strtotime($jurnal['jam_mulai'])) ?> - <?= date('H:i', strtotime($jurnal['jam_selesai'])) ?></small>
+                        <small style="color: #666;">Jam: <?= !empty($jurnal['jam_mulai']) ? date('H:i', strtotime($jurnal['jam_mulai'])) : '-' ?> - <?= !empty($jurnal['jam_selesai']) ? date('H:i', strtotime($jurnal['jam_selesai'])) : '-' ?></small>
                     </td>
                     <td><?= nl2br(esc($jurnal['materi_pembelajaran'])) ?></td>
                     <td><?= nl2br(esc($jurnal['kegiatan_pembelajaran'])) ?></td>
                     <td class="center">
-                        <?php if (!empty($jurnal['foto_kegiatan'])): ?>
-                            <img src="<?= base_url('writable/uploads/' . $jurnal['foto_kegiatan']) ?>" 
+                        <?php if (!empty($jurnal['foto_dokumentasi'])): ?>
+                            <img src="<?= base_url('writable/uploads/jurnal/' . $jurnal['foto_dokumentasi']) ?>" 
                                  alt="Foto Kegiatan" 
                                  class="dokumentasi-img">
                         <?php else: ?>
