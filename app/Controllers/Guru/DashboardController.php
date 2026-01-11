@@ -32,11 +32,8 @@ class DashboardController extends BaseController
         $this->kelasModel = new KelasModel();
         $this->mapelModel = new MataPelajaranModel();
         $this->session = session();
-
-        // Check if user is logged in and has guru role
-        if (!$this->session->get('isLoggedIn') || $this->session->get('role') != 'guru_mapel') {
-            return redirect()->to('/login');
-        }
+        
+        // Note: Auth check removed - handled by AuthFilter and RoleFilter
     }
 
     /**
@@ -324,10 +321,7 @@ class DashboardController extends BaseController
      */
     public function quickAction()
     {
-        if (!$this->session->get('isLoggedIn') || $this->session->get('role') != 'guru_mapel') {
-            return redirect()->to('/login');
-        }
-
+        // Note: Auth check handled by filters
         $action = $this->request->getPost('action');
         $userId = $this->session->get('user_id');
         $guru = $this->guruModel->getByUserId($userId);

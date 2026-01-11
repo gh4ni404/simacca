@@ -40,10 +40,7 @@ class AbsensiController extends BaseController
      */
     public function index()
     {
-        // Check if user is logged in and has guru role
-        if (!$this->session->get('isLoggedIn') || $this->session->get('role') != 'guru_mapel') {
-            return redirect()->to('/login');
-        }
+        // Note: Auth check handled by AuthFilter and RoleFilter
 
         $userId = $this->session->get('userId');
         $guru = $this->guruModel->getByUserId($userId);
@@ -87,10 +84,7 @@ class AbsensiController extends BaseController
      */
     public function create()
     {
-        // Check if user is logged in and has guru role
-        if (!$this->session->get('isLoggedIn') || $this->session->get('role') != 'guru_mapel') {
-            return redirect()->to('/login');
-        }
+        // Note: Auth check handled by AuthFilter and RoleFilter
 
         $userId = $this->session->get('userId');
         $guru = $this->guruModel->getByUserId($userId);
@@ -157,10 +151,7 @@ class AbsensiController extends BaseController
      */
     public function store()
     {
-        // Check if user is logged in and has guru role
-        if (!$this->session->get('isLoggedIn') || $this->session->get('role') != 'guru_mapel') {
-            return redirect()->to('/login');
-        }
+        // Note: Auth check handled by AuthFilter and RoleFilter
 
         $userId = $this->session->get('userId');
         $guru = $this->guruModel->getByUserId($userId);
@@ -265,10 +256,7 @@ class AbsensiController extends BaseController
      */
     public function show($id)
     {
-        // Check if user is logged in and has guru role
-        if (!$this->session->get('isLoggedIn') || $this->session->get('role') != 'guru_mapel') {
-            return redirect()->to('/login');
-        }
+        // Note: Auth check handled by AuthFilter and RoleFilter
 
         $userId = $this->session->get('userId');
         $guru = $this->guruModel->getByUserId($userId);
@@ -316,10 +304,7 @@ class AbsensiController extends BaseController
      */
     public function edit($id)
     {
-        // Check if user is logged in and has guru role
-        if (!$this->session->get('isLoggedIn') || $this->session->get('role') != 'guru_mapel') {
-            return redirect()->to('/login');
-        }
+        // Note: Auth check handled by AuthFilter and RoleFilter
 
         $userId = $this->session->get('userId');
         $guru = $this->guruModel->getByUserId($userId);
@@ -382,10 +367,7 @@ class AbsensiController extends BaseController
      */
     public function update($id)
     {
-        // Check if user is logged in and has guru role
-        if (!$this->session->get('isLoggedIn') || $this->session->get('role') != 'guru_mapel') {
-            return redirect()->to('/login');
-        }
+        // Note: Auth check handled by AuthFilter and RoleFilter
 
         $userId = $this->session->get('userId');
         $guru = $this->guruModel->getByUserId($userId);
@@ -486,10 +468,7 @@ class AbsensiController extends BaseController
      */
     public function delete($id)
     {
-        // Check if user is logged in and has guru role
-        if (!$this->session->get('isLoggedIn') || $this->session->get('role') != 'guru_mapel') {
-            return redirect()->to('/login');
-        }
+        // Note: Auth check handled by AuthFilter and RoleFilter
 
         $userId = $this->session->get('userId');
         $guru = $this->guruModel->getByUserId($userId);
@@ -597,10 +576,7 @@ class AbsensiController extends BaseController
      */
     public function print($id)
     {
-        // Check if user is logged in and has guru role
-        if (!$this->session->get('isLoggedIn') || $this->session->get('role') != 'guru_mapel') {
-            return redirect()->to('/login');
-        }
+        // Note: Auth check handled by AuthFilter and RoleFilter
 
         $userId = $this->session->get('userId');
         $guru = $this->guruModel->getByUserId($userId);
@@ -783,3 +759,4 @@ class AbsensiController extends BaseController
         return $statistics;
     }
 }
+
