@@ -331,7 +331,7 @@
         </div>
     </div>
 
-    <?= print_r($hariData['jadwal_list']); ?>
+    <?= print_r($laporanPerHari); ?>
 
     <!-- Summary Section -->
     <div class="summary-section">
