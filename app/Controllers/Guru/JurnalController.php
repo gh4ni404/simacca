@@ -84,60 +84,99 @@ class JurnalController extends BaseController
             'absensi' => $absensi
         ];
 
-        return view('guru/jurnal/create', $data);
+        return view('guru/jurnal/create_simple', $data);
     }
 
     public function store()
     {
+        helper('security');
+        
         // Validasi input
         $rules = [
             'absensi_id' => 'required|numeric',
-            'tujuan_pembelajaran' => 'required',
             'kegiatan_pembelajaran' => 'required',
-            'media_alat' => 'permit_empty|string',
-            'penilaian' => 'permit_empty|string',
-            'catatan_khusus' => 'permit_empty|string'
+            'foto_dokumentasi' => 'permit_empty|uploaded[foto_dokumentasi]|max_size[foto_dokumentasi,5120]|is_image[foto_dokumentasi]'
         ];
 
         if (!$this->validate($rules)) {
-            return $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Validasi gagal',
-                'errors' => $this->validator->getErrors()
-            ]);
+            session()->setFlashdata('error', 'Validasi gagal: ' . implode(', ', $this->validator->getErrors()));
+            return redirect()->back()->withInput();
         }
 
         // Cek apakah sudah ada jurnal untuk absensi ini
         $absensiId = $this->request->getPost('absensi_id');
         if ($this->jurnalModel->isJurnalExist($absensiId)) {
-            return $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Jurnal untuk absensi ini sudah dibuat'
-            ]);
+            session()->setFlashdata('error', 'Jurnal untuk absensi ini sudah dibuat');
+            return redirect()->to('/guru/jurnal');
+        }
+
+        // Handle foto dokumentasi upload
+        $fotoName = null;
+        $file = $this->request->getFile('foto_dokumentasi');
+        
+        if ($file && $file->isValid() && !$file->hasMoved()) {
+            // Validate file with security helper
+            $allowedTypes = [
+                'image/jpeg',
+                'image/jpg', 
+                'image/png',
+                'image/gif'
+            ];
+            
+            $validation = validate_file_upload($file, $allowedTypes, 5242880); // 5MB
+            
+            if (!$validation['valid']) {
+                session()->setFlashdata('error', $validation['error']);
+                return redirect()->back()->withInput();
+            }
+            
+            // Generate unique filename
+            $fotoName = 'jurnal_' . time() . '_' . uniqid() . '.' . $file->getExtension();
+            
+            // Move file to uploads directory
+            try {
+                $file->move(WRITEPATH . 'uploads/jurnal', $fotoName);
+            } catch (\Exception $e) {
+                log_message('error', 'Failed to upload jurnal foto: ' . $e->getMessage());
+                session()->setFlashdata('error', 'Gagal mengupload foto dokumentasi');
+                return redirect()->back()->withInput();
+            }
         }
 
         // Insert jurnal
         $data = [
             'absensi_id' => $absensiId,
-            'tujuan_pembelajaran' => $this->request->getPost('tujuan_pembelajaran'),
+            'tujuan_pembelajaran' => $this->request->getPost('tujuan_pembelajaran') ?? '-',
             'kegiatan_pembelajaran' => $this->request->getPost('kegiatan_pembelajaran'),
-            'media_alat' => $this->request->getPost('media_ajar'),
-            'penilaian' => $this->request->getPost('penilaian'),
-            'catatan_khusus' => $this->request->getPost('catatan_khusus'),
+            'media_alat' => $this->request->getPost('media_ajar') ?? '-',
+            'penilaian' => $this->request->getPost('penilaian') ?? '-',
+            'catatan_khusus' => $this->request->getPost('catatan_khusus') ?? '-',
+            'foto_dokumentasi' => $fotoName,
             'created_at' => date('Y-m-d H:i:s')
         ];
 
-        if ($this->jurnalModel->insert($data)) {
-            return $this->response->setJSON([
-                'status' => 'success',
-                'message' => 'Jurnal KBM berhasil disimpan'
-            ]);
-        } else {
-            return $this->response->setJSON([
-                'status' => 'error',
-                'message' => 'Gagal menyimpan jurnal KBM',
-                'errors' => $this->jurnalModel->errors()
-            ]);
+        try {
+            if ($this->jurnalModel->insert($data)) {
+                session()->setFlashdata('success', 'Jurnal KBM berhasil disimpan');
+                return redirect()->to('/guru/jurnal');
+            } else {
+                // Delete uploaded file if database insert fails
+                if ($fotoName && file_exists(WRITEPATH . 'uploads/jurnal/' . $fotoName)) {
+                    unlink(WRITEPATH . 'uploads/jurnal/' . $fotoName);
+                }
+                
+                session()->setFlashdata('error', 'Gagal menyimpan jurnal KBM');
+                return redirect()->back()->withInput();
+            }
+        } catch (\Exception $e) {
+            // Delete uploaded file if error occurs
+            if ($fotoName && file_exists(WRITEPATH . 'uploads/jurnal/' . $fotoName)) {
+                unlink(WRITEPATH . 'uploads/jurnal/' . $fotoName);
+            }
+            
+            $safeMessage = safe_error_message($e, 'Gagal menyimpan jurnal KBM');
+            session()->setFlashdata('error', $safeMessage);
+            return redirect()->back()->withInput();
         }
     }
 

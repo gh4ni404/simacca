@@ -19,6 +19,7 @@ class JurnalKbmModel extends Model
         'media_alat',
         'penilaian',
         'catatan_khusus',
+        'foto_dokumentasi',
         'created_at'
     ];
 
@@ -38,7 +39,6 @@ class JurnalKbmModel extends Model
     // Validation
     protected $validationRules      = [
         'absensi_id'                => 'required|numeric|is_unique[jurnal_kbm.absensi_id]',
-        'tujuan_pembelajaran'       => 'required',
         'kegiatan_pembelajaran'     => 'required',
     ];
     protected $validationMessages   = [];

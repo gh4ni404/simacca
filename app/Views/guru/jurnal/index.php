@@ -194,7 +194,8 @@
                                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Tanggal</th>
                                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Mata Pelajaran</th>
                                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Kelas</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Tujuan Pembelajaran</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Materi Pembelajaran</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Foto</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Aksi</th>
                             </tr>
                         </thead>
@@ -232,8 +233,20 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm text-gray-700 max-w-md line-clamp-2">
-                                        <?= esc(substr($j['tujuan_pembelajaran'], 0, 100)) ?><?= strlen($j['tujuan_pembelajaran']) > 100 ? '...' : '' ?>
+                                        <?= esc(substr($j['kegiatan_pembelajaran'], 0, 100)) ?><?= strlen($j['kegiatan_pembelajaran']) > 100 ? '...' : '' ?>
                                     </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <?php if (!empty($j['foto_dokumentasi'])): ?>
+                                        <img src="<?= base_url('writable/uploads/jurnal/' . $j['foto_dokumentasi']) ?>" 
+                                             alt="Foto Dokumentasi" 
+                                             class="w-16 h-16 object-cover rounded-lg mx-auto cursor-pointer hover:scale-110 transition-transform"
+                                             onclick="showImageModal('<?= base_url('writable/uploads/jurnal/' . $j['foto_dokumentasi']) ?>')">
+                                    <?php else: ?>
+                                        <span class="text-gray-400 text-xs">
+                                            <i class="fas fa-image"></i><br>Tidak ada foto
+                                        </span>
+                                    <?php endif; ?>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
                                     <div class="flex items-center justify-center gap-2">
@@ -368,6 +381,21 @@ document.addEventListener('DOMContentLoaded', function() {
         }, index * 50);
     });
 });
+
+    // Image Modal
+    function showImageModal(imageUrl) {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
+        modal.onclick = () => modal.remove();
+        
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        img.className = 'max-w-full max-h-full rounded-lg shadow-2xl';
+        img.onclick = (e) => e.stopPropagation();
+        
+        modal.appendChild(img);
+        document.body.appendChild(modal);
+    }
 </script>
 
 <?= $this->endSection() ?>
