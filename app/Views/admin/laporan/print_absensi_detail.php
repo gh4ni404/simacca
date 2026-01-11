@@ -407,7 +407,7 @@
             'id_ID',
             IntlDateFormatter::FULL,
             IntlDateFormatter::NONE,
-            'appTimezone',
+            'Asia/Makassar',
             IntlDateFormatter::GREGORIAN,
             'EEEE, d MMMM y'
         );
