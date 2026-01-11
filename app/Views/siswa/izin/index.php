@@ -233,12 +233,9 @@
                                     <span class="block mt-1 ml-4 bg-blue-50 p-2 rounded"><?= esc($izin['catatan']); ?></span>
                                 </p>
                                 <?php endif; ?>
-                                <?php if (!empty($izin['approved_by'])): ?>
+                                <?php if (!empty($izin['disetujui_oleh'])): ?>
                                 <p class="text-xs text-gray-500 mt-2">
                                     Diproses oleh: <?= esc($izin['approved_by_username']); ?>
-                                    <?php if (!empty($izin['approved_at'])): ?>
-                                        pada <?= date('d M Y H:i', strtotime($izin['approved_at'])); ?>
-                                    <?php endif; ?>
                                 </p>
                                 <?php endif; ?>
                             </div>

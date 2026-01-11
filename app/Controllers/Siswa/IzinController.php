@@ -33,9 +33,9 @@ class IzinController extends BaseController
         // Get izin data
         $builder = $this->izinSiswaModel
             ->select('izin_siswa.*, users.username as approved_by_username')
-            ->join('users', 'users.id = izin_siswa.approved_by', 'left')
+            ->join('users', 'users.id = izin_siswa.disetujui_oleh', 'left')
             ->where('izin_siswa.siswa_id', $siswa['id'])
-            ->orderBy('izin_siswa.created_at', 'DESC');
+            ->orderBy('izin_siswa.tanggal', 'DESC');
 
         if ($status) {
             $builder->where('izin_siswa.status', $status);
