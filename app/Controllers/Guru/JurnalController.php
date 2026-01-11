@@ -246,6 +246,9 @@ class JurnalController extends BaseController
     {
         helper('security');
         
+        log_message('info', '[JURNAL UPDATE] Started - ID: ' . $jurnalId);
+        log_message('info', '[JURNAL UPDATE] POST data: ' . json_encode($this->request->getPost()));
+        
         // Validasi input - only validate text fields first
         $rules = [
             'kegiatan_pembelajaran' => 'required',
@@ -253,16 +256,23 @@ class JurnalController extends BaseController
         ];
 
         if (!$this->validate($rules)) {
-            session()->setFlashdata('error', 'Validasi gagal: ' . implode(', ', $this->validator->getErrors()));
+            $errors = $this->validator->getErrors();
+            log_message('error', '[JURNAL UPDATE] Validation failed: ' . json_encode($errors));
+            session()->setFlashdata('error', 'Validasi gagal: ' . implode(', ', $errors));
             return redirect()->back()->withInput();
         }
+
+        log_message('info', '[JURNAL UPDATE] Validation passed');
 
         // Cek apakah jurnal ada
         $jurnal = $this->jurnalModel->find($jurnalId);
         if (!$jurnal) {
+            log_message('error', '[JURNAL UPDATE] Jurnal not found: ' . $jurnalId);
             session()->setFlashdata('error', 'Data jurnal tidak ditemukan');
             return redirect()->to('/guru/jurnal');
         }
+
+        log_message('info', '[JURNAL UPDATE] Jurnal found: ' . json_encode($jurnal));
 
         // Prepare update data
         $data = [
@@ -270,13 +280,17 @@ class JurnalController extends BaseController
             'catatan_khusus' => $this->request->getPost('catatan_khusus') ?: '-',
         ];
 
+        log_message('info', '[JURNAL UPDATE] Prepared data: ' . json_encode($data));
+
         // Handle foto deletion
         $removeFoto = $this->request->getPost('remove_foto');
         if ($removeFoto == '1' && !empty($jurnal['foto_dokumentasi'])) {
+            log_message('info', '[JURNAL UPDATE] Removing foto: ' . $jurnal['foto_dokumentasi']);
             // Delete old photo file
             $oldPhotoPath = WRITEPATH . 'uploads/jurnal/' . $jurnal['foto_dokumentasi'];
             if (file_exists($oldPhotoPath)) {
                 unlink($oldPhotoPath);
+                log_message('info', '[JURNAL UPDATE] Old foto deleted');
             }
             $data['foto_dokumentasi'] = null;
         }
@@ -284,9 +298,14 @@ class JurnalController extends BaseController
         // Handle foto upload/replace
         $file = $this->request->getFile('foto_dokumentasi');
         
+        log_message('info', '[JURNAL UPDATE] File check - isValid: ' . ($file && $file->isValid() ? 'yes' : 'no'));
+        
         if ($file && $file->isValid() && !$file->hasMoved()) {
+            log_message('info', '[JURNAL UPDATE] Processing file upload - Name: ' . $file->getName() . ', Size: ' . $file->getSize() . ', Type: ' . $file->getMimeType());
+            
             // Additional validation for file size and type
             if ($file->getSize() > 5242880) {
+                log_message('error', '[JURNAL UPDATE] File too large: ' . $file->getSize());
                 session()->setFlashdata('error', 'Ukuran file terlalu besar. Maksimal 5MB');
                 return redirect()->back()->withInput();
             }
@@ -302,52 +321,80 @@ class JurnalController extends BaseController
             $validation = validate_file_upload($file, $allowedTypes, 5242880); // 5MB
             
             if (!$validation['valid']) {
+                log_message('error', '[JURNAL UPDATE] File validation failed: ' . $validation['error']);
                 session()->setFlashdata('error', $validation['error']);
                 return redirect()->back()->withInput();
             }
+            
+            log_message('info', '[JURNAL UPDATE] File validation passed');
             
             // Delete old photo if exists
             if (!empty($jurnal['foto_dokumentasi'])) {
                 $oldPhotoPath = WRITEPATH . 'uploads/jurnal/' . $jurnal['foto_dokumentasi'];
                 if (file_exists($oldPhotoPath)) {
                     unlink($oldPhotoPath);
+                    log_message('info', '[JURNAL UPDATE] Old foto replaced: ' . $jurnal['foto_dokumentasi']);
                 }
             }
             
             // Generate unique filename
             $fotoName = 'jurnal_' . time() . '_' . uniqid() . '.' . $file->getExtension();
             
+            log_message('info', '[JURNAL UPDATE] Generated filename: ' . $fotoName);
+            
             // Move file to uploads directory
             try {
                 $file->move(WRITEPATH . 'uploads/jurnal', $fotoName);
                 $data['foto_dokumentasi'] = $fotoName;
                 
-                log_message('info', 'Jurnal foto uploaded successfully: ' . $fotoName);
+                log_message('info', '[JURNAL UPDATE] Foto uploaded successfully: ' . $fotoName);
             } catch (\Exception $e) {
-                log_message('error', 'Failed to upload jurnal foto: ' . $e->getMessage());
+                log_message('error', '[JURNAL UPDATE] Failed to upload foto: ' . $e->getMessage());
+                log_message('error', '[JURNAL UPDATE] Stack trace: ' . $e->getTraceAsString());
                 session()->setFlashdata('error', 'Gagal mengupload foto dokumentasi: ' . $e->getMessage());
                 return redirect()->back()->withInput();
             }
+        } else {
+            if ($file) {
+                $error = $file->getErrorString() . ' (' . $file->getError() . ')';
+                log_message('info', '[JURNAL UPDATE] File not valid or already moved: ' . $error);
+            }
         }
+
+        log_message('info', '[JURNAL UPDATE] Final data for update: ' . json_encode($data));
 
         // Update jurnal
         try {
-            if ($this->jurnalModel->update($jurnalId, $data)) {
+            $updateResult = $this->jurnalModel->update($jurnalId, $data);
+            log_message('info', '[JURNAL UPDATE] Update result: ' . ($updateResult ? 'success' : 'failed'));
+            
+            if ($updateResult) {
+                log_message('info', '[JURNAL UPDATE] Jurnal updated successfully');
                 session()->setFlashdata('success', 'Jurnal KBM berhasil diperbarui');
                 return redirect()->to('/guru/jurnal');
             } else {
+                // Get model errors
+                $modelErrors = $this->jurnalModel->errors();
+                log_message('error', '[JURNAL UPDATE] Model update failed: ' . json_encode($modelErrors));
+                
                 // Rollback: delete uploaded file if database update fails
                 if (isset($fotoName) && file_exists(WRITEPATH . 'uploads/jurnal/' . $fotoName)) {
                     unlink(WRITEPATH . 'uploads/jurnal/' . $fotoName);
+                    log_message('info', '[JURNAL UPDATE] Rolled back foto upload');
                 }
                 
-                session()->setFlashdata('error', 'Gagal memperbarui jurnal KBM');
+                $errorMsg = !empty($modelErrors) ? implode(', ', $modelErrors) : 'Unknown error';
+                session()->setFlashdata('error', 'Gagal memperbarui jurnal KBM: ' . $errorMsg);
                 return redirect()->back()->withInput();
             }
         } catch (\Exception $e) {
+            log_message('error', '[JURNAL UPDATE] Exception occurred: ' . $e->getMessage());
+            log_message('error', '[JURNAL UPDATE] Stack trace: ' . $e->getTraceAsString());
+            
             // Rollback: delete uploaded file if error occurs
             if (isset($fotoName) && file_exists(WRITEPATH . 'uploads/jurnal/' . $fotoName)) {
                 unlink(WRITEPATH . 'uploads/jurnal/' . $fotoName);
+                log_message('info', '[JURNAL UPDATE] Rolled back foto upload after exception');
             }
             
             $safeMessage = safe_error_message($e, 'Gagal memperbarui jurnal KBM');
