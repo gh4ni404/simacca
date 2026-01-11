@@ -292,18 +292,10 @@
         <div class="header">
             <div class="header-content">
                 <div class="logo">
-                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <!-- Logo Provinsi Sulawesi Selatan -->
-                        <circle cx="50" cy="50" r="48" fill="none" stroke="#000" stroke-width="1.5"/>
-                        <circle cx="50" cy="50" r="45" fill="#FFD700"/>
-                        <circle cx="50" cy="50" r="40" fill="none" stroke="#000" stroke-width="1"/>
-                        <path d="M 50 20 L 55 35 L 70 35 L 58 45 L 63 60 L 50 50 L 37 60 L 42 45 L 30 35 L 45 35 Z" fill="#8B4513"/>
-                        <circle cx="50" cy="50" r="8" fill="#8B4513"/>
-                        <text x="50" y="80" font-size="10" font-weight="bold" text-anchor="middle" fill="#000">SULSEL</text>
-                    </svg>
+                    <img src="<?= base_url('/assets/images/sekolah.png') ?>" alt="Logo Sekolah" sizes="32"/>
                 </div>
                 <div class="header-text">
-                    <h1>PEMERINTAH PROVINSI SULAWESI SELATAN</h1>
+                    <h1>PEMERINTAH PROPINSI SULAWESI SELATAN</h1>
                     <h2>DINAS PENDIDIKAN</h2>
                     <h3>CABANG DINAS PENDIDIKAN WILAYAH III</h3>
                     <h2>UPT SMKN 8 BONE</h2>
@@ -311,16 +303,7 @@
                     <p><em>Email : smkn8bone@gmail.com</em></p>
                 </div>
                 <div class="logo">
-                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <!-- Logo Kabupaten Bone -->
-                        <circle cx="50" cy="50" r="48" fill="none" stroke="#000" stroke-width="1.5"/>
-                        <circle cx="50" cy="50" r="45" fill="#DC143C"/>
-                        <circle cx="50" cy="50" r="40" fill="none" stroke="#FFD700" stroke-width="1.5"/>
-                        <rect x="38" y="42" width="24" height="20" fill="#FFD700" stroke="#000" stroke-width="0.5"/>
-                        <polygon points="50,28 38,42 62,42" fill="#FFD700" stroke="#000" stroke-width="0.5"/>
-                        <rect x="48" y="50" width="4" height="8" fill="#8B4513"/>
-                        <text x="50" y="82" font-size="9" font-weight="bold" text-anchor="middle" fill="#FFD700">BONE</text>
-                    </svg>
+                    <img src="<?= base_url('/assets/images/provinsi.png') ?>" alt="Logo Provinsi" sizes="32">
                 </div>
             </div>
         </div>
