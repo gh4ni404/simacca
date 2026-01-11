@@ -6,12 +6,12 @@
     <div class="mb-6 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
-                <h1 class="text-2xl font-bold"><?= get_greeting(); ?>, <?= session()->get('nama_lengkap'); ?>!</h1>
+                <h1 class="text-2xl font-bold">Selamat Datang, <?= esc($guru['nama_lengkap'] ?? session()->get('username')); ?>!</h1>
                 <p id="greetingDate" class="mt-1 text-sm opacity-80"><?= date('l, d F Y'); ?></p>
                 <div class="flex items-center mt-2">
                     <div class="flex items-center mt-1 text-sm opacity-80">
                         <i class="fas fa-chalkboard-teacher mr-2"></i>
-                        <?= isset($mapel['nama_mapel']) ? $mapel['nama_mapel'] : 'Mata Pelajaran belum diatur' ?>
+                        <?= isset($guru['nama_mapel']) && $guru['nama_mapel'] ? esc($guru['nama_mapel']) : 'Mata Pelajaran belum diatur' ?>
                     </div>
                     <div class="mx-4 opacity-80">|</div>
                     <div class="flex items-center text-sm opacity-80">

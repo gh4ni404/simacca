@@ -108,10 +108,10 @@ class IzinSiswaModel extends Model
      */
     public function getByStatus($status)
     {
-        return $this->where('status', $status)
+        return $this->select('izin_siswa.*, siswa.nama_lengkap, siswa.nis')
             ->join('siswa', 'siswa.id = izin_siswa.siswa_id')
-            ->select('izin_siswa.*, siswea.nama_lengkap, siswa.nis')
-            ->orderBy('tanggal', 'DESC')
+            ->where('izin_siswa.status', $status)
+            ->orderBy('izin_siswa.tanggal', 'DESC')
             ->findAll();
     }
 

@@ -44,7 +44,7 @@ class DashboardController extends BaseController
      */
     public function index()
     {
-        $userId = $this->session->get('userId');
+        $userId = $this->session->get('user_id');
 
         // Get guru data
         $guru = $this->guruModel->getByUserId($userId);
@@ -90,7 +90,7 @@ class DashboardController extends BaseController
 
         // Get absensi bulan ini
         $absensiBulanIni = $this->absensiModel->select('COUNT(DISTINCT tanggal) as total_hari, COUNT(*) as total_pertemuan')
-            ->where('created_by', $this->session->get('userId'))
+            ->where('created_by', $this->session->get('user_id'))
             ->where('MONTH(tanggal)', $currentMonth)
             ->where('YEAR(tanggal)', $currentYear)
             ->first();
@@ -114,7 +114,7 @@ class DashboardController extends BaseController
             'absensi_bulan_ini' => $absensiBulanIni['total_pertemuan'] ?? 0,
             'jurnal_bulan_ini' => $jurnalBulanIni['total'] ?? 0,
             'total_kelas' => $totalKelas['total'] ?? 0,
-            'absensi_hari_ini' => $this->absensiModel->where('created_by', $this->session->get('userId'))
+            'absensi_hari_ini' => $this->absensiModel->where('created_by', $this->session->get('user_id'))
                 ->where('tanggal', $today)
                 ->countAllResults()
         ];
@@ -329,7 +329,7 @@ class DashboardController extends BaseController
         }
 
         $action = $this->request->getPost('action');
-        $userId = $this->session->get('userId');
+        $userId = $this->session->get('user_id');
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {

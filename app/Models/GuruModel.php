@@ -76,7 +76,11 @@ class GuruModel extends Model
      */
     public function getByUserId($userId)
     {
-        return $this->where('user_id', $userId)->first();
+        return $this->select('guru.*, users.username, users.email, users.is_active, mata_pelajaran.nama_mapel, mata_pelajaran.kode_mapel')
+            ->join('users', 'users.id = guru.user_id', 'left')
+            ->join('mata_pelajaran', 'mata_pelajaran.id = guru.mata_pelajaran_id', 'left')
+            ->where('guru.user_id', $userId)
+            ->first();
     }
 
     /**
