@@ -13,7 +13,7 @@
                         <i class="fas fa-chalkboard-teacher mr-2"></i>
                         <?= isset($guru['nama_mapel']) && $guru['nama_mapel'] ? esc($guru['nama_mapel']) : 'Mata Pelajaran belum diatur' ?>
                     </div>
-                    <div class="mx-4 opacity-80 sm:hidden">|</div>
+                    <div class="mx-4 opacity-80 hidden md:show">|</div>
                     <div class="flex items-center text-sm opacity-80">
                         <i class="fas fa-user-graduate mr-2"></i>
                         <?= $guru['nip'] ?? 'NIP belum diatur'; ?>
