@@ -22,31 +22,48 @@ class IzinController extends BaseController
 
     public function index()
     {
+        log_message('info', '[WALI KELAS IZIN] Index started');
+        
         // Get guru data
         $userId = session()->get('user_id');
         $guru = $this->guruModel->getByUserId($userId);
 
+        log_message('info', '[WALI KELAS IZIN] User ID: ' . $userId);
+        log_message('info', '[WALI KELAS IZIN] Guru found: ' . ($guru ? $guru['id'] : 'none'));
+
         if (!$guru || !$guru['is_wali_kelas']) {
-            return redirect()->to('/access-denied')->with('error', 'Anda bukan wali kelas');
+            log_message('warning', '[WALI KELAS IZIN] Not a wali kelas');
+            session()->setFlashdata('error', '❌ Anda bukan wali kelas');
+            return redirect()->to('/access-denied');
         }
 
         // Get kelas data
         $kelas = $this->kelasModel->getByWaliKelas($guru['id']);
 
+        log_message('info', '[WALI KELAS IZIN] Kelas found: ' . ($kelas ? $kelas['id'] . ' - ' . $kelas['nama_kelas'] : 'none'));
+
         if (!$kelas) {
-            return redirect()->to('/access-denied')->with('error', 'Anda belum ditugaskan sebagai wali kelas');
+            log_message('warning', '[WALI KELAS IZIN] No kelas assigned');
+            session()->setFlashdata('error', '❌ Anda belum ditugaskan sebagai wali kelas');
+            return redirect()->to('/walikelas/dashboard');
         }
 
         // Get filter status
         $status = $this->request->getGet('status') ?? null;
 
+        log_message('info', '[WALI KELAS IZIN] Filter status: ' . ($status ?? 'all'));
+
         // Get izin data
         $izinData = $this->izinSiswaModel->getByKelas($kelas['id'], $status);
+
+        log_message('info', '[WALI KELAS IZIN] Total izin found: ' . count($izinData));
 
         // Count by status
         $countPending = $this->izinSiswaModel->getByKelas($kelas['id'], 'pending');
         $countDisetujui = $this->izinSiswaModel->getByKelas($kelas['id'], 'disetujui');
         $countDitolak = $this->izinSiswaModel->getByKelas($kelas['id'], 'ditolak');
+
+        log_message('info', '[WALI KELAS IZIN] Count - Pending: ' . count($countPending) . ', Disetujui: ' . count($countDisetujui) . ', Ditolak: ' . count($countDitolak));
 
         $data = [
             'title' => 'Persetujuan Izin Siswa',
@@ -64,41 +81,49 @@ class IzinController extends BaseController
 
     public function approve($id)
     {
+        log_message('info', '[WALI KELAS IZIN] Approve started - ID: ' . $id);
+        
         $userId = session()->get('user_id');
         $catatan = $this->request->getPost('catatan');
 
         $result = $this->izinSiswaModel->approveIzin($id, $userId, $catatan);
 
         if ($result) {
+            log_message('info', '[WALI KELAS IZIN] Approve successful');
             return $this->response->setJSON([
                 'status' => 'success',
-                'message' => 'Izin berhasil disetujui'
+                'message' => '✅ Izin berhasil disetujui'
             ]);
         }
 
+        log_message('error', '[WALI KELAS IZIN] Approve failed');
         return $this->response->setJSON([
             'status' => 'error',
-            'message' => 'Gagal menyetujui izin'
+            'message' => '❌ Gagal menyetujui izin'
         ]);
     }
 
     public function reject($id)
     {
+        log_message('info', '[WALI KELAS IZIN] Reject started - ID: ' . $id);
+        
         $userId = session()->get('user_id');
         $catatan = $this->request->getPost('catatan');
 
         $result = $this->izinSiswaModel->rejectIzin($id, $userId, $catatan);
 
         if ($result) {
+            log_message('info', '[WALI KELAS IZIN] Reject successful');
             return $this->response->setJSON([
                 'status' => 'success',
-                'message' => 'Izin berhasil ditolak'
+                'message' => '⚠️ Izin berhasil ditolak'
             ]);
         }
 
+        log_message('error', '[WALI KELAS IZIN] Reject failed');
         return $this->response->setJSON([
             'status' => 'error',
-            'message' => 'Gagal menolak izin'
+            'message' => '❌ Gagal menolak izin'
         ]);
     }
 }
