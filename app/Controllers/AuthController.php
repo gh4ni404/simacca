@@ -120,6 +120,9 @@ class AuthController extends BaseController
                     break;
             }
 
+            // Regenerate session ID to prevent session fixation attacks
+            session()->regenerate();
+            
             // Set session
             session()->set($sessionData);
 

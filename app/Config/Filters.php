@@ -89,7 +89,7 @@ class Filters extends BaseFilters
             'csrf' => [
                 'except' => [
                     'api/*',
-                    'login/process',
+                    // Removed login/process for security - CSRF protection is critical
                     'forgot-password/process',
                     'reset-password/process'
                 ]
@@ -98,7 +98,7 @@ class Filters extends BaseFilters
         ],
         'after' => [
             // 'honeypot',
-            // 'secureheaders',
+            'secureheaders',  // Enable security headers for protection
             'toolbar',
         ],
     ];

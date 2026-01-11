@@ -86,7 +86,8 @@ class AbsensiDetailModel extends Model
             ->orderBy('absensi.tanggal', 'DESC');
 
         if ($startDate && $endDate) {
-            $builder->where("absensi.tanggal BETWEEN '$startDate' AND '$endDate'");
+            $builder->where('absensi.tanggal >=', $startDate);
+            $builder->where('absensi.tanggal <=', $endDate);
         }
 
         return $builder->findAll();
@@ -103,7 +104,8 @@ class AbsensiDetailModel extends Model
             ->groupBy('status');
 
         if ($startDate && $endDate) {
-            $builder->where("absensi.tanggal BETWEEN '$startDate' AND '$endDate'");
+            $builder->where('absensi.tanggal >=', $startDate);
+            $builder->where('absensi.tanggal <=', $endDate);
         }
 
         $result = $builder->findAll();

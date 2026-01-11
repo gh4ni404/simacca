@@ -524,16 +524,19 @@ class GuruController extends BaseController
      */
     public function processImport()
     {
+        helper('security');
         $file = $this->request->getFile('file_excel');
 
-        if (!$file->isValid()) {
-            session()->setFlashdata('error', 'File tidak valid');
-            return redirect()->to('/admin/guru/import');
-        }
-
-        $ext = $file->getExtension();
-        if (!in_array($ext, ['xls', 'xlsx'])) {
-            session()->setFlashdata('error', 'Format file harus Excel (.xls / .xlsx)');
+        // Validate file upload with MIME type checking
+        $allowedTypes = [
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-excel'
+        ];
+        
+        $validation = validate_file_upload($file, $allowedTypes, 5242880); // 5MB limit
+        
+        if (!$validation['valid']) {
+            session()->setFlashdata('error', $validation['error']);
             return redirect()->to('/admin/guru/import');
         }
 
