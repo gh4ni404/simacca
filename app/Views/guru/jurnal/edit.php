@@ -9,32 +9,59 @@
         <li class="breadcrumb-item active">Edit</li>
     </ol>
 
-    <div class="card mb-4">
-        <div class="card-header">
-            <i class="fas fa-edit me-1"></i>
-            Form Edit Jurnal KBM
-        </div>
-        <div class="card-body">
-            <!-- Info Absensi -->
-            <div class="alert alert-info mb-4">
-                <h5 class="alert-heading"><i class="fas fa-info-circle me-1"></i> Informasi Absensi</h5>
-                <hr>
-                <div class="row">
-                    <div class="col-md-6">
-                        <p class="mb-1"><strong>Tanggal:</strong> <?= date('d/m/Y', strtotime($jurnal['tanggal'])) ?></p>
-                        <p class="mb-1"><strong>Mata Pelajaran:</strong> <?= $jurnal['nama_mapel'] ?></p>
-                        <p class="mb-1"><strong>Kelas:</strong> <?= $jurnal['nama_kelas'] ?></p>
-                    </div>
-                    <div class="col-md-6">
-                        <p class="mb-1"><strong>Pertemuan Ke:</strong> <?= $jurnal['pertemuan_ke'] ?></p>
-                        <p class="mb-1"><strong>Materi:</strong> <?= $jurnal['materi_pembelajaran'] ?></p>
+    <!-- Info Absensi Card -->
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+            <i class="fas fa-info-circle mr-2 text-blue-600"></i>
+            Informasi Absensi Terkait
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-2">
+                <div class="flex items-center text-sm">
+                    <i class="fas fa-calendar-alt w-6 text-blue-600"></i>
+                    <span class="text-gray-600">Tanggal:</span>
+                    <span class="ml-2 font-semibold text-gray-800"><?= date('d/m/Y', strtotime($jurnal['tanggal'])) ?></span>
+                </div>
+                <div class="flex items-center text-sm">
+                    <i class="fas fa-book w-6 text-blue-600"></i>
+                    <span class="text-gray-600">Mata Pelajaran:</span>
+                    <span class="ml-2 font-semibold text-gray-800"><?= esc($jurnal['nama_mapel']) ?></span>
+                </div>
+                <div class="flex items-center text-sm">
+                    <i class="fas fa-users w-6 text-blue-600"></i>
+                    <span class="text-gray-600">Kelas:</span>
+                    <span class="ml-2 font-semibold text-gray-800"><?= esc($jurnal['nama_kelas']) ?></span>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <div class="flex items-center text-sm">
+                    <i class="fas fa-list-ol w-6 text-blue-600"></i>
+                    <span class="text-gray-600">Pertemuan Ke:</span>
+                    <span class="ml-2 font-semibold text-gray-800"><?= $jurnal['pertemuan_ke'] ?></span>
+                </div>
+                <div class="flex items-start text-sm">
+                    <i class="fas fa-book-open w-6 text-blue-600 mt-1"></i>
+                    <div class="flex-1">
+                        <span class="text-gray-600">Materi:</span>
+                        <p class="font-semibold text-gray-800"><?= esc($jurnal['materi_pembelajaran']) ?></p>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
+    <!-- Form Card -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="p-4 border-b border-gray-200 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-t-lg">
+            <h2 class="text-lg font-semibold flex items-center">
+                <i class="fas fa-edit mr-2"></i>
+                Edit Form Jurnal KBM
+            </h2>
+        </div>
+        <div class="p-6">
             <form id="formJurnal">
                 <?= csrf_field() ?>
-                <div class="mb-3">
+                <div class="mb-6">
                     <label for="tujuan_pembelajaran" class="form-label">Tujuan Pembelajaran <span class="text-danger">*</span></label>
                     <textarea class="form-control" id="tujuan_pembelajaran" name="tujuan_pembelajaran" rows="4" required><?= $jurnal['tujuan_pembelajaran'] ?></textarea>
                     <div class="invalid-feedback"></div>
