@@ -227,7 +227,7 @@
         /* Footer */
         .footer {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 80px;
             font-size: 9pt;
             color: #666;
             border-top: 1px solid #ddd;
