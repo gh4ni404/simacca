@@ -331,8 +331,6 @@
         </div>
     </div>
 
-    <?= print_r($laporanPerHari); ?>
-
     <!-- Summary Section -->
     <div class="summary-section">
         <div class="summary-box">
@@ -421,7 +419,7 @@
                         <tr class="<?= $rowClass; ?>">
                             <td class="center"><?= $globalNo++; ?></td>
                             <td class="center"><?= esc($jadwal['nama_kelas']); ?></td>
-                            <td class="center"><?= substr($jadwal['jam_mulai'], 0, 5); ?></td>
+                            <td class="center"><?= substr($jadwal['jam_mulai'], 0, 5); ?> - <?= substr($jadwal['jam_selesai'], 0, 5); ?></td>
                             <td><?= esc($jadwal['nama_guru']); ?></td>
                             <td><?= esc($jadwal['nama_mapel']); ?></td>
                             <td><?= esc($jadwal['nama_wali_kelas'] ?? '-'); ?></td>
