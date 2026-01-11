@@ -353,7 +353,7 @@
                 <tr>
                     <th class="col-no">No</th>
                     <th class="col-tanggal">Tanggal</th>
-                    <th class="col-kegiatan">Kegiatan Pembelajaran</th>
+                    <th class="col-kegiatan">Materi Pembelajaran</th>
                     <th class="col-foto">Foto</th>
                     <th class="col-catatan">Catatan Khusus</th>
                 </tr>
