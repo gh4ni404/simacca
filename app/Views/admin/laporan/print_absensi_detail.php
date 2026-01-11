@@ -402,7 +402,20 @@
     <!-- Header -->
     <div style="text-align: center;">
         <h1>Laporan Absensi Pembelajaran</h1>
-        <strong>Tanggal:</strong> <?= new IntlDateFormatter('id-ID', date('l, d F Y', strtotime($tanggal))); ?>
+        <?php
+        // 1. Buat alat pengaturnya (formatter)
+        $formatter = new IntlDateFormatter(
+            'id_ID',
+            IntlDateFormatter::FULL,
+            IntlDateFormatter::NONE,
+            'Asia/Jakarta',
+            IntlDateFormatter::GREGORIAN,
+            'EEEE, d MMMM y'
+        );
+
+        // 2. Gunakan alat tersebut untuk mencetak tanggal
+        ?>
+        <strong>Tanggal:</strong> <?= $formatter->format(strtotime($tanggal)); ?>
         <?php if ($kelasId): ?>
             <br><strong>Kelas:</strong> <?= esc($kelasList[$kelasId] ?? '-'); ?>
         <?php else: ?>
