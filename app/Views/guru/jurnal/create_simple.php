@@ -165,7 +165,7 @@
         </div>
 
         <!-- Form Card -->
-        <form id="jurnalForm" method="post" action="<?= base_url('guru/jurnal/store') ?>" enctype="multipart/form-data">
+        <form id="jurnalForm" method="post" action="<?= base_url('guru/jurnal/simpan') ?>" enctype="multipart/form-data">
             <?= csrf_field() ?>
             <input type="hidden" name="absensi_id" value="<?= esc($absensi['id']) ?>">
 
