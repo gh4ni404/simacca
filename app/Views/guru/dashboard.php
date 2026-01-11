@@ -8,7 +8,7 @@
             <div>
                 <h1 class="text-2xl font-bold">Selamat Datang, <?= esc($guru['nama_lengkap'] ?? session()->get('username')); ?>!</h1>
                 <p id="greetingDate" class="mt-1 text-sm opacity-80"><?= date('l, d F Y'); ?></p>
-                <div class="grid grid-cols-1 md:grid-cols-3 items-center mt-2">
+                <div class="grid grid-cols-1 md:grid-cols-2 items-center mt-2">
                     <div class="flex items-center mt-1 text-sm opacity-80">
                         <i class="fas fa-chalkboard-teacher mr-2"></i>
                         <?= isset($guru['nama_mapel']) && $guru['nama_mapel'] ? esc($guru['nama_mapel']) : 'Mata Pelajaran belum diatur' ?>
