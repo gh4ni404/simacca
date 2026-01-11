@@ -166,9 +166,12 @@ $routes->group('guru', ['filter' => 'auth'], function ($routes) {
     $routes->post('jurnal/simpan', 'Guru\JurnalController::store', ['filter' => 'role:guru_mapel']);
     $routes->get('jurnal/show/(:num)', 'Guru\JurnalController::show/$1', ['filter' => 'role:guru_mapel']);
     $routes->get('jurnal/print/(:num)', 'Guru\JurnalController::print/$1', ['filter' => 'role:guru_mapel']);
-    $routes->get('jurnal/edit/(:num)', 'Guru\JurnalController::edit/$1', ['filter' => 'role:guru_mapel']);
-    $routes->put('jurnal/update/(:num)', 'Guru\JurnalController::update/$1', ['filter' => 'role:guru_mapel']);
-    $routes->get('laporan', 'Guru\LaporanController::index', ['filter' => 'role:guru_mapel']);
+    $routes->get('jurnal/edit/(:num)', 'Guru\\JurnalController::edit/$1', ['filter' => 'role:guru_mapel']);
+    $routes->put('jurnal/update/(:num)', 'Guru\\JurnalController::update/$1', ['filter' => 'role:guru_mapel']);
+    
+    // Laporan Routes
+    $routes->get('laporan', 'Guru\\LaporanController::index', ['filter' => 'role:guru_mapel']);
+    $routes->get('laporan/print', 'Guru\\LaporanController::print', ['filter' => 'role:guru_mapel']);
 });
 
 // Wali Kelas Routes
