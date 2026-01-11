@@ -5,37 +5,59 @@
 **Styling:** Tailwind CSS
 **Authentication:** Myth/Auth
 
-## Fitur Utama
+## 🎯 Fitur Utama
 
-### 1. Authenticattion & Authorization
-- Multi-role (Admin, Guru Mata Pelajaran, Guru Wali Kelas, Siswa)
-- Login/Logout System
-- Role-based access control
+### 1. 🔐 Authentication & Authorization
+- Multi-role system (Admin, Guru Mata Pelajaran, Guru Wali Kelas, Siswa)
+- Login/Logout System dengan session management
+- Role-based access control menggunakan filters
+- Change password functionality
+- Forgot password (in progress)
 
-### 2. Admin Module
-- Manajemen User (Guru & Siswa)
-- Manajemen Kelas & Mata Pelajaran
-- Monitoring Laporan
-- Backup Database
+### 2. 👤 Admin Module
+- **Dashboard** dengan statistik real-time
+- **Manajemen Guru** - CRUD, Import/Export Excel, Status Active/Inactive
+- **Manajemen Siswa** - CRUD, Import/Export Excel, Bulk Actions
+- **Manajemen Kelas** - CRUD, Assign Wali Kelas, Move Siswa
+- **Manajemen Mata Pelajaran** - CRUD dengan KKM
+- **Manajemen Jadwal** - CRUD dengan conflict detection
+- **Laporan** - Absensi & Statistik
 
-### 3. Guru Module
-- Input Absensi Siswa
-- Input Jurnal Kegiatan Belajar Mengajar (KBM)
-- Monitoring Absensi per Kelas
-- Export Data
+### 3. 👨‍🏫 Guru Mata Pelajaran Module
+- **Dashboard** dengan ringkasan jadwal & statistik
+- **Jadwal Mengajar** - Lihat jadwal per hari/minggu
+- **Input Absensi** - CRUD dengan materi pembelajaran
+- **Jurnal KBM** - Pencatatan kegiatan belajar mengajar
+- **Laporan** - Rekapitulasi absensi & export
+- **Print Absensi** - Print ready format
 
-### 4. Siswa Module
-- Lihat Riwayat Absensi
-- Cetak Laporan Absensi
-- Profil Pribadi
+### 4. 👨‍👩‍👧‍👦 Wali Kelas Module ✅ COMPLETE
+- **Dashboard** - Statistik kelas dengan visual analytics
+- **Data Siswa** - Monitoring siswa dengan kehadiran bulan ini
+- **Absensi** - Monitor kehadiran kelas dengan filter periode
+- **Persetujuan Izin** - Approve/Reject izin siswa dengan catatan
+- **Laporan** - Laporan kehadiran lengkap (rekapitulasi & per siswa)
 
-## Struktur Database
-- `users` - Tabel multi-role
-- `kelas` - Data Kelas
-- `mapel` - Mata Pelajaran
-- `absensi_siswa` - Data Absensi Siswa (TABSIS)
-- `jurnal_guru` -  Data Jurnal KBM (TABJURNAL)
-- `jadwal` - Jadwal Pelajaran
+### 5. 🎓 Siswa Module
+- **Dashboard** - Info personal & jadwal (in progress)
+- **Jadwal Pelajaran** - Lihat jadwal harian/mingguan
+- **Riwayat Absensi** - Track kehadiran pribadi
+- **Pengajuan Izin** - Submit izin tidak hadir
+- **Profil** - Update data personal
+
+## 🗄️ Struktur Database
+- `users` - Data user multi-role dengan authentication
+- `guru` - Data guru (NIP, nama, kontak)
+- `siswa` - Data siswa (NIS, NISN, nama, kontak)
+- `kelas` - Data kelas dengan wali kelas
+- `mata_pelajaran` - Data mata pelajaran dengan KKM
+- `jadwal_mengajar` - Jadwal mengajar (guru, kelas, mapel, waktu)
+- `absensi` - Header absensi (tanggal, pertemuan, materi)
+- `absensi_detail` - Detail absensi per siswa (H/S/I/A)
+- `jurnal_kbm` - Jurnal Kegiatan Belajar Mengajar
+- `izin_siswa` - Data izin siswa dengan approval workflow
+
+📝 **Lihat detail lengkap di:** [FEATURES.md](FEATURES.md)
 
 ## Instalasi
 1. Clone Repository:
@@ -136,7 +158,117 @@ Additionally, make sure that the following extensions are enabled in your PHP:
 - [libcurl](http://php.net/manual/en/curl.requirements.php) if you plan to use the HTTP\CURLRequest library
 
 
-# Tim Pengembang
-- [Mohd. Abdul Ghani]
-- [Dirwan Jaya]
+## 📚 Dokumentasi
+
+Untuk informasi lebih detail tentang fitur dan development:
+
+- **[FEATURES.md](FEATURES.md)** - Daftar lengkap fitur sistem dengan detail setiap modul
+- **[TODO.md](TODO.md)** - Task list pengembangan dan bug tracking
+- **[CodeIgniter 4 User Guide](https://codeigniter.com/user_guide/)** - Dokumentasi framework
+
+## 🚀 Quick Start
+
+### Default Login Credentials
+
+Setelah menjalankan seeder, gunakan kredensial berikut:
+
+**Admin:**
+- Username: `admin`
+- Password: `password` (atau cek di AdminSeeder)
+
+**Guru/Siswa:**
+- Lihat data dummy di DummyDataSeeder
+
+### Access URLs
+
+Setelah server berjalan (`php spark serve`), akses:
+
+- **Login Page:** `http://localhost:8080/login`
+- **Admin Dashboard:** `http://localhost:8080/admin/dashboard`
+- **Guru Dashboard:** `http://localhost:8080/guru/dashboard`
+- **Wali Kelas Dashboard:** `http://localhost:8080/walikelas/dashboard`
+- **Siswa Dashboard:** `http://localhost:8080/siswa/dashboard`
+
+## 📊 Status Pengembangan
+
+| Module | Status | Progress |
+|--------|--------|----------|
+| Authentication | ✅ Complete | 100% |
+| Admin Module | ✅ Complete | 100% |
+| Guru Mapel Module | ✅ Complete | 100% |
+| Wali Kelas Module | ✅ Complete | 100% |
+| Siswa Module | ⚠️ Partial | 50% (Controllers only) |
+| Profile Module | ⚠️ Partial | 30% |
+| Notification System | 📋 Planned | 0% |
+| Mobile API | 📋 Planned | 0% |
+
+**Legend:**
+- ✅ Complete - Fully functional
+- ⚠️ Partial - Controller exists, views needed
+- 📋 Planned - Not yet started
+
+## 🤝 Contributing
+
+Jika ingin berkontribusi pada project ini:
+
+1. Fork repository
+2. Create feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👥 Tim Pengembang
+
+- **Mohd. Abdul Ghani** - Lead Developer
+- **Dirwan Jaya** - Developer
+
+---
+
+## 🆘 Troubleshooting
+
+### Common Issues
+
+**Database Connection Error:**
+```bash
+# Check .env configuration
+database.default.hostname = localhost
+database.default.database = simacca_db
+database.default.username = your_username
+database.default.password = your_password
+```
+
+**Migration Error:**
+```bash
+# Reset migrations
+php spark migrate:rollback
+php spark migrate
+```
+
+**Permission Error (writable folder):**
+```bash
+# Linux/Mac
+chmod -R 777 writable/
+# Windows - Check folder permissions manually
+```
+
+**Composer Dependencies:**
+```bash
+composer update
+composer dump-autoload
+```
+
+## 📞 Support
+
+Untuk pertanyaan atau issue, silakan:
+- Open issue di GitHub repository
+- Contact: [Email/WhatsApp jika ada]
+
+---
+
+**Version:** 1.0.0  
+**Last Updated:** 2026-01-11
  
