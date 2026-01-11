@@ -30,6 +30,12 @@
 - **Jurnal KBM** - Pencatatan kegiatan belajar mengajar
 - **Laporan** - Rekapitulasi absensi & export
 - **Print Absensi** - Print ready format
+- **🆕 Guru Pengganti/Piket** ✅ NEW (2026-01-12)
+  - Mode selection untuk input absensi (Normal vs Pengganti)
+  - Lihat semua jadwal di mode pengganti
+  - Auto-detect dan record guru pengganti
+  - Dual ownership access control (creator & schedule owner)
+  - Integrated dengan jurnal KBM dan laporan admin
 
 ### 4. 👨‍👩‍👧‍👦 Wali Kelas Module ✅ COMPLETE
 - **Dashboard** - Statistik kelas dengan visual analytics
@@ -52,10 +58,15 @@
 - `kelas` - Data kelas dengan wali kelas
 - `mata_pelajaran` - Data mata pelajaran dengan KKM
 - `jadwal_mengajar` - Jadwal mengajar (guru, kelas, mapel, waktu)
-- `absensi` - Header absensi (tanggal, pertemuan, materi)
+- `absensi` - Header absensi (tanggal, pertemuan, materi, **guru_pengganti_id** 🆕)
 - `absensi_detail` - Detail absensi per siswa (H/S/I/A)
 - `jurnal_kbm` - Jurnal Kegiatan Belajar Mengajar
 - `izin_siswa` - Data izin siswa dengan approval workflow
+
+**🆕 Database Enhancements (2026-01-12):**
+- Field `guru_pengganti_id` di tabel `absensi` untuk record guru pengganti
+- Foreign key constraint dengan ON DELETE SET NULL
+- Enhanced queries dengan dual ownership logic (OR conditions)
 
 📝 **Lihat detail lengkap di:** [FEATURES.md](FEATURES.md)
 
@@ -162,9 +173,27 @@ Additionally, make sure that the following extensions are enabled in your PHP:
 
 Untuk informasi lebih detail tentang fitur dan development:
 
+### General Documentation
 - **[FEATURES.md](FEATURES.md)** - Daftar lengkap fitur sistem dengan detail setiap modul
 - **[TODO.md](TODO.md)** - Task list pengembangan dan bug tracking
 - **[CodeIgniter 4 User Guide](https://codeigniter.com/user_guide/)** - Dokumentasi framework
+
+### Feature-Specific Documentation 🆕 (2026-01-12)
+- **[GURU_PENGGANTI_FEATURE.md](GURU_PENGGANTI_FEATURE.md)** - Guru Pengganti feature overview & usage
+- **[SUBSTITUTE_TEACHER_MODE_FIX.md](SUBSTITUTE_TEACHER_MODE_FIX.md)** - Technical implementation details
+- **[SUBSTITUTE_MODE_ACCESS_FIX.md](SUBSTITUTE_MODE_ACCESS_FIX.md)** - Access validation fixes
+- **[JURNAL_SUBSTITUTE_ACCESS_FIX.md](JURNAL_SUBSTITUTE_ACCESS_FIX.md)** - Jurnal KBM integration
+- **[ABSENSI_LIST_AND_ACCESS_FIX.md](ABSENSI_LIST_AND_ACCESS_FIX.md)** - List display & access control
+- **[DATABASE_MIGRATION_GURU_PENGGANTI.md](DATABASE_MIGRATION_GURU_PENGGANTI.md)** - Migration guide
+- **[QUICK_DEPLOYMENT_GUIDE.md](QUICK_DEPLOYMENT_GUIDE.md)** - 5-minute deployment checklist
+
+### Security & Fixes Documentation
+- **[SECURITY_FIXES_REPORT.md](SECURITY_FIXES_REPORT.md)** - Comprehensive security improvements
+- **[CSRF_FIX.md](CSRF_FIX.md)** - CSRF protection implementation
+- **[SESSION_KEY_FIXES.md](SESSION_KEY_FIXES.md)** - Session security fixes
+- **[SESSION_LOGOUT_FIX.md](SESSION_LOGOUT_FIX.md)** - Logout mechanism fixes
+- **[REDIRECT_LOOP_FIX.md](REDIRECT_LOOP_FIX.md)** - Authentication redirect fixes
+- **[ERROR_MESSAGES_IMPROVEMENT_REPORT.md](ERROR_MESSAGES_IMPROVEMENT_REPORT.md)** - Error handling
 
 ## 🚀 Quick Start
 
@@ -191,21 +220,23 @@ Setelah server berjalan (`php spark serve`), akses:
 
 ## 📊 Status Pengembangan
 
-| Module | Status | Progress |
-|--------|--------|----------|
-| Authentication | ✅ Complete | 100% |
-| Admin Module | ✅ Complete | 100% |
-| Guru Mapel Module | ✅ Complete | 100% |
-| Wali Kelas Module | ✅ Complete | 100% |
-| Siswa Module | ✅ Complete | 100% |
-| Profile Module | ⚠️ Partial | 30% |
-| Notification System | 📋 Planned | 0% |
-| Mobile API | 📋 Planned | 0% |
+| Module | Status | Progress | Last Update |
+|--------|--------|----------|-------------|
+| Authentication | ✅ Complete | 100% | 2026-01-11 |
+| Admin Module | ✅ Complete | 100% | 2026-01-11 |
+| Guru Mapel Module | ✅ Complete | 100% | 2026-01-11 |
+| **Guru Pengganti/Piket** | ✅ Complete | 100% | **2026-01-12** 🆕 |
+| Wali Kelas Module | ✅ Complete | 100% | 2026-01-11 |
+| Siswa Module | ✅ Complete | 100% | 2026-01-11 |
+| Profile Module | ⚠️ Partial | 30% | - |
+| Notification System | 📋 Planned | 0% | - |
+| Mobile API | 📋 Planned | 0% | - |
 
 **Legend:**
-- ✅ Complete - Fully functional
+- ✅ Complete - Fully functional & tested
 - ⚠️ Partial - Controller exists, views needed
 - 📋 Planned - Not yet started
+- 🆕 New - Recently added feature
 
 ## 🤝 Contributing
 
@@ -269,6 +300,35 @@ Untuk pertanyaan atau issue, silakan:
 
 ---
 
-**Version:** 1.0.0  
-**Last Updated:** 2026-01-11
+## 🎉 What's New (January 2026)
+
+### 🆕 Guru Pengganti/Piket System (2026-01-12)
+Sistem lengkap untuk menangani situasi guru pengganti ketika guru utama berhalangan hadir:
+
+**Key Features:**
+- ✅ **Mode Selection UI** - Toggle antara "Jadwal Saya Sendiri" dan "Guru Pengganti"
+- ✅ **Smart Access Control** - Guru pengganti bisa akses jadwal guru lain
+- ✅ **Auto-Detection** - Sistem otomatis detect dan record guru pengganti
+- ✅ **Dual Ownership** - Both creator dan schedule owner bisa manage absensi
+- ✅ **Full Integration** - Terintegrasi dengan absensi, jurnal KBM, dan laporan
+
+**Benefits:**
+- Transparansi penuh siapa guru pengganti di setiap pertemuan
+- Guru asli tetap bisa monitor dan manage absensi yang diinput pengganti
+- Data tercatat lengkap untuk keperluan administrasi dan pelaporan
+
+**Documentation:** 7 comprehensive markdown files dengan flow diagrams dan test scenarios
+
+### 🔒 Security Enhancements
+- ✅ CSRF Protection across all forms
+- ✅ Session security improvements
+- ✅ Proper logout mechanism
+- ✅ Fixed authentication redirect loops
+- ✅ XSS protection improvements
+- ✅ Error message sanitization
+
+---
+
+**Version:** 1.1.0  
+**Last Updated:** 2026-01-12
  
