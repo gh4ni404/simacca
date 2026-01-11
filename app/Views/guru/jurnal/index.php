@@ -61,8 +61,8 @@
                     <h1 class="text-3xl md:text-4xl py-2 font-bold text-gray-800 flex items-center">
                         <span class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                             <i class="fas fa-book-open mr-3"></i>
-                            Jurnal Kegiatan Belajar Mengajar
                         </span>
+                        Jurnal Kegiatan Belajar Mengajar
                     </h1>
                     <p class="text-gray-600 mt-2">Kelola dan pantau jurnal KBM Anda dengan mudah</p>
                 </div>
