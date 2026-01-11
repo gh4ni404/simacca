@@ -294,7 +294,7 @@
                             name="next_action"
                             value="jurnal"
                             class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
-                            <i class="fas fa-book mr-2"></i> Simpan & Buat Jurnal
+                            <i class="fas fa-book mr-2"></i> Lanjut isi dokumentasi
                         </button>
                     </div>
                 </div>
