@@ -388,13 +388,13 @@
         <div class="signature-section">
             <div class="signature-box">
                 <p>Mengetahui,<br>Kepala Sekolah</p>
-                <p class="name">........................................</p>
+                <p class="name">H. Muh. Amin, S.Pd</p>
                 <p class="nip">NIP. ......................................</p>
             </div>
             <div class="signature-box">
                 <p>Guru Mata Pelajaran</p>
                 <p class="name"><?= esc($jurnal['nama_guru']) ?></p>
-                <p class="nip">NIP. ......................................</p>
+                <p class="nip">NIP. <?= esc($jurnal['nip']) ?></p>
             </div>
         </div>
 

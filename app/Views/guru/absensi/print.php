@@ -289,7 +289,7 @@
         <div class="signature-box">
             <p>Mengetahui,<br>Kepala Sekolah</p>
             <div class="name">
-                (....................................)
+                (H. Muh. Amin, S.Pd)
             </div>
             <p style="margin-top: 5px; font-size: 10pt;">NIP. ...................................</p>
         </div>
