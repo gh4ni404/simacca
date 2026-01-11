@@ -33,6 +33,7 @@
             </div>
 
             <form id="formJurnal">
+                <?= csrf_field() ?>
                 <div class="mb-3">
                     <label for="tujuan_pembelajaran" class="form-label">Tujuan Pembelajaran <span class="text-danger">*</span></label>
                     <textarea class="form-control" id="tujuan_pembelajaran" name="tujuan_pembelajaran" rows="4" required><?= $jurnal['tujuan_pembelajaran'] ?></textarea>

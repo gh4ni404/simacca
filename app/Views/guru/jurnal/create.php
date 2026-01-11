@@ -33,6 +33,7 @@
             </div>
 
             <form id="formJurnal">
+                <?= csrf_field() ?>
                 <input type="hidden" name="absensi_id" value="<?= $absensi['id'] ?>">
 
                 <div class="mb-3">
