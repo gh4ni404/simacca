@@ -176,7 +176,7 @@
                                         <?php if (!empty($jadwal['foto_dokumentasi'])): ?>
                                             <img src="<?= base_url('files/jurnal/' . esc($jadwal['foto_dokumentasi'])) ?>"
                                                 alt="Foto"
-                                                class="w-24 h-24 object-cover rounded mx-auto cursor-pointer hover:scale-110 transition-transform"
+                                                class="w-36 h-36 object-cover rounded mx-auto cursor-pointer hover:scale-110 transition-transform"
                                                 onclick="showImageModal('<?= base_url('files/jurnal/' . esc($jadwal['foto_dokumentasi'])) ?>')">
                                         <?php else: ?>
                                             <span class="text-gray-400 text-xs">
