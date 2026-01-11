@@ -111,7 +111,7 @@
 </div>
 
 <!-- Quick Links -->
-<div class="bg-white rounded-xl shadow p-6">
+<div class="bg-white rounded-xl shadow p-6 mb-8">
     <h3 class="text-lg font-semibold text-gray-800 mb-6">Aksi Cepat</h3>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <a href="<?= base_url('admin/guru/tambah'); ?>" class="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100">
