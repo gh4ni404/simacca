@@ -16,7 +16,7 @@
 
 <?= $this->section('content') ?>
 <!-- Welcome Section -->
-<div class="mb-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white">
+<div class="mb-4 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white">
     <div class="flex flex-col md:flex-row justify-between items-center">
         <div>
             <h2 class="text-2xl font-bold"><?= get_greeting(); ?>, <?= session()->get('nama_lengkap'); ?>!</h2>
@@ -38,7 +38,7 @@
 </div>
 
 <!-- Quick Stats -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-4">
     <!-- Total Guru -->
     <a href="<?= base_url('admin/guru'); ?>" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
         <div class="stat-card bg-white rounded-xl shadow p-6 border-l-4 border-blue-500 hover:shadow-lg">
@@ -111,7 +111,7 @@
 </div>
 
 <!-- Quick Links -->
-<div class="bg-white rounded-xl shadow p-6 mb-8">
+<div class="bg-white rounded-xl shadow p-6 mb-4">
     <h3 class="text-lg font-semibold text-gray-800 mb-6">Aksi Cepat</h3>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <a href="<?= base_url('admin/guru/tambah'); ?>" class="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100">
@@ -154,7 +154,7 @@
 </div>
 
 <!-- Chart and Analytics -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
     <!-- Kehadiran 7 Hari terakhir -->
     <div class="bg-white rounded-xl shadow p-6">
         <div class="flex justify-between items-center mb-6">
@@ -189,7 +189,7 @@
 </div>
 
 <!-- Recent Activity -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
     <!-- Absensi terbaru -->
     <div class="bg-white rounded-xl shadow">
         <div class="p-6 border-b border-gray-200">
@@ -272,7 +272,7 @@
 </div>
 
 <!-- Kelas Sumary -->
-<div class="bg-white rounded-xl shadow mb-8">
+<div class="bg-white rounded-xl shadow mb-4">
     <div class="p-6 border-b border-gray-200">
         <div class="flex justify-between items-center">
             <h3 class="text-lg font-semibold text-gray-800">Ringkasan Kelas</h3>
