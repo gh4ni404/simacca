@@ -369,7 +369,7 @@
                     <td><?= nl2br(esc($jurnal['kegiatan_pembelajaran'])) ?></td>
                     <td class="center">
                         <?php if (!empty($jurnal['foto_dokumentasi'])): ?>
-                            <img src="<?= base_url('writable/uploads/jurnal/' . $jurnal['foto_dokumentasi']) ?>" 
+                            <img src="<?= base_url('files/jurnal/' . $jurnal['foto_dokumentasi']) ?>" 
                                  alt="Foto Kegiatan" 
                                  class="dokumentasi-img">
                         <?php else: ?>
