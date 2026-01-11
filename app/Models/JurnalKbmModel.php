@@ -95,7 +95,18 @@ class JurnalKbmModel extends Model
 
     public function getByGuru($guruId, $startDate = null, $endDate = null)
     {
-        $builder = $this->select('jurnal_kbm.*, absensi.tanggal, mata_pelajaran.nama_mapel, kelas.nama_kelas')
+        $builder = $this->select('jurnal_kbm.id,
+                                jurnal_kbm.absensi_id,
+                                jurnal_kbm.tujuan_pembelajaran,
+                                jurnal_kbm.kegiatan_pembelajaran,
+                                jurnal_kbm.media_alat,
+                                jurnal_kbm.penilaian,
+                                jurnal_kbm.catatan_khusus,
+                                jurnal_kbm.foto_dokumentasi,
+                                jurnal_kbm.created_at,
+                                absensi.tanggal,
+                                mata_pelajaran.nama_mapel,
+                                kelas.nama_kelas')
             ->join('absensi', 'absensi.id = jurnal_kbm.absensi_id')
             ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
             ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
@@ -104,7 +115,8 @@ class JurnalKbmModel extends Model
             ->orderBy('absensi.tanggal', 'DESC');
 
         if ($startDate && $endDate) {
-            $builder->where("absensi.tanggal BETWEEN '$startDate' AND '$endDate'");
+            $builder->where('absensi.tanggal >=', $startDate);
+            $builder->where('absensi.tanggal <=', $endDate);
         }
 
         return $builder->findAll();

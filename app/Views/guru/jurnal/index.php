@@ -238,10 +238,10 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
                                     <?php if (!empty($j['foto_dokumentasi'])): ?>
-                                        <img src="<?= base_url('writable/uploads/jurnal/' . $j['foto_dokumentasi']) ?>" 
+                                        <img src="<?= base_url('files/jurnal/' . esc($j['foto_dokumentasi'])) ?>" 
                                              alt="Foto Dokumentasi" 
                                              class="w-16 h-16 object-cover rounded-lg mx-auto cursor-pointer hover:scale-110 transition-transform"
-                                             onclick="showImageModal('<?= base_url('writable/uploads/jurnal/' . $j['foto_dokumentasi']) ?>')">
+                                             onclick="showImageModal('<?= base_url('files/jurnal/' . esc($j['foto_dokumentasi'])) ?>')">
                                     <?php else: ?>
                                         <span class="text-gray-400 text-xs">
                                             <i class="fas fa-image"></i><br>Tidak ada foto

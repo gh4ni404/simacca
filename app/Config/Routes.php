@@ -214,6 +214,9 @@ $routes->group('profile', ['filter' => 'auth'], function ($routes) {
     $routes->post('/update', 'ProfileController::update');
 });
 
+// File Routes (for serving uploaded files)
+$routes->get('files/jurnal/(:segment)', 'FileController::jurnalFoto/$1');
+
 /**
  * -----------------------------------------------------------------
  * Additional Routing
