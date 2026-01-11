@@ -208,12 +208,13 @@
         }
 
         .signature-box p {
-            /* margin-bottom: 60px; */
+            margin-bottom: 60px;
             line-height: 1.3;
         }
 
         .signature-box .name {
             font-weight: bold;
+            margin-bottom: 0;
             border-bottom: 1px solid #000;
             display: inline-block;
             min-width: 180px;
