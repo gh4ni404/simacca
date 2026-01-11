@@ -222,7 +222,7 @@
                                             </span>
                                         </div>
                                     </div>
-                                    <a href="<?= base_url('guru/absensi/detail/' . $absensi['id']); ?>"
+                                    <a href="<?= base_url('guru/absensi/show/' . $absensi['id']); ?>"
                                         class="text-sm text-blue-500 hover:text-blue-700">
                                         <i class="fas fa-eye"></i>
                                     </a>

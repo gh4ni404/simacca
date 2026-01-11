@@ -240,9 +240,9 @@ class AbsensiController extends BaseController
 
             // Ask if want to fill jurnal
             if ($this->request->getPost('next_action') == 'jurnal') {
-                return redirect()->to('/guru/jurnal/tambah?absensi_id=' . $absensiId);
+                return redirect()->to('/guru/jurnal/tambah/' . $absensiId);
             } else {
-                return redirect()->to('/guru/absensi/detail/' . $absensiId);
+                return redirect()->to('/guru/absensi/show/' . $absensiId);
             }
         } catch (\Exception $e) {
             $db->transRollback();
@@ -330,7 +330,7 @@ class AbsensiController extends BaseController
         // Check if absensi is editable (within 24 hours)
         if (!$this->isAbsensiEditable($absensi)) {
             $this->session->setFlashdata('error', 'Absensi ini sudah tidak dapat diedit (lebih dari 24 jam).');
-            return redirect()->to('/guru/absensi/detail/' . $id);
+            return redirect()->to('/guru/absensi/show/' . $id);
         }
 
         // Get absensi details
@@ -392,7 +392,7 @@ class AbsensiController extends BaseController
         // Check if absensi is editable
         if (!$this->isAbsensiEditable($absensi)) {
             $this->session->setFlashdata('error', 'Absensi ini sudah tidak dapat diedit (lebih dari 24 jam).');
-            return redirect()->to('/guru/absensi/detail/' . $id);
+            return redirect()->to('/guru/absensi/show/' . $id);
         }
 
         // Validate input
@@ -455,7 +455,7 @@ class AbsensiController extends BaseController
             }
 
             $this->session->setFlashdata('success', 'Absensi berhasil diperbarui!');
-            return redirect()->to('/guru/absensi/detail/' . $id);
+            return redirect()->to('/guru/absensi/show/' . $id);
         } catch (\Exception $e) {
             $db->transRollback();
             $this->session->setFlashdata('error', $e->getMessage());
@@ -493,7 +493,7 @@ class AbsensiController extends BaseController
         // Check if absensi is editable
         if (!$this->isAbsensiEditable($absensi)) {
             $this->session->setFlashdata('error', 'Absensi ini sudah tidak dapat dihapus (lebih dari 24 jam).');
-            return redirect()->to('/guru/absensi/detail/' . $id);
+            return redirect()->to('/guru/absensi/show/' . $id);
         }
 
         // Delete absensi (cascade will delete absensi_detail)

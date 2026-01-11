@@ -9,7 +9,7 @@
             <li class="text-gray-400">/</li>
             <li><a href="<?= base_url('guru/absensi') ?>" class="text-blue-600 hover:text-blue-800 font-medium">Absensi</a></li>
             <li class="text-gray-400">/</li>
-            <li><a href="<?= base_url('guru/absensi/detail/' . $absensi['id']) ?>" class="text-blue-600 hover:text-blue-800 font-medium">Detail</a></li>
+            <li><a href="<?= base_url('guru/absensi/show/' . $absensi['id']) ?>" class="text-blue-600 hover:text-blue-800 font-medium">Detail</a></li>
             <li class="text-gray-400">/</li>
             <li class="text-gray-600 font-semibold">Edit</li>
         </ol>
@@ -247,7 +247,7 @@
         <!-- Action Buttons -->
         <div class="bg-white rounded-2xl shadow-xl p-6">
             <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <a href="<?= base_url('guru/absensi/detail/' . $absensi['id']) ?>" 
+                <a href="<?= base_url('guru/absensi/show/' . $absensi['id']) ?>" 
                    class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all shadow-sm">
                     <i class="fas fa-arrow-left mr-2"></i> Kembali
                 </a>

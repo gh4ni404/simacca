@@ -294,7 +294,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
                                     <div class="flex justify-center space-x-2">
-                                        <a href="<?= base_url('guru/absensi/detail/' . $item['id']); ?>"
+                                        <a href="<?= base_url('guru/absensi/show/' . $item['id']); ?>"
                                             class="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-all transform hover:scale-110" title="Detail">
                                             <i class="fas fa-eye"></i>
                                         </a>
