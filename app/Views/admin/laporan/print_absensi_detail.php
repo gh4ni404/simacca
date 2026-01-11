@@ -435,7 +435,7 @@
                                 <td class="catatan-cell"><?= esc($jadwal['catatan_khusus'] ?: '-'); ?></td>
                                 <td class="foto-cell">
                                     <?php if (!empty($jadwal['foto_dokumentasi'])): ?>
-                                        <img src="<?= base_url('writable/uploads/jurnal/' . $jadwal['foto_dokumentasi']); ?>" alt="Foto">
+                                        <img src="<?= base_url('files/jurnal/' . $jadwal['foto_dokumentasi']); ?>" alt="Foto">
                                     <?php else: ?>
                                         -
                                     <?php endif; ?>
