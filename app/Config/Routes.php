@@ -129,14 +129,17 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('mata-pelajaran/hapus/(:num)', 'Admin\MataPelajaranController::delete/$1', ['filter' => 'role:admin']);
 
     // Jadwal Management
-    $routes->get('jadwal', 'Admin\JadwalController::index', ['filter' => 'role:admin']);
-    $routes->get('jadwal/tambah', 'Admin\JadwalController::create', ['filter' => 'role:admin']);
-    $routes->post('jadwal/simpan', 'Admin\JadwalController::store', ['filter' => 'role:admin']);
-    $routes->get('jadwal/edit/(:num)', 'Admin\JadwalController::edit/$1', ['filter' => 'role:admin']);
-    $routes->post('jadwal/update/(:num)', 'Admin\JadwalController::update/$1', ['filter' => 'role:admin']);
-    $routes->get('jadwal/hapus/(:num)', 'Admin\JadwalController::delete/$1', ['filter' => 'role:admin']);
-    $routes->post('jadwal/checkConflict', 'Admin\JadwalController::checkConflict', ['filter' => 'role:admin']);
-    $routes->get('jadwal/export', 'Admin\JadwalController::export', ['filter' => 'role:admin']);
+    $routes->get('jadwal', 'Admin\\JadwalController::index', ['filter' => 'role:admin']);
+    $routes->get('jadwal/tambah', 'Admin\\JadwalController::create', ['filter' => 'role:admin']);
+    $routes->post('jadwal/simpan', 'Admin\\JadwalController::store', ['filter' => 'role:admin']);
+    $routes->get('jadwal/edit/(:num)', 'Admin\\JadwalController::edit/$1', ['filter' => 'role:admin']);
+    $routes->post('jadwal/update/(:num)', 'Admin\\JadwalController::update/$1', ['filter' => 'role:admin']);
+    $routes->get('jadwal/hapus/(:num)', 'Admin\\JadwalController::delete/$1', ['filter' => 'role:admin']);
+    $routes->post('jadwal/checkConflict', 'Admin\\JadwalController::checkConflict', ['filter' => 'role:admin']);
+    $routes->get('jadwal/import', 'Admin\\JadwalController::import', ['filter' => 'role:admin']);
+    $routes->post('jadwal/process-import', 'Admin\\JadwalController::processImport', ['filter' => 'role:admin']);
+    $routes->get('jadwal/download-template', 'Admin\\JadwalController::downloadTemplate', ['filter' => 'role:admin']);
+    $routes->get('jadwal/export', 'Admin\\JadwalController::export', ['filter' => 'role:admin']);
 
     // Laporan
     $routes->get('laporan/absensi', 'Admin\LaporanController::absensi', ['filter' => 'role:admin']);

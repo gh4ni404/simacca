@@ -434,4 +434,265 @@ class JadwalController extends BaseController
         $writer->save('php://output');
         exit;
     }
+
+    /**
+     * Show import form
+     */
+    public function import()
+    {
+        if (!$this->session->get('isLoggedIn') || $this->session->get('role') != 'admin') {
+            return redirect()->to('/login');
+        }
+
+        $data = [
+            'title' => 'Import Jadwal Mengajar',
+            'pageTitle' => 'Import Jadwal Mengajar',
+            'pageDescription' => 'Upload file Excel untuk import jadwal mengajar',
+            'user' => $this->getUserData()
+        ];
+
+        return view('admin/jadwal/import', $data);
+    }
+
+    /**
+     * Process import from Excel
+     */
+    public function processImport()
+    {
+        if (!$this->session->get('isLoggedIn') || $this->session->get('role') != 'admin') {
+            return redirect()->to('/login');
+        }
+
+        helper('security');
+        $file = $this->request->getFile('file_excel');
+
+        // Validate file upload
+        $allowedTypes = [
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-excel'
+        ];
+        
+        $validation = validate_file_upload($file, $allowedTypes, 5242880); // 5MB limit
+        
+        if (!$validation['valid']) {
+            $this->session->setFlashdata('error', $validation['error']);
+            return redirect()->to('/admin/jadwal/import');
+        }
+
+        try {
+            // Load spreadsheet
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getTempName());
+            $sheet = $spreadsheet->getActiveSheet();
+            $rows = $sheet->toArray();
+
+            // Skip header row
+            array_shift($rows);
+
+            $successCount = 0;
+            $errorCount = 0;
+            $errors = [];
+            $skipDuplicate = $this->request->getPost('skip_duplicate');
+
+            foreach ($rows as $index => $row) {
+                if (empty($row[0])) continue; // Skip empty rows
+
+                // Start transaction
+                $db = \Config\Database::connect();
+                $db->transStart();
+
+                try {
+                    $hari = trim($row[0]);
+                    $jamMulai = trim($row[1]);
+                    $jamSelesai = trim($row[2]);
+                    $guruId = trim($row[3]);
+                    $mataPelajaranId = trim($row[4]);
+                    $kelasId = trim($row[5]);
+                    $semester = trim($row[6]);
+                    $tahunAjaran = trim($row[7]);
+
+                    // Validate required fields
+                    if (empty($hari) || empty($jamMulai) || empty($jamSelesai) || 
+                        empty($guruId) || empty($mataPelajaranId) || empty($kelasId) ||
+                        empty($semester) || empty($tahunAjaran)) {
+                        throw new \Exception("Data tidak lengkap pada baris " . ($index + 2));
+                    }
+
+                    // Validate hari
+                    $hariValid = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+                    if (!in_array($hari, $hariValid)) {
+                        throw new \Exception("Hari tidak valid: {$hari}");
+                    }
+
+                    // Validate guru exists
+                    $guru = $this->guruModel->find($guruId);
+                    if (!$guru) {
+                        throw new \Exception("Guru ID {$guruId} tidak ditemukan");
+                    }
+
+                    // Validate mata pelajaran exists
+                    $mapel = $this->mapelModel->find($mataPelajaranId);
+                    if (!$mapel) {
+                        throw new \Exception("Mata Pelajaran ID {$mataPelajaranId} tidak ditemukan");
+                    }
+
+                    // Validate kelas exists
+                    $kelas = $this->kelasModel->find($kelasId);
+                    if (!$kelas) {
+                        throw new \Exception("Kelas ID {$kelasId} tidak ditemukan");
+                    }
+
+                    // Check for schedule conflict for teacher
+                    if ($this->jadwalModel->checkConflict($guruId, $hari, $jamMulai, $jamSelesai)) {
+                        if ($skipDuplicate) {
+                            $errorCount++;
+                            $errors[] = "Baris " . ($index + 2) . ": Guru {$guru['nama_lengkap']} sudah memiliki jadwal di waktu yang sama (dilewati)";
+                            continue;
+                        } else {
+                            throw new \Exception("Guru {$guru['nama_lengkap']} sudah memiliki jadwal di waktu yang sama");
+                        }
+                    }
+
+                    // Check for schedule conflict for class
+                    if ($this->jadwalModel->checkKelasConflict($kelasId, $hari, $jamMulai, $jamSelesai)) {
+                        if ($skipDuplicate) {
+                            $errorCount++;
+                            $errors[] = "Baris " . ($index + 2) . ": Kelas {$kelas['nama_kelas']} sudah memiliki jadwal di waktu yang sama (dilewati)";
+                            continue;
+                        } else {
+                            throw new \Exception("Kelas {$kelas['nama_kelas']} sudah memiliki jadwal di waktu yang sama");
+                        }
+                    }
+
+                    // Insert jadwal
+                    $jadwalData = [
+                        'guru_id' => $guruId,
+                        'mata_pelajaran_id' => $mataPelajaranId,
+                        'kelas_id' => $kelasId,
+                        'hari' => $hari,
+                        'jam_mulai' => $jamMulai,
+                        'jam_selesai' => $jamSelesai,
+                        'semester' => $semester,
+                        'tahun_ajaran' => $tahunAjaran
+                    ];
+
+                    $this->jadwalModel->insert($jadwalData);
+
+                    $db->transComplete();
+
+                    if ($db->transStatus() === false) {
+                        throw new \Exception('Gagal menyimpan data');
+                    }
+
+                    $successCount++;
+                } catch (\Exception $e) {
+                    $db->transRollback();
+                    $errorCount++;
+                    $errors[] = "Baris " . ($index + 2) . ": " . $e->getMessage();
+                }
+            }
+
+            $message = "Import selesai. Berhasil: {$successCount}, Gagal: {$errorCount}";
+
+            if (!empty($errors)) {
+                $this->session->setFlashdata('import_errors', $errors);
+            }
+
+            if ($errorCount > 0 && $successCount == 0) {
+                $this->session->setFlashdata('error', $message);
+            } else {
+                $this->session->setFlashdata('success', $message);
+            }
+
+            return redirect()->to('/admin/jadwal');
+        } catch (\Exception $e) {
+            $this->session->setFlashdata('error', 'Error saat memproses file: ' . $e->getMessage());
+            return redirect()->to('/admin/jadwal/import');
+        }
+    }
+
+    /**
+     * Download template Excel for import
+     */
+    public function downloadTemplate()
+    {
+        if (!$this->session->get('isLoggedIn') || $this->session->get('role') != 'admin') {
+            return redirect()->to('/login');
+        }
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Template Import Jadwal');
+
+        // Set headers
+        $headers = [
+            'A1' => 'HARI',
+            'B1' => 'JAM MULAI (HH:MM:SS)',
+            'C1' => 'JAM SELESAI (HH:MM:SS)',
+            'D1' => 'GURU_ID',
+            'E1' => 'MATA_PELAJARAN_ID',
+            'F1' => 'KELAS_ID',
+            'G1' => 'SEMESTER',
+            'H1' => 'TAHUN AJARAN',
+        ];
+
+        foreach ($headers as $cell => $text) {
+            $sheet->setCellValue($cell, $text);
+        }
+
+        // Style header
+        $headerStyle = [
+            'font' => ['bold' => true],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['argb' => 'FFD1E7DD']
+            ]
+        ];
+        $sheet->getStyle('A1:H1')->applyFromArray($headerStyle);
+
+        // Add sample data
+        $sheet->fromArray([
+            ['Senin', '07:00:00', '08:30:00', 1, 1, 1, 'Ganjil', '2023/2024'],
+            ['Senin', '08:30:00', '10:00:00', 2, 2, 1, 'Ganjil', '2023/2024'],
+            ['Selasa', '07:00:00', '08:30:00', 1, 1, 2, 'Ganjil', '2023/2024'],
+        ], null, 'A2');
+
+        // Auto width
+        foreach (range('A', 'H') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Freeze header
+        $sheet->freezePane('A2');
+
+        // Add instructions sheet
+        $instructionSheet = $spreadsheet->createSheet();
+        $instructionSheet->setTitle('Petunjuk');
+        $instructionSheet->setCellValue('A1', 'PETUNJUK IMPORT JADWAL MENGAJAR');
+        $instructionSheet->setCellValue('A3', '1. HARI: Senin, Selasa, Rabu, Kamis, Jumat, Sabtu, Minggu');
+        $instructionSheet->setCellValue('A4', '2. JAM MULAI dan JAM SELESAI: Format HH:MM:SS (contoh: 07:00:00)');
+        $instructionSheet->setCellValue('A5', '3. GURU_ID: ID guru dari database (lihat di menu Guru)');
+        $instructionSheet->setCellValue('A6', '4. MATA_PELAJARAN_ID: ID mata pelajaran dari database (lihat di menu Mata Pelajaran)');
+        $instructionSheet->setCellValue('A7', '5. KELAS_ID: ID kelas dari database (lihat di menu Kelas)');
+        $instructionSheet->setCellValue('A8', '6. SEMESTER: Ganjil atau Genap');
+        $instructionSheet->setCellValue('A9', '7. TAHUN AJARAN: Format YYYY/YYYY (contoh: 2023/2024)');
+        $instructionSheet->setCellValue('A11', 'PENTING:');
+        $instructionSheet->setCellValue('A12', '- Jangan mengubah nama kolom header');
+        $instructionSheet->setCellValue('A13', '- Pastikan format jam benar (HH:MM:SS)');
+        $instructionSheet->setCellValue('A14', '- Pastikan ID guru, mapel, dan kelas sudah ada di database');
+        $instructionSheet->setCellValue('A15', '- Sistem akan mengecek konflik jadwal');
+
+        $instructionSheet->getColumnDimension('A')->setWidth(80);
+
+        // Output
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $filename = 'template-import-jadwal.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+        exit();
+    }
 }

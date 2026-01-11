@@ -9,6 +9,10 @@
             <p class="text-gray-600">Kelola jadwal mengajar guru</p>
         </div>
         <div class="flex space-x-2">
+            <a href="<?= base_url('admin/jadwal/import'); ?>"
+                class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg flex items-center">
+                <i class="fas fa-file-import mr-2"></i> Import
+            </a>
             <a href="<?= base_url('admin/jadwal/export'); ?>"
                 class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center">
                 <i class="fas fa-file-excel mr-2"></i> Export
