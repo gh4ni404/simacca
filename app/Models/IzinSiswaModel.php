@@ -20,8 +20,7 @@ class IzinSiswaModel extends Model
         'berkas',
         'status',
         'disetujui_oleh',
-        'catatan',
-        'created_at',
+        'catatan'
     ];
 
     protected bool $allowEmptyInserts = false;

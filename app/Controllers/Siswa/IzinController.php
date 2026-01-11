@@ -174,8 +174,7 @@ class IzinController extends BaseController
             'jenis_izin' => $this->request->getPost('jenis_izin'),
             'alasan' => $this->request->getPost('alasan'),
             'berkas' => $berkasName,
-            'status' => 'pending',
-            'created_at' => date('Y-m-d H:i:s')
+            'status' => 'pending'
         ];
 
         log_message('info', '[IZIN SISWA] Inserting data: ' . json_encode($data));
