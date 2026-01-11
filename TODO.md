@@ -35,6 +35,13 @@
 - [x] Print Absensi
 - [x] Input Jurnal KBM (CRUD)
 - [x] Laporan
+- [x] **Guru Pengganti/Piket Feature** ✅ BARU (2026-01-12)
+  - [x] Mode Selection UI (Normal vs Pengganti)
+  - [x] Lihat semua jadwal untuk mode pengganti
+  - [x] Input absensi sebagai guru pengganti
+  - [x] Auto-detect dan record guru pengganti
+  - [x] Dual ownership access control
+  - [x] Integrated dengan Jurnal KBM
 
 ### 👨‍👩‍👧‍👦 Wali Kelas Module (Controllers Created)
 - [x] DashboardController
@@ -54,6 +61,8 @@
 - [x] Migrations untuk semua tabel
 - [x] Models untuk semua entitas
 - [x] Seeders (Admin & Dummy Data)
+- [x] Migration untuk field `guru_pengganti_id` ✅ (2026-01-12)
+- [x] Enhanced queries dengan dual ownership logic ✅ (2026-01-12)
 
 ---
 
@@ -139,6 +148,12 @@
 - [ ] View jadwal dalam format kalender
 
 #### 12. Absensi Enhancement
+- [x] **Guru Pengganti/Piket System** ✅ SELESAI (2026-01-12)
+  - Mode selection untuk input absensi normal vs pengganti
+  - Lihat semua jadwal di mode pengganti
+  - Auto-detect dan record guru pengganti
+  - Dual ownership access control (creator & schedule owner)
+  - Integrated dengan jurnal KBM dan laporan
 - [ ] QR Code untuk absensi siswa
 - [ ] Geolocation untuk validasi absensi
 - [ ] Rekap absensi per bulan/semester
@@ -148,11 +163,18 @@
 
 ## 🐛 Bug dan Perbaikan
 
+### Recently Fixed ✅ (2026-01-12)
+- [x] **Guru Pengganti Access Issues** - Fixed mode selection, access control, and list display
+- [x] **Jurnal KBM Access for Substitute Teachers** - Updated validation logic
+- [x] **Absensi List Display** - Added dual ownership query logic
+- [x] **Edit/Delete Access for Original Teachers** - Allow schedule owner to manage substitute's records
+- [x] **CSRF Protection** - Implemented across all forms
+- [x] **Session Security** - Fixed session key handling and logout mechanism
+- [x] **Redirect Loop Issues** - Fixed authentication and role-based redirects
+
 ### Critical
-- [ ] Review all form validations
-- [ ] Add CSRF protection to all forms
-- [ ] Check SQL injection vulnerabilities
-- [ ] Add XSS protection for user inputs
+- [ ] Check SQL injection vulnerabilities (ongoing review)
+- [ ] Add XSS protection for user inputs (ongoing implementation)
 
 ### High Priority
 - [ ] Handle error pages (404, 500, etc.) dengan template yang sesuai
@@ -207,11 +229,26 @@
 
 ## 📚 Dokumentasi
 
+### Recently Created ✅ (2026-01-12)
+- [x] **GURU_PENGGANTI_FEATURE.md** - Feature overview dan usage guide
+- [x] **SUBSTITUTE_TEACHER_MODE_FIX.md** - Technical implementation details
+- [x] **SUBSTITUTE_MODE_ACCESS_FIX.md** - Access validation fix documentation
+- [x] **JURNAL_SUBSTITUTE_ACCESS_FIX.md** - Jurnal KBM access fix
+- [x] **ABSENSI_LIST_AND_ACCESS_FIX.md** - List display and access control fix
+- [x] **DATABASE_MIGRATION_GURU_PENGGANTI.md** - Migration guide with SQL examples
+- [x] **QUICK_DEPLOYMENT_GUIDE.md** - 5-minute deployment checklist
+- [x] **CSRF_FIX.md** - CSRF protection implementation
+- [x] **SESSION_KEY_FIXES.md** - Session security fixes
+- [x] **SESSION_LOGOUT_FIX.md** - Logout mechanism fixes
+- [x] **REDIRECT_LOOP_FIX.md** - Authentication redirect fixes
+- [x] **SECURITY_FIXES_REPORT.md** - Comprehensive security improvements
+- [x] **ERROR_MESSAGES_IMPROVEMENT_REPORT.md** - Error handling enhancements
+
 ### Code Documentation
 - [ ] Add PHPDoc comments untuk semua classes
 - [ ] Document API endpoints (jika ada)
-- [ ] Create database schema documentation
-- [ ] Document deployment process
+- [x] Database schema documentation (via migration docs) ✅
+- [x] Document deployment process (QUICK_DEPLOYMENT_GUIDE.md) ✅
 
 ### User Documentation
 - [ ] Create user manual untuk Admin
@@ -266,4 +303,55 @@
 
 ---
 
-**Last Updated:** 2026-01-11
+**Last Updated:** 2026-01-12
+
+---
+
+## 🎉 Recent Achievements (January 2026)
+
+### Major Feature: Guru Pengganti/Piket System (2026-01-12)
+Implementasi lengkap sistem guru pengganti untuk menangani situasi ketika guru berhalangan hadir:
+
+#### What's New:
+1. **Mode Selection Interface**
+   - Toggle UI untuk memilih "Jadwal Saya Sendiri" atau "Guru Pengganti"
+   - Visual feedback yang jelas dengan icon dan warna berbeda
+   - Dynamic label berdasarkan mode yang dipilih
+
+2. **Smart Backend Logic**
+   - Auto-detect substitute mode berdasarkan guru_id jadwal
+   - Auto-set guru_pengganti_id untuk mode pengganti
+   - Dual ownership access control (creator OR schedule owner)
+   - Enhanced queries dengan groupStart/groupEnd untuk OR conditions
+
+3. **Complete Access Control**
+   - Guru pengganti bisa lihat daftar absensi yang diinput
+   - Guru asli bisa edit/delete absensi dari guru pengganti
+   - Both can create jurnal KBM
+   - Proper validation across all CRUD operations
+
+4. **Integration Points**
+   - Absensi module: show, edit, update, delete, print
+   - Jurnal KBM module: create, edit, show, print
+   - Laporan admin: menampilkan info guru pengganti
+   - Database: field guru_pengganti_id dengan foreign key
+
+#### Files Modified:
+- Controllers: `AbsensiController.php`, `JurnalController.php`
+- Models: `AbsensiModel.php` (enhanced getByGuru method)
+- Views: `create.php`, `edit.php`, `show.php` (absensi & jurnal)
+- Database: Migration file untuk guru_pengganti_id
+
+#### Documentation:
+- 7 comprehensive markdown files created
+- Flow diagrams and test scenarios included
+- Deployment guide with checklist
+- Security considerations documented
+
+### Security Enhancements (Previous Updates)
+- CSRF protection across all forms
+- Session key handling fixes
+- Proper logout mechanism
+- Redirect loop fixes
+- XSS protection improvements
+- Error message sanitization
