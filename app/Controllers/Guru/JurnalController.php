@@ -246,11 +246,10 @@ class JurnalController extends BaseController
     {
         helper('security');
         
-        // Validasi input
+        // Validasi input - only validate text fields first
         $rules = [
             'kegiatan_pembelajaran' => 'required',
-            'catatan_khusus' => 'permit_empty|string',
-            'foto_dokumentasi' => 'permit_empty|uploaded[foto_dokumentasi]|max_size[foto_dokumentasi,5120]|is_image[foto_dokumentasi]'
+            'catatan_khusus' => 'permit_empty|string'
         ];
 
         if (!$this->validate($rules)) {
@@ -286,6 +285,12 @@ class JurnalController extends BaseController
         $file = $this->request->getFile('foto_dokumentasi');
         
         if ($file && $file->isValid() && !$file->hasMoved()) {
+            // Additional validation for file size and type
+            if ($file->getSize() > 5242880) {
+                session()->setFlashdata('error', 'Ukuran file terlalu besar. Maksimal 5MB');
+                return redirect()->back()->withInput();
+            }
+            
             // Validate file with security helper
             $allowedTypes = [
                 'image/jpeg',
@@ -316,9 +321,11 @@ class JurnalController extends BaseController
             try {
                 $file->move(WRITEPATH . 'uploads/jurnal', $fotoName);
                 $data['foto_dokumentasi'] = $fotoName;
+                
+                log_message('info', 'Jurnal foto uploaded successfully: ' . $fotoName);
             } catch (\Exception $e) {
                 log_message('error', 'Failed to upload jurnal foto: ' . $e->getMessage());
-                session()->setFlashdata('error', 'Gagal mengupload foto dokumentasi');
+                session()->setFlashdata('error', 'Gagal mengupload foto dokumentasi: ' . $e->getMessage());
                 return redirect()->back()->withInput();
             }
         }

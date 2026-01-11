@@ -452,24 +452,55 @@
         if (capturedImageBlob) {
             e.preventDefault();
             
+            // Show loading state
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...';
+            
             const formData = new FormData(e.target);
+            
+            // Remove old file input and add captured blob
             formData.delete('foto_dokumentasi');
             formData.append('foto_dokumentasi', capturedImageBlob, 'captured_photo.jpg');
             
+            // Ensure _method and CSRF token are included
+            if (!formData.has('_method')) {
+                formData.append('_method', 'PUT');
+            }
+            
             try {
                 const response = await fetch(e.target.action, {
-                    method: 'POST',
-                    body: formData
+                    method: 'POST',  // Still POST, but with _method=PUT for Laravel/CI4 spoofing
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
                 });
                 
-                if (response.ok) {
+                // Check response
+                if (response.ok || response.redirected) {
+                    // Success - redirect to jurnal list
                     window.location.href = '<?= base_url('guru/jurnal') ?>';
                 } else {
-                    alert('Terjadi kesalahan saat menyimpan jurnal');
+                    // Try to get error message
+                    const text = await response.text();
+                    console.error('Server response:', text);
+                    
+                    // Restore button
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnText;
+                    
+                    alert('Terjadi kesalahan saat menyimpan jurnal. Silakan coba lagi.');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Terjadi kesalahan saat menyimpan jurnal');
+                
+                // Restore button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+                
+                alert('Terjadi kesalahan jaringan. Pastikan koneksi internet Anda stabil dan coba lagi.');
             }
         }
     });
