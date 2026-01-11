@@ -208,7 +208,7 @@
         }
 
         .signature-box p {
-            margin-bottom: 60px;
+            /* margin-bottom: 60px; */
             line-height: 1.3;
         }
 
