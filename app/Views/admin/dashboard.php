@@ -110,6 +110,49 @@
     </a>
 </div>
 
+<!-- Quick Links -->
+<div class="bg-white rounded-xl shadow p-6">
+    <h3 class="text-lg font-semibold text-gray-800 mb-6">Aksi Cepat</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <a href="<?= base_url('admin/guru/tambah'); ?>" class="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100">
+            <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <div>
+                <p class="font-medium text-blue-800">Tambah Guru</p>
+                <p class="text-sm text-blue-600">Input data guru Baru</p>
+            </div>
+        </a>
+        <a href="<?= base_url('admin/siswa/tambah'); ?>" class="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100">
+            <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+            <div>
+                <p class="font-medium text-green-800">Tambah Siswa</p>
+                <p class="text-sm text-green-600">Input data siswa baru</p>
+            </div>
+        </a>
+        <a href="<?= base_url('admin/jadwal/tambah'); ?>" class="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100">
+            <div class="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
+                <i class="fas fa-calendar-plus"></i>
+            </div>
+            <div>
+                <p class="font-medium text-purple-800">Buat Jadwal</p>
+                <p class="text-sm text-purple-600">Atur jadwal mengajar</p>
+            </div>
+        </a>
+        <a href="<?= base_url('admin/laporan/absensi'); ?>" class="flex items-center p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100">
+            <div class="p-3 rounded-full bg-yellow-100 text-yellow-600 mr-4">
+                <i class="fas fa-file-export"></i>
+            </div>
+            <div>
+                <p class="font-medium text-yellow-800">Export Laporan</p>
+                <p class="text-sm text-yellow-600">Download data absensi</p>
+            </div>
+        </a>
+    </div>
+</div>
+
 <!-- Chart and Analytics -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
     <!-- Kehadiran 7 Hari terakhir -->
@@ -287,48 +330,7 @@
     </div>
 </div>
 
-<!-- Quick Links -->
-<div class="bg-white rounded-xl shadow p-6">
-    <h3 class="text-lg font-semibold text-gray-800 mb-6">Aksi Cepat</h3>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <a href="<?= base_url('admin/guru/tambah'); ?>" class="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100">
-            <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
-                <i class="fas fa-user-plus"></i>
-            </div>
-            <div>
-                <p class="font-medium text-blue-800">Tambah Guru</p>
-                <p class="text-sm text-blue-600">Input data guru Baru</p>
-            </div>
-        </a>
-        <a href="<?= base_url('admin/siswa/tambah'); ?>" class="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100">
-            <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
-                <i class="fas fa-user-graduate"></i>
-            </div>
-            <div>
-                <p class="font-medium text-green-800">Tambah Siswa</p>
-                <p class="text-sm text-green-600">Input data siswa baru</p>
-            </div>
-        </a>
-        <a href="<?= base_url('admin/jadwal/tambah'); ?>" class="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100">
-            <div class="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
-                <i class="fas fa-calendar-plus"></i>
-            </div>
-            <div>
-                <p class="font-medium text-purple-800">Buat Jadwal</p>
-                <p class="text-sm text-purple-600">Atur jadwal mengajar</p>
-            </div>
-        </a>
-        <a href="<?= base_url('admin/laporan/absensi'); ?>" class="flex items-center p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100">
-            <div class="p-3 rounded-full bg-yellow-100 text-yellow-600 mr-4">
-                <i class="fas fa-file-export"></i>
-            </div>
-            <div>
-                <p class="font-medium text-yellow-800">Export Laporan</p>
-                <p class="text-sm text-yellow-600">Download data absensi</p>
-            </div>
-        </a>
-    </div>
-</div>
+
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
@@ -396,29 +398,31 @@
     // Quick Actions
     function performQuickAction(action) {
         fetch('<?= base_url("admin/dashboard/quick-action"); ?>', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-            },
-            body: JSON.stringify({ action: action })
-        })
-        .then (response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                if (action === 'refresh_stats') {
-                    // Reload page to update stats
-                    location.reload();
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: JSON.stringify({
+                    action: action
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    if (action === 'refresh_stats') {
+                        // Reload page to update stats
+                        location.reload();
+                    }
+                } else {
+                    alert('Error: ' + data.message)
                 }
-            } else {
-                alert('Error: '+data.message)
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan');
-        });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan');
+            });
     }
 </script>
 <?= $this->endSection() ?>
