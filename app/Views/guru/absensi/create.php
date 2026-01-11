@@ -284,12 +284,12 @@
                         <i class="fas fa-arrow-left mr-2"></i> Kembali
                     </a>
                     <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                        <!-- <button type="submit"
+                        <button type="submit"
                             name="next_action"
                             value="list"
                             class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
                             <i class="fas fa-save mr-2"></i> Simpan Absensi
-                        </button> -->
+                        </button>
                         <button type="submit"
                             name="next_action"
                             value="jurnal"
