@@ -471,12 +471,32 @@
 
 <script>
     function showImageModal(imageUrl) {
-        document.getElementById('modalImage').src = imageUrl;
-        document.getElementById('imageModal').classList.remove('hidden');
+        const modal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        
+        if (modal && modalImage) {
+            modalImage.src = imageUrl;
+            modal.classList.remove('hidden');
+        }
     }
 
     function closeImageModal() {
-        document.getElementById('imageModal').classList.add('hidden');
+        const modal = document.getElementById('imageModal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
     }
+    
+    // Close modal when clicking outside the image
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('imageModal');
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeImageModal();
+                }
+            });
+        }
+    });
 </script>
 <?= $this->endSection() ?>
