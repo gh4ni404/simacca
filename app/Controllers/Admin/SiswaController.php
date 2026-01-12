@@ -12,6 +12,9 @@ class SiswaController extends BaseController
     protected $userModel;
     protected $siswaModel;
     protected $kelasModel;
+    
+    // Performance: Cache kelas lookups during import to avoid N+1 queries
+    private $kelasCache = [];
 
     public function __construct()
     {
@@ -500,59 +503,128 @@ class SiswaController extends BaseController
             $successCount = 0;
             $errorCount = 0;
             $errors = [];
+            $createdClasses = []; // Track kelas baru yang dibuat
 
             foreach ($rows as $index => $row) {
-                if (empty($row[0])) continue; // Skip empty rows
+                // BUG FIX #7: Skip baris kosong dengan validasi lebih baik
+                if (empty($row[0]) || empty($row[1]) || empty($row[2])) {
+                    continue; // Skip empty rows
+                }
+
+                $rowNumber = $index + 2; // Excel row number (header = row 1)
 
                 try {
+                    // BUG FIX #7: Validasi data sebelum insert
+                    $nis = trim($row[1] ?? '');
+                    $namaLengkap = trim($row[2] ?? '');
+                    $jenisKelamin = strtoupper(trim($row[3] ?? ''));
+                    $namaKelas = trim($row[4] ?? '');
+                    $tahunAjaran = trim($row[5] ?? '');
+                    
+                    // Validasi field required
+                    if (empty($nis)) {
+                        throw new \Exception("NIS tidak boleh kosong");
+                    }
+                    if (empty($namaLengkap)) {
+                        throw new \Exception("Nama lengkap tidak boleh kosong");
+                    }
+                    if (empty($namaKelas)) {
+                        throw new \Exception("Nama kelas tidak boleh kosong");
+                    }
+                    if (empty($tahunAjaran)) {
+                        throw new \Exception("Tahun ajaran tidak boleh kosong");
+                    }
+                    if (!in_array($jenisKelamin, ['L', 'P'])) {
+                        throw new \Exception("Jenis kelamin harus L atau P");
+                    }
+
                     // Start transaction for each row
+                    // Note: Using manual DB connection is intentional for per-row transactions
+                    // This allows partial success in bulk imports (CI4 best practice for bulk operations)
                     $db = \Config\Database::connect();
                     $db->transStart();
 
                     // Generate username from NIS if not provided
-                    $username = !empty($row[7]) ? $row[7] : 'siswa_' . $row[1];
-                    $password = !empty($row[8]) ? $row[8] : 'siswa123';
+                    $username = !empty($row[7]) ? trim($row[7]) : 'siswa_' . $nis;
+                    $password = !empty($row[8]) ? trim($row[8]) : 'siswa123';
+                    $email = !empty($row[6]) ? trim($row[6]) : null;
 
                     // 1. Create user account
                     $userData = [
                         'username' => $username,
                         'password' => $password,
                         'role' => 'siswa',
-                        'email' => $row[6] ?? null,
+                        'email' => $email,
                         'is_active' => 1,
                         'created_at' => date('Y-m-d H:i:s')
                     ];
 
                     $userId = $this->userModel->insert($userData);
+                    
+                    if (!$userId) {
+                        throw new \Exception("Gagal membuat user account");
+                    }
 
-                    // 2. Create siswa data
+                    // 2. Get or create kelas (track kelas baru)
+                    $kelasId = $this->getKelasIdByName($namaKelas);
+                    
+                    // Track kelas baru yang dibuat
+                    if (!isset($createdClasses[$namaKelas])) {
+                        $createdClasses[$namaKelas] = true;
+                    }
+
+                    // 3. Create siswa data
                     $siswaData = [
                         'user_id' => $userId,
-                        'nis' => $row[1],
-                        'nama_lengkap' => $row[2],
-                        'jenis_kelamin' => strtoupper($row[3]) == 'P' ? 'P' : 'L',
-                        'kelas_id' => $this->getKelasIdByName($row[4]),
-                        'tahun_ajaran' => $row[5],
+                        'nis' => $nis,
+                        'nama_lengkap' => $namaLengkap,
+                        'jenis_kelamin' => $jenisKelamin,
+                        'kelas_id' => $kelasId,
+                        'tahun_ajaran' => $tahunAjaran,
                         'created_at' => date('Y-m-d H:i:s')
                     ];
 
-                    $this->siswaModel->insert($siswaData);
+                    $siswaId = $this->siswaModel->insert($siswaData);
+                    
+                    if (!$siswaId) {
+                        throw new \Exception("Gagal membuat data siswa");
+                    }
 
                     $db->transComplete();
 
                     if ($db->transStatus() === FALSE) {
-                        throw new \Exception("Gagal import baris " . ($index + 2));
+                        throw new \Exception("Transaksi database gagal");
                     }
 
                     $successCount++;
                 } catch (\Exception $e) {
-                    $db->transRollback();
+                    if (isset($db)) {
+                        $db->transRollback();
+                    }
                     $errorCount++;
-                    $errors[] = "Baris " . ($index + 2) . ": " . $e->getMessage();
+                    
+                    // BUG FIX #7: Error message lebih detail
+                    $errorMsg = $e->getMessage();
+                    
+                    // Tambahkan context berdasarkan jenis error
+                    if (strpos($errorMsg, 'Duplicate entry') !== false) {
+                        if (strpos($errorMsg, 'nis') !== false) {
+                            $errorMsg = "NIS '$nis' sudah terdaftar";
+                        } elseif (strpos($errorMsg, 'username') !== false) {
+                            $errorMsg = "Username '$username' sudah digunakan";
+                        }
+                    }
+                    
+                    $errors[] = "Baris $rowNumber (NIS: $nis, Nama: $namaLengkap): $errorMsg";
                 }
             }
+            
+            // BUG FIX #7: Informasi kelas baru yang dibuat
+            $kelasBaruInfo = count($createdClasses) > 0 
+                ? " Kelas baru dibuat: " . implode(', ', array_keys($createdClasses)) . "."
+                : "";
 
-            $message = "Import selesai. Berhasil: $successCount, Gagal: $errorCount";
+            $message = "Import selesai. Berhasil: $successCount, Gagal: $errorCount." . $kelasBaruInfo;
 
             if (!empty($errors)) {
                 session()->setFlashdata('import_errors', $errors);
@@ -567,12 +639,124 @@ class SiswaController extends BaseController
     }
 
     /**
-     * Get kelas ID by name
+     * Get kelas ID by name, create if not exists
+     * CI4 Performance: Uses caching to avoid N+1 queries during import
      */
     private function getKelasIdByName($namaKelas)
     {
+        // BUG FIX #2: Validasi input nama kelas
+        if (empty($namaKelas) || trim($namaKelas) === '') {
+            throw new \Exception("Nama kelas tidak boleh kosong");
+        }
+        
+        // Normalize whitespace
+        $namaKelas = trim($namaKelas);
+        
+        // BUG FIX #4: Validasi panjang nama kelas (max 10 chars di database)
+        if (strlen($namaKelas) > 10) {
+            throw new \Exception("Nama kelas '$namaKelas' terlalu panjang (max 10 karakter)");
+        }
+        
+        // CI4 Performance: Check cache first to avoid repeated DB queries
+        if (isset($this->kelasCache[$namaKelas])) {
+            return $this->kelasCache[$namaKelas];
+        }
+        
+        // Cek apakah kelas sudah ada
         $kelas = $this->kelasModel->where('nama_kelas', $namaKelas)->first();
-        return $kelas ? $kelas['id'] : null;
+        
+        if ($kelas) {
+            // Cache the result
+            $this->kelasCache[$namaKelas] = $kelas['id'];
+            return $kelas['id'];
+        }
+        
+        // Jika kelas belum ada, buat kelas baru
+        // Parse nama kelas untuk mendapatkan tingkat dan jurusan
+        // Format yang didukung: X-RPL, XI-RPL, XII-RPL, 10-RPL, 11-RPL, 12-RPL
+        $tingkat = null;
+        $jurusan = null;
+        
+        // BUG FIX #6: Konversi ke uppercase dulu sebelum preg_match
+        $namaKelasUpper = strtoupper($namaKelas);
+        
+        // Coba parse dengan format "X-RPL" atau "10-RPL"
+        if (preg_match('/^(X|XI|XII|10|11|12)[\s\-_](.+)$/', $namaKelasUpper, $matches)) {
+            // Konversi tingkat romawi ke angka
+            $tingkatMap = [
+                'X' => '10',
+                'XI' => '11', 
+                'XII' => '12'
+            ];
+            
+            $tingkatInput = $matches[1];
+            $tingkat = isset($tingkatMap[$tingkatInput]) ? $tingkatMap[$tingkatInput] : $tingkatInput;
+            $jurusan = trim($matches[2]);
+        } else {
+            // Jika format tidak sesuai, gunakan default
+            $tingkat = '10';
+            $jurusan = $namaKelas;
+        }
+        
+        // BUG FIX #3: Validasi tingkat harus 10, 11, atau 12
+        if (!in_array($tingkat, ['10', '11', '12'])) {
+            throw new \Exception("Tingkat kelas '$namaKelas' tidak valid. Format yang didukung: X-XXX, XI-XXX, XII-XXX, atau 10-XXX, 11-XXX, 12-XXX");
+        }
+        
+        // BUG FIX #4: Validasi panjang jurusan (max 50 chars)
+        if (strlen($jurusan) > 50) {
+            throw new \Exception("Nama jurusan untuk kelas '$namaKelas' terlalu panjang (max 50 karakter)");
+        }
+        
+        // Buat kelas baru
+        $kelasData = [
+            'nama_kelas' => $namaKelas,
+            'tingkat' => $tingkat,
+            'jurusan' => $jurusan,
+            'wali_kelas_id' => null
+        ];
+        
+        try {
+            // CI4 Best Practice: Use insert() with skipValidation parameter
+            // Skip validation to avoid is_unique constraint during auto-create
+            $this->kelasModel->skipValidation(true);
+            
+            try {
+                $kelasId = $this->kelasModel->insert($kelasData);
+                
+                // BUG FIX #1: Double check untuk handle race condition
+                if (!$kelasId) {
+                    $kelas = $this->kelasModel->where('nama_kelas', $namaKelas)->first();
+                    if ($kelas) {
+                        return $kelas['id'];
+                    }
+                    throw new \Exception("Gagal membuat kelas '$namaKelas'");
+                }
+                
+                // Cache the newly created kelas
+                $this->kelasCache[$namaKelas] = $kelasId;
+                
+                return $kelasId;
+            } finally {
+                // Always restore validation state (CI4 Best Practice)
+                $this->kelasModel->skipValidation(false);
+            }
+        } catch (\Exception $e) {
+            // BUG FIX #1: Handle duplicate key error (race condition)
+            if (strpos($e->getMessage(), 'Duplicate entry') !== false || 
+                strpos($e->getMessage(), 'UNIQUE constraint') !== false) {
+                // Kelas sudah dibuat oleh thread lain, cari lagi
+                $kelas = $this->kelasModel->where('nama_kelas', $namaKelas)->first();
+                if ($kelas) {
+                    // Cache the result
+                    $this->kelasCache[$namaKelas] = $kelas['id'];
+                    return $kelas['id'];
+                }
+            }
+            
+            // BUG FIX #7: Error message lebih informatif
+            throw new \Exception("Gagal membuat kelas '$namaKelas': " . $e->getMessage());
+        }
     }
 
     /**

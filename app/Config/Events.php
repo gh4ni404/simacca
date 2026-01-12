@@ -23,18 +23,19 @@ use CodeIgniter\HotReloader\HotReloader;
  *      Events::on('create', [$myInstance, 'myMethod']);
  */
 
-Events::on('pre_system', static function (): void {
-    if (ENVIRONMENT !== 'testing') {
-        if (ini_get('zlib.output_compression')) {
-            throw FrameworkException::forEnabledZlibOutputCompression();
-        }
+// Events::on('pre_system', static function (): void {
+//     if (ENVIRONMENT !== 'testing') {
+//         if (ini_get('zlib.output_compression')) {
+//             throw FrameworkException::forEnabledZlibOutputCompression();
+//         }
 
-        while (ob_get_level() > 0) {
-            ob_end_flush();
-        }
+//         while (ob_get_level() > 0) {
+//             ob_end_flush();
+//         }
 
-        ob_start(static fn ($buffer) => $buffer);
-    }
+//         ob_start(static fn ($buffer) => $buffer);
+//     }
+// });
 
     /*
      * --------------------------------------------------------------------
@@ -52,4 +53,4 @@ Events::on('pre_system', static function (): void {
             });
         }
     }
-});
+// });

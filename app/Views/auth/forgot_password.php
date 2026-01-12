@@ -1,64 +1,68 @@
-<!DOCTYPE html>
-<html lang="en">
+<?= $this->extend('templates/auth_layout') ?>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $title ?? 'Lupa Password'; ?></title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-    </style>
-</head>
+<?= $this->section('title') ?>
+Lupa Password
+<?= $this->endSection() ?>
 
-<body class="h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-d w-full space-y-8 bg-white p-8 rounded-lg shadow-lg">
-        <div>
-            <div class="flex justify-center">
-                <i class="fas fa-key text-4xl text-indigo-600"></i>
+<?= $this->section('header') ?>
+<div class="flex justify-center">
+    <i class="fas fa-key text-5xl text-indigo-600"></i>
+</div>
+<h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+    Lupa Password?
+</h2>
+<p class="mt-2 text-sm text-gray-600">
+    Masukkan email Anda untuk mereset password
+</p>
+<?= $this->endSection() ?>
+
+<?= $this->section('content') ?>
+<form action="<?= base_url('forgot-password/process'); ?>" method="POST" class="space-y-6">
+    <?= csrf_field(); ?>
+
+    <!-- Email Input -->
+    <div>
+        <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
+            Email
+        </label>
+        <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-envelope text-gray-400"></i>
             </div>
-            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900"><?= $title ?? 'Test'; ?></h2>
-            <p class="mt-2 text-center text-sm text-gray-600">
-                Masukkan email Anda untuk mereset password
-            </p>
+            <input 
+                type="email" 
+                id="email" 
+                name="email" 
+                value="<?= old('email'); ?>"
+                placeholder="email@example.com"
+                required
+                class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            >
         </div>
-        <!-- Flash Messages -->
-        <?php if (session()->getFlashdata('error')): ?>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 px-3 rounded relative" role="alert">
-                <span class="block sm:inline"><?= session()->getFlashdata('error'); ?></span>
-            </div>
+        <?php if (isset($validation) && $validation->hasError('email')): ?>
+            <p class="mt-1 text-sm text-red-600">
+                <i class="fas fa-exclamation-circle mr-1"></i><?= $validation->getError('email') ?>
+            </p>
         <?php endif; ?>
-
-        <form action="<?= base_url('forgot-password/process'); ?>" method="POST">
-            <?= csrf_field(); ?>
-
-            <div class="rounded-md shadow-sm">
-                <div>
-                    <label for="email" class="sr-only">Email</label>
-                    <input type="email" id="email" name="email" required placeholder="Email terdaftar" value="<?= old('email'); ?>"
-                        class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm">
-                </div>
-            </div>
-            <div>
-                <button type="submit"
-                    class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                        <i class="fas fa-paper-plane"></i>
-                    </span>
-                    Kirim Link Reset
-                </button>
-            </div>
-            <div class="text-center">
-                <a href="<?= base_url('login'); ?>"
-                    class="font-medium text-indigo-600 hover:text-indigo-500">
-                    <i class="fas fa-arrow-left mr-1"></i> Kembali ke Login
-                </a>
-            </div>
-        </form>
     </div>
-</body>
 
-</html>
+    <!-- Submit Button -->
+    <div>
+        <button 
+            type="submit"
+            class="w-full flex justify-center items-center py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+        >
+            <i class="fas fa-paper-plane mr-2"></i>
+            Kirim Link Reset
+        </button>
+    </div>
+
+    <!-- Back to Login -->
+    <div class="text-center">
+        <a href="<?= base_url('login'); ?>" class="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Kembali ke Login
+        </a>
+    </div>
+</form>
+<?= $this->endSection() ?>

@@ -66,7 +66,6 @@ Migrations ini menambahkan field baru atau mengupdate struktur tabel existing.
 | `2026-01-10-014749_AddNewStatus.php` | Tambah status baru di enum | 2026-01-10 |
 | `2026-01-11-142000_AddFotoToJurnalKbm.php` | Tambah field foto dokumentasi | 2026-01-11 |
 | `2026-01-11-183700_AddGuruPenggantiToAbsensi.php` | **Guru Pengganti Feature** | 2026-01-11 |
-| `2026-01-11-222000_AddTimestampsToIzinSiswa.php` | Tambah timestamps di izin siswa | 2026-01-11 |
 
 ## 📊 Database Schema Overview
 
