@@ -58,8 +58,7 @@
         /* Custom focus styles */
         input:focus {
             outline: none;
-            ring: 2px;
-            ring-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102,126,234,0.5);
         }
     </style>
     

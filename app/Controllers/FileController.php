@@ -33,15 +33,19 @@ class FileController extends BaseController
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('File bukan gambar');
         }
         
+        // Clear any output buffers to prevent whitespace corruption
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+        
         // Set headers
-        $this->response->setHeader('Content-Type', $mimeType);
-        $this->response->setHeader('Content-Length', filesize($filepath));
-        $this->response->setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
-        $this->response->setHeader('Expires', gmdate('D, d M Y H:i:s', time() + 31536000) . ' GMT');
+        header('Content-Type: ' . $mimeType);
+        header('Content-Length: ' . filesize($filepath));
+        header('Cache-Control: public, max-age=31536000');
+        header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 31536000) . ' GMT');
         
-        // Output file
-        $this->response->setBody(file_get_contents($filepath));
-        
-        return $this->response;
+        // Output file directly
+        readfile($filepath);
+        exit;
     }
 }

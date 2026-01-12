@@ -91,7 +91,8 @@ class Filters extends BaseFilters
                     'api/*',
                     // Removed login/process for security - CSRF protection is critical
                     'forgot-password/process',
-                    'reset-password/process'
+                    'reset-password/process',
+                    'files/*'  // Allow file serving without CSRF
                 ]
             ],
             // 'invalidchars',
@@ -137,6 +138,9 @@ class Filters extends BaseFilters
                 'dashboard/*',
                 'change-password/*',
                 'profile/*',
+            ],
+            'except' => [
+                'files/*'  // Allow file access without auth check (FileController will handle security)
             ]
         ],
         'guest' => [
