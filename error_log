@@ -1,0 +1,4 @@
+[11-Jan-2026 13:50:59 UTC] PHP Fatal error:  Uncaught Error: Undefined constant "FCPATH" in /home2/smknbone/simaccaProject/tmp_rovodev_check_walikelas_setup.php:10
+Stack trace:
+#0 {main}
+  thrown in /home2/smknbone/simaccaProject/tmp_rovodev_check_walikelas_setup.php on line 10
