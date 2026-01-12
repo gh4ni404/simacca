@@ -127,4 +127,4 @@ _modules/*
 /results/
 /phpunit*.xml
 
-/public/
+# /public/

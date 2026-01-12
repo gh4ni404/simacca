@@ -46,6 +46,34 @@ class AdminSeeder extends Seeder
 
         $this->db->table('users')->insertBatch($data);
 
+        // Insert mata pelajaran first (required by foreign key)
+        $mataPelajaranData = [
+            [
+                'nama_mapel'    => 'Matematika',
+                'kode_mapel'    => 'MAT',
+                'kategori'      => 'umum',
+                'created_at'    => Time::now(),
+            ],
+            [
+                'nama_mapel'    => 'Bahasa Indonesia',
+                'kode_mapel'    => 'BIN',
+                'kategori'      => 'umum',
+                'created_at'    => Time::now(),
+            ],
+        ];
+        $this->db->table('mata_pelajaran')->insertBatch($mataPelajaranData);
+
+        // Insert kelas (required by guru and siswa)
+        $kelasData = [
+            [
+                'nama_kelas'    => 'X RPL 1',
+                'tingkat'       => '10',
+                'jurusan'       => 'RPL',
+                'wali_kelas_id' => null,
+            ],
+        ];
+        $this->db->table('kelas')->insertBatch($kelasData);
+
         $guruData = [
             [
                 'user_id'               => 2,

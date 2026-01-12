@@ -369,6 +369,9 @@
         });
     </script>
 
+    <!-- Modal Helper Scripts -->
+    <?= modal_scripts() ?>
+
 </body>
 
 </html>

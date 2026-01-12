@@ -21,11 +21,22 @@ class UpdateKelasForeignKey extends Migration
 {
     public function up()
     {
-        $this->forge->addForeignKey('wali_kelas_id', 'guru', 'id', 'SET NULL', 'SET NULL');
+        $this->db->query('ALTER TABLE kelas ADD CONSTRAINT kelas_wali_kelas_id_foreign FOREIGN KEY (wali_kelas_id) REFERENCES guru(id) ON DELETE SET NULL ON UPDATE SET NULL');
     }
 
     public function down()
     {
-        $this->forge->dropForeignKey('kelas', 'wali_kelas_id_foreign');
+        // Check if foreign key exists before dropping
+        $query = $this->db->query("
+            SELECT CONSTRAINT_NAME 
+            FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE 
+            WHERE TABLE_SCHEMA = DATABASE() 
+            AND TABLE_NAME = 'kelas' 
+            AND CONSTRAINT_NAME = 'kelas_wali_kelas_id_foreign'
+        ");
+        
+        if ($query->getNumRows() > 0) {
+            $this->db->query('ALTER TABLE kelas DROP FOREIGN KEY kelas_wali_kelas_id_foreign');
+        }
     }
 }

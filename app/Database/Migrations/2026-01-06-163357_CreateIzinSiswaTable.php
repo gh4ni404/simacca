@@ -16,7 +16,7 @@ use CodeIgniter\Database\Migration;
  *   - kelas_id -> kelas(id)
  * 
  * Status Enum: pending, approved, rejected
- * Note: Timestamps added via AddTimestampsToIzinSiswa migration
+ * Timestamps: created_at, updated_at included in initial schema
  * 
  * @package App\Database\Migrations
  * @author SIMACCA Team
