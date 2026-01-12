@@ -262,12 +262,8 @@ class AbsensiController extends BaseController
 
             $this->session->setFlashdata('success', 'Absensi berhasil disimpan!');
 
-            // Ask if want to fill jurnal
-            if ($this->request->getPost('next_action') == 'jurnal') {
-                return redirect()->to('/guru/jurnal/tambah/' . $absensiId);
-            } else {
-                return redirect()->to('/guru/absensi/show/' . $absensiId);
-            }
+            // Redirect to absensi index
+            return redirect()->to('/guru/absensi');
         } catch (\Exception $e) {
             $db->transRollback();
             $this->session->setFlashdata('error', $e->getMessage());
@@ -370,17 +366,6 @@ class AbsensiController extends BaseController
         $kelasId = $absensi['kelas_id'] ?? null;
         $siswaList = $kelasId ? $this->siswaModel->getByKelas($kelasId) : [];
 
-        // Get approved izin for this date and class
-        $approvedIzin = [];
-        if ($kelasId && isset($absensi['tanggal'])) {
-            $approvedIzin = $this->izinModel->getApprovedIzinByDate($absensi['tanggal'], $kelasId);
-        }
-
-        // Get all teachers for substitute teacher dropdown
-        $guruList = $this->guruModel->select('id, nama_lengkap, nip')
-            ->orderBy('nama_lengkap', 'ASC')
-            ->findAll();
-
         $data = [
             'title' => 'Edit Absensi',
             'pageTitle' => 'Edit Absensi',
@@ -389,10 +374,8 @@ class AbsensiController extends BaseController
             'absensi' => $absensi,
             'absensiDetails' => $absensiDetails,
             'siswaList' => $siswaList,
-            'approvedIzin' => $approvedIzin,
             'guru' => $guru,
-            'statusOptions' => $this->getStatusOptions(),
-            'guruList' => $guruList
+            'statusOptions' => $this->getStatusOptions()
         ];
 
         return view('guru/absensi/edit', $data);
@@ -436,8 +419,8 @@ class AbsensiController extends BaseController
 
         // Validate input
         $rules = [
+            'tanggal' => 'required|valid_date',
             'pertemuan_ke' => 'required|numeric|greater_than[0]',
-            'materi_pembelajaran' => 'permit_empty',
             'siswa' => 'required'
         ];
 
@@ -448,9 +431,8 @@ class AbsensiController extends BaseController
         // Update absensi data
         $absensiData = [
             'id' => $id,
-            'pertemuan_ke' => $this->request->getPost('pertemuan_ke'),
-            'materi_pembelajaran' => $this->request->getPost('materi_pembelajaran'),
-            'guru_pengganti_id' => $this->request->getPost('guru_pengganti_id') ?: null
+            'tanggal' => $this->request->getPost('tanggal'),
+            'pertemuan_ke' => $this->request->getPost('pertemuan_ke')
         ];
 
         // Start database transaction
@@ -495,7 +477,7 @@ class AbsensiController extends BaseController
             }
 
             $this->session->setFlashdata('success', 'Absensi berhasil diperbarui!');
-            return redirect()->to('/guru/absensi/show/' . $id);
+            return redirect()->to('/guru/absensi');
         } catch (\Exception $e) {
             $db->transRollback();
             $this->session->setFlashdata('error', $e->getMessage());
