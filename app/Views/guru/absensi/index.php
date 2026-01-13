@@ -40,6 +40,36 @@
         </div>
     <?php endif; ?>
 
+    <?php if (session()->getFlashdata('success_custom')): ?>
+        <?php $customData = session()->getFlashdata('success_custom'); ?>
+        <div class="mb-6 bg-gradient-to-r from-green-50 to-blue-50 border-l-4 border-green-500 p-6 rounded-lg shadow-lg animate-fade-in">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <div class="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center">
+                        <i class="fas fa-check-circle text-white text-2xl"></i>
+                    </div>
+                </div>
+                <div class="ml-4 flex-1">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2"><?= $customData['title'] ?? 'Informasi'; ?></h3>
+                    <p class="text-gray-700"><?= $customData['message'] ?? ''; ?></p>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <?php if (session()->getFlashdata('info')): ?>
+        <div class="mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg shadow-sm animate-fade-in">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-info-circle text-blue-500 text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-blue-800 font-medium"><?= session()->getFlashdata('info'); ?></p>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <?php if (session()->getFlashdata('error')): ?>
         <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm animate-fade-in">
             <div class="flex items-center">

@@ -132,7 +132,7 @@ abstract class BaseController extends Controller
     protected function isAbsensiEditable($absensi)
     {
         // Check if $absensi is array and has created_at key
-        if (!is_array($absensi) || !isset($absensi['created_at'])) {
+        if (!isset($absensi['created_at'])) {
             return false;
         }
 
