@@ -134,7 +134,7 @@
         </div>
 
         <!-- Filter Form -->
-        <form method="get" class="hidden md:block p-4 md:p-6 pt-0 md:pt-0" id="filterForm">
+        <form method="get" class="hidden md:block p-4 md:p-6 pt-0 md:pt-4" id="filterForm">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-3 md:mb-4">
                 <div>
                     <label class="block text-xs md:text-sm font-semibold text-gray-700 mb-1 md:mb-2 flex items-center">
