@@ -38,7 +38,7 @@ class JurnalKbmModel extends Model
 
     // Validation
     protected $validationRules      = [
-        'absensi_id'                => 'required|numeric|is_unique[jurnal_kbm.absensi_id]',
+        'absensi_id'                => 'required|numeric',
         'kegiatan_pembelajaran'     => 'required',
     ];
     protected $validationMessages   = [];
@@ -109,7 +109,9 @@ class JurnalKbmModel extends Model
                                 jurnal_kbm.created_at,
                                 absensi.tanggal,
                                 absensi.pertemuan_ke,
+                                mata_pelajaran.id as mapel_id,
                                 mata_pelajaran.nama_mapel,
+                                kelas.id as kelas_id,
                                 kelas.nama_kelas')
             ->join('absensi', 'absensi.id = jurnal_kbm.absensi_id')
             ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
@@ -124,6 +126,35 @@ class JurnalKbmModel extends Model
         }
 
         return $builder->findAll();
+    }
+
+    /**
+     * Get Jurnal by guru and kelas
+     */
+    public function getByGuruAndKelas($guruId, $kelasId)
+    {
+        return $this->select('jurnal_kbm.id,
+                                jurnal_kbm.absensi_id,
+                                jurnal_kbm.tujuan_pembelajaran,
+                                jurnal_kbm.kegiatan_pembelajaran,
+                                jurnal_kbm.media_alat,
+                                jurnal_kbm.penilaian,
+                                jurnal_kbm.catatan_khusus,
+                                jurnal_kbm.foto_dokumentasi,
+                                jurnal_kbm.created_at,
+                                absensi.tanggal,
+                                absensi.pertemuan_ke,
+                                absensi.materi_pembelajaran,
+                                mata_pelajaran.nama_mapel,
+                                kelas.nama_kelas')
+            ->join('absensi', 'absensi.id = jurnal_kbm.absensi_id')
+            ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
+            ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
+            ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
+            ->where('jadwal_mengajar.guru_id', $guruId)
+            ->where('kelas.id', $kelasId)
+            ->orderBy('absensi.tanggal', 'DESC')
+            ->findAll();
     }
 
     /**

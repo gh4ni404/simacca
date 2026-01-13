@@ -166,6 +166,7 @@ $routes->group('guru', ['filter' => 'auth'], function ($routes) {
     $routes->get('absensi/getJadwalByHari', 'Guru\AbsensiController::getJadwalByHari', ['filter' => 'role:guru_mapel']);
 
     $routes->get('jurnal', 'Guru\JurnalController::index', ['filter' => 'role:guru_mapel']);
+    $routes->get('jurnal/preview/(:num)/(:num)', 'Guru\JurnalController::preview/$1/$2', ['filter' => 'role:guru_mapel']);
     $routes->get('jurnal/tambah/(:num)', 'Guru\JurnalController::create/$1', ['filter' => 'role:guru_mapel']);
     $routes->post('jurnal/simpan', 'Guru\JurnalController::store', ['filter' => 'role:guru_mapel']);
     $routes->get('jurnal/show/(:num)', 'Guru\JurnalController::show/$1', ['filter' => 'role:guru_mapel']);

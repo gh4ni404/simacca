@@ -19,7 +19,7 @@
             <div>
                 <a href="<?= base_url('guru/absensi/tambah'); ?>"
                     class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
-                    <i class="fas fa-plus-circle mr-2 text-lg"></i> 
+                    <i class="fas fa-plus-circle mr-2 text-lg"></i>
                     <span>Input Absensi Baru</span>
                 </a>
             </div>
@@ -225,7 +225,7 @@
                                     </div>
                                     <p class="text-xl font-semibold text-gray-600 mb-2">Belum Ada Data Absensi</p>
                                     <p class="text-gray-500 mb-4">Mulai dengan menginput data absensi pertama Anda</p>
-                                    <a href="<?= base_url('guru/absensi/tambah'); ?>" 
+                                    <a href="<?= base_url('guru/absensi/tambah'); ?>"
                                         class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all">
                                         <i class="fas fa-plus-circle mr-2"></i> Input Absensi Pertama
                                     </a>
@@ -246,7 +246,20 @@
                                         </div>
                                         <div>
                                             <div class="text-sm font-semibold text-gray-900">
-                                                <?= date('d/m/Y', strtotime($item['tanggal'])); ?>
+                                                <?php
+                                                // 1. Buat alat pengaturnya (formatter)
+                                                $formatter = new IntlDateFormatter(
+                                                    'id_ID',
+                                                    IntlDateFormatter::FULL,
+                                                    IntlDateFormatter::NONE,
+                                                    'Asia/Makassar',
+                                                    IntlDateFormatter::GREGORIAN,
+                                                    'EEEE, d MMMM y'
+                                                );
+
+                                                // 2. Gunakan alat tersebut untuk mencetak tanggal
+                                                ?>
+                                                <?= $formatter->format(strtotime($item['tanggal'])); ?>
                                             </div>
                                             <div class="text-xs text-gray-500 flex items-center mt-0.5">
                                                 <i class="far fa-clock mr-1"></i>

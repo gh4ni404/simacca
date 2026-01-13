@@ -131,39 +131,40 @@
                     </div>
 
                     <!-- Jadwal Selection Form -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label for="hari" class="block text-sm font-medium text-gray-700 mb-2">
-                                Hari
-                            </label>
-                            <select id="hari" name="hari" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">Pilih Hari</option>
-                                <?php foreach ($hariList as $key => $value): ?>
-                                    <option value="<?= $key; ?>"><?= $value; ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-2">
-                                Tanggal Absensi
+                                <i class="fas fa-calendar-alt mr-1 text-blue-500"></i>
+                                Tanggal Absensi <span class="text-red-500">*</span>
                             </label>
                             <input type="date"
                                 id="tanggal"
                                 name="tanggal"
                                 value="<?= $tanggal; ?>"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                min="<?= date('Y-m-d', strtotime('-7 days')); ?>"
-                                max="<?= date('Y-m-d', strtotime('+1 day')); ?>">
+                                required>
+                            <p class="text-xs text-gray-500 mt-1">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Jadwal akan muncul otomatis berdasarkan hari dari tanggal yang dipilih
+                            </p>
                         </div>
                         <div>
                             <label for="jadwal_id" class="block text-sm font-medium text-gray-700 mb-2">
-                                <span id="jadwalLabel">Jadwal</span>
+                                <i class="fas fa-clock mr-1 text-purple-500"></i>
+                                <span id="jadwalLabel">Jadwal</span> <span class="text-red-500">*</span>
                             </label>
-                            <select id="jadwal_id" name="jadwal_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">Pilih Jadwal</option>
+                            <select id="jadwal_id" name="jadwal_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                <option value="">Pilih tanggal terlebih dahulu</option>
                             </select>
+                            <p class="text-xs text-gray-500 mt-1" id="hariInfo">
+                                <i class="fas fa-calendar-day mr-1"></i>
+                                <span id="hariText">-</span>
+                            </p>
                         </div>
                     </div>
+                    
+                    <!-- Hidden field untuk hari (auto-detected) -->
+                    <input type="hidden" id="hari" name="hari" value="">
 
                     <!-- Jadwal Hari Ini -->
                     <?php if (!empty($jadwalHariIni)): ?>
@@ -532,13 +533,19 @@
         }
     }
 
-    // Handle jadwal selection
-    document.getElementById('hari').addEventListener('change', function() {
-        const hari = this.value;
-        const jadwalSelect = document.getElementById('jadwal_id');
+    // Function to get day name from date
+    function getDayFromDate(dateString) {
+        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const date = new Date(dateString);
+        return days[date.getDay()];
+    }
 
+    // Function to load jadwal based on hari
+    function loadJadwalByHari(hari) {
+        const jadwalSelect = document.getElementById('jadwal_id');
+        
         if (!hari) {
-            jadwalSelect.innerHTML = '<option value="">Pilih Hari terlebih dahulu</option>';
+            jadwalSelect.innerHTML = '<option value="">Pilih tanggal terlebih dahulu</option>';
             return;
         }
 
@@ -583,6 +590,39 @@
                 console.error('Error:', error);
                 jadwalSelect.innerHTML = '<option value="">Error loading data</option>';
             });
+    }
+
+    // Handle tanggal selection - auto detect hari and load jadwal
+    document.getElementById('tanggal').addEventListener('change', function() {
+        const tanggal = this.value;
+        
+        if (!tanggal) {
+            document.getElementById('hari').value = '';
+            document.getElementById('hariText').textContent = '-';
+            document.getElementById('jadwal_id').innerHTML = '<option value="">Pilih tanggal terlebih dahulu</option>';
+            return;
+        }
+
+        // Get day name from selected date
+        const hari = getDayFromDate(tanggal);
+        
+        // Update hidden field and display
+        document.getElementById('hari').value = hari;
+        document.getElementById('hariText').textContent = hari;
+        
+        // Load jadwal for this day
+        loadJadwalByHari(hari);
+    });
+
+    // Trigger on page load if tanggal already set
+    window.addEventListener('DOMContentLoaded', function() {
+        const tanggal = document.getElementById('tanggal').value;
+        if (tanggal) {
+            const hari = getDayFromDate(tanggal);
+            document.getElementById('hari').value = hari;
+            document.getElementById('hariText').textContent = hari;
+            loadJadwalByHari(hari);
+        }
     });
 </script>
 <?= $this->endSection() ?>

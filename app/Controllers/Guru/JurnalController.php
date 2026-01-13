@@ -37,13 +37,31 @@ class JurnalController extends BaseController
         $startDate = $this->request->getGet('start_date');
         $endDate = $this->request->getGet('end_date');
 
-        // Get jurnal by guru
-        $jurnal = $this->jurnalModel->getByGuru($guru['id'], $startDate, $endDate);
+        // Get jurnal by guru (grouped by kelas)
+        $jurnalRaw = $this->jurnalModel->getByGuru($guru['id'], $startDate, $endDate);
+        
+        // Group by kelas
+        $kelasList = [];
+        foreach ($jurnalRaw as $j) {
+            $kelasId = $j['kelas_id'];
+            if (!isset($kelasList[$kelasId])) {
+                $kelasList[$kelasId] = [
+                    'kelas_id' => $kelasId,
+                    'nama_kelas' => $j['nama_kelas'],
+                    'nama_mapel' => $j['nama_mapel'],
+                    'mapel_id' => $j['mapel_id'],
+                    'total_pertemuan' => 0,
+                    'jurnal' => []
+                ];
+            }
+            $kelasList[$kelasId]['total_pertemuan']++;
+            $kelasList[$kelasId]['jurnal'][] = $j;
+        }
 
         $data = [
             'title' => 'Jurnal KBM',
             'guru' => $guru,
-            'jurnal' => $jurnal,
+            'kelasList' => array_values($kelasList),
             'startDate' => $startDate,
             'endDate' => $endDate
         ];
@@ -69,8 +87,11 @@ class JurnalController extends BaseController
         }
 
         // Cek apakah sudah ada jurnal untuk absensi ini
-        if ($this->jurnalModel->isJurnalExist($absensiId)) {
-            return redirect()->to('/guru/jurnal')->with('error', 'Jurnal untuk absensi ini sudah dibuat');
+        // Jika sudah ada, redirect ke edit jurnal
+        $existingJurnal = $this->jurnalModel->getByAbsensi($absensiId);
+        if ($existingJurnal) {
+            return redirect()->to('/guru/jurnal/edit/' . $existingJurnal['id'])
+                ->with('info', 'Jurnal untuk pertemuan ini sudah ada. Anda dapat mengeditnya di sini.');
         }
 
         // Cek apakah guru yang login adalah pembuat absensi (created_by)
@@ -87,7 +108,7 @@ class JurnalController extends BaseController
             'absensi' => $absensi
         ];
 
-        return view('guru/jurnal/create_simple', $data);
+        return view('guru/jurnal/create', $data);
     }
 
     public function store()
@@ -114,9 +135,10 @@ class JurnalController extends BaseController
 
         // Cek apakah sudah ada jurnal untuk absensi ini
         $absensiId = $this->request->getPost('absensi_id');
-        if ($this->jurnalModel->isJurnalExist($absensiId)) {
-            session()->setFlashdata('error', '⚠️ Jurnal untuk pertemuan ini sudah dibuat sebelumnya. Silakan edit jurnal yang sudah ada atau pilih pertemuan lain.');
-            return redirect()->to('/guru/jurnal');
+        $existingJurnal = $this->jurnalModel->getByAbsensi($absensiId);
+        if ($existingJurnal) {
+            session()->setFlashdata('info', '📝 Jurnal untuk pertemuan ini sudah ada. Silakan edit jurnal tersebut.');
+            return redirect()->to('/guru/jurnal/edit/' . $existingJurnal['id']);
         }
 
         // Handle foto dokumentasi upload
@@ -218,8 +240,25 @@ class JurnalController extends BaseController
             return redirect()->to('/guru/dashboard')->with('error', 'Data guru tidak ditemukan');
         }
 
-        // Get jurnal with detail
-        $jurnal = $this->jurnalModel->getJurnalWithDetail($jurnalId);
+        // Get jurnal with detail including kelas_id
+        $jurnal = $this->jurnalModel->select('jurnal_kbm.*,
+                                            absensi.tanggal,
+                                            absensi.pertemuan_ke,
+                                            absensi.materi_pembelajaran,
+                                            jadwal_mengajar.jam_mulai,
+                                            jadwal_mengajar.jam_selesai,
+                                            guru.nama_lengkap as nama_guru,
+                                            guru.nip,
+                                            mata_pelajaran.nama_mapel,
+                                            kelas.id as kelas_id,
+                                            kelas.nama_kelas')
+                    ->join('absensi', 'absensi.id = jurnal_kbm.absensi_id')
+                    ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
+                    ->join('guru', 'guru.id = jadwal_mengajar.guru_id')
+                    ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
+                    ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
+                    ->where('jurnal_kbm.id', $jurnalId)
+                    ->first();
 
         if (!$jurnal) {
             return redirect()->to('/guru/jurnal')->with('error', 'Data jurnal tidak ditemukan');
@@ -238,10 +277,10 @@ class JurnalController extends BaseController
             'jurnal' => $jurnal
         ];
 
-        return view('guru/jurnal/edit_simple', $data);
+        return view('guru/jurnal/edit', $data);
     }
 
-    public function show($jurnalId)
+    public function show($kelasId)
     {
         // Get guru data from session
         $userId = session()->get('user_id');
@@ -251,27 +290,25 @@ class JurnalController extends BaseController
             return redirect()->to('/guru/dashboard')->with('error', 'Data guru tidak ditemukan');
         }
 
-        // Get jurnal with detail
-        $jurnal = $this->jurnalModel->getJurnalWithDetail($jurnalId);
+        // Get all jurnal for this kelas
+        $jurnalList = $this->jurnalModel->getByGuruAndKelas($guru['id'], $kelasId);
 
-        if (!$jurnal) {
-            return redirect()->to('/guru/jurnal')->with('error', 'Data jurnal tidak ditemukan');
-        }
-
-        // Cek apakah jurnal dibuat oleh guru yang login
-        // Check via absensi's created_by to support substitute teacher mode
-        $absensi = $this->absensiModel->find($jurnal['absensi_id']);
-        if ($absensi && $absensi['created_by'] != $userId) {
-            return redirect()->to('/guru/jurnal')->with('error', 'Anda tidak memiliki akses ke jurnal ini');
+        if (empty($jurnalList)) {
+            return redirect()->to('/guru/jurnal')->with('error', 'Data jurnal tidak ditemukan untuk kelas ini');
         }
 
         $data = [
-            'title' => 'Preview Jurnal KBM',
+            'title' => 'Daftar Pertemuan - ' . $jurnalList[0]['nama_kelas'],
             'guru' => $guru,
-            'jurnal' => $jurnal
+            'jurnalList' => $jurnalList,
+            'kelas' => [
+                'id' => $kelasId,
+                'nama_kelas' => $jurnalList[0]['nama_kelas'],
+                'nama_mapel' => $jurnalList[0]['nama_mapel']
+            ]
         ];
 
-        return view('guru/jurnal/show_simple', $data);
+        return view('guru/jurnal/show', $data);
     }
 
     public function update($jurnalId)
@@ -411,7 +448,21 @@ class JurnalController extends BaseController
             
             if ($updateResult) {
                 log_message('info', '[JURNAL UPDATE] Jurnal updated successfully');
+                
+                // Get kelas_id for redirect
+                $jurnalDetail = $this->jurnalModel->select('jurnal_kbm.*, jadwal_mengajar.kelas_id')
+                    ->join('absensi', 'absensi.id = jurnal_kbm.absensi_id')
+                    ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
+                    ->where('jurnal_kbm.id', $jurnalId)
+                    ->first();
+                    
+                $kelasId = $jurnalDetail['kelas_id'] ?? null;
+                
                 session()->setFlashdata('success', '✅ Jurnal KBM berhasil diperbarui! Perubahan telah disimpan.');
+                
+                if ($kelasId) {
+                    return redirect()->to('/guru/jurnal/show/' . $kelasId);
+                }
                 return redirect()->to('/guru/jurnal');
             } else {
                 // Get model errors
@@ -453,7 +504,7 @@ class JurnalController extends BaseController
         }
     }
 
-    public function print($jurnalId)
+    public function print($kelasId = null)
     {
         // Get guru data from session
         $userId = session()->get('user_id');
@@ -463,24 +514,61 @@ class JurnalController extends BaseController
             return redirect()->to('/guru/dashboard')->with('error', 'Data guru tidak ditemukan');
         }
 
-        // Get jurnal with detail
-        $jurnal = $this->jurnalModel->getJurnalWithDetail($jurnalId);
+        // Get filters from query params or URL segment
+        $bulan = $this->request->getGet('bulan');
+        $tahun = $this->request->getGet('tahun');
 
-        if (!$jurnal) {
-            return redirect()->to('/guru/jurnal')->with('error', 'Data jurnal tidak ditemukan');
+        // Set date range if month and year provided
+        $startDate = null;
+        $endDate = null;
+        if ($bulan && $tahun) {
+            $startDate = "$tahun-" . str_pad($bulan, 2, '0', STR_PAD_LEFT) . "-01";
+            $endDate = date('Y-m-t', strtotime($startDate));
         }
 
-        // Cek apakah jurnal dibuat oleh guru yang login
-        // Check via absensi's created_by to support substitute teacher mode
-        $absensi = $this->absensiModel->find($jurnal['absensi_id']);
-        if ($absensi && $absensi['created_by'] != $userId) {
-            return redirect()->to('/guru/jurnal')->with('error', 'Anda tidak memiliki akses ke jurnal ini');
+        // Get jurnal list based on kelas
+        if ($kelasId) {
+            $jurnalList = $this->jurnalModel->select('jurnal_kbm.*,
+                                    absensi.tanggal,
+                                    absensi.pertemuan_ke,
+                                    absensi.materi_pembelajaran,
+                                    mata_pelajaran.nama_mapel,
+                                    kelas.nama_kelas')
+                ->join('absensi', 'absensi.id = jurnal_kbm.absensi_id')
+                ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
+                ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
+                ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
+                ->where('jadwal_mengajar.guru_id', $guru['id'])
+                ->where('kelas.id', $kelasId);
+
+            if ($startDate && $endDate) {
+                $jurnalList->where('absensi.tanggal >=', $startDate)
+                           ->where('absensi.tanggal <=', $endDate);
+            }
+
+            $jurnalList = $jurnalList->orderBy('absensi.tanggal', 'ASC')->findAll();
+            
+            // Get kelas info
+            $kelasModel = new \App\Models\KelasModel();
+            $kelasInfo = $kelasModel->find($kelasId);
+            $mapelInfo = !empty($jurnalList) ? ['nama_mapel' => $jurnalList[0]['nama_mapel']] : null;
+        } else {
+            // Redirect to jurnal index if no kelas specified
+            return redirect()->to('/guru/jurnal')->with('error', 'Pilih kelas untuk mencetak jurnal');
+        }
+
+        if (empty($jurnalList)) {
+            return redirect()->to('/guru/jurnal')->with('error', 'Tidak ada data jurnal untuk dicetak');
         }
 
         $data = [
             'title' => 'Print Jurnal KBM',
             'guru' => $guru,
-            'jurnal' => $jurnal,
+            'jurnalList' => $jurnalList,
+            'kelasInfo' => $kelasInfo,
+            'mapelInfo' => $mapelInfo,
+            'bulan' => $bulan,
+            'tahun' => $tahun,
             'request' => $this->request
         ];
 

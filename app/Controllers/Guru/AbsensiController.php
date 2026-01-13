@@ -262,7 +262,15 @@ class AbsensiController extends BaseController
 
             $this->session->setFlashdata('success', 'Absensi berhasil disimpan!');
 
-            // Redirect to absensi index
+            // Check next action from form
+            $nextAction = $this->request->getPost('next_action');
+            
+            if ($nextAction === 'jurnal') {
+                // Redirect to jurnal create with absensi_id
+                return redirect()->to('/guru/jurnal/tambah/' . $absensiId);
+            }
+
+            // Default: Redirect to absensi index
             return redirect()->to('/guru/absensi');
         } catch (\Exception $e) {
             $db->transRollback();
@@ -477,6 +485,16 @@ class AbsensiController extends BaseController
             }
 
             $this->session->setFlashdata('success', 'Absensi berhasil diperbarui!');
+            
+            // Check next action from form
+            $nextAction = $this->request->getPost('next_action');
+            
+            if ($nextAction === 'jurnal') {
+                // Redirect to jurnal create with absensi_id
+                return redirect()->to('/guru/jurnal/tambah/' . $id);
+            }
+
+            // Default: Redirect to absensi index
             return redirect()->to('/guru/absensi');
         } catch (\Exception $e) {
             $db->transRollback();

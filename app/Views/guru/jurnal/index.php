@@ -59,12 +59,12 @@
             <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                 <div>
                     <h1 class="text-3xl md:text-4xl font-bold text-gray-800 flex items-center">
-                        <span class="py-2 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                        <span class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                             <i class="fas fa-book-open mr-3"></i>
                             Jurnal Kegiatan Belajar Mengajar
                         </span>
                     </h1>
-                    <p class="text-gray-600 mt-2">Kelola dan pantau jurnal KBM Anda dengan mudah</p>
+                    <p class="text-gray-600 mt-2">Kelola jurnal pembelajaran per kelas dengan mudah</p>
                 </div>
                 <div class="mt-4 md:mt-0">
                     <nav class="text-sm text-gray-600 bg-white px-4 py-3 rounded-lg shadow-sm">
@@ -152,26 +152,26 @@
             </div>
         </div>
 
-        <!-- Jurnal List -->
+        <!-- Jurnal List per Kelas -->
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
             <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-6">
                 <div class="flex items-center justify-between">
                     <div>
                         <h2 class="text-xl font-bold text-white flex items-center">
                             <i class="fas fa-list mr-3"></i>
-                            Daftar Jurnal KBM
+                            Daftar Jurnal KBM per Kelas
                         </h2>
-                        <p class="text-indigo-100 mt-1">Semua jurnal pembelajaran yang telah dibuat</p>
+                        <p class="text-indigo-100 mt-1">Jurnal pembelajaran dikelompokkan berdasarkan kelas</p>
                     </div>
                     <div class="stats-badge bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-xl">
-                        <p class="text-sm opacity-90">Total Jurnal</p>
-                        <p class="text-3xl font-bold"><?= count($jurnal ?? []) ?></p>
+                        <p class="text-sm opacity-90">Total Kelas</p>
+                        <p class="text-3xl font-bold"><?= count($kelasList ?? []) ?></p>
                     </div>
                 </div>
             </div>
             
             <div class="p-6">
-                <?php if (empty($jurnal)): ?>
+                <?php if (empty($kelasList)): ?>
                 <!-- Empty State -->
                 <div class="text-center py-16">
                     <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 mb-6">
@@ -191,78 +191,52 @@
                         <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                             <tr>
                                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">No</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Tanggal</th>
                                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Mata Pelajaran</th>
                                 <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Kelas</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Materi Pembelajaran</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Foto</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Total Pertemuan</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            <?php $no = 1; foreach ($jurnal as $j): ?>
+                            <?php $no = 1; foreach ($kelasList as $kelas): ?>
                             <tr class="table-row-hover">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900"><?= $no++ ?></td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="bg-blue-100 p-2 rounded-lg mr-3">
-                                            <i class="fas fa-calendar-alt text-blue-600"></i>
-                                        </div>
-                                        <div>
-                                            <div class="text-sm font-bold text-gray-900"><?= date('d/m/Y', strtotime($j['tanggal'])) ?></div>
-                                            <div class="text-xs text-gray-500"><?= date('l', strtotime($j['tanggal'])) ?></div>
-                                        </div>
-                                    </div>
-                                </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center">
-                                        <div class="bg-green-100 p-2 rounded-lg mr-3">
-                                            <i class="fas fa-book text-green-600"></i>
+                                        <div class="bg-green-100 p-3 rounded-lg mr-3">
+                                            <i class="fas fa-book text-green-600 text-lg"></i>
                                         </div>
                                         <div>
-                                            <div class="text-sm font-bold text-gray-900"><?= esc($j['nama_mapel']) ?></div>
-                                            <div class="text-xs text-gray-500">Pertemuan ke-<?= $j['pertemuan_ke'] ?? '-' ?></div>
+                                            <div class="text-sm font-bold text-gray-900"><?= esc($kelas['nama_mapel']) ?></div>
+                                            <div class="text-xs text-gray-500">Mata Pelajaran</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border border-blue-200">
-                                        <i class="fas fa-users mr-1"></i>
-                                        <?= esc($j['nama_kelas']) ?>
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-700 max-w-md line-clamp-2">
-                                        <?= esc(substr($j['kegiatan_pembelajaran'], 0, 100)) ?><?= strlen($j['kegiatan_pembelajaran']) > 100 ? '...' : '' ?>
+                                    <div class="flex items-center">
+                                        <div class="bg-purple-100 p-3 rounded-lg mr-3">
+                                            <i class="fas fa-users text-purple-600 text-lg"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-sm font-bold text-gray-900"><?= esc($kelas['nama_kelas']) ?></div>
+                                            <div class="text-xs text-gray-500">Kelas</div>
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <?php if (!empty($j['foto_dokumentasi'])): ?>
-                                        <img src="<?= base_url('files/jurnal/' . esc($j['foto_dokumentasi'])) ?>" 
-                                             alt="Foto Dokumentasi" 
-                                             class="w-16 h-16 object-cover rounded-lg mx-auto cursor-pointer hover:scale-110 transition-transform"
-                                             onclick="showImageModal('<?= base_url('files/jurnal/' . esc($j['foto_dokumentasi'])) ?>')">
-                                    <?php else: ?>
-                                        <span class="text-gray-400 text-xs">
-                                            <i class="fas fa-image"></i><br>Tidak ada foto
-                                        </span>
-                                    <?php endif; ?>
+                                    <div class="inline-flex items-center justify-center bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border-2 border-blue-200 px-4 py-2 rounded-xl">
+                                        <i class="fas fa-clipboard-list mr-2"></i>
+                                        <span class="text-lg font-bold"><?= $kelas['total_pertemuan'] ?></span>
+                                        <span class="text-xs ml-1">pertemuan</span>
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <div class="flex items-center justify-center gap-2">
-                                        <a href="<?= base_url('guru/jurnal/show/' . $j['id']) ?>" 
-                                           class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:from-blue-600 hover:to-cyan-600 transition-all font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-                                           title="Preview Jurnal">
-                                            <i class="fas fa-eye mr-2"></i>
-                                            Preview
-                                        </a>
-                                        <a href="<?= base_url('guru/jurnal/edit/' . $j['id']) ?>" 
-                                           class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-                                           title="Edit Jurnal">
-                                            <i class="fas fa-edit mr-2"></i>
-                                            Edit
-                                        </a>
-                                    </div>
+                                    <a href="<?= base_url('guru/jurnal/show/' . $kelas['kelas_id']) ?>" 
+                                       class="inline-flex items-center px-6 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:from-blue-600 hover:to-cyan-600 transition-all font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                                       title="Lihat Daftar Pertemuan">
+                                        <i class="fas fa-eye mr-2"></i>
+                                        Lihat Pertemuan
+                                    </a>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -272,42 +246,24 @@
 
                 <!-- Cards Mobile -->
                 <div class="md:hidden space-y-4">
-                    <?php $no = 1; foreach ($jurnal as $j): ?>
+                    <?php $no = 1; foreach ($kelasList as $kelas): ?>
                     <div class="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-md border-2 border-gray-200 p-5 hover:shadow-lg transition-all">
                         <div class="flex items-start justify-between mb-4">
                             <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full">#{<?= $no++ ?>}</span>
-                            <div class="flex gap-2">
-                                <a href="<?= base_url('guru/jurnal/show/' . $j['id']) ?>" 
-                                   class="px-3 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg text-sm font-semibold shadow-md"
-                                   title="Preview">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                <a href="<?= base_url('guru/jurnal/edit/' . $j['id']) ?>" 
-                                   class="px-3 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg text-sm font-semibold shadow-md"
-                                   title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                            </div>
+                            <span class="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 text-xs font-bold px-3 py-2 rounded-lg border border-blue-200">
+                                <i class="fas fa-clipboard-list mr-1"></i>
+                                <?= $kelas['total_pertemuan'] ?> pertemuan
+                            </span>
                         </div>
                         
-                        <div class="space-y-3">
-                            <div class="flex items-center">
-                                <div class="bg-blue-100 p-2 rounded-lg mr-3">
-                                    <i class="fas fa-calendar-alt text-blue-600"></i>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-gray-500">Tanggal</p>
-                                    <p class="text-sm font-bold text-gray-900"><?= date('d/m/Y', strtotime($j['tanggal'])) ?></p>
-                                </div>
-                            </div>
-                            
+                        <div class="space-y-3 mb-4">
                             <div class="flex items-center">
                                 <div class="bg-green-100 p-2 rounded-lg mr-3">
                                     <i class="fas fa-book text-green-600"></i>
                                 </div>
                                 <div>
                                     <p class="text-xs text-gray-500">Mata Pelajaran</p>
-                                    <p class="text-sm font-bold text-gray-900"><?= esc($j['nama_mapel']) ?></p>
+                                    <p class="text-sm font-bold text-gray-900"><?= esc($kelas['nama_mapel']) ?></p>
                                 </div>
                             </div>
                             
@@ -317,17 +273,16 @@
                                 </div>
                                 <div>
                                     <p class="text-xs text-gray-500">Kelas</p>
-                                    <p class="text-sm font-bold text-gray-900"><?= esc($j['nama_kelas']) ?></p>
+                                    <p class="text-sm font-bold text-gray-900"><?= esc($kelas['nama_kelas']) ?></p>
                                 </div>
                             </div>
-                            
-                            <div class="pt-3 border-t border-gray-200">
-                                <p class="text-xs text-gray-500 mb-1">Tujuan Pembelajaran:</p>
-                                <p class="text-sm text-gray-700">
-                                    <?= esc(substr($j['tujuan_pembelajaran'], 0, 100)) ?><?= strlen($j['tujuan_pembelajaran']) > 100 ? '...' : '' ?>
-                                </p>
-                            </div>
                         </div>
+                        
+                        <a href="<?= base_url('guru/jurnal/show/' . $kelas['kelas_id']) ?>" 
+                           class="block w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg text-center font-semibold shadow-md hover:shadow-lg transition-all">
+                            <i class="fas fa-eye mr-2"></i>
+                            Lihat Pertemuan
+                        </a>
                     </div>
                     <?php endforeach; ?>
                 </div>
@@ -350,15 +305,15 @@
                         </li>
                         <li class="flex items-start">
                             <i class="fas fa-check-circle text-blue-600 mr-3 mt-0.5"></i>
+                            <span>Klik <strong>"Lihat Pertemuan"</strong> untuk melihat semua jurnal per kelas</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-blue-600 mr-3 mt-0.5"></i>
                             <span>Gunakan <strong>filter tanggal</strong> untuk mencari jurnal pada periode tertentu</span>
                         </li>
                         <li class="flex items-start">
                             <i class="fas fa-check-circle text-blue-600 mr-3 mt-0.5"></i>
-                            <span>Pastikan melengkapi semua informasi jurnal dengan <strong>detail dan akurat</strong></span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-blue-600 mr-3 mt-0.5"></i>
-                            <span>Jurnal dapat diedit <strong>kapan saja</strong> untuk memperbaiki atau menambahkan informasi</span>
+                            <span>Jurnal dikelompokkan berdasarkan <strong>kelas dan mata pelajaran</strong></span>
                         </li>
                     </ul>
                 </div>
@@ -381,21 +336,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, index * 50);
     });
 });
-
-    // Image Modal
-    function showImageModal(imageUrl) {
-        const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
-        modal.onclick = () => modal.remove();
-        
-        const img = document.createElement('img');
-        img.src = imageUrl;
-        img.className = 'max-w-full max-h-full rounded-lg shadow-2xl';
-        img.onclick = (e) => e.stopPropagation();
-        
-        modal.appendChild(img);
-        document.body.appendChild(modal);
-    }
 </script>
 
 <?= $this->endSection() ?>
