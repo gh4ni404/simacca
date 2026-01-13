@@ -208,6 +208,12 @@
         const submitBtn = document.getElementById('submitBtn');
         const form = document.getElementById('jadwalForm');
 
+        // Fungsi untuk mendapatkan CSRF token dari form
+        function getCsrfToken() {
+            const tokenInput = form.querySelector('input[name="<?= csrf_token() ?>"]');
+            return tokenInput ? tokenInput.value : '';
+        }
+
         // Fungsi untuk check konflik
         function checkConflict() {
             const guruId = document.getElementById('guru_id').value;
@@ -220,21 +226,23 @@
                 return;
             }
 
-            // Kirim AJAX request untuk check konflik
+            // Kirim AJAX request untuk check konflik dengan CSRF token dari form
+            const formData = new URLSearchParams({
+                'guru_id': guruId,
+                'kelas_id': kelasId,
+                'hari': hari,
+                'jam_mulai': jamMulai,
+                'jam_selesai': jamSelesai,
+                '<?= csrf_token() ?>': getCsrfToken()
+            });
+
             fetch('<?= base_url("admin/jadwal/checkConflict"); ?>', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: new URLSearchParams({
-                        'guru_id': guruId,
-                        'kelas_id': kelasId,
-                        'hari': hari,
-                        'jam_mulai': jamMulai,
-                        'jam_selesai': jamSelesai,
-                        '<?= csrf_token() ?>': '<?= csrf_hash() ?>'
-                    })
+                    body: formData
                 })
                 .then(response => response.json())
                 .then(data => {

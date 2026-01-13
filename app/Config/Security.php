@@ -61,8 +61,9 @@ class Security extends BaseConfig
      * Expiration time for Cross Site Request Forgery protection cookie.
      *
      * Defaults to two hours (in seconds).
+     * Changed to 4 hours (14400) to accommodate longer form sessions
      */
-    public int $expires = 7200;
+    public int $expires = 14400;
 
     /**
      * --------------------------------------------------------------------------
@@ -70,6 +71,9 @@ class Security extends BaseConfig
      * --------------------------------------------------------------------------
      *
      * Regenerate CSRF Token on every submission.
+     * 
+     * NOTE: Set to FALSE when using AJAX requests that might change the token
+     * before form submission (causes token mismatch error)
      */
     public bool $regenerate = false;
 
@@ -79,8 +83,9 @@ class Security extends BaseConfig
      * --------------------------------------------------------------------------
      *
      * Redirect to previous page with error on failure.
+     * Set to true to show friendly error instead of exception page
      *
      * @see https://codeigniter4.github.io/userguide/libraries/security.html#redirection-on-failure
      */
-    public bool $redirect = (ENVIRONMENT === 'production');
+    public bool $redirect = true;
 }
