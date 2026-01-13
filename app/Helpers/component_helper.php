@@ -116,3 +116,66 @@ if (!function_exists('load_component')) {
         }
     }
 }
+
+if (!function_exists('modal_scripts')) {
+    /**
+     * Render modal JavaScript for handling modal interactions
+     * 
+     * @return string JavaScript code for modals
+     */
+    function modal_scripts()
+    {
+        return <<<'HTML'
+<script>
+    // Modal helper functions
+    function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        }
+    }
+
+    // Auto-attach close handlers to modal close buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        // Close modal when clicking close button
+        document.querySelectorAll('[data-modal-close]').forEach(button => {
+            button.addEventListener('click', function() {
+                const modalId = this.getAttribute('data-modal-close');
+                closeModal(modalId);
+            });
+        });
+
+        // Close modal when clicking overlay
+        document.querySelectorAll('[data-modal-overlay]').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    const modalId = this.getAttribute('data-modal-overlay');
+                    closeModal(modalId);
+                }
+            });
+        });
+
+        // Close modal on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('[role="dialog"]:not(.hidden)').forEach(modal => {
+                    closeModal(modal.id);
+                });
+            }
+        });
+    });
+</script>
+HTML;
+    }
+}
