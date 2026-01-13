@@ -44,6 +44,10 @@ class Cookie extends BaseConfig
      * --------------------------------------------------------------------------
      *
      * Set to `.your-domain.com` for site-wide cookies.
+     * 
+     * AUTO-DETECTION: Automatically sets domain based on environment
+     * - Production: Uses actual domain from HTTP_HOST
+     * - Development: Empty (works for localhost)
      */
     public string $domain = '';
 
@@ -53,8 +57,43 @@ class Cookie extends BaseConfig
      * --------------------------------------------------------------------------
      *
      * Cookie will only be set if a secure HTTPS connection exists.
+     * 
+     * AUTO-DETECTION: Automatically detects HTTPS connection
      */
     public bool $secure = false;
+    
+    public function __construct()
+    {
+        parent::__construct();
+        
+        // Auto-detect HTTPS for secure cookies
+        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+            $this->secure = true;
+        } elseif (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+            // Behind reverse proxy/load balancer
+            $this->secure = true;
+        }
+        
+        // Auto-detect domain for production environment
+        if (ENVIRONMENT === 'production' && isset($_SERVER['HTTP_HOST'])) {
+            // Extract domain from HTTP_HOST
+            $host = $_SERVER['HTTP_HOST'];
+            
+            // Remove port if present
+            $host = explode(':', $host)[0];
+            
+            // For subdomain cookie sharing, use root domain
+            // e.g., simacca.smkn8bone.sch.id -> .smkn8bone.sch.id
+            $parts = explode('.', $host);
+            if (count($parts) > 2) {
+                // Has subdomain, set to root domain for sharing
+                $this->domain = '.' . implode('.', array_slice($parts, -2));
+            } else {
+                // No subdomain, use as is
+                $this->domain = '';
+            }
+        }
+    }
 
     /**
      * --------------------------------------------------------------------------
