@@ -16,18 +16,8 @@
         </div>
     </div>
 
-    <!-- Flash Message -->
-    <?php if (session()->getFlashdata('success')): ?>
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            <?= session()->getFlashdata('success'); ?>
-        </div>
-    <?php endif; ?>
-
-    <?php if (session()->getFlashdata('error')): ?>
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            <?= session()->getFlashdata('error'); ?>
-        </div>
-    <?php endif; ?>
+    <!-- Flash Messages -->
+    <?= view('components/alerts') ?>
 
     <!-- Search and Filter -->
     <div class="bg-white rounded-lg shadow p-4 mb-6">

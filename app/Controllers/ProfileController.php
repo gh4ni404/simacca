@@ -27,7 +27,7 @@ class ProfileController extends BaseController
     {
         // Check if user is logged in
         if (!session()->get('isLoggedIn')) {
-            return redirect()->to('/login')->with('error', 'Silahkan login terlebih dahulu');
+            return redirect()->to('/login')->with('error', 'Login dulu dong ??');
         }
 
         $userId = session()->get('userId');
@@ -64,7 +64,7 @@ class ProfileController extends BaseController
     {
         // Check if user is logged in
         if (!session()->get('isLoggedIn')) {
-            return redirect()->to('/login')->with('error', 'Silahkan login terlebih dahulu');
+            return redirect()->to('/login')->with('error', 'Login dulu dong ??');
         }
 
         $userId = session()->get('userId');
@@ -109,7 +109,7 @@ class ProfileController extends BaseController
             'email' => $updateData['email']
         ]);
 
-        session()->setFlashdata('success', 'Profil berhasil diupdate');
+        session()->setFlashdata('success', 'Profil updated! Looking good 😎✨');
         return redirect()->back();
     }
 }

@@ -46,7 +46,7 @@ class DashboardController extends BaseController
         // Get guru data
         $guru = $this->guruModel->getByUserId($userId);
         if (!$guru) {
-            $this->session->setFlashdata('error', 'Data guru tidak ditemukan.');
+            $this->session->setFlashdata('error', 'Data guru nggak ketemu 🔍');
             return redirect()->to('/login');
         }
 

@@ -91,7 +91,7 @@ class IzinController extends BaseController
 
         if (!$siswa) {
             log_message('error', '[IZIN SISWA] Siswa not found for user_id: ' . $userId);
-            session()->setFlashdata('error', '❌ Data siswa tidak ditemukan');
+            session()->setFlashdata('error', 'Data siswa nggak ketemu 🔍');
             return redirect()->back();
         }
 
@@ -113,7 +113,7 @@ class IzinController extends BaseController
                 $errorList .= '<li>' . $error . '</li>';
             }
             $errorList .= '</ul>';
-            session()->setFlashdata('error', '❌ Mohon lengkapi data berikut:' . $errorList);
+            session()->setFlashdata('error', 'Lengkapin dulu datanya ya 😊' . $errorList);
             return redirect()->back()->withInput();
         }
 
@@ -122,7 +122,7 @@ class IzinController extends BaseController
         // Check if already submitted for same date
         if ($this->izinSiswaModel->isIzinExist($siswa['id'], $this->request->getPost('tanggal'))) {
             log_message('warning', '[IZIN SISWA] Duplicate izin for date: ' . $this->request->getPost('tanggal'));
-            session()->setFlashdata('error', '⚠️ Anda sudah mengajukan izin untuk tanggal tersebut');
+            session()->setFlashdata('error', 'Eh, udah ngajuin izin di tanggal ini kok 📅');
             return redirect()->back()->withInput();
         }
 
@@ -162,7 +162,7 @@ class IzinController extends BaseController
                 log_message('info', '[IZIN SISWA] File uploaded: ' . $berkasName);
             } catch (\Exception $e) {
                 log_message('error', '[IZIN SISWA] File upload failed: ' . $e->getMessage());
-                session()->setFlashdata('error', '📁 Gagal mengupload berkas: ' . $e->getMessage());
+                session()->setFlashdata('error', 'Upload file gagal nih 📁😬');
                 return redirect()->back()->withInput();
             }
         }
@@ -182,7 +182,7 @@ class IzinController extends BaseController
         try {
             if ($this->izinSiswaModel->insert($data)) {
                 log_message('info', '[IZIN SISWA] Insert successful');
-                session()->setFlashdata('success', '✅ Izin berhasil diajukan! Menunggu persetujuan wali kelas.');
+                session()->setFlashdata('success', 'Izin dikirim! Tunggu persetujuan wali kelas ya 📨✨');
                 return redirect()->to('/siswa/izin');
             } else {
                 $modelErrors = $this->izinSiswaModel->errors();
@@ -202,7 +202,7 @@ class IzinController extends BaseController
                     $errorList .= '</ul>';
                     session()->setFlashdata('error', '❌ Gagal mengajukan izin:' . $errorList);
                 } else {
-                    session()->setFlashdata('error', '❌ Gagal mengajukan izin. Silakan coba lagi.');
+                    session()->setFlashdata('error', 'Oops, izin gagal dikirim. Coba lagi yuk 😅');
                 }
                 
                 return redirect()->back()->withInput();

@@ -23,18 +23,7 @@
     </div>
 
     <!-- Flash Messages -->
-    <?php if (session()->getFlashdata('error')): ?>
-        <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm animate-fade-in">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
-                </div>
-                <div class="ml-3">
-                    <p class="text-red-800 font-medium"><?= session()->getFlashdata('error'); ?></p>
-                </div>
-            </div>
-        </div>
-    <?php endif; ?>
+    <?= view('components/alerts') ?>
 
     <!-- Main Form Container -->
     <div class="bg-white rounded-2xl shadow-xl p-8">

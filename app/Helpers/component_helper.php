@@ -8,93 +8,188 @@
 
 if (!function_exists('render_alerts')) {
     /**
-     * Render alert messages from session
+     * Render alert messages from session with priority
+     * Only shows ONE alert at a time (the highest priority)
+     * Priority order: errors > error > warning > success_custom > success > info
      * 
-     * @return string HTML for alerts
+     * @param bool $showAll If true, shows all alerts. Default false (only highest priority)
+     * @return string HTML for alert(s)
      */
-    function render_alerts()
+    function render_alerts($showAll = false)
     {
         if (!function_exists('session')) {
             return '';
         }
         
-        $output = '';
+        // Prevent double rendering using a static flag
+        static $rendered = false;
+        if ($rendered) {
+            return ''; // Already rendered, return empty
+        }
+        
         $session = session();
         
-        // Success alert
-        if ($session->has('success')) {
-            $output .= '<div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-r-lg shadow-md mb-4 flex items-start" role="alert">';
-            $output .= '<i class="fas fa-check-circle text-xl mr-3 mt-0.5"></i>';
-            $output .= '<div class="flex-1">';
-            $output .= '<p class="font-semibold">Berhasil!</p>';
-            $output .= '<p class="text-sm">' . esc($session->get('success')) . '</p>';
-            $output .= '</div>';
-            $output .= '<button onclick="this.parentElement.remove()" class="text-green-700 hover:text-green-900 ml-4">';
-            $output .= '<i class="fas fa-times"></i>';
-            $output .= '</button>';
-            $output .= '</div>';
-        }
+        // Priority order for single alert display
+        $priorities = [
+            'errors',
+            'error', 
+            'warning',
+            'success_custom',
+            'success',
+            'info'
+        ];
         
-        // Error alert
-        if ($session->has('error')) {
-            $output .= '<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-r-lg shadow-md mb-4 flex items-start" role="alert">';
-            $output .= '<i class="fas fa-exclamation-circle text-xl mr-3 mt-0.5"></i>';
-            $output .= '<div class="flex-1">';
-            $output .= '<p class="font-semibold">Terjadi Kesalahan!</p>';
-            $output .= '<p class="text-sm">' . esc($session->get('error')) . '</p>';
-            $output .= '</div>';
-            $output .= '<button onclick="this.parentElement.remove()" class="text-red-700 hover:text-red-900 ml-4">';
-            $output .= '<i class="fas fa-times"></i>';
-            $output .= '</button>';
-            $output .= '</div>';
-        }
-        
-        // Warning alert
-        if ($session->has('warning')) {
-            $output .= '<div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-r-lg shadow-md mb-4 flex items-start" role="alert">';
-            $output .= '<i class="fas fa-exclamation-triangle text-xl mr-3 mt-0.5"></i>';
-            $output .= '<div class="flex-1">';
-            $output .= '<p class="font-semibold">Perhatian!</p>';
-            $output .= '<p class="text-sm">' . esc($session->get('warning')) . '</p>';
-            $output .= '</div>';
-            $output .= '<button onclick="this.parentElement.remove()" class="text-yellow-700 hover:text-yellow-900 ml-4">';
-            $output .= '<i class="fas fa-times"></i>';
-            $output .= '</button>';
-            $output .= '</div>';
-        }
-        
-        // Info alert
-        if ($session->has('info')) {
-            $output .= '<div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-r-lg shadow-md mb-4 flex items-start" role="alert">';
-            $output .= '<i class="fas fa-info-circle text-xl mr-3 mt-0.5"></i>';
-            $output .= '<div class="flex-1">';
-            $output .= '<p class="font-semibold">Informasi</p>';
-            $output .= '<p class="text-sm">' . esc($session->get('info')) . '</p>';
-            $output .= '</div>';
-            $output .= '<button onclick="this.parentElement.remove()" class="text-blue-700 hover:text-blue-900 ml-4">';
-            $output .= '<i class="fas fa-times"></i>';
-            $output .= '</button>';
-            $output .= '</div>';
-        }
-        
-        // Errors array
-        if ($session->has('errors')) {
-            $output .= '<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-r-lg shadow-md mb-4" role="alert">';
-            $output .= '<div class="flex items-start">';
-            $output .= '<i class="fas fa-exclamation-circle text-xl mr-3 mt-0.5"></i>';
-            $output .= '<div class="flex-1">';
-            $output .= '<p class="font-semibold mb-2">Terjadi beberapa kesalahan:</p>';
-            $output .= '<ul class="list-disc list-inside text-sm space-y-1">';
-            foreach ($session->get('errors') as $error) {
-                $output .= '<li>' . esc($error) . '</li>';
+        // If showAll is false, find the first available message and show only that
+        if (!$showAll) {
+            foreach ($priorities as $type) {
+                // Use getFlashdata() to properly read flashdata
+                $data = $session->getFlashdata($type);
+                if ($data !== null) {
+                    $rendered = true; // Mark as rendered
+                    return render_single_alert($type, $data);
+                }
             }
-            $output .= '</ul>';
-            $output .= '</div>';
-            $output .= '<button onclick="this.parentElement.parentElement.remove()" class="text-red-700 hover:text-red-900 ml-4">';
-            $output .= '<i class="fas fa-times"></i>';
-            $output .= '</button>';
-            $output .= '</div>';
-            $output .= '</div>';
+            return '';
+        }
+        
+        // If showAll is true, render all available alerts
+        $output = '';
+        foreach ($priorities as $type) {
+            // Use getFlashdata() to properly read flashdata
+            $data = $session->getFlashdata($type);
+            if ($data !== null) {
+                $output .= render_single_alert($type, $data);
+            }
+        }
+        
+        if ($output !== '') {
+            $rendered = true; // Mark as rendered
+        }
+        
+        return $output;
+    }
+}
+
+if (!function_exists('render_single_alert')) {
+    /**
+     * Render a single alert based on type
+     * 
+     * @param string $type Alert type (success, error, warning, info, errors, success_custom)
+     * @param mixed $data Alert data (string or array)
+     * @return string HTML for the alert
+     */
+    function render_single_alert($type, $data)
+    {
+        $output = '';
+        
+        switch ($type) {
+            case 'success_custom':
+                // Custom success with title and message
+                $title = is_array($data) ? ($data['title'] ?? 'Berhasil!') : 'Berhasil!';
+                $message = is_array($data) ? ($data['message'] ?? '') : $data;
+                
+                $output .= '<div class="bg-gradient-to-r from-green-50 to-blue-50 border-l-4 border-green-500 p-6 rounded-lg shadow-lg mb-6 animate-fade-in" role="alert">';
+                $output .= '<div class="flex items-start">';
+                $output .= '<div class="flex-shrink-0">';
+                $output .= '<div class="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center">';
+                $output .= '<i class="fas fa-check-circle text-white text-2xl"></i>';
+                $output .= '</div>';
+                $output .= '</div>';
+                $output .= '<div class="ml-4 flex-1">';
+                $output .= '<h3 class="text-xl font-bold text-gray-800 mb-2">' . $title . '</h3>';
+                $output .= '<p class="text-gray-700">' . $message . '</p>';
+                $output .= '</div>';
+                $output .= '<button onclick="this.parentElement.parentElement.remove()" class="text-gray-500 hover:text-gray-700 ml-4">';
+                $output .= '<i class="fas fa-times text-xl"></i>';
+                $output .= '</button>';
+                $output .= '</div>';
+                $output .= '</div>';
+                break;
+                
+            case 'success':
+                $output .= '<div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg shadow-sm mb-6 animate-fade-in" role="alert">';
+                $output .= '<div class="flex items-center">';
+                $output .= '<div class="flex-shrink-0">';
+                $output .= '<i class="fas fa-check-circle text-green-500 text-xl"></i>';
+                $output .= '</div>';
+                $output .= '<div class="ml-3 flex-1">';
+                $output .= '<p class="text-green-800 font-medium">' . esc($data) . '</p>';
+                $output .= '</div>';
+                $output .= '<button onclick="this.parentElement.parentElement.remove()" class="text-green-600 hover:text-green-800 ml-4">';
+                $output .= '<i class="fas fa-times"></i>';
+                $output .= '</button>';
+                $output .= '</div>';
+                $output .= '</div>';
+                break;
+                
+            case 'error':
+                $output .= '<div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm mb-6 animate-fade-in" role="alert">';
+                $output .= '<div class="flex items-center">';
+                $output .= '<div class="flex-shrink-0">';
+                $output .= '<i class="fas fa-exclamation-circle text-red-500 text-xl"></i>';
+                $output .= '</div>';
+                $output .= '<div class="ml-3 flex-1">';
+                $output .= '<p class="text-red-800 font-medium">' . esc($data) . '</p>';
+                $output .= '</div>';
+                $output .= '<button onclick="this.parentElement.parentElement.remove()" class="text-red-600 hover:text-red-800 ml-4">';
+                $output .= '<i class="fas fa-times"></i>';
+                $output .= '</button>';
+                $output .= '</div>';
+                $output .= '</div>';
+                break;
+                
+            case 'warning':
+                $output .= '<div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-lg shadow-sm mb-6 animate-fade-in" role="alert">';
+                $output .= '<div class="flex items-center">';
+                $output .= '<div class="flex-shrink-0">';
+                $output .= '<i class="fas fa-exclamation-triangle text-yellow-500 text-xl"></i>';
+                $output .= '</div>';
+                $output .= '<div class="ml-3 flex-1">';
+                $output .= '<p class="text-yellow-800 font-medium">' . esc($data) . '</p>';
+                $output .= '</div>';
+                $output .= '<button onclick="this.parentElement.parentElement.remove()" class="text-yellow-600 hover:text-yellow-800 ml-4">';
+                $output .= '<i class="fas fa-times"></i>';
+                $output .= '</button>';
+                $output .= '</div>';
+                $output .= '</div>';
+                break;
+                
+            case 'info':
+                $output .= '<div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg shadow-sm mb-6 animate-fade-in" role="alert">';
+                $output .= '<div class="flex items-center">';
+                $output .= '<div class="flex-shrink-0">';
+                $output .= '<i class="fas fa-info-circle text-blue-500 text-xl"></i>';
+                $output .= '</div>';
+                $output .= '<div class="ml-3 flex-1">';
+                $output .= '<p class="text-blue-800 font-medium">' . esc($data) . '</p>';
+                $output .= '</div>';
+                $output .= '<button onclick="this.parentElement.parentElement.remove()" class="text-blue-600 hover:text-blue-800 ml-4">';
+                $output .= '<i class="fas fa-times"></i>';
+                $output .= '</button>';
+                $output .= '</div>';
+                $output .= '</div>';
+                break;
+                
+            case 'errors':
+                $output .= '<div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm mb-6 animate-fade-in" role="alert">';
+                $output .= '<div class="flex items-start">';
+                $output .= '<div class="flex-shrink-0">';
+                $output .= '<i class="fas fa-exclamation-circle text-red-500 text-xl mt-0.5"></i>';
+                $output .= '</div>';
+                $output .= '<div class="ml-3 flex-1">';
+                $output .= '<p class="text-red-800 font-semibold mb-2">Terjadi beberapa kesalahan:</p>';
+                $output .= '<ul class="list-disc list-inside text-sm text-red-700 space-y-1">';
+                foreach ($data as $error) {
+                    $output .= '<li>' . esc($error) . '</li>';
+                }
+                $output .= '</ul>';
+                $output .= '</div>';
+                $output .= '<button onclick="this.parentElement.parentElement.remove()" class="text-red-600 hover:text-red-800 ml-4">';
+                $output .= '<i class="fas fa-times"></i>';
+                $output .= '</button>';
+                $output .= '</div>';
+                $output .= '</div>';
+                break;
         }
         
         return $output;

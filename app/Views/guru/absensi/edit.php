@@ -23,30 +23,7 @@
     </div>
 
     <!-- Flash Messages -->
-    <?php if (session()->getFlashdata('error')): ?>
-        <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm">
-            <div class="flex items-center">
-                <i class="fas fa-exclamation-circle text-red-500 text-xl mr-3"></i>
-                <p class="text-red-800 font-medium"><?= session()->getFlashdata('error') ?></p>
-            </div>
-        </div>
-    <?php endif; ?>
-
-    <?php if (isset($errors)): ?>
-        <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm">
-            <div class="flex items-start">
-                <i class="fas fa-exclamation-circle text-red-500 text-xl mr-3 mt-1"></i>
-                <div class="flex-1">
-                    <p class="text-red-800 font-bold mb-2">Terdapat kesalahan:</p>
-                    <ul class="list-disc list-inside text-red-700 space-y-1">
-                        <?php foreach ($errors as $error): ?>
-                            <li><?= $error ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    <?php endif; ?>
+    <?= view('components/alerts') ?>
 
     <!-- Absensi Info Card -->
     <div class="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-300 rounded-2xl shadow-lg p-6 mb-8">

@@ -37,7 +37,7 @@ class AuthFilter implements FilterInterface
             }
 
             // Redirect to login page
-            return redirect()->to('/login')->with('error', 'Silahkan login terlebih dahulu');
+            return redirect()->to('/login')->with('error', 'Login dulu dong 🔐');
         }
 
         // Update last activity time to keep session alive

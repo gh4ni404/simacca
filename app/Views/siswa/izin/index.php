@@ -21,20 +21,8 @@
         </div>
     </div>
 
-    <!-- Success/Error Message -->
-    <?php if (session()->getFlashdata('success')): ?>
-    <div class="mb-6 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center">
-        <i class="fas fa-check-circle text-xl mr-3"></i>
-        <span><?= session()->getFlashdata('success'); ?></span>
-    </div>
-    <?php endif; ?>
-
-    <?php if (session()->getFlashdata('error')): ?>
-    <div class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center">
-        <i class="fas fa-exclamation-circle text-xl mr-3"></i>
-        <span><?= session()->getFlashdata('error'); ?></span>
-    </div>
-    <?php endif; ?>
+    <!-- Flash Messages -->
+    <?= view('components/alerts') ?>
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">

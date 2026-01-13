@@ -137,7 +137,7 @@ class AuthController extends BaseController
             return $this->redirectToDashboard();
         } else {
             // Login Failed
-            session()->setFlashdata('error', 'Username atau password salah');
+            session()->setFlashdata('error', 'Hmm, username atau password kayaknya salah deh 🤔');
             return redirect()->to('/login')->withInput();
         }
     }
@@ -221,7 +221,7 @@ class AuthController extends BaseController
         }
 
         // TODO: Send reset password email
-        session()->setFlashdata('success', 'Instruksi reset password telah dikirim ke email anda');
+        session()->setFlashdata('success', 'Cek email ya! Instruksi reset sudah dikirim 📧✨');
         return redirect()->to('/login');
     }
 
@@ -261,7 +261,7 @@ class AuthController extends BaseController
 
         // TODO: Validate token and update password
 
-        session()->setFlashdata('success', 'Password berhasil direset. Silahkan login dengan password baru');
+        session()->setFlashdata('success', 'Mantap! Password baru siap dipakai 🎉 Yuk login!');
         return redirect()->to('/login');
     }
 
@@ -272,7 +272,7 @@ class AuthController extends BaseController
     {
         // Check if user is logged in
         if (!session()->get('isLoggedIn')) {
-            return redirect()->to('/login')->with('error', 'Silahkan login terlebih dahulu');
+            return redirect()->to('/login')->with('error', 'Login dulu dong ??');
         }
 
         $data = [
@@ -289,7 +289,7 @@ class AuthController extends BaseController
     {
         // Check if user is logged in
         if (!session()->get('isLoggedIn')) {
-            return redirect()->to('/login')->with('error', 'Silahkan login terlebih dahulu');
+            return redirect()->to('/login')->with('error', 'Login dulu dong ??');
         }
 
         $rules = [
@@ -331,7 +331,7 @@ class AuthController extends BaseController
         $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
         $this->userModel->update($userId, ['password' => $hashedPassword]);
 
-        session()->setFlashdata('success', 'Passowrd berhasil diubah');
+        session()->setFlashdata('success', 'Password updated! Jangan lupa dicatat ya 🔐✨');
 
         // redirect based on role
         return $this->redirectToDashboard();

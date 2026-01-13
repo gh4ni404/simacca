@@ -8,12 +8,8 @@
         <p class="text-gray-600">Isi form untuk menambahkan mata pelajaran baru</p>
     </div>
 
-    <!-- Flash Message -->
-    <?php if (session()->getFlashdata('error')): ?>
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            <?= session()->getFlashdata('error'); ?>
-        </div>
-    <?php endif; ?>
+    <!-- Flash Messages -->
+    <?= view('components/alerts') ?>
 
     <!-- Form -->
     <div class="bg-white rounded-lg shadow p-6">

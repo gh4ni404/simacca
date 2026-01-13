@@ -20,7 +20,7 @@ class FileController extends BaseController
         
         // Check if file exists
         if (!file_exists($filepath)) {
-            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('File tidak ditemukan');
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('File nggak ketemu 🔍');
         }
         
         // Get file info

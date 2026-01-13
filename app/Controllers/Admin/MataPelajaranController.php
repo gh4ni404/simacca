@@ -88,10 +88,10 @@ class MataPelajaranController extends BaseController
 
         // Save to database
         if ($this->mataPelajaranModel->save($data)) {
-            $this->session->setFlashdata('success', 'Mata pelajaran berhasil ditambahkan!');
+            $this->session->setFlashdata('success', 'Sip! Mapel baru sudah masuk.');
             return redirect()->to('/admin/mata-pelajaran');
         } else {
-            $this->session->setFlashdata('error', 'Gagal menambahkan mata pelajaran.');
+            $this->session->setFlashdata('error', 'Oops, mapel gagal ditambahkan ??');
             return redirect()->back()->withInput();
         }
     }
@@ -158,10 +158,10 @@ class MataPelajaranController extends BaseController
 
         // Update database
         if ($this->mataPelajaranModel->save($data)) {
-            $this->session->setFlashdata('success', 'Mata pelajaran berhasil diperbarui!');
+            $this->session->setFlashdata('success', 'Done! Mapel sudah diperbarui ??');
             return redirect()->to('/admin/mata-pelajaran');
         } else {
-            $this->session->setFlashdata('error', 'Gagal memperbarui mata pelajaran.');
+            $this->session->setFlashdata('error', 'Waduh, update mapel gagal nih ??');
             return redirect()->back()->withInput();
         }
     }
@@ -189,7 +189,7 @@ class MataPelajaranController extends BaseController
             ->countAllResults();
 
         if ($checkUsage > 0) {
-            $this->session->setFlashdata('error', 'Mata pelajaran tidak dapat dihapus karena masih digunakan dalam jadwal mengajar!');
+            $this->session->setFlashdata('error', 'Mapel ini masih dipake di jadwal, belum bisa dihapus ya ??');
             return redirect()->back();
         }
 
@@ -199,15 +199,15 @@ class MataPelajaranController extends BaseController
             ->countAllResults();
 
         if ($checkGuruUsage > 0) {
-            $this->session->setFlashdata('error', 'Mata pelajaran tidak dapat dihapus karena masih digunakan oleh guru!');
+            $this->session->setFlashdata('error', 'Ada guru yang ngajar mapel ini, belum bisa dihapus.');
             return redirect()->back();
         }
 
         // Delete from database
         if ($this->mataPelajaranModel->delete($id)) {
-            $this->session->setFlashdata('success', 'Mata pelajaran berhasil dihapus!');
+            $this->session->setFlashdata('success', 'Mapel sudah dihapus ?');
         } else {
-            $this->session->setFlashdata('error', 'Gagal menghapus mata pelajaran.');
+            $this->session->setFlashdata('error', 'Hmm, gagal hapus mapel ??');
         }
 
         return redirect()->to('/admin/mata-pelajaran');

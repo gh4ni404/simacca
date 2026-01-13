@@ -78,34 +78,8 @@
             </div>
         </div>
 
-        <!-- Success/Error Messages -->
-        <?php if (session()->getFlashdata('success')): ?>
-        <div class="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 text-green-800 px-6 py-4 rounded-lg shadow-md animate-slide-in-left">
-            <div class="flex items-center">
-                <div class="bg-green-500 text-white p-2 rounded-lg mr-4">
-                    <i class="fas fa-check-circle text-xl"></i>
-                </div>
-                <div>
-                    <p class="font-semibold">Berhasil!</p>
-                    <p class="text-sm"><?= session()->getFlashdata('success') ?></p>
-                </div>
-            </div>
-        </div>
-        <?php endif; ?>
-
-        <?php if (session()->getFlashdata('error')): ?>
-        <div class="mb-6 bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-500 text-red-800 px-6 py-4 rounded-lg shadow-md animate-slide-in-left">
-            <div class="flex items-center">
-                <div class="bg-red-500 text-white p-2 rounded-lg mr-4">
-                    <i class="fas fa-exclamation-circle text-xl"></i>
-                </div>
-                <div>
-                    <p class="font-semibold">Terjadi Kesalahan!</p>
-                    <p class="text-sm"><?= session()->getFlashdata('error') ?></p>
-                </div>
-            </div>
-        </div>
-        <?php endif; ?>
+        <!-- Flash Messages -->
+        <?= view('components/alerts') ?>
 
         <!-- Filter Section -->
         <div class="bg-white rounded-2xl shadow-lg mb-8 overflow-hidden">

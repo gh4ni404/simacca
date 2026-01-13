@@ -129,7 +129,7 @@ class JurnalController extends BaseController
                 $errorList .= '<li>' . $error . '</li>';
             }
             $errorList .= '</ul>';
-            session()->setFlashdata('error', '❌ Mohon lengkapi data berikut:' . $errorList);
+            session()->setFlashdata('error', 'Isi dulu dong yang lengkap 😊' . $errorList);
             return redirect()->back()->withInput();
         }
 
@@ -137,7 +137,7 @@ class JurnalController extends BaseController
         $absensiId = $this->request->getPost('absensi_id');
         $existingJurnal = $this->jurnalModel->getByAbsensi($absensiId);
         if ($existingJurnal) {
-            session()->setFlashdata('info', '📝 Jurnal untuk pertemuan ini sudah ada. Silakan edit jurnal tersebut.');
+            session()->setFlashdata('info', 'Jurnal pertemuan ini udah ada nih. Edit aja ya! 📝');
             return redirect()->to('/guru/jurnal/edit/' . $existingJurnal['id']);
         }
 
@@ -196,7 +196,7 @@ class JurnalController extends BaseController
 
         try {
             if ($this->jurnalModel->insert($data)) {
-                session()->setFlashdata('success', '✅ Jurnal KBM berhasil disimpan! Data pembelajaran telah tercatat.');
+                session()->setFlashdata('success', 'Yeay! Jurnal tersimpan. Good job! 📚✨');
                 return redirect()->to('/guru/jurnal');
             } else {
                 // Delete uploaded file if database insert fails

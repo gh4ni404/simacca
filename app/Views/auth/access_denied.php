@@ -62,11 +62,7 @@ Akses Ditolak
                     Anda tidak memiliki izin untuk mengakses halaman ini
                 </p>
             </div>
-            <?php if (session()->getFlashdata('error')) : ?>
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                    <span class="block sm:inline"><?= session()->getFlashdata('error'); ?></span>
-                </div>
-            <?php endif; ?>
+            <?= view('components/alerts') ?>
             <div class="space-y-4">
                 <div>
                     <a href="<?= base_url('dashboard'); ?>"

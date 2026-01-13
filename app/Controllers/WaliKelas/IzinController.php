@@ -33,7 +33,7 @@ class IzinController extends BaseController
 
         if (!$guru || !$guru['is_wali_kelas']) {
             log_message('warning', '[WALI KELAS IZIN] Not a wali kelas');
-            session()->setFlashdata('error', '❌ Anda bukan wali kelas');
+            session()->setFlashdata('error', 'Sorry, kamu bukan wali kelas 🙅‍♂️');
             return redirect()->to('/access-denied');
         }
 
@@ -44,7 +44,7 @@ class IzinController extends BaseController
 
         if (!$kelas) {
             log_message('warning', '[WALI KELAS IZIN] No kelas assigned');
-            session()->setFlashdata('error', '❌ Anda belum ditugaskan sebagai wali kelas');
+            session()->setFlashdata('error', 'Kamu belum jadi wali kelas nih 👨‍🏫');
             return redirect()->to('/walikelas/dashboard');
         }
 
@@ -92,14 +92,14 @@ class IzinController extends BaseController
             log_message('info', '[WALI KELAS IZIN] Approve successful');
             return $this->response->setJSON([
                 'status' => 'success',
-                'message' => '✅ Izin berhasil disetujui'
+                'message' => 'Izin disetujui! Nice decision 👍✨'
             ]);
         }
 
         log_message('error', '[WALI KELAS IZIN] Approve failed');
         return $this->response->setJSON([
             'status' => 'error',
-            'message' => '❌ Gagal menyetujui izin'
+            'message' => 'Oops, gagal approve izin 😅'
         ]);
     }
 
@@ -116,14 +116,14 @@ class IzinController extends BaseController
             log_message('info', '[WALI KELAS IZIN] Reject successful');
             return $this->response->setJSON([
                 'status' => 'success',
-                'message' => '⚠️ Izin berhasil ditolak'
+                'message' => 'Izin ditolak. Hope you understand 🤝'
             ]);
         }
 
         log_message('error', '[WALI KELAS IZIN] Reject failed');
         return $this->response->setJSON([
             'status' => 'error',
-            'message' => '❌ Gagal menolak izin'
+            'message' => 'Hmm, gagal reject izin 😕'
         ]);
     }
 }

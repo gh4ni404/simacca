@@ -25,15 +25,7 @@
     </div>
 
     <!-- Flash Messages -->
-    <?php if (session()->getFlashdata('errors')): ?>
-        <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-            <ul class="list-disc list-inside">
-                <?php foreach (session()->getFlashdata('errors') as $error): ?>
-                    <li><?= $error ?></li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
-    <?php endif; ?>
+    <?= view('components/alerts') ?>
 
     <!-- Form -->
     <form action="<?= base_url('admin/kelas/update/' . $kelas['id']) ?>" method="POST" id="kelasForm">

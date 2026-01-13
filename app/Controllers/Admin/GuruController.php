@@ -132,7 +132,7 @@ class GuruController extends BaseController
                 throw new \Exception('Gagal menyimpan data');
             }
 
-            session()->setFlashdata('success', 'Data guru berhasil ditambahkan');
+            session()->setFlashdata('success', 'Yeay! Guru baru berhasil ditambahkan 🎓✨');
             return redirect()->to('/admin/guru');
         } catch (\Exception $e) {
             $db->transRollback();
@@ -149,7 +149,7 @@ class GuruController extends BaseController
         $guru = $this->guruModel->getGuruWithMapel($id);
 
         if (!$guru) {
-            session()->setFlashdata('error', 'Data guru tidak ditemukan');
+            session()->setFlashdata('error', 'Ups, guru ini nggak ketemu ??');
             return redirect()->to('/admin/guru');
         }
 
@@ -179,7 +179,7 @@ class GuruController extends BaseController
         $guru = $this->guruModel->find($id);
 
         if (!$guru) {
-            session()->setFlashdata('error', 'Data guru tidak ditemukan');
+            session()->setFlashdata('error', 'Ups, guru ini nggak ketemu ??');
             return redirect()->to('/admin/guru');
         }
 
@@ -268,7 +268,7 @@ class GuruController extends BaseController
                 throw new \Exception('Gagal mengupdate data');
             }
 
-            session()->setFlashdata('success', 'Data guru berhasil diupdate');
+            session()->setFlashdata('success', 'Sip! Data guru sudah diperbarui 👍');
             return redirect()->to('/admin/guru');
         } catch (\Exception $e) {
             $db->transRollback();
@@ -285,7 +285,7 @@ class GuruController extends BaseController
         $guru = $this->guruModel->find($id);
 
         if (!$guru) {
-            session()->setFlashdata('error', 'Data guru tidak ditemukan');
+            session()->setFlashdata('error', 'Ups, guru ini nggak ketemu ??');
             return redirect()->to('/admin/guru');
         }
 
@@ -311,7 +311,7 @@ class GuruController extends BaseController
                 throw new \Exception('Gagal menghapus data');
             }
 
-            session()->setFlashdata('success', 'Data guru berhasil dihapus');
+            session()->setFlashdata('success', 'Done! Data guru sudah dihapus ✓');
             return redirect()->to('/admin/guru');
         } catch (\Exception $e) {
             $db->transRollback();
@@ -328,7 +328,7 @@ class GuruController extends BaseController
         $guru = $this->guruModel->getGuruWithMapel($id);
 
         if (!$guru) {
-            session()->setFlashdata('error', 'Data guru tidak ditemukan');
+            session()->setFlashdata('error', 'Ups, guru ini nggak ketemu ??');
             return redirect()->to('/admin/guru');
         }
 
@@ -414,14 +414,14 @@ class GuruController extends BaseController
         $guru = $this->guruModel->find($id);
 
         if (!$guru) {
-            session()->setFlashdata('error', 'Data guru tidak ditemukan');
+            session()->setFlashdata('error', 'Ups, guru ini nggak ketemu 🔍');
             return redirect()->to('/admin/guru');
         }
 
         $user = $this->userModel->find($guru['user_id']);
 
         if (!$user) {
-            session()->setFlashdata('error', 'Data user tidak ditemukan');
+            session()->setFlashdata('error', 'Ups, user ini nggak ketemu 🔍');
             return redirect()->to('/admin/guru');
         }
 
@@ -431,7 +431,8 @@ class GuruController extends BaseController
         $this->userModel->update($guru['user_id'], ['is_active' => $newStatus]);
 
         $statusText = $newStatus ? 'diaktifkan' : 'dinonaktifkan';
-        session()->setFlashdata('success', "Guru berhasil $statusText");
+        $newMessage = $statusText == 'diaktifkan' ? 'Guru diaktifkan! Siap mengajar lagi 🚀' : 'Guru dinonaktifkan. See you soon! 👋';
+        session()->setFlashdata('success', $newMessage);
 
         return redirect()->to('/admin/guru');
     }
@@ -661,7 +662,7 @@ class GuruController extends BaseController
 
             return redirect()->to('/admin/guru');
         } catch (\Exception $e) {
-            session()->setFlashdata('error', 'Error saat memproses file: ' . $e->getMessage());
+            session()->setFlashdata('error', 'Waduh, file-nya bermasalah nih 😅 Coba cek lagi ya');
             return redirect()->to('/admin/guru/import');
         }
     }

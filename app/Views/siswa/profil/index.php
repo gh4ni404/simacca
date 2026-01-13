@@ -11,36 +11,8 @@
         <p class="text-gray-600 mt-1">Kelola informasi profil dan keamanan akun Anda</p>
     </div>
 
-    <!-- Success/Error Messages -->
-    <?php if (session()->getFlashdata('success')): ?>
-    <div class="mb-6 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center">
-        <i class="fas fa-check-circle text-xl mr-3"></i>
-        <span><?= session()->getFlashdata('success'); ?></span>
-    </div>
-    <?php endif; ?>
-
-    <?php if (session()->getFlashdata('error')): ?>
-    <div class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center">
-        <i class="fas fa-exclamation-circle text-xl mr-3"></i>
-        <span><?= session()->getFlashdata('error'); ?></span>
-    </div>
-    <?php endif; ?>
-
-    <?php if (session()->getFlashdata('errors')): ?>
-    <div class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
-        <div class="flex items-start">
-            <i class="fas fa-exclamation-circle text-xl mr-3 mt-1"></i>
-            <div>
-                <p class="font-semibold mb-2">Terdapat kesalahan:</p>
-                <ul class="list-disc list-inside space-y-1">
-                    <?php foreach (session()->getFlashdata('errors') as $error): ?>
-                        <li><?= $error; ?></li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
-        </div>
-    </div>
-    <?php endif; ?>
+    <!-- Flash Messages -->
+    <?= view('components/alerts') ?>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Profile Card -->

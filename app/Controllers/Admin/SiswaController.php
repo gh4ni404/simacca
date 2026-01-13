@@ -138,7 +138,7 @@ class SiswaController extends BaseController
                 throw new \Exception('Gagal menyimpan data');
             }
 
-            session()->setFlashdata('success', 'Data siswa berhasil ditambahkan');
+            session()->setFlashdata('success', 'Welcome aboard! Siswa baru sudah terdaftar 🎒✨');
             return redirect()->to('/admin/siswa');
         } catch (\Exception $e) {
             $db->transRollback();
@@ -155,7 +155,7 @@ class SiswaController extends BaseController
         $siswa = $this->siswaModel->getSiswaWithWaliKelas($id);
 
         if (!$siswa) {
-            session()->setFlashdata('error', 'Data siswa tidak ditemukan');
+            session()->setFlashdata('error', 'Hmm, siswa ini nggak ketemu ??');
             return redirect()->to('/admin/siswa');
         }
 
@@ -185,7 +185,7 @@ class SiswaController extends BaseController
         $siswa = $this->siswaModel->find($id);
 
         if (!$siswa) {
-            session()->setFlashdata('error', 'Data siswa tidak ditemukan');
+            session()->setFlashdata('error', 'Hmm, siswa ini nggak ketemu ??');
             return redirect()->to('/admin/siswa');
         }
 
@@ -249,7 +249,7 @@ class SiswaController extends BaseController
                 throw new \Exception('Gagal mengupdate data');
             }
 
-            session()->setFlashdata('success', 'Data siswa berhasil diupdate');
+            session()->setFlashdata('success', 'Nice! Data siswa sudah diperbarui ??');
             return redirect()->to('/admin/siswa');
         } catch (\Exception $e) {
             $db->transRollback();
@@ -266,7 +266,7 @@ class SiswaController extends BaseController
         $siswa = $this->siswaModel->find($id);
 
         if (!$siswa) {
-            session()->setFlashdata('error', 'Data siswa tidak ditemukan');
+            session()->setFlashdata('error', 'Hmm, siswa ini nggak ketemu ??');
             return redirect()->to('/admin/siswa');
         }
 
@@ -287,7 +287,7 @@ class SiswaController extends BaseController
                 throw new \Exception('Gagal menghapus data');
             }
 
-            session()->setFlashdata('success', 'Data siswa berhasil dihapus');
+            session()->setFlashdata('success', 'Data siswa sudah dihapus ?');
             return redirect()->to('/admin/siswa');
         } catch (\Exception $e) {
             $db->transRollback();
@@ -304,7 +304,7 @@ class SiswaController extends BaseController
         $siswa = $this->siswaModel->getSiswaWithWaliKelas($id);
 
         if (!$siswa) {
-            session()->setFlashdata('error', 'Data siswa tidak ditemukan');
+            session()->setFlashdata('error', 'Hmm, siswa ini nggak ketemu ??');
             return redirect()->to('/admin/siswa');
         }
 
@@ -366,14 +366,14 @@ class SiswaController extends BaseController
         $siswa = $this->siswaModel->find($id);
 
         if (!$siswa) {
-            session()->setFlashdata('error', 'Data siswa tidak ditemukan');
+            session()->setFlashdata('error', 'Hmm, siswa ini nggak ketemu ??');
             return redirect()->to('/admin/siswa');
         }
 
         $user = $this->userModel->find($siswa['user_id']);
 
         if (!$user) {
-            session()->setFlashdata('error', 'Data user tidak ditemukan');
+            session()->setFlashdata('error', 'Ups, user ini nggak ketemu ??');
             return redirect()->to('/admin/siswa');
         }
 
@@ -383,7 +383,7 @@ class SiswaController extends BaseController
         $this->userModel->update($siswa['user_id'], ['is_active' => $newStatus]);
 
         $statusText = $newStatus ? 'diaktifkan' : 'dinonaktifkan';
-        session()->setFlashdata('success', "Siswa berhasil $statusText");
+        session()->setFlashdata('success', $statusText == 'diaktifkan' ? 'Siswa aktif kembali! Let''s go ??' : 'Siswa dinonaktifkan. Take care! ??');
 
         return redirect()->to('/admin/siswa');
     }
@@ -784,7 +784,7 @@ class SiswaController extends BaseController
         $ids = $this->request->getPost('ids');
 
         if (empty($ids)) {
-            session()->setFlashdata('error', 'Tidak ada siswa yang dipilih');
+            session()->setFlashdata('error', 'Eh, pilih siswanya dulu dong ??');
             return redirect()->to('/admin/siswa');
         }
 

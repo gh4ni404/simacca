@@ -31,23 +31,7 @@
     </div>
 
     <!-- Flash Messages -->
-    <?php if (session()->getFlashdata('success')): ?>
-    <div class="mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded-lg shadow-sm">
-        <div class="flex items-center">
-            <i class="fas fa-check-circle text-green-500 text-xl mr-3"></i>
-            <p class="text-green-800 font-medium"><?= session()->getFlashdata('success') ?></p>
-        </div>
-    </div>
-    <?php endif; ?>
-
-    <?php if (session()->getFlashdata('error')): ?>
-    <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm">
-        <div class="flex items-center">
-            <i class="fas fa-exclamation-circle text-red-500 text-xl mr-3"></i>
-            <p class="text-red-800 font-medium"><?= session()->getFlashdata('error') ?></p>
-        </div>
-    </div>
-    <?php endif; ?>
+    <?= view('components/alerts') ?>
 
     <!-- Main Content Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
