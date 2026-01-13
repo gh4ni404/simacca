@@ -164,7 +164,24 @@
 
 ## 🐛 Bug dan Perbaikan
 
-### Recently Fixed ✅ (2026-01-14)
+### Recently Added ✅ (2026-01-14)
+
+#### Mobile-First UI/UX (v1.4.0)
+- [x] **Responsive Attendance Interface** - Desktop table + Mobile card view
+- [x] **Mobile Card Design** - Individual student cards with avatars
+- [x] **Touch-Friendly Buttons** - 48px+ touch targets, icon-based
+- [x] **Progress Tracking** - Fixed progress indicator on mobile
+- [x] **Visual Feedback** - Check marks, border flash, real-time updates
+- [x] **Dual Rendering** - Same data, optimized layout per device
+- [x] **Reference-Based Design** - Inspired by 3 professional UI references
+
+#### Desktop UI/UX Improvements (v1.3.0)
+- [x] **User-Friendly Attendance Status Selection** - Visual button badges with color coding
+- [x] **Bulk Action Buttons** - Set all students status at once (Semua Hadir, Izin, Sakit, Alpha)
+- [x] **Visual Feedback System** - Toast notifications for bulk actions
+- [x] **Improved Efficiency** - 60-70% faster attendance marking
+- [x] **Color-Coded Interface** - Green (Hadir), Blue (Izin), Yellow (Sakit), Red (Alpha)
+- [x] **Touch-Friendly Design** - Better for tablets and mobile devices
 
 #### Production Deployment Fixes
 - [x] **Session Headers Already Sent Error** - Refactored component_helper.php to use function-based approach

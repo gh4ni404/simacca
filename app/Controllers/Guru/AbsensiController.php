@@ -407,6 +407,12 @@ class AbsensiController extends BaseController
         $kelasId = $absensi['kelas_id'] ?? null;
         $siswaList = $kelasId ? $this->siswaModel->getByKelas($kelasId) : [];
 
+        // Get approved izin for this date and class
+        $approvedIzin = [];
+        if ($kelasId && isset($absensi['tanggal'])) {
+            $approvedIzin = $this->izinModel->getApprovedIzinByDate($absensi['tanggal'], $kelasId);
+        }
+
         $data = [
             'title' => 'Edit Absensi',
             'pageTitle' => 'Edit Absensi',
@@ -416,7 +422,8 @@ class AbsensiController extends BaseController
             'absensiDetails' => $absensiDetails,
             'siswaList' => $siswaList,
             'guru' => $guru,
-            'statusOptions' => $this->getStatusOptions()
+            'statusOptions' => $this->getStatusOptions(),
+            'approvedIzin' => $approvedIzin
         ];
 
         return view('guru/absensi/edit', $data);

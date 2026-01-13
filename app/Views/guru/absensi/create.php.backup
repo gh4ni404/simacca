@@ -306,15 +306,8 @@
                         </div>
                     </div>
 
-                    <!-- Progress Indicator (Mobile) -->
-                    <div class="md:hidden mb-4">
-                        <div class="bg-gray-900 text-white px-4 py-2 rounded-full text-center shadow-lg">
-                            <span id="mobile-progress-counter" class="font-semibold text-sm">0 / 0 Siswa Terisi</span>
-                        </div>
-                    </div>
-
-                    <!-- Desktop View: Table -->
-                    <div class="hidden md:block bg-gray-50 rounded-xl p-1 mb-6">
+                    <!-- Students Table -->
+                    <div class="bg-gray-50 rounded-xl p-1 mb-6">
                         <div class="bg-white rounded-xl shadow-md overflow-hidden">
                             <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200">
@@ -346,18 +339,6 @@
                                     </tbody>
                                 </table>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Mobile View: Cards -->
-                    <div class="md:hidden space-y-4 mb-6" id="siswaCardsContainer">
-                        <!-- Will be populated by AJAX -->
-                        <div class="flex flex-col items-center justify-center py-12">
-                            <div class="p-4 bg-blue-100 rounded-full mb-3">
-                                <i class="fas fa-spinner fa-spin text-blue-500 text-3xl"></i>
-                            </div>
-                            <p class="text-gray-600 font-medium">Memuat data siswa...</p>
-                            <p class="text-gray-400 text-sm mt-1">Mohon tunggu sebentar</p>
                         </div>
                     </div>
                 </div>
@@ -450,8 +431,6 @@
 
         function renderSiswaTable(siswaList, approvedIzin, statusOptions) {
             const tableBody = document.getElementById('siswaTableBody');
-            const cardsContainer = document.getElementById('siswaCardsContainer');
-            const mobileProgressCounter = document.getElementById('mobile-progress-counter');
 
             if (!siswaList || siswaList.length === 0) {
                 tableBody.innerHTML = `
@@ -462,23 +441,11 @@
                 </td>
             </tr>
         `;
-                cardsContainer.innerHTML = `
-            <div class="flex flex-col items-center justify-center py-12 text-gray-500">
-                <i class="fas fa-users-slash text-4xl mb-3"></i>
-                <p class="font-medium">Tidak ada siswa di kelas ini</p>
-            </div>
-        `;
                 return;
             }
 
             let html = '';
-            let mobileHtml = '';
             let approvedIzinMap = {};
-
-            // Initialize mobile progress counter - start at 0 since nothing is manually filled yet
-            if (mobileProgressCounter) {
-                mobileProgressCounter.textContent = `0 / ${siswaList.length} Siswa Terisi`;
-            }
 
             // Create map of approved izin
             approvedIzin.forEach(izin => {
@@ -493,7 +460,6 @@
                 const defaultStatus = isApprovedIzin ? 'izin' : 'hadir';
                 const defaultKeterangan = isApprovedIzin ? `Izin ${isApprovedIzin.jenis}: ${isApprovedIzin.alasan}` : '';
 
-                // Desktop table row
                 html += `
             <tr class="hover:bg-gray-50">
                 <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">${index + 1}</td>
@@ -562,283 +528,106 @@
                 </td>
             </tr>
         `;
-
-                // Mobile card view
-                mobileHtml += `
-        <div class="student-card bg-white rounded-2xl shadow-md p-4 border-2 border-transparent transition-all" data-student-id="${siswa.id}">
-            <!-- Student Info -->
-            <div class="flex items-center gap-3 mb-3">
-                <div class="relative">
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
-                        ${siswa.nama_lengkap.charAt(0).toUpperCase()}
-                    </div>
-                    <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white items-center justify-center hidden student-check-${siswa.id}">
-                        <i class="fas fa-check text-white text-xs"></i>
-                    </div>
-                </div>
-                <div class="flex-1">
-                    <h3 class="font-bold text-base text-gray-900">${siswa.nama_lengkap}</h3>
-                    <p class="text-xs text-gray-600">NIS: ${siswa.nis || '-'}</p>
-                    ${isApprovedIzin ? `<p class="text-xs text-blue-600 mt-0.5"><i class="fas fa-info-circle mr-1"></i>Izin disetujui</p>` : ''}
-                </div>
-            </div>
-
-            <!-- Hidden Input -->
-            <input type="hidden" name="siswa[${siswa.id}][status]" value="${defaultStatus}" class="status-input" data-siswa-id="${siswa.id}">
-
-            <!-- Status Buttons -->
-            <div class="grid grid-cols-4 gap-2 mb-3">
-                ${Object.entries(statusOptions).map(([value, option]) => {
-                    const isSelected = value === defaultStatus;
-                    const buttonStyles = {
-                        'hadir': {
-                            active: 'bg-green-500 text-white border-green-600',
-                            inactive: 'bg-white text-gray-700 border-gray-300',
-                            icon: 'fa-check-circle'
-                        },
-                        'izin': {
-                            active: 'bg-blue-500 text-white border-blue-600',
-                            inactive: 'bg-white text-gray-700 border-gray-300',
-                            icon: 'fa-file-alt'
-                        },
-                        'sakit': {
-                            active: 'bg-yellow-500 text-white border-yellow-600',
-                            inactive: 'bg-white text-gray-700 border-gray-300',
-                            icon: 'fa-thermometer'
-                        },
-                        'alpa': {
-                            active: 'bg-red-500 text-white border-red-600',
-                            inactive: 'bg-white text-gray-700 border-gray-300',
-                            icon: 'fa-times-circle'
-                        }
-                    };
-                    
-                    const style = buttonStyles[value];
-                    const activeClass = isSelected ? style.active : style.inactive;
-                    
-                    return `
-                        <button type="button" 
-                                class="status-btn flex flex-col items-center justify-center p-3 border-2 rounded-xl transition-all active:scale-95 ${activeClass}"
-                                data-siswa-id="${siswa.id}"
-                                data-status="${value}"
-                                onclick="selectStatus(${siswa.id}, '${value}')">
-                            <i class="fas ${style.icon} text-xl mb-1"></i>
-                            <span class="text-xs font-semibold">${option.label}</span>
-                        </button>
-                    `;
-                }).join('')}
-            </div>
-
-            <!-- Notes Field -->
-            <textarea name="siswa[${siswa.id}][keterangan]"
-                      class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                      rows="2"
-                      placeholder="Keterangan (opsional)">${defaultKeterangan}</textarea>
-        </div>
-        `;
             });
 
             tableBody.innerHTML = html;
-            cardsContainer.innerHTML = mobileHtml;
         }
 
-        // Note: selectStatus, setAllStatus, and updateProgressCounters functions
-        // are now defined in global scope below to ensure they're always accessible
+        // Function to handle status button selection
+        function selectStatus(siswaId, status) {
+            // Update hidden input value
+            const hiddenInput = document.querySelector(`.status-input[data-siswa-id="${siswaId}"]`);
+            if (hiddenInput) {
+                hiddenInput.value = status;
+            }
+
+            // Define button styles for each status
+            const buttonStyles = {
+                'hadir': {
+                    active: 'bg-green-500 text-white border-green-600 shadow-md',
+                    inactive: 'bg-white text-green-700 border-green-300 hover:bg-green-50'
+                },
+                'izin': {
+                    active: 'bg-blue-500 text-white border-blue-600 shadow-md',
+                    inactive: 'bg-white text-blue-700 border-blue-300 hover:bg-blue-50'
+                },
+                'sakit': {
+                    active: 'bg-yellow-500 text-white border-yellow-600 shadow-md',
+                    inactive: 'bg-white text-yellow-700 border-yellow-300 hover:bg-yellow-50'
+                },
+                'alpa': {
+                    active: 'bg-red-500 text-white border-red-600 shadow-md',
+                    inactive: 'bg-white text-red-700 border-red-300 hover:bg-red-50'
+                }
+            };
+
+            // Get all status buttons for this student
+            const buttonGroup = document.querySelector(`div[data-siswa-id="${siswaId}"]`);
+            if (!buttonGroup) return;
+
+            const buttons = buttonGroup.querySelectorAll('.status-btn');
+            
+            buttons.forEach(btn => {
+                const btnStatus = btn.getAttribute('data-status');
+                const style = buttonStyles[btnStatus];
+                
+                if (!style) return;
+                
+                // Remove all style classes
+                btn.classList.remove('bg-green-500', 'text-white', 'border-green-600', 'shadow-md',
+                    'bg-white', 'text-green-700', 'border-green-300', 'hover:bg-green-50',
+                    'bg-blue-500', 'text-blue-700', 'border-blue-600', 'border-blue-300', 'hover:bg-blue-50',
+                    'bg-yellow-500', 'text-yellow-700', 'border-yellow-600', 'border-yellow-300', 'hover:bg-yellow-50',
+                    'bg-red-500', 'text-red-700', 'border-red-600', 'border-red-300', 'hover:bg-red-50');
+                
+                // Apply appropriate style
+                if (btnStatus === status) {
+                    // Active button
+                    style.active.split(' ').forEach(cls => btn.classList.add(cls));
+                } else {
+                    // Inactive button
+                    style.inactive.split(' ').forEach(cls => btn.classList.add(cls));
+                }
+            });
+        }
+
+        // Function to set all students to the same status
+        function setAllStatus(status) {
+            const hiddenInputs = document.querySelectorAll('.status-input');
+            
+            hiddenInputs.forEach(input => {
+                const siswaId = input.getAttribute('data-siswa-id');
+                selectStatus(siswaId, status);
+            });
+
+            // Show feedback
+            const statusLabels = {
+                'hadir': 'Hadir',
+                'izin': 'Izin',
+                'sakit': 'Sakit',
+                'alpa': 'Alpa'
+            };
+
+            // Create temporary notification
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in';
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span>Semua siswa di-set <strong>${statusLabels[status]}</strong></span>
+                </div>
+            `;
+            document.body.appendChild(notification);
+
+            // Remove notification after 2 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.3s';
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
+        }
     </script>
 <?php endif; ?>
-
-<script>
-    // Global function - must be outside PHP conditional block
-    // Function to handle status button selection
-    function selectStatus(siswaId, status) {
-        console.log('selectStatus called:', siswaId, status);
-        
-        // Update hidden input value
-        const hiddenInputs = document.querySelectorAll(`.status-input[data-siswa-id="${siswaId}"]`);
-        if (hiddenInputs.length > 0) {
-            hiddenInputs.forEach(input => {
-                input.value = status;
-                // Mark as manually set
-                input.setAttribute('data-manually-set', 'true');
-            });
-            console.log('Hidden inputs updated:', hiddenInputs.length);
-        } else {
-            console.error('Hidden input not found for siswa ID:', siswaId);
-            return;
-        }
-
-        // Define button styles for each status (desktop)
-        const desktopButtonStyles = {
-            'hadir': {
-                active: ['bg-green-500', 'text-white', 'border-green-600', 'shadow-md'],
-                inactive: ['bg-white', 'text-green-700', 'border-green-300', 'hover:bg-green-50']
-            },
-            'izin': {
-                active: ['bg-blue-500', 'text-white', 'border-blue-600', 'shadow-md'],
-                inactive: ['bg-white', 'text-blue-700', 'border-blue-300', 'hover:bg-blue-50']
-            },
-            'sakit': {
-                active: ['bg-yellow-500', 'text-white', 'border-yellow-600', 'shadow-md'],
-                inactive: ['bg-white', 'text-yellow-700', 'border-yellow-300', 'hover:bg-yellow-50']
-            },
-            'alpa': {
-                active: ['bg-red-500', 'text-white', 'border-red-600', 'shadow-md'],
-                inactive: ['bg-white', 'text-red-700', 'border-red-300', 'hover:bg-red-50']
-            }
-        };
-
-        // Define button styles for mobile
-        const mobileButtonStyles = {
-            'hadir': {
-                active: ['bg-green-500', 'text-white', 'border-green-600'],
-                inactive: ['bg-white', 'text-gray-700', 'border-gray-300']
-            },
-            'izin': {
-                active: ['bg-blue-500', 'text-white', 'border-blue-600'],
-                inactive: ['bg-white', 'text-gray-700', 'border-gray-300']
-            },
-            'sakit': {
-                active: ['bg-yellow-500', 'text-white', 'border-yellow-600'],
-                inactive: ['bg-white', 'text-gray-700', 'border-gray-300']
-            },
-            'alpa': {
-                active: ['bg-red-500', 'text-white', 'border-red-600'],
-                inactive: ['bg-white', 'text-gray-700', 'border-gray-300']
-            }
-        };
-
-        // All possible color classes to remove
-        const allColorClasses = [
-            'bg-green-500', 'bg-blue-500', 'bg-yellow-500', 'bg-red-500',
-            'bg-white', 'bg-green-50', 'bg-blue-50', 'bg-yellow-50', 'bg-red-50',
-            'text-white', 'text-green-700', 'text-blue-700', 'text-yellow-700', 'text-red-700', 'text-gray-700',
-            'border-green-600', 'border-blue-600', 'border-yellow-600', 'border-red-600',
-            'border-green-300', 'border-blue-300', 'border-yellow-300', 'border-red-300', 'border-gray-300',
-            'shadow-md', 'hover:bg-green-50', 'hover:bg-blue-50', 'hover:bg-yellow-50', 'hover:bg-red-50'
-        ];
-
-        // Get all status buttons for this student
-        const allButtons = document.querySelectorAll(`.status-btn[data-siswa-id="${siswaId}"]`);
-        console.log('Total buttons found:', allButtons.length);
-        
-        if (allButtons.length === 0) {
-            console.error('No buttons found for siswa ID:', siswaId);
-            return;
-        }
-
-        allButtons.forEach(btn => {
-            const btnStatus = btn.getAttribute('data-status');
-            
-            // Determine if this is a mobile button (has flex-col class)
-            const isMobile = btn.classList.contains('flex-col');
-            const styleSet = isMobile ? mobileButtonStyles : desktopButtonStyles;
-            const style = styleSet[btnStatus];
-            
-            if (!style) {
-                console.warn('No style found for status:', btnStatus);
-                return;
-            }
-            
-            // Remove all color classes
-            btn.classList.remove(...allColorClasses);
-            
-            // Apply appropriate style
-            if (btnStatus === status) {
-                // Active button
-                btn.classList.add(...style.active);
-            } else {
-                // Inactive button
-                btn.classList.add(...style.inactive);
-            }
-        });
-
-        // Update progress counters
-        updateProgressCounters();
-
-        // Show check mark on mobile card
-        const checkMark = document.querySelector(`.student-check-${siswaId}`);
-        if (checkMark) {
-            checkMark.classList.remove('hidden');
-            checkMark.classList.add('flex');
-        }
-
-        // Add visual feedback for mobile card
-        const mobileCard = document.querySelector(`.student-card[data-student-id="${siswaId}"]`);
-        if (mobileCard) {
-            mobileCard.classList.add('border-green-500', 'bg-green-50');
-            setTimeout(() => {
-                mobileCard.classList.remove('bg-green-50');
-            }, 300);
-        }
-        
-        console.log('selectStatus completed for:', siswaId, status);
-    }
-
-    // Function to set all students to the same status
-    function setAllStatus(status) {
-        console.log('setAllStatus called:', status);
-        const hiddenInputs = document.querySelectorAll('.status-input');
-        console.log('Found', hiddenInputs.length, 'students');
-        
-        hiddenInputs.forEach(input => {
-            const siswaId = input.getAttribute('data-siswa-id');
-            selectStatus(siswaId, status);
-        });
-
-        // Update progress
-        if (typeof updateProgressCounters === 'function') {
-            updateProgressCounters();
-        }
-
-        // Show feedback
-        const statusLabels = {
-            'hadir': 'Hadir',
-            'izin': 'Izin',
-            'sakit': 'Sakit',
-            'alpa': 'Alpa'
-        };
-
-        // Create temporary notification
-        const notification = document.createElement('div');
-        notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in';
-        notification.innerHTML = `
-            <div class="flex items-center">
-                <i class="fas fa-check-circle mr-2"></i>
-                <span>Semua siswa di-set <strong>${statusLabels[status]}</strong></span>
-            </div>
-        `;
-        document.body.appendChild(notification);
-
-        // Remove notification after 2 seconds
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            notification.style.transition = 'opacity 0.3s';
-            setTimeout(() => notification.remove(), 300);
-        }, 2000);
-    }
-
-    // Function to update progress counters
-    function updateProgressCounters() {
-        const hiddenInputs = document.querySelectorAll('.status-input');
-        let filledCount = 0;
-        
-        // Count students that have been manually changed (marked with data attribute)
-        hiddenInputs.forEach(input => {
-            const isManuallySet = input.getAttribute('data-manually-set') === 'true';
-            if (isManuallySet) {
-                filledCount++;
-            }
-        });
-
-        const totalCount = hiddenInputs.length;
-        const mobileCounter = document.getElementById('mobile-progress-counter');
-        
-        if (mobileCounter) {
-            mobileCounter.textContent = `${filledCount} / ${totalCount} Siswa Terisi`;
-        }
-    }
-</script>
-
 <script>
     // Mode selection state
     let isSubstituteMode = false;
