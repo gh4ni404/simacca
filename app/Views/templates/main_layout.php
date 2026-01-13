@@ -203,39 +203,7 @@
             </div>
 
             <!-- Flash Messages -->
-            <?php if (session()->getFlashdata('success')): ?>
-                <div class="mb-4 flash flash-success" role="alert">
-                    <i class="fas fa-check-circle mt-0.5"></i>
-                    <div><?= session()->getFlashdata('success'); ?></div>
-                    <button type="button" class="close" aria-label="Close">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            <?php endif; ?>
-            <?php if (session()->getFlashdata('error')): ?>
-                <div class="mb-4 flash flash-error" role="alert">
-                    <i class="fas fa-exclamation-triangle mt-0.5"></i>
-                    <div><?= session()->getFlashdata('error'); ?></div>
-                    <button type="button" class="close" aria-label="Close">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            <?php endif; ?>
-            <?php if (session()->getFlashdata('errors')): ?>
-                <div class="mb-4 flash flash-error" role="alert">
-                    <i class="fas fa-exclamation-circle mt-0.5"></i>
-                    <div>
-                        <ul class="list-disc list-inside">
-                            <?php foreach (session()->getFlashdata('errors') as $error): ?>
-                                <li><?= $error; ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                    <button type="button" class="close" aria-label="Close">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            <?php endif; ?>
+            <?= render_alerts() ?>
 
             <!-- Content -->
             <?= $this->renderSection('content'); ?>

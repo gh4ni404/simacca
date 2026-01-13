@@ -128,17 +128,17 @@ foreach ($writableDirs as $dir) {
 // Check 3: Public directory
 printHeader('Checking Public Directory');
 $checks++;
-if (file_exists(__DIR__ . '/public/index.php')) {
-    checkmark('public/index.php exists');
+if (file_exists(__DIR__ . '/simacca_public/index.php')) {
+    checkmark('simacca_public/index.php exists');
 } else {
-    error('public/index.php NOT found');
+    error('simacca_public/index.php NOT found');
     $errors[] = 'Ensure public directory is properly set up';
 }
 
-if (file_exists(__DIR__ . '/public/.htaccess')) {
-    checkmark('public/.htaccess exists');
+if (file_exists(__DIR__ . '/simacca_public/.htaccess')) {
+    checkmark('simacca_public/.htaccess exists');
 } else {
-    warning('public/.htaccess NOT found (might cause routing issues)');
+    warning('simacca_public/.htaccess NOT found (might cause routing issues)');
     $warnings[] = 'Create .htaccess in public directory for Apache';
 }
 

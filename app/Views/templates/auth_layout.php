@@ -75,7 +75,7 @@
         </div>
         
         <!-- Flash Messages -->
-        <?= $this->include('components/alerts') ?>
+        <?= render_alerts() ?>
         
         <!-- Main Content -->
         <div class="mt-8">
