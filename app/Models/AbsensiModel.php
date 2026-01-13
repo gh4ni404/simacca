@@ -99,30 +99,27 @@ class AbsensiModel extends Model
      * Include both:
      * 1. Absensi for schedules belonging to this teacher (normal mode)
      * 2. Absensi created by this teacher as substitute (substitute mode)
+     * 
+     * OPTIMIZED: Reduced JOINs and moved aggregate calculation to separate queries
      */
     public function getByGuru($guruId, $startDate = null, $endDate = null)
     {
+        // First, get basic absensi data with minimal JOINs
+        // Include both: own schedules OR substitute teaching
         $builder = $this->select('absensi.*,
                             guru.nama_lengkap as nama_guru,
                             guru_pengganti.nama_lengkap as nama_guru_pengganti,
                             mata_pelajaran.nama_mapel,
-                            kelas.nama_kelas,
-                            COUNT(absensi_detail.id) as total_siswa,
-                            SUM(CASE WHEN absensi_detail.status = "hadir" THEN 1 ELSE 0 END) as hadir,
-                            ROUND((SUM(CASE WHEN absensi_detail.status = "hadir" THEN 1 ELSE 0 END) / COUNT(absensi_detail.id)) * 100, 0) as percentage')
+                            kelas.nama_kelas')
             ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
             ->join('guru', 'guru.id = jadwal_mengajar.guru_id')
             ->join('guru guru_pengganti', 'guru_pengganti.id = absensi.guru_pengganti_id', 'left')
             ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
             ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
-            ->join('absensi_detail', 'absensi_detail.absensi_id = absensi.id', 'left')
-            ->join('users', 'users.id = absensi.created_by')
-            ->join('guru guru_creator', 'guru_creator.user_id = users.id')
             ->groupStart()
                 ->where('jadwal_mengajar.guru_id', $guruId)  // Schedule belongs to this teacher
-                ->orWhere('guru_creator.id', $guruId)        // Or created by this teacher (substitute)
+                ->orWhere('absensi.guru_pengganti_id', $guruId)  // Or this teacher is substitute
             ->groupEnd()
-            ->groupBy('absensi.id')
             ->orderBy('absensi.tanggal', 'DESC');
 
         if ($startDate && $endDate) {
@@ -131,7 +128,54 @@ class AbsensiModel extends Model
             $builder->where('absensi.tanggal', $startDate);
         }
 
-        return $builder->findAll();
+        $absensiList = $builder->findAll();
+
+        // If no data, return empty array
+        if (empty($absensiList)) {
+            return [];
+        }
+
+        // Get absensi IDs for batch processing
+        $absensiIds = array_column($absensiList, 'id');
+
+        // Get aggregate data for all absensi in one query
+        $db = \Config\Database::connect();
+        $aggregateQuery = $db->table('absensi_detail')
+            ->select('absensi_id,
+                     COUNT(id) as total_siswa,
+                     SUM(CASE WHEN status = "hadir" THEN 1 ELSE 0 END) as hadir')
+            ->whereIn('absensi_id', $absensiIds)
+            ->groupBy('absensi_id')
+            ->get()
+            ->getResultArray();
+
+        // Create lookup array for fast access
+        $statsLookup = [];
+        foreach ($aggregateQuery as $stat) {
+            $statsLookup[$stat['absensi_id']] = [
+                'total_siswa' => (int)$stat['total_siswa'],
+                'hadir' => (int)$stat['hadir'],
+                'percentage' => $stat['total_siswa'] > 0 
+                    ? round(($stat['hadir'] / $stat['total_siswa']) * 100, 0) 
+                    : 0
+            ];
+        }
+
+        // Merge stats into absensi list
+        foreach ($absensiList as &$absensi) {
+            if (isset($statsLookup[$absensi['id']])) {
+                $absensi['total_siswa'] = $statsLookup[$absensi['id']]['total_siswa'];
+                $absensi['hadir'] = $statsLookup[$absensi['id']]['hadir'];
+                $absensi['percentage'] = $statsLookup[$absensi['id']]['percentage'];
+            } else {
+                // No detail data
+                $absensi['total_siswa'] = 0;
+                $absensi['hadir'] = 0;
+                $absensi['percentage'] = 0;
+            }
+        }
+
+        return $absensiList;
     }
 
     /**
