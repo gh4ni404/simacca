@@ -192,6 +192,31 @@
 - [x] **Permission Issues** - Documented comprehensive fix procedures
 - [x] **Component Helper Refactoring** - Created render_alerts() function for safe session handling
 
+### Recently Fixed ✅ (2026-01-14)
+
+#### CSRF Error pada Form Jadwal Mengajar
+- [x] **Fixed CSRF token mismatch** - Admin form jadwal mengajar error "action not allowed"
+  - Changed CSRF `regenerate` from true to false for AJAX compatibility
+  - Extended CSRF token expiry from 2 hours to 4 hours
+  - Added dynamic `getCsrfToken()` function in views
+  - Added `X-CSRF-TOKEN` header to AJAX requests
+  - Excluded read-only `checkConflict` endpoint from CSRF filter
+  - All state-changing operations still fully CSRF protected
+
+#### HotReloader Error
+- [x] **Fixed ob_flush error** - Suppressed non-critical HotReloader error in development mode
+  - Added try-catch wrapper in Events.php
+  - Error now logged as debug instead of critical
+
+#### Jadwal Views Code Quality
+- [x] **Refactored badge colors** - Replaced complex ternary with clean array mapping
+- [x] **Added XSS protection** - Using esc() function for output
+- [x] **Consistent form fields** - tahun_ajaran now dropdown in both create and edit
+- [x] **Enhanced error feedback** - AJAX failures show user-friendly yellow warnings
+- [x] **Fixed typos** - Cleaned up import template text
+
+---
+
 ### Previously Fixed ✅ (2026-01-12)
 - [x] **Import Siswa Auto-Create Kelas** - FIXED
   - Issue: Saat import siswa dengan kelas baru, kelas tidak otomatis dibuat

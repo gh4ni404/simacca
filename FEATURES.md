@@ -4,12 +4,49 @@
 **Framework:** CodeIgniter 4.6.4  
 **Database:** MySQL  
 **Styling:** Tailwind CSS  
-**Version:** 1.4.0  
+**Version:** 1.4.1  
 **Last Updated:** 2026-01-14
 
 ---
 
 ## 📋 Recent Updates & Fixes
+
+### 🔒 CSRF & Security Fixes (2026-01-14) - v1.4.1
+**Status:** ✅ Complete & Production Ready
+
+**Fixed Critical CSRF Error:**
+1. **Form Jadwal Mengajar CSRF Error**
+   - Issue: "The action you requested is not allowed" when submitting schedule form
+   - Root cause: Token regeneration conflicting with AJAX requests
+   - Solution: 
+     - Changed CSRF `regenerate` to false for AJAX compatibility
+     - Extended token expiry from 2 hours to 4 hours
+     - Added dynamic `getCsrfToken()` function
+     - Added `X-CSRF-TOKEN` header to AJAX requests
+     - Excluded read-only `checkConflict` from CSRF (safe with auth layers)
+
+2. **HotReloader Error Fixed**
+   - Suppressed non-critical `ob_flush()` error in development
+   - Error now logged as debug level
+
+**Code Quality Improvements:**
+3. **Refactored Jadwal Views**
+   - Replaced complex nested ternary with clean array mapping
+   - Added XSS protection with `esc()` function
+   - Made tahun_ajaran field consistent (dropdown in both create/edit)
+   - Enhanced AJAX error feedback (user-friendly warnings)
+   - Fixed typos in import templates
+
+**Security Status:**
+- ✅ All state-changing operations fully CSRF protected
+- ✅ Read-only AJAX endpoints protected by authentication + role filters
+- ✅ XSS protection enhanced with output escaping
+- ✅ Defense in depth security model maintained
+
+**Files Modified:** 9 files (config, views)  
+**Impact:** Critical bug fixes + improved UX + better code quality
+
+---
 
 ### 📱 Mobile-First Responsive Design (2026-01-14) - v1.4.0
 **Status:** ✅ Complete & Production Ready
