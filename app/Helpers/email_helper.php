@@ -197,6 +197,79 @@ if (!function_exists('send_email_change_notification')) {
     }
 }
 
+if (!function_exists('send_password_changed_by_self_notification')) {
+    /**
+     * Send notification when user changes their own password
+     * 
+     * @param string $email User's email
+     * @param string $fullName User's full name
+     * @param string $username User's username
+     * @param string $newPassword New password (plain text)
+     * @return bool Success status
+     */
+    function send_password_changed_by_self_notification(string $email, string $fullName, string $username, string $newPassword): bool
+    {
+        // Get IP address
+        $request = \Config\Services::request();
+        $ipAddress = $request->getIPAddress();
+        
+        // Load email template
+        $message = view('emails/password_changed_by_self', [
+            'fullName' => $fullName,
+            'username' => $username,
+            'newPassword' => $newPassword,
+            'changeTime' => date('d F Y H:i'),
+            'ipAddress' => $ipAddress
+        ]);
+        
+        $subject = 'SIMACCA - Password Anda Berhasil Diubah';
+        
+        $result = send_email($email, $subject, $message);
+        
+        if ($result) {
+            log_message('info', 'Self password change notification sent to: ' . $email);
+        } else {
+            log_message('error', 'Failed to send self password change notification to: ' . $email);
+        }
+        
+        return $result;
+    }
+}
+
+if (!function_exists('send_password_changed_by_admin_notification')) {
+    /**
+     * Send notification when admin changes user password
+     * 
+     * @param string $email User's email
+     * @param string $fullName User's full name
+     * @param string $username User's username
+     * @param string $newPassword New password (plain text)
+     * @return bool Success status
+     */
+    function send_password_changed_by_admin_notification(string $email, string $fullName, string $username, string $newPassword): bool
+    {
+        // Load email template
+        $message = view('emails/password_changed_by_admin', [
+            'fullName' => $fullName,
+            'username' => $username,
+            'newPassword' => $newPassword,
+            'changeTime' => date('d F Y H:i')
+        ]);
+        
+        $subject = 'SIMACCA - Password Anda Telah Diubah oleh Admin';
+        
+        $result = send_email($email, $subject, $message);
+        
+        if ($result) {
+            log_message('info', 'Password change notification sent to: ' . $email);
+        } else {
+            log_message('error', 'Failed to send password change notification to: ' . $email);
+        }
+        
+        return $result;
+    }
+}
+
 if (!function_exists('test_email_configuration')) {
     /**
      * Test email configuration by sending a test email

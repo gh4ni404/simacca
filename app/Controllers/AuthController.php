@@ -333,9 +333,8 @@ class AuthController extends BaseController
         }
 
         try {
-            // Update password
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            $this->userModel->update($user['id'], ['password' => $hashedPassword]);
+            // Update password - let Model's beforeUpdate callback handle hashing
+            $this->userModel->update($user['id'], ['password' => $password]);
 
             // Mark token as used
             $this->passwordResetTokenModel->markAsUsed($token);
@@ -411,9 +410,42 @@ class AuthController extends BaseController
             return redirect()->back()->withInput()->with('error', 'Passworword saat ini salah');
         }
 
-        // Update password
-        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-        $this->userModel->update($userId, ['password' => $hashedPassword]);
+        // Update password - let Model's beforeUpdate callback handle hashing
+        $this->userModel->update($userId, ['password' => $newPassword]);
+
+        // Send email notification if user has email
+        if (!empty($user['email'])) {
+            helper('email');
+            
+            // Get user's full name based on role
+            $fullName = $user['username']; // Default fallback
+            $role = session()->get('role');
+            
+            if ($role === 'guru_mapel' || $role === 'wali_kelas') {
+                $guru = $this->guruModel->where('user_id', $userId)->first();
+                if ($guru && !empty($guru['nama_lengkap'])) {
+                    $fullName = $guru['nama_lengkap'];
+                }
+            } elseif ($role === 'siswa') {
+                $siswa = $this->siswaModel->where('user_id', $userId)->first();
+                if ($siswa && !empty($siswa['nama_lengkap'])) {
+                    $fullName = $siswa['nama_lengkap'];
+                }
+            }
+            
+            $emailSent = send_password_changed_by_self_notification(
+                $user['email'],
+                $fullName,
+                $user['username'],
+                $newPassword
+            );
+            
+            if ($emailSent) {
+                log_message('info', 'AuthController processChangePassword - Password change notification sent to: ' . $user['email']);
+            } else {
+                log_message('warning', 'AuthController processChangePassword - Failed to send password notification to: ' . $user['email']);
+            }
+        }
 
         session()->setFlashdata('success', 'Password updated! Jangan lupa dicatat ya 🔐✨');
 

@@ -222,12 +222,25 @@ class GuruController extends BaseController
             ];
 
             // Update password jika diisi
+            $plainPassword = null;
             if ($this->request->getPost('password')) {
+                $plainPassword = $this->request->getPost('password');
                 // $userUpdateData['password'] = password_hash($this->request->getPost('password'), PASSWORD_DEFAULT);
-                $userUpdateData['password'] = $this->request->getPost('password');
+                $userUpdateData['password'] = $plainPassword;
+                log_message('info', 'GuruController update - Password will be updated for user_id: ' . $guru['user_id']);
             }
 
-            $this->userModel->update($guru['user_id'], $userUpdateData);
+            // Skip Model validation since we already validated in controller
+            $this->userModel->skipValidation(true);
+            $result = $this->userModel->update($guru['user_id'], $userUpdateData);
+            $this->userModel->skipValidation(false);
+            
+            log_message('info', 'GuruController update - User update result: ' . ($result ? 'SUCCESS' : 'FAILED'));
+            
+            if (!$result) {
+                log_message('error', 'GuruController update - Failed to update user. Errors: ' . json_encode($this->userModel->errors()));
+                throw new \Exception('Gagal mengupdate data user');
+            }
 
             // 2. Update guru data
             $guruData = [
@@ -266,6 +279,27 @@ class GuruController extends BaseController
 
             if ($db->transStatus() === FALSE) {
                 throw new \Exception('Gagal mengupdate data');
+            }
+
+            // Send email notification if password was changed
+            if ($plainPassword && !empty($userData['email'])) {
+                helper('email');
+                
+                // Get full name
+                $fullName = $guru['nama_lengkap'] ?? $userData['username'];
+                
+                $emailSent = send_password_changed_by_admin_notification(
+                    $userData['email'],
+                    $fullName,
+                    $userData['username'],
+                    $plainPassword
+                );
+                
+                if ($emailSent) {
+                    log_message('info', 'GuruController update - Password change notification sent to: ' . $userData['email']);
+                } else {
+                    log_message('warning', 'GuruController update - Failed to send password notification to: ' . $userData['email']);
+                }
             }
 
             session()->setFlashdata('success', 'Sip! Data guru sudah diperbarui 👍');

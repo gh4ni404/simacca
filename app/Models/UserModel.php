@@ -59,12 +59,22 @@ class UserModel extends Model
     protected $afterDelete    = [];
 
     /**
-     * Hash Password sebelum insert
+     * Hash Password sebelum insert/update
+     * Only hash if password is not already hashed
      */
     protected function hashPassword(array $data)
     {
         if (isset($data['data']['password'])) {
-            $data['data']['password'] = password_hash($data['data']['password'], PASSWORD_DEFAULT);
+            $password = $data['data']['password'];
+            
+            // Check if password is already hashed (bcrypt hashes start with $2y$)
+            // If not hashed yet, hash it
+            if (!preg_match('/^\$2[ayb]\$.{56}$/', $password)) {
+                $data['data']['password'] = password_hash($password, PASSWORD_DEFAULT);
+                log_message('info', 'UserModel hashPassword - Password hashed for user');
+            } else {
+                log_message('info', 'UserModel hashPassword - Password already hashed, skipping');
+            }
         }
         return $data;
     }

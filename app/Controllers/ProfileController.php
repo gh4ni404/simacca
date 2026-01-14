@@ -156,8 +156,12 @@ class ProfileController extends BaseController
         }
 
         // Handle password change
+        // Store plain password for email notification
+        $plainPassword = null;
         if ($this->request->getPost('password')) {
-            $updateData['password'] = password_hash($this->request->getPost('password'), PASSWORD_DEFAULT);
+            $plainPassword = $this->request->getPost('password');
+            // Don't hash here - let the Model's beforeUpdate callback handle it
+            $updateData['password'] = $plainPassword;
         }
 
         // Log what we're about to update (for debugging)
@@ -224,6 +228,27 @@ class ProfileController extends BaseController
             log_message('info', 'ProfileController update - Session email updated (no change detected)');
         }
 
+        // Send email notification if password was changed
+        if ($isPasswordChangeOnly && $plainPassword && !empty($userData['email'])) {
+            helper('email');
+            
+            // Get user's full name
+            $fullName = $this->getUserFullName($userId, $role);
+            
+            $emailSent = send_password_changed_by_self_notification(
+                $userData['email'],
+                $fullName,
+                $userData['username'],
+                $plainPassword  // Pass plain text password
+            );
+            
+            if ($emailSent) {
+                log_message('info', 'ProfileController update - Self password change notification sent to: ' . $userData['email']);
+            } else {
+                log_message('warning', 'ProfileController update - Failed to send self password notification to: ' . $userData['email']);
+            }
+        }
+        
         // Success message
         if ($isPasswordChangeOnly) {
             session()->setFlashdata('success', 'Password berhasil diubah! 🔐✨');

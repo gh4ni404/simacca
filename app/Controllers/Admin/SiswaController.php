@@ -226,11 +226,24 @@ class SiswaController extends BaseController
             ];
 
             // Update password jika diisi
+            $plainPassword = null;
             if ($this->request->getPost('password')) {
-                $userUpdateData['password'] = $this->request->getPost('password');
+                $plainPassword = $this->request->getPost('password');
+                $userUpdateData['password'] = $plainPassword;
+                log_message('info', 'SiswaController update - Password will be updated for user_id: ' . $siswa['user_id']);
             }
 
-            $this->userModel->update($siswa['user_id'], $userUpdateData);
+            // Skip Model validation since we already validated in controller
+            $this->userModel->skipValidation(true);
+            $result = $this->userModel->update($siswa['user_id'], $userUpdateData);
+            $this->userModel->skipValidation(false);
+            
+            log_message('info', 'SiswaController update - User update result: ' . ($result ? 'SUCCESS' : 'FAILED'));
+            
+            if (!$result) {
+                log_message('error', 'SiswaController update - Failed to update user. Errors: ' . json_encode($this->userModel->errors()));
+                throw new \Exception('Gagal mengupdate data user');
+            }
 
             // 2. Update siswa data
             $siswaData = [
@@ -247,6 +260,27 @@ class SiswaController extends BaseController
 
             if ($db->transStatus() === FALSE) {
                 throw new \Exception('Gagal mengupdate data');
+            }
+
+            // Send email notification if password was changed
+            if ($plainPassword && !empty($userData['email'])) {
+                helper('email');
+                
+                // Get full name
+                $fullName = $siswa['nama_lengkap'] ?? $userData['username'];
+                
+                $emailSent = send_password_changed_by_admin_notification(
+                    $userData['email'],
+                    $fullName,
+                    $userData['username'],
+                    $plainPassword
+                );
+                
+                if ($emailSent) {
+                    log_message('info', 'SiswaController update - Password change notification sent to: ' . $userData['email']);
+                } else {
+                    log_message('warning', 'SiswaController update - Failed to send password notification to: ' . $userData['email']);
+                }
             }
 
             session()->setFlashdata('success', 'Nice! Data siswa sudah diperbarui.');
