@@ -231,7 +231,8 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        'X-Requested-With': 'XMLHttpRequest'
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': getCsrfToken()
                     },
                     body: new URLSearchParams({
                         'guru_id': guruId,
