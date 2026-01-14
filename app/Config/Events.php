@@ -49,7 +49,13 @@ Events::on('pre_system', static function (): void {
         // Hot Reload route - for framework use on the hot reloader.
         if (ENVIRONMENT === 'development') {
             service('routes')->get('__hot-reload', static function (): void {
-                (new HotReloader())->run();
+                try {
+                    (new HotReloader())->run();
+                } catch (\Throwable $e) {
+                    // Suppress HotReloader errors to prevent log spam
+                    // These are non-critical and don't affect application functionality
+                    log_message('debug', 'HotReloader error (suppressed): ' . $e->getMessage());
+                }
             });
         }
     }
