@@ -13,6 +13,7 @@ class AuthController extends BaseController
     protected $userModel;
     protected $guruModel;
     protected $siswaModel;
+    protected $passwordResetTokenModel;
     protected $appName;
 
     public function __construct()
@@ -20,7 +21,11 @@ class AuthController extends BaseController
         $this->userModel = new UserModel();
         $this->guruModel = new GuruModel();
         $this->siswaModel = new SiswaModel();
+        $this->passwordResetTokenModel = new \App\Models\PasswordResetTokenModel();
         $this->appName = 'SIMACCA';
+        
+        // Load email helper
+        helper('email');
     }
 
     // public function index()
@@ -213,17 +218,51 @@ class AuthController extends BaseController
      */
     public function processForgotPassword()
     {
-        // Implement forgot password logic here
-        // This is a basic implementation
+        // Validate input
+        $rules = [
+            'email' => 'required|valid_email'
+        ];
+
+        $messages = [
+            'email' => [
+                'required' => 'Email harus diisi',
+                'valid_email' => 'Format email tidak valid'
+            ]
+        ];
+
+        if (!$this->validate($rules, $messages)) {
+            return redirect()->back()->withInput()->with('error', $this->validator->getErrors());
+        }
 
         $email = $this->request->getPost('email');
 
-        if (!$email) {
-            return redirect()->back()->withInput()->with('error', 'Email harus diisi');
+        // Check if email exists in database
+        $user = $this->userModel->where('email', $email)->first();
+
+        if (!$user) {
+            // Don't reveal if email exists or not (security best practice)
+            session()->setFlashdata('success', 'Kalau email terdaftar, instruksi reset sudah dikirim 📧✨');
+            return redirect()->to('/login');
         }
 
-        // TODO: Send reset password email
-        session()->setFlashdata('success', 'Cek email ya! Instruksi reset sudah dikirim 📧✨');
+        try {
+            // Create password reset token
+            $token = $this->passwordResetTokenModel->createToken($email);
+
+            // Send reset password email
+            $emailSent = send_password_reset_email($email, $token, $user['username']);
+
+            if ($emailSent) {
+                session()->setFlashdata('success', 'Cek email ya! Instruksi reset sudah dikirim 📧✨');
+            } else {
+                log_message('error', 'Failed to send password reset email to: ' . $email);
+                session()->setFlashdata('error', 'Gagal mengirim email. Silakan hubungi administrator.');
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'Password reset error: ' . $e->getMessage());
+            session()->setFlashdata('error', 'Terjadi kesalahan. Silakan coba lagi nanti.');
+        }
+
         return redirect()->to('/login');
     }
 
@@ -249,22 +288,65 @@ class AuthController extends BaseController
      */
     public function processResetPassword()
     {
-        // Implement reset password logic here
-        // This is a basic implementation
+        // Validate input
+        $rules = [
+            'token' => 'required',
+            'password' => 'required|min_length[6]',
+            'confirm_password' => 'required|matches[password]'
+        ];
 
-        $token = $this->request->getPost('token');
-        $passsword = $this->request->getPost('password');
-        $confirm_password = $this->request->getPost('confirm_password');
+        $messages = [
+            'token' => [
+                'required' => 'Token tidak valid'
+            ],
+            'password' => [
+                'required' => 'Password baru harus diisi',
+                'min_length' => 'Password minimal 6 karakter'
+            ],
+            'confirm_password' => [
+                'required' => 'Konfirmasi password harus diisi',
+                'matches' => 'Konfirmasi password tidak sama'
+            ]
+        ];
 
-
-        if ($passsword !== $confirm_password) {
-            return redirect()->back()->withInput()->with('error', 'Password tidak sama');
+        if (!$this->validate($rules, $messages)) {
+            return redirect()->back()->withInput()->with('error', $this->validator->getErrors());
         }
 
-        // TODO: Validate token and update password
+        $token = $this->request->getPost('token');
+        $password = $this->request->getPost('password');
 
-        session()->setFlashdata('success', 'Mantap! Password baru siap dipakai 🎉 Yuk login!');
-        return redirect()->to('/login');
+        // Verify token
+        $tokenData = $this->passwordResetTokenModel->verifyToken($token);
+
+        if (!$tokenData) {
+            session()->setFlashdata('error', 'Token tidak valid atau sudah expired. Silakan request reset password lagi.');
+            return redirect()->to('/forgot-password');
+        }
+
+        // Get user by email
+        $user = $this->userModel->where('email', $tokenData['email'])->first();
+
+        if (!$user) {
+            session()->setFlashdata('error', 'User tidak ditemukan.');
+            return redirect()->to('/login');
+        }
+
+        try {
+            // Update password
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            $this->userModel->update($user['id'], ['password' => $hashedPassword]);
+
+            // Mark token as used
+            $this->passwordResetTokenModel->markAsUsed($token);
+
+            session()->setFlashdata('success', 'Mantap! Password baru siap dipakai 🎉 Yuk login!');
+            return redirect()->to('/login');
+        } catch (\Exception $e) {
+            log_message('error', 'Password reset update error: ' . $e->getMessage());
+            session()->setFlashdata('error', 'Terjadi kesalahan saat mereset password. Silakan coba lagi.');
+            return redirect()->back();
+        }
     }
 
     /**

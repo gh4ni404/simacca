@@ -92,6 +92,9 @@ class Autoload extends AutoloadConfig
      */
     public $helpers = [
         'auth',
-        'component'
+        'component',
+        'security',
+        'image',
+        'email'
     ];
 }

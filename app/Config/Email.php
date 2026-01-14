@@ -11,6 +11,43 @@ class Email extends BaseConfig
     public string $recipients = '';
 
     /**
+     * Constructor - Load configuration from .env
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        
+        // Load from environment variables if set
+        if (getenv('email.fromEmail')) {
+            $this->fromEmail = getenv('email.fromEmail');
+        }
+        if (getenv('email.fromName')) {
+            $this->fromName = getenv('email.fromName');
+        }
+        if (getenv('email.protocol')) {
+            $this->protocol = getenv('email.protocol');
+        }
+        if (getenv('email.SMTPHost')) {
+            $this->SMTPHost = getenv('email.SMTPHost');
+        }
+        if (getenv('email.SMTPUser')) {
+            $this->SMTPUser = getenv('email.SMTPUser');
+        }
+        if (getenv('email.SMTPPass')) {
+            $this->SMTPPass = getenv('email.SMTPPass');
+        }
+        if (getenv('email.SMTPPort')) {
+            $this->SMTPPort = (int) getenv('email.SMTPPort');
+        }
+        if (getenv('email.SMTPCrypto')) {
+            $this->SMTPCrypto = getenv('email.SMTPCrypto');
+        }
+        if (getenv('email.mailType')) {
+            $this->mailType = getenv('email.mailType');
+        }
+    }
+
+    /**
      * The "user agent"
      */
     public string $userAgent = 'CodeIgniter';
