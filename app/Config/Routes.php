@@ -129,17 +129,17 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('mata-pelajaran/hapus/(:num)', 'Admin\MataPelajaranController::delete/$1', ['filter' => 'role:admin']);
 
     // Jadwal Management
-    $routes->get('jadwal', 'Admin\\JadwalController::index', ['filter' => 'role:admin']);
-    $routes->get('jadwal/tambah', 'Admin\\JadwalController::create', ['filter' => 'role:admin']);
-    $routes->post('jadwal/simpan', 'Admin\\JadwalController::store', ['filter' => 'role:admin']);
-    $routes->get('jadwal/edit/(:num)', 'Admin\\JadwalController::edit/$1', ['filter' => 'role:admin']);
-    $routes->post('jadwal/update/(:num)', 'Admin\\JadwalController::update/$1', ['filter' => 'role:admin']);
-    $routes->get('jadwal/hapus/(:num)', 'Admin\\JadwalController::delete/$1', ['filter' => 'role:admin']);
-    $routes->post('jadwal/checkConflict', 'Admin\\JadwalController::checkConflict', ['filter' => 'role:admin']);
-    $routes->get('jadwal/import', 'Admin\\JadwalController::import', ['filter' => 'role:admin']);
-    $routes->post('jadwal/process-import', 'Admin\\JadwalController::processImport', ['filter' => 'role:admin']);
-    $routes->get('jadwal/download-template', 'Admin\\JadwalController::downloadTemplate', ['filter' => 'role:admin']);
-    $routes->get('jadwal/export', 'Admin\\JadwalController::export', ['filter' => 'role:admin']);
+    $routes->get('jadwal', 'Admin\JadwalController::index', ['filter' => 'role:admin']);
+    $routes->get('jadwal/tambah', 'Admin\JadwalController::create', ['filter' => 'role:admin']);
+    $routes->post('jadwal/simpan', 'Admin\JadwalController::store', ['filter' => 'role:admin']);
+    $routes->get('jadwal/edit/(:num)', 'Admin\JadwalController::edit/$1', ['filter' => 'role:admin']);
+    $routes->post('jadwal/update/(:num)', 'Admin\JadwalController::update/$1', ['filter' => 'role:admin']);
+    $routes->get('jadwal/hapus/(:num)', 'Admin\JadwalController::delete/$1', ['filter' => 'role:admin']);
+    $routes->post('jadwal/checkConflict', 'Admin\JadwalController::checkConflict', ['filter' => 'role:admin']);
+    $routes->get('jadwal/import', 'Admin\JadwalController::import', ['filter' => 'role:admin']);
+    $routes->post('jadwal/process-import', 'Admin\JadwalController::processImport', ['filter' => 'role:admin']);
+    $routes->get('jadwal/download-template', 'Admin\JadwalController::downloadTemplate', ['filter' => 'role:admin']);
+    $routes->get('jadwal/export', 'Admin\JadwalController::export', ['filter' => 'role:admin']);
 
     // Laporan
     $routes->get('laporan/absensi', 'Admin\LaporanController::absensi', ['filter' => 'role:admin']);
@@ -172,12 +172,12 @@ $routes->group('guru', ['filter' => 'auth'], function ($routes) {
     $routes->post('jurnal/simpan', 'Guru\JurnalController::store', ['filter' => 'role:guru_mapel']);
     $routes->get('jurnal/show/(:num)', 'Guru\JurnalController::show/$1', ['filter' => 'role:guru_mapel']);
     $routes->get('jurnal/print/(:num)', 'Guru\JurnalController::print/$1', ['filter' => 'role:guru_mapel']);
-    $routes->get('jurnal/edit/(:num)', 'Guru\\JurnalController::edit/$1', ['filter' => 'role:guru_mapel']);
-    $routes->put('jurnal/update/(:num)', 'Guru\\JurnalController::update/$1', ['filter' => 'role:guru_mapel']);
+    $routes->get('jurnal/edit/(:num)', 'Guru\JurnalController::edit/$1', ['filter' => 'role:guru_mapel']);
+    $routes->put('jurnal/update/(:num)', 'Guru\JurnalController::update/$1', ['filter' => 'role:guru_mapel']);
     
     // Laporan Routes
-    $routes->get('laporan', 'Guru\\LaporanController::index', ['filter' => 'role:guru_mapel']);
-    $routes->get('laporan/print', 'Guru\\LaporanController::print', ['filter' => 'role:guru_mapel']);
+    $routes->get('laporan', 'Guru\LaporanController::index', ['filter' => 'role:guru_mapel']);
+    $routes->get('laporan/print', 'Guru\LaporanController::print', ['filter' => 'role:guru_mapel']);
 });
 
 // Wali Kelas Routes
@@ -213,9 +213,9 @@ $routes->group('siswa', ['filter' => 'auth'], function ($routes) {
     // $routes->post('jurnal/simpan', 'Siswa\JurnalController::store', ['filter'=> 'role:siswa']);
     // $routes->get('jurnal/edit/(:num)', 'Siswa\JurnalController::edit/$1', ['filter'=> 'role:siswa']);
     // $routes->post('jurnal/update/(:num)', 'Siswa\JurnalController::update/$1', ['filter'=> 'role:siswa']);
-    $routes->get('profil', 'Siswa\\ProfilController::index', ['filter' => 'role:siswa']);
-    $routes->post('profil/update', 'Siswa\\ProfilController::update', ['filter' => 'role:siswa']);
-    $routes->post('profil/change-password', 'Siswa\\ProfilController::changePassword', ['filter' => 'role:siswa']);
+    $routes->get('profil', 'Siswa\ProfilController::index', ['filter' => 'role:siswa']);
+    $routes->post('profil/update', 'Siswa\ProfilController::update', ['filter' => 'role:siswa']);
+    $routes->post('profil/change-password', 'Siswa\ProfilController::changePassword', ['filter' => 'role:siswa']);
 });
 
 // Profile Routes (for all roles)
