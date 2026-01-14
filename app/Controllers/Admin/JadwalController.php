@@ -504,15 +504,15 @@ class JadwalController extends BaseController
                     $hari = trim($row[0]);
                     $jamMulai = trim($row[1]);
                     $jamSelesai = trim($row[2]);
-                    $guruId = trim($row[3]);
-                    $mataPelajaranId = trim($row[4]);
-                    $kelasId = trim($row[5]);
+                    $guruInput = trim($row[3]);
+                    $mataPelajaranInput = trim($row[4]);
+                    $kelasInput = trim($row[5]);
                     $semester = trim($row[6]);
                     $tahunAjaran = trim($row[7]);
 
                     // Validate required fields
                     if (empty($hari) || empty($jamMulai) || empty($jamSelesai) || 
-                        empty($guruId) || empty($mataPelajaranId) || empty($kelasId) ||
+                        empty($guruInput) || empty($mataPelajaranInput) || empty($kelasInput) ||
                         empty($semester) || empty($tahunAjaran)) {
                         throw new \Exception("Data tidak lengkap pada baris " . ($index + 2));
                     }
@@ -523,22 +523,101 @@ class JadwalController extends BaseController
                         throw new \Exception("Hari tidak valid: {$hari}");
                     }
 
+                    // ===== PROSES GURU: Support ID atau Nama =====
+                    $guruId = null;
+                    if (is_numeric($guruInput)) {
+                        // Jika input berupa angka, anggap sebagai ID
+                        $guruId = (int)$guruInput;
+                    } else {
+                        // Jika input berupa string, coba beberapa cara
+                        // 1. Coba extract NIP dari format "Nama (NIP)" untuk backward compatibility
+                        if (preg_match('/\(([^)]+)\)/', $guruInput, $matches)) {
+                            $nip = trim($matches[1]);
+                            $guru = $this->guruModel->where('nip', $nip)->first();
+                            if ($guru) {
+                                $guruId = $guru['id'];
+                            }
+                        }
+                        
+                        // 2. Jika belum ketemu, cari berdasarkan nama lengkap exact match
+                        if (!$guruId) {
+                            $guru = $this->guruModel->where('nama_lengkap', trim($guruInput))->first();
+                            if ($guru) {
+                                $guruId = $guru['id'];
+                            }
+                        }
+                        
+                        // 3. Jika masih belum ketemu, cari dengan LIKE (partial match)
+                        if (!$guruId) {
+                            $guru = $this->guruModel->like('nama_lengkap', trim($guruInput))->first();
+                            if ($guru) {
+                                $guruId = $guru['id'];
+                            }
+                        }
+                    }
+
                     // Validate guru exists
                     $guru = $this->guruModel->find($guruId);
                     if (!$guru) {
-                        throw new \Exception("Guru ID {$guruId} tidak ditemukan");
+                        throw new \Exception("Guru '{$guruInput}' tidak ditemukan");
+                    }
+
+                    // ===== PROSES MATA PELAJARAN: Support ID atau Nama =====
+                    $mataPelajaranId = null;
+                    if (is_numeric($mataPelajaranInput)) {
+                        // Jika input berupa angka, anggap sebagai ID
+                        $mataPelajaranId = (int)$mataPelajaranInput;
+                    } else {
+                        // Jika input berupa string, coba beberapa cara
+                        // 1. Coba extract kode dari format "Nama (Kode)" untuk backward compatibility
+                        if (preg_match('/\(([^)]+)\)/', $mataPelajaranInput, $matches)) {
+                            $kode = trim($matches[1]);
+                            $mapel = $this->mapelModel->where('kode_mapel', $kode)->first();
+                            if ($mapel) {
+                                $mataPelajaranId = $mapel['id'];
+                            }
+                        }
+                        
+                        // 2. Jika belum ketemu, cari berdasarkan nama mapel exact match
+                        if (!$mataPelajaranId) {
+                            $mapel = $this->mapelModel->where('nama_mapel', trim($mataPelajaranInput))->first();
+                            if ($mapel) {
+                                $mataPelajaranId = $mapel['id'];
+                            }
+                        }
+                        
+                        // 3. Jika masih belum ketemu, cari dengan LIKE (partial match)
+                        if (!$mataPelajaranId) {
+                            $mapel = $this->mapelModel->like('nama_mapel', trim($mataPelajaranInput))->first();
+                            if ($mapel) {
+                                $mataPelajaranId = $mapel['id'];
+                            }
+                        }
                     }
 
                     // Validate mata pelajaran exists
                     $mapel = $this->mapelModel->find($mataPelajaranId);
                     if (!$mapel) {
-                        throw new \Exception("Mata Pelajaran ID {$mataPelajaranId} tidak ditemukan");
+                        throw new \Exception("Mata Pelajaran '{$mataPelajaranInput}' tidak ditemukan");
+                    }
+
+                    // ===== PROSES KELAS: Support ID atau Nama =====
+                    $kelasId = null;
+                    if (is_numeric($kelasInput)) {
+                        // Jika input berupa angka, anggap sebagai ID
+                        $kelasId = (int)$kelasInput;
+                    } else {
+                        // Cari berdasarkan nama kelas
+                        $kelas = $this->kelasModel->where('nama_kelas', $kelasInput)->first();
+                        if ($kelas) {
+                            $kelasId = $kelas['id'];
+                        }
                     }
 
                     // Validate kelas exists
                     $kelas = $this->kelasModel->find($kelasId);
                     if (!$kelas) {
-                        throw new \Exception("Kelas ID {$kelasId} tidak ditemukan");
+                        throw new \Exception("Kelas '{$kelasInput}' tidak ditemukan");
                     }
 
                     // Check for schedule conflict for teacher
@@ -611,7 +690,7 @@ class JadwalController extends BaseController
     }
 
     /**
-     * Download template Excel for import
+     * Download template Excel for import (User-Friendly dengan Dropdown)
      */
     public function downloadTemplate()
     {
@@ -620,17 +699,19 @@ class JadwalController extends BaseController
         }
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        
+        // ===== SHEET 1: Template Import Jadwal =====
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Template Import Jadwal');
 
-        // Set headers
+        // Set headers dengan kolom nama yang user-friendly
         $headers = [
             'A1' => 'HARI',
-            'B1' => 'JAM MULAI (HH:MM:SS)',
-            'C1' => 'JAM SELESAI (HH:MM:SS)',
-            'D1' => 'GURU_ID',
-            'E1' => 'MATA_PELAJARAN_ID',
-            'F1' => 'KELAS_ID',
+            'B1' => 'JAM MULAI',
+            'C1' => 'JAM SELESAI',
+            'D1' => 'NAMA GURU',
+            'E1' => 'MATA PELAJARAN',
+            'F1' => 'KELAS',
             'G1' => 'SEMESTER',
             'H1' => 'TAHUN AJARAN',
         ];
@@ -641,52 +722,265 @@ class JadwalController extends BaseController
 
         // Style header
         $headerStyle = [
-            'font' => ['bold' => true],
-            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'font' => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER, 'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
             'fill' => [
                 'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                'startColor' => ['argb' => 'FFD1E7DD']
-            ]
+                'startColor' => ['argb' => 'FF4472C4']
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => 'FF000000'],
+                ],
+            ],
         ];
         $sheet->getStyle('A1:H1')->applyFromArray($headerStyle);
+        $sheet->getRowDimension(1)->setRowHeight(25);
 
-        // Add sample data
-        $sheet->fromArray([
-            ['Senin', '07:00:00', '08:30:00', 1, 1, 1, 'Ganjil', '2023/2024'],
-            ['Senin', '08:30:00', '10:00:00', 2, 2, 1, 'Ganjil', '2023/2024'],
-            ['Selasa', '07:00:00', '08:30:00', 1, 1, 2, 'Ganjil', '2023/2024'],
-        ], null, 'A2');
+        // Get data untuk dropdown
+        $guruList = $this->guruModel->select('guru.id, guru.nama_lengkap, guru.nip')
+            ->join('users', 'users.id = guru.user_id')
+            ->where('users.is_active', 1)
+            ->orderBy('guru.nama_lengkap', 'ASC')
+            ->findAll();
+        $mapelList = $this->mapelModel->select('id, nama_mapel, kode_mapel')
+            ->orderBy('nama_mapel', 'ASC')
+            ->findAll();
+        $kelasList = $this->kelasModel->select('id, nama_kelas')
+            ->orderBy('nama_kelas', 'ASC')
+            ->findAll();
 
-        // Auto width
-        foreach (range('A', 'H') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
+        // ===== SHEET 2: Data Guru =====
+        $guruSheet = $spreadsheet->createSheet();
+        $guruSheet->setTitle('Data Guru');
+        $guruSheet->setCellValue('A1', 'ID');
+        $guruSheet->setCellValue('B1', 'NIP');
+        $guruSheet->setCellValue('C1', 'NAMA LENGKAP');
+        $guruSheet->getStyle('A1:C1')->applyFromArray($headerStyle);
+        
+        $row = 2;
+        foreach ($guruList as $guru) {
+            $guruSheet->setCellValue('A' . $row, $guru['id']);
+            $guruSheet->setCellValue('B' . $row, $guru['nip']);
+            $guruSheet->setCellValue('C' . $row, $guru['nama_lengkap']);
+            $row++;
         }
+        $guruSheet->getColumnDimension('A')->setWidth(8);
+        $guruSheet->getColumnDimension('B')->setWidth(20);
+        $guruSheet->getColumnDimension('C')->setWidth(35);
+
+        // ===== SHEET 3: Data Mata Pelajaran =====
+        $mapelSheet = $spreadsheet->createSheet();
+        $mapelSheet->setTitle('Data Mata Pelajaran');
+        $mapelSheet->setCellValue('A1', 'ID');
+        $mapelSheet->setCellValue('B1', 'KODE');
+        $mapelSheet->setCellValue('C1', 'NAMA MATA PELAJARAN');
+        $mapelSheet->getStyle('A1:C1')->applyFromArray($headerStyle);
+        
+        $row = 2;
+        foreach ($mapelList as $mapel) {
+            $mapelSheet->setCellValue('A' . $row, $mapel['id']);
+            $mapelSheet->setCellValue('B' . $row, $mapel['kode_mapel']);
+            $mapelSheet->setCellValue('C' . $row, $mapel['nama_mapel']);
+            $row++;
+        }
+        $mapelSheet->getColumnDimension('A')->setWidth(8);
+        $mapelSheet->getColumnDimension('B')->setWidth(15);
+        $mapelSheet->getColumnDimension('C')->setWidth(35);
+
+        // ===== SHEET 4: Data Kelas =====
+        $kelasSheet = $spreadsheet->createSheet();
+        $kelasSheet->setTitle('Data Kelas');
+        $kelasSheet->setCellValue('A1', 'ID');
+        $kelasSheet->setCellValue('B1', 'NAMA KELAS');
+        $kelasSheet->getStyle('A1:B1')->applyFromArray($headerStyle);
+        
+        $row = 2;
+        foreach ($kelasList as $kelas) {
+            $kelasSheet->setCellValue('A' . $row, $kelas['id']);
+            $kelasSheet->setCellValue('B' . $row, $kelas['nama_kelas']);
+            $row++;
+        }
+        $kelasSheet->getColumnDimension('A')->setWidth(8);
+        $kelasSheet->getColumnDimension('B')->setWidth(25);
+
+        // ===== Kembali ke Sheet Template =====
+        $spreadsheet->setActiveSheetIndex(0);
+
+        // Create dropdown lists untuk kolom yang membutuhkan
+        $totalGuruRows = count($guruList);
+        $totalMapelRows = count($mapelList);
+        $totalKelasRows = count($kelasList);
+
+        // Prepare dropdown data
+        $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+        $semesterList = ['Ganjil', 'Genap'];
+
+        // Add dropdowns untuk 50 baris dengan referensi ke sheet lain
+        for ($row = 2; $row <= 51; $row++) {
+            // Dropdown HARI (kolom A)
+            $validation = $sheet->getCell('A' . $row)->getDataValidation();
+            $validation->setType(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST);
+            $validation->setErrorStyle(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::STYLE_STOP);
+            $validation->setAllowBlank(false);
+            $validation->setShowDropDown(true);
+            $validation->setFormula1('"' . implode(',', $hariList) . '"');
+            $validation->setShowErrorMessage(true);
+            $validation->setErrorTitle('Input Error');
+            $validation->setError('Pilih hari dari dropdown');
+
+            // Dropdown NAMA GURU (kolom D) - Referensi ke sheet "Data Guru"
+            if ($totalGuruRows > 0) {
+                $validation = $sheet->getCell('D' . $row)->getDataValidation();
+                $validation->setType(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST);
+                $validation->setErrorStyle(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::STYLE_STOP);
+                $validation->setAllowBlank(false);
+                $validation->setShowDropDown(true);
+                // Referensi ke kolom C (NAMA LENGKAP) di sheet "Data Guru"
+                $validation->setFormula1("'Data Guru'!\$C\$2:\$C\$" . ($totalGuruRows + 1));
+                $validation->setShowErrorMessage(true);
+                $validation->setErrorTitle('Input Error');
+                $validation->setError('Pilih guru dari dropdown');
+            }
+
+            // Dropdown MATA PELAJARAN (kolom E) - Referensi ke sheet "Data Mata Pelajaran"
+            if ($totalMapelRows > 0) {
+                $validation = $sheet->getCell('E' . $row)->getDataValidation();
+                $validation->setType(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST);
+                $validation->setErrorStyle(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::STYLE_STOP);
+                $validation->setAllowBlank(false);
+                $validation->setShowDropDown(true);
+                // Referensi ke kolom C (NAMA MATA PELAJARAN) di sheet "Data Mata Pelajaran"
+                $validation->setFormula1("'Data Mata Pelajaran'!\$C\$2:\$C\$" . ($totalMapelRows + 1));
+                $validation->setShowErrorMessage(true);
+                $validation->setErrorTitle('Input Error');
+                $validation->setError('Pilih mata pelajaran dari dropdown');
+            }
+
+            // Dropdown KELAS (kolom F) - Referensi ke sheet "Data Kelas"
+            if ($totalKelasRows > 0) {
+                $validation = $sheet->getCell('F' . $row)->getDataValidation();
+                $validation->setType(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST);
+                $validation->setErrorStyle(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::STYLE_STOP);
+                $validation->setAllowBlank(false);
+                $validation->setShowDropDown(true);
+                // Referensi ke kolom B (NAMA KELAS) di sheet "Data Kelas"
+                $validation->setFormula1("'Data Kelas'!\$B\$2:\$B\$" . ($totalKelasRows + 1));
+                $validation->setShowErrorMessage(true);
+                $validation->setErrorTitle('Input Error');
+                $validation->setError('Pilih kelas dari dropdown');
+            }
+
+            // Dropdown SEMESTER (kolom G)
+            $validation = $sheet->getCell('G' . $row)->getDataValidation();
+            $validation->setType(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST);
+            $validation->setErrorStyle(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::STYLE_STOP);
+            $validation->setAllowBlank(false);
+            $validation->setShowDropDown(true);
+            $validation->setFormula1('"' . implode(',', $semesterList) . '"');
+            $validation->setShowErrorMessage(true);
+            $validation->setErrorTitle('Input Error');
+            $validation->setError('Pilih semester dari dropdown');
+        }
+
+        // Add sample data dengan nama (bukan ID) - hanya nama tanpa NIP/Kode
+        if (!empty($guruList) && !empty($mapelList) && !empty($kelasList)) {
+            $sheet->setCellValue('A2', 'Senin');
+            $sheet->setCellValue('B2', '07:00:00');
+            $sheet->setCellValue('C2', '08:30:00');
+            $sheet->setCellValue('D2', $guruList[0]['nama_lengkap']); // Hanya nama
+            $sheet->setCellValue('E2', $mapelList[0]['nama_mapel']); // Hanya nama mapel
+            $sheet->setCellValue('F2', $kelasList[0]['nama_kelas']);
+            $sheet->setCellValue('G2', 'Ganjil');
+            $sheet->setCellValue('H2', date('Y') . '/' . (date('Y') + 1));
+        }
+
+        // Set column widths
+        $sheet->getColumnDimension('A')->setWidth(12);
+        $sheet->getColumnDimension('B')->setWidth(12);
+        $sheet->getColumnDimension('C')->setWidth(12);
+        $sheet->getColumnDimension('D')->setWidth(35);
+        $sheet->getColumnDimension('E')->setWidth(35);
+        $sheet->getColumnDimension('F')->setWidth(15);
+        $sheet->getColumnDimension('G')->setWidth(12);
+        $sheet->getColumnDimension('H')->setWidth(15);
 
         // Freeze header
         $sheet->freezePane('A2');
 
-        // Add instructions sheet
+        // ===== SHEET 5: Petunjuk =====
         $instructionSheet = $spreadsheet->createSheet();
         $instructionSheet->setTitle('Petunjuk');
-        $instructionSheet->setCellValue('A1', 'PETUNJUK IMPORT JADWAL MENGAJAR');
-        $instructionSheet->setCellValue('A3', '1. HARI: Senin, Selasa, Rabu, Kamis, Jumat');
-        $instructionSheet->setCellValue('A4', '2. JAM MULAI dan JAM SELESAI: Format HH:MM:SS (contoh: 07:00:00)');
-        $instructionSheet->setCellValue('A5', '3. GURU_ID: ID guru dari database (lihat di menu Guru)');
-        $instructionSheet->setCellValue('A6', '4. MATA_PELAJARAN_ID: ID mata pelajaran dari database (lihat di menu Mata Pelajaran)');
-        $instructionSheet->setCellValue('A7', '5. KELAS_ID: ID kelas dari database (lihat di menu Kelas)');
-        $instructionSheet->setCellValue('A8', '6. SEMESTER: Ganjil atau Genap');
-        $instructionSheet->setCellValue('A9', '7. TAHUN AJARAN: Format YYYY/YYYY (contoh: 2023/2024)');
-        $instructionSheet->setCellValue('A11', 'PENTING:');
-        $instructionSheet->setCellValue('A12', '- Jangan mengubah nama kolom header');
-        $instructionSheet->setCellValue('A13', '- Pastikan format jam benar (HH:MM:SS)');
-        $instructionSheet->setCellValue('A14', '- Pastikan ID guru, mapel, dan kelas sudah ada di database');
-        $instructionSheet->setCellValue('A15', '- Sistem akan mengecek konflik jadwal');
+        
+        $instructions = [
+            ['PETUNJUK IMPORT JADWAL MENGAJAR'],
+            [''],
+            ['CARA MENGISI TEMPLATE:'],
+            ['1. HARI: Pilih dari dropdown (Senin, Selasa, Rabu, Kamis, Jumat)'],
+            ['2. JAM MULAI: Format HH:MM:SS (contoh: 07:00:00, 08:30:00)'],
+            ['3. JAM SELESAI: Format HH:MM:SS, harus lebih besar dari Jam Mulai'],
+            ['4. NAMA GURU: Pilih dari dropdown - HANYA NAMA (data dari sheet "Data Guru")'],
+            ['5. MATA PELAJARAN: Pilih dari dropdown - HANYA NAMA (data dari sheet "Data Mata Pelajaran")'],
+            ['6. KELAS: Pilih dari dropdown - NAMA KELAS (data dari sheet "Data Kelas")'],
+            ['7. SEMESTER: Pilih dari dropdown (Ganjil atau Genap)'],
+            ['8. TAHUN AJARAN: Format YYYY/YYYY (contoh: 2023/2024, 2024/2025)'],
+            [''],
+            ['TIPS PENTING:'],
+            ['✓ CUKUP PILIH NAMA dari dropdown (tidak perlu NIP atau kode!)'],
+            ['✓ Dropdown otomatis mengambil data dari sheet referensi'],
+            ['✓ Jangan mengubah nama kolom header di sheet "Template Import Jadwal"'],
+            ['✓ Jangan mengedit sheet "Data Guru", "Data Mata Pelajaran", dan "Data Kelas"'],
+            ['✓ Format jam HARUS HH:MM:SS (2 digit jam : 2 digit menit : 2 digit detik)'],
+            ['✓ Sistem akan otomatis mengecek konflik jadwal (guru dan kelas)'],
+            ['✓ Centang "Lewati jadwal konflik" saat upload untuk skip data yang konflik'],
+            [''],
+            ['VALIDASI OTOMATIS:'],
+            ['→ Sistem akan mengecek apakah guru sudah mengajar di jam yang sama'],
+            ['→ Sistem akan mengecek apakah kelas sudah ada pelajaran di jam yang sama'],
+            ['→ Data yang valid akan diimport, yang invalid akan dilaporkan'],
+            [''],
+            ['CONTOH DATA VALID (Format Baru):'],
+            ['Senin | 07:00:00 | 08:30:00 | Ahmad Yani | Matematika | X RPL 1 | Ganjil | 2023/2024'],
+            [''],
+            ['SHEET REFERENSI:'],
+            ['• Sheet "Data Guru": Lihat ID, NIP, dan Nama Lengkap - Pilih dari kolom NAMA LENGKAP'],
+            ['• Sheet "Data Mata Pelajaran": Lihat ID, Kode, dan Nama - Pilih dari kolom NAMA MATA PELAJARAN'],
+            ['• Sheet "Data Kelas": Lihat ID dan Nama - Pilih dari kolom NAMA KELAS'],
+            [''],
+            ['BACKWARD COMPATIBILITY:'],
+            ['Sistem masih support format lama dengan ID angka atau format "Nama (NIP/Kode)"'],
+            [''],
+            ['Jika ada pertanyaan, hubungi administrator sistem.'],
+        ];
 
-        $instructionSheet->getColumnDimension('A')->setWidth(80);
+        $instructionSheet->fromArray($instructions, null, 'A1');
+        $instructionSheet->getColumnDimension('A')->setWidth(100);
+        
+        // Style untuk instruction
+        $instructionSheet->getStyle('A1')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 16, 'color' => ['argb' => 'FF4472C4']],
+        ]);
+        $instructionSheet->getStyle('A3')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 12],
+        ]);
+        $instructionSheet->getStyle('A13')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 12],
+        ]);
+        $instructionSheet->getStyle('A21')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 12],
+        ]);
+        $instructionSheet->getStyle('A27')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 12],
+        ]);
+        $instructionSheet->getStyle('A32')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 12],
+        ]);
 
         // Output
+        $spreadsheet->setActiveSheetIndex(0);
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        $filename = 'template-import-jadwal.xlsx';
+        $filename = 'template-import-jadwal-' . date('Y-m-d') . '.xlsx';
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $filename . '"');

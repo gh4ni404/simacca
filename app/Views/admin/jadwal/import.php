@@ -8,22 +8,38 @@
         <p class="text-gray-600"><?= $pageDescription ?></p>
     </div>
 
+    <pre>
+        <?= print_r($user); ?>
+    </pre>
+
     <!-- Import Guide -->
     <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
         <h3 class="text-lg font-semibold text-blue-800 mb-4 flex items-center">
-            <i class="fas fa-info-circle mr-2"></i> Petunjuk Import
+            <i class="fas fa-info-circle mr-2"></i> Petunjuk Import (User-Friendly dengan Dropdown!)
         </h3>
-        <ul class="list-disc list-inside space-y-2 text-blue-700">
-            <li>Format file harus Excel (.xlsx atau .xls)</li>
-            <li>Pastikan format kolom sesuai template</li>
-            <li>Kolom wajib: Hari, Jam Mulai, Jam Selesai, Guru ID, Mata Pelajaran ID, Kelas ID, Semester, Tahun Ajaran</li>
-            <li>Format jam: HH:MM:SS (contoh: 07:00:00)</li>
-            <li>Hari: Senin, Selasa, Rabu, Kamis, Jumat</li>
-            <li>Semester: Ganjil atau Genap</li>
-            <li>Tahun Ajaran: Format YYYY/YYYY (contoh: 2023/2024)</li>
-            <li>Sistem akan mengecek konflik jadwal otomatis</li>
-            <li>Download template untuk panduan format data</li>
-        </ul>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <h4 class="font-semibold text-blue-900 mb-2">✨ Fitur Baru:</h4>
+                <ul class="list-disc list-inside space-y-2 text-blue-700">
+                    <li><strong>Dropdown Otomatis</strong> untuk Hari, Guru, Mapel, Kelas, Semester</li>
+                    <li><strong>Tidak perlu mengingat ID</strong> - Pilih dari dropdown!</li>
+                    <li><strong>5 Sheet</strong> - Template, Data Guru, Data Mapel, Data Kelas, Petunjuk</li>
+                    <li><strong>Data Referensi</strong> lengkap dengan NIP dan Kode Mapel</li>
+                    <li>Format: <code>Nama Guru (NIP)</code>, <code>Nama Mapel (Kode)</code></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold text-blue-900 mb-2">📋 Format Data:</h4>
+                <ul class="list-disc list-inside space-y-2 text-blue-700">
+                    <li>Format file: Excel (.xlsx atau .xls)</li>
+                    <li>Format jam: HH:MM:SS (contoh: 07:00:00)</li>
+                    <li>Hari: Pilih dari dropdown (Senin-Jumat)</li>
+                    <li>Semester: Pilih dari dropdown (Ganjil/Genap)</li>
+                    <li>Tahun Ajaran: Format YYYY/YYYY (contoh: 2023/2024)</li>
+                    <li>Sistem mengecek konflik jadwal otomatis</li>
+                </ul>
+            </div>
+        </div>
 
         <div class="mt-4 flex space-x-3">
             <a href="<?= base_url('admin/jadwal/download-template') ?>"
@@ -73,6 +89,24 @@
                 </div>
 
                 <!-- Info Box -->
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-check-circle text-green-400 text-xl"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-green-800">Template Mudah Digunakan!</h3>
+                            <div class="mt-2 text-sm text-green-700">
+                                <p><strong>✓ TIDAK PERLU MENGINGAT ID!</strong></p>
+                                <p>• Pilih nama guru, mapel, dan kelas dari <strong>dropdown</strong></p>
+                                <p>• Data referensi tersedia di sheet terpisah</p>
+                                <p>• Sistem otomatis konversi nama ke ID</p>
+                                <p>• Support format lama (ID) dan baru (nama) sekaligus</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                     <div class="flex">
                         <div class="flex-shrink-0">
@@ -81,9 +115,9 @@
                         <div class="ml-3">
                             <h3 class="text-sm font-medium text-yellow-800">Perhatian</h3>
                             <div class="mt-2 text-sm text-yellow-700">
-                                <p>• Pastikan ID Guru, Mata Pelajaran, dan Kelas sudah ada di database</p>
                                 <p>• Sistem akan mengecek konflik jadwal untuk guru dan kelas</p>
                                 <p>• Jika opsi "Lewati jadwal konflik" dicentang, data konflik tidak akan diimport</p>
+                                <p>• Pastikan format jam benar: HH:MM:SS</p>
                             </div>
                         </div>
                     </div>
