@@ -18,7 +18,7 @@
             <li>Pastikan format kolom sesuai template</li>
             <li>Kolom wajib: Hari, Jam Mulai, Jam Selesai, Guru ID, Mata Pelajaran ID, Kelas ID, Semester, Tahun Ajaran</li>
             <li>Format jam: HH:MM:SS (contoh: 07:00:00)</li>
-            <li>Hari: Senin, Selasa, Rabu, Kamis, Jumat, </li>
+            <li>Hari: Senin, Selasa, Rabu, Kamis, Jumat</li>
             <li>Semester: Ganjil atau Genap</li>
             <li>Tahun Ajaran: Format YYYY/YYYY (contoh: 2023/2024)</li>
             <li>Sistem akan mengecek konflik jadwal otomatis</li>

@@ -159,17 +159,21 @@
                     <label for="tahun_ajaran" class="block text-sm font-medium text-gray-700 mb-2">
                         Tahun Ajaran *
                     </label>
-                    <input type="text"
-                        id="tahun_ajaran"
+                    <select id="tahun_ajaran"
                         name="tahun_ajaran"
-                        value="<?= old('tahun_ajaran', $jadwal['tahun_ajaran']); ?>"
                         class="w-full px-4 py-2 border <?= session('errors.tahun_ajaran') ? 'border-red-500' : 'border-gray-300'; ?> rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="2024/2025"
                         required>
+                        <option value="">Pilih Tahun Ajaran</option>
+                        <?php foreach ($tahunAjaranList as $key => $value): ?>
+                            <option value="<?= $key; ?>" <?= (old('tahun_ajaran', $jadwal['tahun_ajaran']) == $key) ? 'selected' : ''; ?>>
+                                <?= $value; ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                     <?php if (session('errors.tahun_ajaran')): ?>
                         <p class="mt-1 text-sm text-red-600"><?= session('errors.tahun_ajaran'); ?></p>
                     <?php endif; ?>
-                    <p class="mt-1 text-xs text-gray-500">Format: 2024/2025</p>
+                    <p class="mt-1 text-xs text-gray-500">Format: <?= $currentYear ?>/<?= $currentYear + 1 ?></p>
                 </div>
             </div>
 
@@ -264,6 +268,11 @@
                 })
                 .catch(error => {
                     console.error('Error checking conflict:', error);
+                    // Show user-friendly error message
+                    conflictAlert.classList.remove('hidden');
+                    conflictMessage.textContent = '⚠️ Tidak dapat mengecek konflik jadwal. Silakan coba lagi atau langsung submit form.';
+                    conflictAlert.querySelector('.bg-red-100').classList.remove('bg-red-100', 'border-red-400', 'text-red-700');
+                    conflictAlert.querySelector('.bg-red-100').classList.add('bg-yellow-100', 'border-yellow-400', 'text-yellow-700');
                 });
         }
 
@@ -284,17 +293,7 @@
             }
         });
 
-        // Validasi tahun ajaran
-        document.getElementById('tahun_ajaran').addEventListener('input', function(e) {
-            const value = e.target.value;
-            const pattern = /^\d{4}\/\d{4}$/;
-
-            if (!pattern.test(value)) {
-                e.target.setCustomValidity('Format tahun ajaran harus: 2024/2025');
-            } else {
-                e.target.setCustomValidity('');
-            }
-        });
+        // Tahun ajaran validation removed - now using select dropdown
     });
 </script>
 <?= $this->endSection() ?>

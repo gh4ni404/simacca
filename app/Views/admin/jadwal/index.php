@@ -183,14 +183,22 @@
                         </tr>
                     <?php else: ?>
                         <?php $no = (($jadwal['pager']->getCurrentPage() - 1) * $perPage) + 1; ?>
-                        <?php foreach ($jadwal['jadwal'] as $item): ?>
+                        <?php foreach ($jadwal['jadwal'] as $item): 
+                            // Badge colors untuk hari
+                            $hariBadgeColors = [
+                                'Senin' => 'bg-red-100 text-red-800',
+                                'Selasa' => 'bg-yellow-100 text-yellow-800',
+                                'Rabu' => 'bg-green-100 text-green-800',
+                                'Kamis' => 'bg-blue-100 text-blue-800',
+                                'Jumat' => 'bg-purple-100 text-purple-800',
+                            ];
+                            $badgeColor = $hariBadgeColors[$item['hari']] ?? 'bg-gray-100 text-gray-800';
+                        ?>
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= $no++; ?></td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full 
-                                        <?= $item['hari'] == 'Senin' ? 'bg-red-100 text-red-800' : ($item['hari'] == 'Selasa' ? 'bg-yellow-100 text-yellow-800' : ($item['hari'] == 'Rabu' ? 'bg-green-100 text-green-800' : ($item['hari'] == 'Kamis' ? 'bg-blue-100 text-blue-800' : ($item['hari'] == 'Jumat' ? 'bg-purple-100 text-purple-800' :
-                                                            'bg-gray-100 text-gray-800')))) ?>">
-                                        <?= $item['hari']; ?>
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full <?= esc($badgeColor); ?>">
+                                        <?= esc($item['hari']); ?>
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">

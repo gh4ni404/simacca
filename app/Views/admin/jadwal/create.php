@@ -269,6 +269,11 @@
                 })
                 .catch(error => {
                     console.error('Error checking conflict:', error);
+                    // Show user-friendly error message
+                    conflictAlert.classList.remove('hidden');
+                    conflictMessage.textContent = '⚠️ Tidak dapat mengecek konflik jadwal. Silakan coba lagi atau langsung submit form.';
+                    conflictAlert.querySelector('.bg-red-100').classList.remove('bg-red-100', 'border-red-400', 'text-red-700');
+                    conflictAlert.querySelector('.bg-red-100').classList.add('bg-yellow-100', 'border-yellow-400', 'text-yellow-700');
                 });
         }
 
