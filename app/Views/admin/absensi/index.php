@@ -21,37 +21,8 @@
         </div>
 
         <!-- Alert Messages -->
-        <?php if (session()->getFlashdata('success')): ?>
-            <div class="mb-6 bg-green-50 border-l-4 border-green-500 rounded-lg p-4 shadow-sm animate-fade-in">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-check-circle text-green-500 text-xl"></i>
-                    </div>
-                    <div class="ml-3 flex-1">
-                        <p class="text-green-800 font-medium"><?= session()->getFlashdata('success') ?></p>
-                    </div>
-                    <button onclick="this.parentElement.parentElement.remove()" class="text-green-500 hover:text-green-700">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            </div>
-        <?php endif; ?>
-
-        <?php if (session()->getFlashdata('error')): ?>
-            <div class="mb-6 bg-red-50 border-l-4 border-red-500 rounded-lg p-4 shadow-sm animate-fade-in">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
-                    </div>
-                    <div class="ml-3 flex-1">
-                        <p class="text-red-800 font-medium"><?= session()->getFlashdata('error') ?></p>
-                    </div>
-                    <button onclick="this.parentElement.parentElement.remove()" class="text-red-500 hover:text-red-700">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            </div>
-        <?php endif; ?>
+        <?= view('components/alerts') ?>
+        <!-- Alert Messages -->
 
         <!-- Filter Card -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-6 overflow-hidden">
