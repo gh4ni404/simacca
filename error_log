@@ -41,3 +41,4 @@ Stack trace:
 #0 /home2/smknbone/simaccaProject/deploy.php(148): require_once()
 #1 {main}
   thrown in /home2/smknbone/simaccaProject/app/Config/Database.php on line 10
+[14-Jan-2026 00:37:26 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
