@@ -94,7 +94,8 @@ class Filters extends BaseFilters
                     // Removed login/process for security - CSRF protection is critical
                     'forgot-password/process',
                     'reset-password/process',
-                    'files/*'  // Allow file serving without CSRF
+                    'files/*',  // Allow file serving without CSRF
+                    'admin/jadwal/checkConflict'  // AJAX endpoint - token sent in header
                 ]
             ],
             // 'invalidchars',
