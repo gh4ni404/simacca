@@ -49,6 +49,9 @@ if (!function_exists('optimize_image')) {
             return false;
         }
 
+        // Capture original file size early so logging is correct even when source and dest are the same file.
+        $originalFileSize = filesize($sourcePath);
+
         list($originalWidth, $originalHeight, $imageType) = $imageInfo;
         $mimeType = $imageInfo['mime'];
 
@@ -77,6 +80,73 @@ if (!function_exists('optimize_image')) {
         if ($sourceImage === false || $sourceImage === null) {
             log_message('error', 'Failed to create image resource from: ' . $sourcePath);
             return false;
+        }
+
+        // Auto-rotate JPEG images based on EXIF Orientation metadata.
+        // Many mobile cameras store the orientation in EXIF instead of rotating pixels.
+        if ($imageType === IMAGETYPE_JPEG && function_exists('exif_read_data')) {
+            try {
+                $exif = @exif_read_data($sourcePath);
+                $orientation = isset($exif['Orientation']) ? (int) $exif['Orientation'] : 1;
+
+                if ($orientation !== 1) {
+                    $rotated = null;
+
+                    // Handle flips first (orientation 2,4,5,7)
+                    if (in_array($orientation, [2, 4, 5, 7], true) && function_exists('imageflip')) {
+                        switch ($orientation) {
+                            case 2: // Mirror horizontal
+                                imageflip($sourceImage, IMG_FLIP_HORIZONTAL);
+                                break;
+                            case 4: // Mirror vertical
+                                imageflip($sourceImage, IMG_FLIP_VERTICAL);
+                                break;
+                            case 5: // Mirror horizontal and rotate 270 CW
+                                imageflip($sourceImage, IMG_FLIP_HORIZONTAL);
+                                $rotated = imagerotate($sourceImage, 90, 0);
+                                break;
+                            case 7: // Mirror horizontal and rotate 90 CW
+                                imageflip($sourceImage, IMG_FLIP_HORIZONTAL);
+                                $rotated = imagerotate($sourceImage, -90, 0);
+                                break;
+                        }
+                    }
+
+                    // Handle rotations (orientation 3,6,8) and also 5/7 when imageflip not available.
+                    if ($rotated === null) {
+                        switch ($orientation) {
+                            case 3:
+                                $rotated = imagerotate($sourceImage, 180, 0);
+                                break;
+                            case 6:
+                                $rotated = imagerotate($sourceImage, -90, 0); // 90 CW
+                                break;
+                            case 8:
+                                $rotated = imagerotate($sourceImage, 90, 0); // 90 CCW
+                                break;
+                            case 5:
+                                // Best effort without flip support
+                                $rotated = imagerotate($sourceImage, 90, 0);
+                                break;
+                            case 7:
+                                $rotated = imagerotate($sourceImage, -90, 0);
+                                break;
+                        }
+                    }
+
+                    if ($rotated !== null && $rotated !== false) {
+                        imagedestroy($sourceImage);
+                        $sourceImage = $rotated;
+
+                        // Update dimensions after rotation.
+                        $originalWidth = imagesx($sourceImage);
+                        $originalHeight = imagesy($sourceImage);
+                    }
+                }
+            } catch (\Throwable $e) {
+                // Never fail optimization due to EXIF parsing issues.
+                log_message('debug', 'EXIF auto-rotate skipped: ' . $e->getMessage());
+            }
         }
 
         // Calculate new dimensions while maintaining aspect ratio
@@ -141,9 +211,9 @@ if (!function_exists('optimize_image')) {
             chmod($destPath, 0644);
             
             // Log compression results
-            $originalSize = filesize($sourcePath);
             $newSize = filesize($destPath);
-            $savings = round((($originalSize - $newSize) / $originalSize) * 100, 2);
+            $originalSize = $originalFileSize > 0 ? $originalFileSize : $newSize;
+            $savings = $originalSize > 0 ? round((($originalSize - $newSize) / $originalSize) * 100, 2) : 0;
             
             log_message('info', sprintf(
                 'Image optimized: %s → %s (%.2f%% smaller, %dx%d → %dx%d)',
