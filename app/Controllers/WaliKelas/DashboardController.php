@@ -23,8 +23,6 @@ class DashboardController extends BaseController
 
     public function __construct()
     {
-        helper('controller'); // Load controller helper
-        
         $this->guruModel = new GuruModel();
         $this->kelasModel = new KelasModel();
         $this->siswaModel = new SiswaModel();
@@ -36,14 +34,12 @@ class DashboardController extends BaseController
 
     public function index()
     {
-        // Get guru data using helper
-        $guru = get_current_guru('Anda bukan wali kelas');
-        if ($guru instanceof \CodeIgniter\HTTP\RedirectResponse) {
-            return $guru;
-        }
+        // Get guru data
+        $userId = session()->get('user_id');
+        $guru = $this->guruModel->getByUserId($userId);
 
-        if (!$guru['is_wali_kelas']) {
-            return redirect_with_error('/access-denied', 'Anda bukan wali kelas');
+        if (!$guru || !$guru['is_wali_kelas']) {
+            return redirect()->to('/access-denied')->with('error', 'Anda bukan wali kelas');
         }
 
         $guruId = $guru['id'];
@@ -60,9 +56,8 @@ class DashboardController extends BaseController
         $totalSiswa = count($siswa);
 
         // Get statistik absensi kelas (bulan ini)
-        $dateRange = get_month_date_range();
-        $startDate = $dateRange['start'];
-        $endDate = $dateRange['end'];
+        $startDate = date('Y-m-01');
+        $endDate = date('Y-m-t');
         
         $absensiKelas = $this->absensiModel->getByKelas($kelas['id'], $startDate, $endDate);
         
@@ -79,7 +74,13 @@ class DashboardController extends BaseController
 
         // Get statistik kehadiran detail
         $kehadiranStats = $this->absensiDetailModel
-            ->select(get_attendance_stats_query())
+            ->select('
+                COUNT(*) as total,
+                SUM(CASE WHEN status = "hadir" THEN 1 ELSE 0 END) as hadir,
+                SUM(CASE WHEN status = "sakit" THEN 1 ELSE 0 END) as sakit,
+                SUM(CASE WHEN status = "izin" THEN 1 ELSE 0 END) as izin,
+                SUM(CASE WHEN status = "alpa" THEN 1 ELSE 0 END) as alpa
+            ')
             ->join('siswa', 'siswa.id = absensi_detail.siswa_id')
             ->join('absensi', 'absensi.id = absensi_detail.absensi_id')
             ->where('siswa.kelas_id', $kelas['id'])

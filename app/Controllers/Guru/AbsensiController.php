@@ -247,12 +247,41 @@ class AbsensiController extends BaseController
             'created_at' => date('Y-m-d H:i:s')
         ];
 
-        // Get siswa attendance data
-        $siswaData = $this->request->getPost('siswa');
+        // Start database transaction
+        $db = \Config\Database::connect();
+        $db->transStart();
 
         try {
-            // Use model method to handle transaction
-            $absensiId = $this->absensiModel->createAbsensiWithDetails($absensiData, $siswaData);
+            // Insert absensi
+            $absensiId = $this->absensiModel->insert($absensiData);
+
+            if (!$absensiId) {
+                throw new \Exception('Gagal menyimpan data absensi.');
+            }
+
+            // Insert absensi details
+            $siswaData = $this->request->getPost('siswa');
+            $batchData = [];
+
+            foreach ($siswaData as $siswaId => $data) {
+                $batchData[] = [
+                    'absensi_id' => $absensiId,
+                    'siswa_id' => $siswaId,
+                    'status' => $data['status'],
+                    'keterangan' => $data['keterangan'] ?? null,
+                    'waktu_absen' => date('Y-m-d H:i:s')
+                ];
+            }
+
+            if (!empty($batchData)) {
+                $this->absensiDetailModel->insertBatch($batchData);
+            }
+
+            $db->transComplete();
+
+            if ($db->transStatus() === FALSE) {
+                throw new \Exception('Gagal menyimpan data detail absensi.');
+            }
 
             $this->session->setFlashdata('success', 'Mantap! Absen tersimpan.');
 
@@ -267,6 +296,7 @@ class AbsensiController extends BaseController
             // Default: Redirect to absensi index
             return redirect()->to('/guru/absensi');
         } catch (\Exception $e) {
+            $db->transRollback();
             $this->session->setFlashdata('error', $e->getMessage());
             return redirect()->back()->withInput();
         }
@@ -467,17 +497,90 @@ class AbsensiController extends BaseController
 
         // Update absensi data
         $absensiData = [
+            'id' => $id,
             'tanggal' => $this->request->getPost('tanggal'),
             'pertemuan_ke' => $this->request->getPost('pertemuan_ke'),
             'updated_at' => date('Y-m-d H:i:s')
         ];
 
-        try {
-            // Use model method to handle transaction
-            $result = $this->absensiModel->updateAbsensiWithDetails($id, $absensiData, $siswaData);
+        // Start database transaction
+        $db = \Config\Database::connect();
+        $db->transStart();
 
-            $updateCount = $result['updated'];
-            $insertCount = $result['inserted'];
+        try {
+            // Update absensi
+            if (!$this->absensiModel->save($absensiData)) {
+                throw new \Exception('Gagal mengupdate data absensi utama.');
+            }
+
+            // Update absensi details
+            $updateCount = 0;
+            $insertCount = 0;
+
+            foreach ($siswaData as $siswaId => $data) {
+                // Validate siswa_id
+                if (!is_numeric($siswaId)) {
+                    log_message('warning', 'Invalid siswa_id: ' . $siswaId);
+                    continue;
+                }
+
+                // Validate status
+                if (!isset($data['status']) || empty($data['status'])) {
+                    log_message('warning', 'Empty status for siswa_id: ' . $siswaId);
+                    continue;
+                }
+
+                // Normalize status to lowercase and handle Alpha -> alpa conversion
+                $status = strtolower(trim($data['status']));
+                if ($status === 'alpha') {
+                    $status = 'alpa';
+                }
+
+                // Validate status value
+                $validStatuses = ['hadir', 'izin', 'sakit', 'alpa'];
+                if (!in_array($status, $validStatuses)) {
+                    log_message('warning', 'Invalid status "' . $data['status'] . '" for siswa_id: ' . $siswaId);
+                    continue;
+                }
+
+                $existing = $this->absensiDetailModel
+                    ->where('absensi_id', $id)
+                    ->where('siswa_id', $siswaId)
+                    ->first();
+
+                if ($existing) {
+                    // Update existing record
+                    $updateResult = $this->absensiDetailModel->update($existing['id'], [
+                        'status' => $status,
+                        'keterangan' => $data['keterangan'] ?? null
+                    ]);
+
+                    if ($updateResult) {
+                        $updateCount++;
+                        log_message('debug', 'Updated siswa_id: ' . $siswaId . ' with status: ' . $status);
+                    }
+                } else {
+                    // Insert new record
+                    $insertResult = $this->absensiDetailModel->insert([
+                        'absensi_id' => $id,
+                        'siswa_id' => $siswaId,
+                        'status' => $status,
+                        'keterangan' => $data['keterangan'] ?? null,
+                        'waktu_absen' => date('Y-m-d H:i:s')
+                    ]);
+
+                    if ($insertResult) {
+                        $insertCount++;
+                        log_message('debug', 'Inserted siswa_id: ' . $siswaId . ' with status: ' . $status);
+                    }
+                }
+            }
+
+            $db->transComplete();
+
+            if ($db->transStatus() === FALSE) {
+                throw new \Exception('Gagal memperbarui data absensi.');
+            }
 
             // Log success
             log_message('info', 'Absensi updated successfully. Updated: ' . $updateCount . ', Inserted: ' . $insertCount);
@@ -495,6 +598,7 @@ class AbsensiController extends BaseController
             // Default: Redirect to absensi index
             return redirect()->to('/guru/absensi');
         } catch (\Exception $e) {
+            $db->transRollback();
             log_message('error', 'Error updating absensi: ' . $e->getMessage());
             $this->session->setFlashdata('error', 'Gagal menyimpan: ' . $e->getMessage());
             return redirect()->back()->withInput();
@@ -750,20 +854,78 @@ class AbsensiController extends BaseController
 
     private function getKelasOptions($guruId)
     {
-        // Delegate to model
-        return $this->absensiModel->getKelasOptionsByGuru($guruId);
+        $kelasList = $this->jadwalModel->select('kelas.*')
+            ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
+            ->where('guru_id', $guruId)
+            ->groupBy('kelas.id')
+            ->orderBy('kelas.tingkat, kelas.nama_kelas')
+            ->findAll();
+
+        $options = ['' => 'Semua Kelas'];
+        foreach ($kelasList as $kelas) {
+            $options[$kelas['id']] = $kelas['nama_kelas'] . ' - ' . $kelas['jurusan'];
+        }
+
+        return $options;
     }
 
     private function getAbsensiStats($guruId, $tanggal = null)
     {
-        // Delegate to model
-        return $this->absensiModel->getAbsensiStatsByGuru($guruId, $tanggal);
+        $stats = [
+            'total' => 0,
+            'hadir' => 0,
+            'izin' => 0,
+            'sakit' => 0,
+            'alpa' => 0
+        ];
+
+        $builder = $this->absensiDetailModel
+            ->join('absensi', 'absensi.id = absensi_detail.absensi_id')
+            ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
+            ->where('jadwal_mengajar.guru_id', $guruId);
+
+        if ($tanggal) {
+            $builder->where('absensi.tanggal', $tanggal);
+        }
+
+        $details = $builder->select('absensi_detail.status, COUNT(*) as jumlah')
+            ->groupBy('absensi_detail.status')
+            ->findAll();
+
+        foreach ($details as $detail) {
+            $stats[$detail['status']] = $detail['jumlah'];
+            $stats['total'] += $detail['jumlah'];
+        }
+
+        return $stats;
     }
 
     private function getNextPertemuan($guruId, $kelasId = null, $jadwalId = null)
     {
-        // Delegate to model
-        return $this->absensiModel->getNextPertemuan($jadwalId, $guruId, $kelasId);
+        // If jadwal_id is provided, use it to get the last pertemuan for that specific schedule
+        // This ensures substitute teachers continue from the original teacher's last pertemuan
+        if ($jadwalId) {
+            $lastAbsensi = $this->absensiModel
+                ->where('jadwal_mengajar_id', $jadwalId)
+                ->orderBy('pertemuan_ke', 'DESC')
+                ->first();
+
+            return $lastAbsensi ? ($lastAbsensi['pertemuan_ke'] + 1) : 1;
+        }
+
+        // Fallback to old logic if jadwal_id is not provided (for initial form load)
+        $builder = $this->absensiModel
+            ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
+            ->where('jadwal_mengajar.guru_id', $guruId);
+
+        if ($kelasId) {
+            $builder->where('jadwal_mengajar.kelas_id', $kelasId);
+        }
+
+        $lastAbsensi = $builder->orderBy('pertemuan_ke', 'DESC')
+            ->first();
+
+        return $lastAbsensi ? ($lastAbsensi['pertemuan_ke'] + 1) : 1;
     }
 
     private function getHariList()
