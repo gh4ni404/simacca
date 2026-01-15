@@ -162,6 +162,8 @@ class ProfileController extends BaseController
             $plainPassword = $this->request->getPost('password');
             // Don't hash here - let the Model's beforeUpdate callback handle it
             $updateData['password'] = $plainPassword;
+            // Track password change timestamp
+            $updateData['password_changed_at'] = date('Y-m-d H:i:s');
         }
 
         // Log what we're about to update (for debugging)
@@ -195,6 +197,8 @@ class ProfileController extends BaseController
         // Handle email change notification
         if (isset($updateData['email']) && $updateData['email'] !== $userData['email']) {
             session()->set('email', $updateData['email']);
+            // Track email change timestamp
+            $updateData['email_changed_at'] = date('Y-m-d H:i:s');
             log_message('info', 'ProfileController update - Session email updated to: ' . $updateData['email']);
             
             // Send notification emails
@@ -225,6 +229,10 @@ class ProfileController extends BaseController
             }
         } elseif (isset($updateData['email'])) {
             session()->set('email', $updateData['email']);
+            // If email is being set for first time (even without change), track it
+            if (empty($userData['email_changed_at'])) {
+                $updateData['email_changed_at'] = date('Y-m-d H:i:s');
+            }
             log_message('info', 'ProfileController update - Session email updated (no change detected)');
         }
 
@@ -326,8 +334,11 @@ class ProfileController extends BaseController
                     log_message('info', "Profile photo optimized: {$newName} - {$savings}% smaller");
                 }
 
-                // Update database
-                $this->userModel->update($userId, ['profile_photo' => $newName]);
+                // Update database with timestamp
+                $this->userModel->update($userId, [
+                    'profile_photo' => $newName,
+                    'profile_photo_uploaded_at' => date('Y-m-d H:i:s')
+                ]);
 
                 // Update session
                 session()->set('profile_photo', $newName);

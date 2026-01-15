@@ -20,6 +20,9 @@ class UserModel extends Model
         'profile_photo',
         'is_active',
         'created_at',
+        'password_changed_at',
+        'email_changed_at',
+        'profile_photo_uploaded_at',
     ];
 
     protected bool $allowEmptyInserts = false;
@@ -148,5 +151,30 @@ class UserModel extends Model
         return $this->orderBy('created_at', 'DESC')
         ->limit($limit)
         ->findAll();
+    }
+
+    /**
+     * Check if user needs to complete profile
+     * User needs to complete profile if they haven't changed password, email, or uploaded photo
+     * 
+     * @param int $userId User ID
+     * @return bool True if profile needs completion, false otherwise
+     */
+    public function needsProfileCompletion($userId)
+    {
+        $user = $this->find($userId);
+        
+        if (!$user) {
+            return false;
+        }
+
+        // Check if any of the tracking fields are null
+        // User needs to complete profile if they haven't:
+        // 1. Changed their password
+        // 2. Set/changed their email
+        // 3. Uploaded profile photo
+        return empty($user['password_changed_at']) 
+            || empty($user['email_changed_at']) 
+            || empty($user['profile_photo_uploaded_at']);
     }
 }

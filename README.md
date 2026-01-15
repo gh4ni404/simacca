@@ -1,5 +1,11 @@
 # Sistem Monitoring Absensi dan Catatan Cara Ajar
 
+[![PHP Version](https://img.shields.io/badge/PHP-8.1%2B-blue)](https://php.net)
+[![CodeIgniter](https://img.shields.io/badge/CodeIgniter-4.x-red)](https://codeigniter.com)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+> **⚡ Quick Start:** Butuh panduan cepat? Lihat [QUICK_START.md](QUICK_START.md) untuk instalasi dalam 5 menit!
+
 **Framework:** Codeigniter 4.6.4
 **Database:** MySQL
 **Styling:** Tailwind CSS
@@ -119,57 +125,70 @@
 
 📝 **Lihat detail lengkap di:** [FEATURES.md](FEATURES.md) & [TODO.md](TODO.md)
 
-### Langkah 1: Instalasi
-1. Clone Repository:
+---
+
+## 🚀 Quick Start (TL;DR)
+
+**Ingin langsung coba aplikasi?** Ikuti langkah ini:
+
 ```bash
+# 1. Clone repository
 git clone https://github.com/gh4ni404/simacca.git
-```
-2. Install Dependencies:
-```bash
+cd simacca
+
+# 2. Install dependencies
 composer install
-```
 
-### Langkah 2: Konfigurasi Database
-```bash
-# Copy file env ke .env
+# 3. Setup environment
 cp env .env
+php spark key:generate
 
-# Edit .env - bagian database saja
-# database.default.database = simacca_db
-# database.default.username = root
-# database.default.password = 
-```
+# 4. Edit .env - konfigurasi database
+# nano .env  (atau gunakan text editor)
 
-**PENTING:** Buat database dulu di MySQL:
-```sql
-CREATE DATABASE simacca_db;
-```
+# 5. Buat database MySQL
+mysql -u root -p -e "CREATE DATABASE simacca_db"
 
-### Langkah 3: Setup Otomatis ⭐
-```bash
-# Setup lengkap (migrations + admin user)
-php spark setup
-
-# Atau dengan data dummy untuk testing
+# 6. Setup database dengan data dummy
 php spark setup --with-dummy
-```
 
-### Langkah 4: Jalankan Server
-```bash
+# 7. Jalankan server
 php spark serve
+
+# 8. Buka browser: http://localhost:8080
+# Login: admin / admin123
 ```
 
-Buka browser: **http://localhost:8080**
-
-### Default Login
-- **Username:** `admin`
-- **Password:** `admin123`
+**🎯 Total waktu: ~5 menit**
 
 ⚠️ **Ganti password setelah login pertama!**
+
+📖 **Detail lengkap:** [QUICK_START.md](QUICK_START.md) | [PANDUAN_INSTALASI.md](PANDUAN_INSTALASI.md)
 
 ---
 
 ## 🚀 Production Deployment
+
+> **💡 Tip:** Untuk panduan deployment lengkap (shared hosting, VPS, cloud), lihat [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
+
+### Quick Production Checklist
+
+- [ ] Copy `.env.production` → `.env`
+- [ ] Set `CI_ENVIRONMENT = production`
+- [ ] Configure database credentials
+- [ ] Generate encryption key: `php spark key:generate`
+- [ ] Run migrations: `php spark migrate`
+- [ ] Set permissions: `chmod -R 777 writable/`
+- [ ] Configure web server (Apache/Nginx)
+- [ ] Setup SSL certificate
+- [ ] Test email configuration
+- [ ] Setup backup schedule
+
+📖 **Detail lengkap:** [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
+
+---
+
+## 🚀 Production Deployment (Detail)
 
 ### Directory Structure
 SIMACCA uses a split directory structure for enhanced security:
@@ -307,6 +326,77 @@ Additionally, make sure that the following extensions are enabled in your PHP:
 
 
 ## 📚 Dokumentasi
+
+> **📑 Lihat daftar lengkap semua dokumentasi:** [DOKUMENTASI_INDEX.md](DOKUMENTASI_INDEX.md)
+
+### 📖 Panduan Instalasi & Deployment
+
+Pilih panduan yang sesuai dengan kebutuhan Anda:
+
+| 📄 Dokumen | 🎯 Untuk Siapa? | ⏱️ Waktu | 📝 Deskripsi |
+|-----------|----------------|----------|--------------|
+| [**QUICK_START.md**](QUICK_START.md) | Pemula yang ingin coba aplikasi | 5 menit | Panduan super cepat untuk testing/development |
+| [**GETTING_STARTED.md**](GETTING_STARTED.md) | Semua user | 2 menit | Panduan memilih skenario instalasi yang tepat |
+| [**PANDUAN_INSTALASI.md**](PANDUAN_INSTALASI.md) | Developer & System Admin | 15-30 menit | Panduan lengkap instalasi + troubleshooting |
+| [**DEPLOYMENT_GUIDE.md**](DEPLOYMENT_GUIDE.md) | System Admin | 30-60 menit | Panduan deployment ke production (shared hosting, VPS, cloud) |
+| [**REQUIREMENTS.md**](REQUIREMENTS.md) | Semua | 5 menit | Daftar lengkap system requirements & compatibility |
+
+### 🎓 Panduan Khusus Fitur
+
+| 📄 Dokumen | 📝 Deskripsi |
+|-----------|--------------|
+| [EMAIL_SERVICE_QUICKSTART.md](EMAIL_SERVICE_QUICKSTART.md) | Setup email notification & reset password |
+| [IMPORT_JADWAL_DOCUMENTATION.md](IMPORT_JADWAL_DOCUMENTATION.md) | Import jadwal mengajar via Excel |
+| [FEATURE_ADMIN_UNLOCK_ABSENSI.md](FEATURE_ADMIN_UNLOCK_ABSENSI.md) | Fitur admin unlock absensi yang sudah dikunci |
+
+### 📋 Changelog & Updates
+
+| 📄 Dokumen | 📝 Deskripsi |
+|-----------|--------------|
+| [CHANGELOG.md](CHANGELOG.md) | History perubahan & update aplikasi |
+| [FEATURES.md](FEATURES.md) | Daftar lengkap fitur aplikasi |
+
+---
+
+## 🚀 Quick Start (TL;DR)
+
+**Ingin langsung coba aplikasi?** Ikuti langkah ini:
+
+```bash
+# 1. Clone repository
+git clone https://github.com/username/simacca.git
+cd simacca
+
+# 2. Install dependencies
+composer install
+
+# 3. Setup environment
+cp env .env
+php spark key:generate
+
+# 4. Edit .env - konfigurasi database
+# nano .env  (atau gunakan text editor)
+
+# 5. Buat database MySQL
+mysql -u root -p -e "CREATE DATABASE simacca_db"
+
+# 6. Setup database dengan data dummy
+php spark setup --with-dummy
+
+# 7. Jalankan server
+php spark serve
+
+# 8. Buka browser: http://localhost:8080
+# Login: admin / admin123
+```
+
+**🎯 Total waktu: ~5 menit**
+
+📖 **Detail lengkap:** [QUICK_START.md](QUICK_START.md)
+
+---
+
+## 📚 Dokumentasi (Legacy)
 
 Untuk informasi lebih detail tentang fitur dan development:
 

@@ -43,6 +43,7 @@ class Filters extends BaseFilters
         'role'          => \App\Filters\RoleFilter::class,
         'guest'         => \App\Filters\GuestFilter::class,
         'keepalive'     => \App\Filters\KeepAliveFilter::class,  // ✅ Prevent ERR_CONNECTION_RESET
+        'profile_completion' => \App\Filters\ProfileCompletionFilter::class,  // ✅ Check profile completion
     ];
 
     /**
@@ -152,6 +153,16 @@ class Filters extends BaseFilters
                 'login',
                 'forgot-password',
                 'reset-password/*'
+            ]
+        ],
+        'profile_completion' => [
+            'before' => [
+                'admin/*',
+                'guru/*',
+                'walikelas/*',
+                'siswa/*',
+                'dashboard/*',
+                'change-password/*',
             ]
         ]
     ];
