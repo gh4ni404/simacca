@@ -55,3 +55,33 @@ Stack trace:
 [15-Jan-2026 04:28:01 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
 [15-Jan-2026 04:28:14 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
 [15-Jan-2026 04:28:24 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
+[15-Jan-2026 06:06:55 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
+[15-Jan-2026 14:06:55 Asia/Makassar] PHP Fatal error:  Uncaught ErrorException: fwrite(): Write of 17 bytes failed with errno=32 Broken pipe in /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/CLI/InputOutput.php:78
+Stack trace:
+#0 [internal function]: CodeIgniter\Debug\Exceptions->errorHandler(8, 'fwrite(): Write...', '/home2/smknbone...', 78)
+#1 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/CLI/InputOutput.php(78): fwrite(Resource id #2, '[ErrorException...')
+#2 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/CLI/CLI.php(1126): CodeIgniter\CLI\InputOutput->fwrite(Resource id #2, '[ErrorException...')
+#3 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/CLI/CLI.php(465): CodeIgniter\CLI\CLI::fwrite(Resource id #2, '[ErrorException...')
+#4 /home2/smknbone/simaccaProject/app/Views/errors/cli/error_exception.php(6): CodeIgniter\CLI\CLI::write('[ErrorException...', 'light_gray', 'red')
+#5 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Debug/BaseExceptionHandler.php(270): include('/home2/smknbone...')
+#6 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Debug/BaseExceptionHandler.php(273): CodeIgniter\Debug\BaseExceptionHandler->CodeIgniter\Debug\{closure}()
+#7 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Debug/ExceptionHandler.php(126): CodeIgniter\Debug\BaseExceptionHandler->render(Object(ErrorException), 500, '/home2/smknbone...')
+#8 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Debug/Exceptions.php(162): CodeIgniter\Debug\ExceptionHandler->handle(Object(ErrorException), Object(CodeIgniter\HTTP\CLIRequest), Object(CodeIgniter\HTTP\Response), 500, 1)
+#9 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(ErrorException))
+#10 {main}
+  thrown in /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/CLI/InputOutput.php on line 78
+[15-Jan-2026 14:06:55 Asia/Makassar] PHP Fatal error:  Uncaught ErrorException: fwrite(): Write of 17 bytes failed with errno=32 Broken pipe in /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/CLI/InputOutput.php:78
+Stack trace:
+#0 [internal function]: CodeIgniter\Debug\Exceptions->errorHandler(8, 'fwrite(): Write...', '/home2/smknbone...', 78)
+#1 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/CLI/InputOutput.php(78): fwrite(Resource id #2, '[ErrorException...')
+#2 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/CLI/CLI.php(1126): CodeIgniter\CLI\InputOutput->fwrite(Resource id #2, '[ErrorException...')
+#3 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/CLI/CLI.php(465): CodeIgniter\CLI\CLI::fwrite(Resource id #2, '[ErrorException...')
+#4 /home2/smknbone/simaccaProject/app/Views/errors/cli/error_exception.php(6): CodeIgniter\CLI\CLI::write('[ErrorException...', 'light_gray', 'red')
+#5 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Debug/BaseExceptionHandler.php(270): include('/home2/smknbone...')
+#6 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Debug/BaseExceptionHandler.php(273): CodeIgniter\Debug\BaseExceptionHandler->CodeIgniter\Debug\{closure}()
+#7 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Debug/ExceptionHandler.php(126): CodeIgniter\Debug\BaseExceptionHandler->render(Object(ErrorException), 500, '/home2/smknbone...')
+#8 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Debug/Exceptions.php(162): CodeIgniter\Debug\ExceptionHandler->handle(Object(ErrorException), Object(CodeIgniter\HTTP\CLIRequest), Object(CodeIgniter\HTTP\Response), 500, 1)
+#9 /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/Debug/Exceptions.php(317): CodeIgniter\Debug\Exceptions->exceptionHandler(Object(ErrorException))
+#10 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+#11 {main}
+  thrown in /home2/smknbone/simaccaProject/vendor/codeigniter4/framework/system/CLI/InputOutput.php on line 78

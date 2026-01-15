@@ -219,9 +219,9 @@
             border: 1px solid #ccc;
         }
 
-        .data-table .catatan-cell {
+        .data-table .kegiatan-cell {
             font-size: 7pt;
-            max-width: 80px;
+            max-width: 100px;
             word-wrap: break-word;
         }
 
@@ -481,6 +481,7 @@
                 <th style="width: 80px;">Jam<br>Mengajar</th>
                 <th style="width: 95px;">Nama Guru<br>Mapel</th>
                 <th style="width: 85px;">Mata<br>Pelajaran</th>
+                <th style="width: 110px;">Kegiatan<br>Pembelajaran</th>
                 <!-- <th style="width: 85px;">Nama<br>Wali Kelas</th> -->
                 <!-- <th style="width: 45px;">Nama<br>Wali Kelas</th> -->
                 <!-- <th style="width: 15px;">Nama<br>Wali Kelas</th> -->
@@ -489,7 +490,6 @@
                 <th style="width: 28px;">Sakit</th>
                 <th style="width: 28px;">Izin</th>
                 <th style="width: 28px;">Alpa</th>
-                <th style="width: 90px;">Catatan<br>Khusus</th>
                 <th style="width: 100px;">Foto</th>
                 <th style="width: 85px;">Guru Piket<br>Pengganti</th>
             </tr>
@@ -520,18 +520,18 @@
                             <?php /**<td><?= esc($jadwal['nama_wali_kelas'] ?? '-'); ?></td> */ ?>
 
                             <?php if ($belumIsi): ?>
+                                <td class="kegiatan-cell center">-</td>
                                 <td class="center" colspan="4">
                                     <span class="badge-belum">BELUM ISI</span>
                                 </td>
-                                <td class="catatan-cell center">-</td>
                                 <td class="foto-cell center">-</td>
                                 <td class="center">-</td>
                             <?php else: ?>
+                                <td class="kegiatan-cell left"><?= esc($jadwal['kegiatan_pembelajaran'] ?: '-'); ?></td>
                                 <td class="center"><?= $jadwal['jumlah_hadir']; ?></td>
                                 <td class="center"><?= $jadwal['jumlah_sakit']; ?></td>
                                 <td class="center"><?= $jadwal['jumlah_izin']; ?></td>
                                 <td class="center"><?= $jadwal['jumlah_alpa']; ?></td>
-                                <td class="catatan-cell <?= ($jadwal['catatan_khusus'] !== '-') ? 'left' : 'center'; ?>"><?= esc($jadwal['catatan_khusus'] ?: '-'); ?></td>
                                 <td class="foto-cell">
                                     <?php if (!empty($jadwal['foto_dokumentasi'])): ?>
                                         <img src="<?= base_url('files/jurnal/' . $jadwal['foto_dokumentasi']); ?>" alt="Foto">

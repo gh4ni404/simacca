@@ -90,12 +90,12 @@
                     <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Jam</th>
                     <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Guru Mapel</th>
                     <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Mata Pelajaran</th>
+                    <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Kegiatan Pembelajaran</th>
                     <!-- <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Wali Kelas</th> -->
                     <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">H</th>
                     <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">S</th>
                     <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">I</th>
                     <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">A</th>
-                    <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Catatan</th>
                     <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">Foto</th>
                     <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Pengganti</th>
                 </tr>
@@ -132,6 +132,7 @@
                                 */ ?>
                                 
                                 <?php if ($belumIsi): ?>
+                                    <td class="px-2 py-2 text-center text-sm text-red-700 border border-gray-300">-</td>
                                     <td class="px-2 py-2 text-center border border-gray-300" colspan="4">
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-600 text-white">
                                             BELUM ISI
@@ -139,8 +140,18 @@
                                     </td>
                                     <td class="px-2 py-2 text-center text-sm text-red-700 border border-gray-300">-</td>
                                     <td class="px-2 py-2 text-center text-sm text-red-700 border border-gray-300">-</td>
-                                    <td class="px-2 py-2 text-center text-sm text-red-700 border border-gray-300">-</td>
                                 <?php else: ?>
+                                    <td class="px-2 py-2 text-sm text-gray-900 border border-gray-300">
+                                        <?php if (!empty($jadwal['kegiatan_pembelajaran'])): ?>
+                                            <div class="max-w-xs">
+                                                <p class="text-gray-700 text-xs text-left" title="<?= esc($jadwal['kegiatan_pembelajaran']); ?>">
+                                                    <?= esc(strlen($jadwal['kegiatan_pembelajaran']) > 50 ? substr($jadwal['kegiatan_pembelajaran'], 0, 50) . '...' : $jadwal['kegiatan_pembelajaran']); ?>
+                                                </p>
+                                            </div>
+                                        <?php else: ?>
+                                            -
+                                        <?php endif; ?>
+                                    </td>
                                     <td class="px-2 py-2 text-center text-sm border border-gray-300">
                                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-green-800">
                                             <?= (int)$jadwal['jumlah_hadir']; ?>
@@ -160,17 +171,6 @@
                                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-red-800">
                                             <?= (int)$jadwal['jumlah_alpa']; ?>
                                         </span>
-                                    </td>
-                                    <td class="px-2 py-2 text-sm text-gray-900 border border-gray-300">
-                                        <?php if (!empty($jadwal['catatan_khusus'])): ?>
-                                            <div class="max-w-xs">
-                                                <p class="text-gray-700 text-xs <?= esc($jadwal['catatan_khusus']  !== '-') ? 'text-left' : 'text-center'; ?>" title="<?= esc($jadwal['catatan_khusus']); ?>">
-                                                    <?= esc(strlen($jadwal['catatan_khusus']) > 40 ? substr($jadwal['catatan_khusus'], 0, 40) . '...' : $jadwal['catatan_khusus']); ?>
-                                                </p>
-                                            </div>
-                                        <?php else: ?>
-                                            -
-                                        <?php endif; ?>
                                     </td>
                                     <td class="px-2 py-2 text-center text-sm border border-gray-300">
                                         <?php if (!empty($jadwal['foto_dokumentasi'])): ?>

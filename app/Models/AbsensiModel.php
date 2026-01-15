@@ -325,7 +325,7 @@ class AbsensiModel extends Model
                     a.id as absensi_id,
                     gp.nama_lengkap as nama_guru_pengganti,
                     jk.id as jurnal_id,
-                    MAX(jk.catatan_khusus) as catatan_khusus,
+                    MAX(jk.kegiatan_pembelajaran) as kegiatan_pembelajaran,
                     MAX(jk.foto_dokumentasi) as foto_dokumentasi,
                     SUM(CASE WHEN ad.status = "hadir" THEN 1 ELSE 0 END) as jumlah_hadir,
                     SUM(CASE WHEN ad.status = "sakit" THEN 1 ELSE 0 END) as jumlah_sakit,
