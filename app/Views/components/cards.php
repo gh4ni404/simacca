@@ -61,24 +61,49 @@ if (!function_exists('stat_card')) {
      * @param string $icon Font Awesome icon (without 'fa-')
      * @param string $color blue|green|yellow|red|purple|indigo
      * @param string $link Optional link URL
+     * @param string $footer Optional footer text with icon (e.g., '<i class="fas fa-clock mr-1"></i>5 hari ini')
+     * @param string $size normal|compact (for mobile optimization)
      * @return string
      */
-    function stat_card($label, $value, $icon = '', $color = 'blue', $link = '')
+    function stat_card($label, $value, $icon = '', $color = 'blue', $link = '', $footer = '', $size = 'normal')
     {
         $colorClasses = [
-            'blue'   => 'bg-blue-500',
-            'green'  => 'bg-green-500',
-            'yellow' => 'bg-yellow-500',
-            'red'    => 'bg-red-500',
-            'purple' => 'bg-purple-500',
-            'indigo' => 'bg-indigo-500',
-            'gray'   => 'bg-gray-500',
+            'blue'   => ['bg' => 'bg-blue-500', 'text' => 'text-blue-600', 'bg-light' => 'bg-blue-100'],
+            'green'  => ['bg' => 'bg-green-500', 'text' => 'text-green-600', 'bg-light' => 'bg-green-100'],
+            'yellow' => ['bg' => 'bg-yellow-500', 'text' => 'text-yellow-600', 'bg-light' => 'bg-yellow-100'],
+            'red'    => ['bg' => 'bg-red-500', 'text' => 'text-red-600', 'bg-light' => 'bg-red-100'],
+            'purple' => ['bg' => 'bg-purple-500', 'text' => 'text-purple-600', 'bg-light' => 'bg-purple-100'],
+            'indigo' => ['bg' => 'bg-indigo-500', 'text' => 'text-indigo-600', 'bg-light' => 'bg-indigo-100'],
+            'gray'   => ['bg' => 'bg-gray-500', 'text' => 'text-gray-600', 'bg-light' => 'bg-gray-100'],
         ];
         
-        $bgColor = $colorClasses[$color] ?? $colorClasses['blue'];
-        $iconHtml = $icon ? '<i class="fas fa-' . $icon . ' text-3xl"></i>' : '';
+        $colors = $colorClasses[$color] ?? $colorClasses['blue'];
         
-        $wrapperClass = 'bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200';
+        // Size-specific classes
+        if ($size === 'compact') {
+            // Mobile/Compact version
+            $padding = 'p-3';
+            $iconSize = 'text-lg';
+            $iconPadding = 'p-2';
+            $labelSize = 'text-xs';
+            $valueSize = 'text-xl';
+            $footerSize = 'text-xs';
+            $shadow = 'shadow-sm';
+        } else {
+            // Desktop/Normal version
+            $padding = 'p-4';
+            $iconSize = 'text-xl';
+            $iconPadding = 'p-3';
+            $labelSize = 'text-sm';
+            $valueSize = 'text-2xl';
+            $footerSize = 'text-xs';
+            $shadow = 'shadow';
+        }
+        
+        $iconHtml = $icon ? '<i class="fas fa-' . $icon . ' ' . $iconSize . '"></i>' : '';
+        $footerHtml = $footer ? '<div class="mt-2 ' . $footerSize . ' text-gray-500">' . $footer . '</div>' : '';
+        
+        $wrapperClass = 'bg-white rounded-lg ' . $shadow . ' hover:shadow-lg transition-shadow';
         if ($link) {
             $wrapperStart = '<a href="' . $link . '" class="block ' . $wrapperClass . '">';
             $wrapperEnd = '</a>';
@@ -87,21 +112,38 @@ if (!function_exists('stat_card')) {
             $wrapperEnd = '</div>';
         }
         
-        return $wrapperStart . '
-            <div class="p-6">
-                <div class="flex items-center justify-between">
-                    <div class="flex-1">
-                        <p class="text-sm font-medium text-gray-600 uppercase tracking-wider">' . esc($label) . '</p>
-                        <p class="mt-2 text-3xl font-bold text-gray-900">' . esc($value) . '</p>
-                    </div>
-                    <div class="flex-shrink-0 ' . $bgColor . ' bg-opacity-10 p-4 rounded-lg">
-                        <div class="' . $bgColor . ' text-white rounded-lg p-3">
-                            ' . $iconHtml . '
-                        </div>
+        // Build the card
+        $html = $wrapperStart . '
+            <div class="' . $padding . '">
+                <div class="flex items-center';
+        
+        // For compact, use vertical space efficiently
+        if ($size === 'compact') {
+            $html .= ' justify-between mb-2">
+                    <div class="' . $iconPadding . ' rounded-lg ' . $colors['bg-light'] . ' ' . $colors['text'] . '">
+                        ' . $iconHtml . '
                     </div>
                 </div>
+                <p class="' . $labelSize . ' text-gray-500">' . esc($label) . '</p>
+                <p class="' . $valueSize . ' font-bold text-gray-900">' . esc($value) . '</p>';
+        } else {
+            // Normal desktop layout
+            $html .= '">
+                    <div class="' . $iconPadding . ' rounded-full ' . $colors['bg-light'] . ' ' . $colors['text'] . ' mr-4">
+                        ' . $iconHtml . '
+                    </div>
+                    <div>
+                        <p class="' . $labelSize . ' text-gray-500">' . esc($label) . '</p>
+                        <p class="' . $valueSize . ' font-bold">' . esc($value) . '</p>
+                    </div>
+                </div>';
+        }
+        
+        $html .= $footerHtml . '
             </div>
         ' . $wrapperEnd;
+        
+        return $html;
     }
 }
 
