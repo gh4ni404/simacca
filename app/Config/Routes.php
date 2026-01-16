@@ -235,6 +235,17 @@ $routes->group('profile', ['filter' => 'auth'], function ($routes) {
 $routes->get('files/jurnal/(:segment)', 'FileController::jurnalFoto/$1');
 $routes->get('profile-photo/(:segment)', 'FileController::profilePhoto/$1');
 
+// Layout Switcher Routes (for testing and manual switching)
+$routes->group('layout', function ($routes) {
+    $routes->get('desktop', 'LayoutSwitcher::desktop');
+    $routes->get('mobile', 'LayoutSwitcher::mobile');
+    $routes->get('auto', 'LayoutSwitcher::auto');
+    $routes->get('device-info', 'LayoutSwitcher::deviceInfo');
+    $routes->get('example', function() {
+        return view('examples/layout_example', ['title' => 'Layout Example']);
+    });
+});
+
 /**
  * -----------------------------------------------------------------
  * Additional Routing

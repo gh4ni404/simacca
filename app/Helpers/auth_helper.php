@@ -337,3 +337,139 @@ if (!function_exists('is_absensi_editable')) {
         return $diffHours <= 24; // Editable within 24 hours
     }
 }
+
+if (!function_exists('is_mobile_device')) {
+    /**
+     * Detect if the current device is mobile
+     * 
+     * @return bool
+     */
+    function is_mobile_device()
+    {
+        $request = \Config\Services::request();
+        $userAgent = $request->getUserAgent();
+        
+        if ($userAgent->isMobile()) {
+            return true;
+        }
+        
+        // Additional mobile detection
+        $mobileKeywords = [
+            'Mobile', 'Android', 'iPhone', 'iPod', 'BlackBerry', 
+            'Windows Phone', 'Opera Mini', 'IEMobile'
+        ];
+        
+        $agent = $userAgent->getAgentString();
+        foreach ($mobileKeywords as $keyword) {
+            if (stripos($agent, $keyword) !== false) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+}
+
+if (!function_exists('is_tablet_device')) {
+    /**
+     * Detect if the current device is tablet
+     * 
+     * @return bool
+     */
+    function is_tablet_device()
+    {
+        $request = \Config\Services::request();
+        $userAgent = $request->getUserAgent();
+        
+        // Check for tablet keywords
+        $tabletKeywords = ['iPad', 'Android', 'Tablet', 'Kindle', 'Silk', 'PlayBook'];
+        $agent = $userAgent->getAgentString();
+        
+        foreach ($tabletKeywords as $keyword) {
+            if (stripos($agent, $keyword) !== false) {
+                // Exclude phones
+                if (stripos($agent, 'Mobile') === false || stripos($agent, 'iPad') !== false) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+}
+
+if (!function_exists('get_device_layout')) {
+    /**
+     * Get appropriate layout based on device type
+     * 
+     * @param string $defaultLayout Default layout to use (desktop_layout or mobile_layout)
+     * @return string Layout name
+     */
+    function get_device_layout($defaultLayout = null)
+    {
+        // Check if user has manually set a preference in session
+        $session = \Config\Services::session();
+        $layoutPreference = $session->get('layout_preference');
+        
+        if ($layoutPreference !== null) {
+            return $layoutPreference;
+        }
+        
+        // If default layout is specified, use it
+        if ($defaultLayout !== null) {
+            return $defaultLayout;
+        }
+        
+        // Auto-detect based on device
+        if (is_mobile_device() && !is_tablet_device()) {
+            return 'templates/mobile_layout';
+        }
+        
+        return 'templates/desktop_layout';
+    }
+}
+
+if (!function_exists('set_layout_preference')) {
+    /**
+     * Set user's layout preference in session
+     * 
+     * @param string $layout Layout preference (desktop_layout or mobile_layout)
+     * @return void
+     */
+    function set_layout_preference($layout)
+    {
+        $session = \Config\Services::session();
+        $session->set('layout_preference', $layout);
+    }
+}
+
+if (!function_exists('clear_layout_preference')) {
+    /**
+     * Clear user's layout preference (return to auto-detection)
+     * 
+     * @return void
+     */
+    function clear_layout_preference()
+    {
+        $session = \Config\Services::session();
+        $session->remove('layout_preference');
+    }
+}
+
+if (!function_exists('get_device_type')) {
+    /**
+     * Get the device type as a string
+     * 
+     * @return string 'mobile', 'tablet', or 'desktop'
+     */
+    function get_device_type()
+    {
+        if (is_mobile_device() && !is_tablet_device()) {
+            return 'mobile';
+        } elseif (is_tablet_device()) {
+            return 'tablet';
+        }
+        
+        return 'desktop';
+    }
+}
