@@ -274,3 +274,17 @@ if (!function_exists('modal_scripts')) {
 HTML;
     }
 }
+
+// Auto-load component files AFTER all helper functions are defined
+// This prevents circular dependency issues
+if (defined('APPPATH')) {
+    // Load component files that contain additional helper functions
+    // Note: alerts.php is NOT loaded here because it calls render_alerts()
+    $componentFiles = ['cards', 'buttons', 'forms', 'modals', 'tables', 'badges'];
+    foreach ($componentFiles as $file) {
+        $path = APPPATH . 'Views/components/' . $file . '.php';
+        if (file_exists($path)) {
+            require_once $path;
+        }
+    }
+}
