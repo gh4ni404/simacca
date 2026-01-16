@@ -67,7 +67,6 @@ class DashboardController extends BaseController
             'chartData' => $this->getChartData($guruId),
             'quickActions' => $this->getQuickActions($guru),
             'mapel' => $this->getMataPelajaran($guruId),
-            'isEditable' => $this->isAbsensiEditable($guruId),
         ];
 
         return view('guru/dashboard', $data);

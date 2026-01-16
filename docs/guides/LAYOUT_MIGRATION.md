@@ -55,9 +55,10 @@ http://your-domain.test/layout/device-info
 
 ### Step 3: Update Views by Priority
 
+> **Note**: Auth views (login, forgot password, etc.) should NOT be migrated. They use `templates/auth_layout.php` which is already optimized. See [Auth Views section](#auth-views-4-files---no-migration-needed) below.
+
 #### High Priority (Migrate First)
-1. Login page: `app/Views/auth/login.php`
-2. Dashboard pages:
+1. Dashboard pages (most frequently accessed):
    - `app/Views/admin/dashboard.php`
    - `app/Views/guru/dashboard.php`
    - `app/Views/siswa/dashboard.php`
@@ -86,13 +87,41 @@ $files = new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator($viewsPath)
 );
 
+// Folders to skip (auth views use their own layout)
+$skipFolders = ['auth'];
+
 $updated = 0;
+$skipped = 0;
 foreach ($files as $file) {
     if ($file->isFile() && $file->getExtension() === 'php') {
-        $content = file_get_contents($file->getPathname());
+        $filePath = $file->getPathname();
+        
+        // Skip auth folder
+        $shouldSkip = false;
+        foreach ($skipFolders as $folder) {
+            if (strpos($filePath, DIRECTORY_SEPARATOR . $folder . DIRECTORY_SEPARATOR) !== false) {
+                echo "Skipped (auth): " . $filePath . "\n";
+                $skipped++;
+                $shouldSkip = true;
+                break;
+            }
+        }
+        
+        if ($shouldSkip) {
+            continue;
+        }
+        
+        $content = file_get_contents($filePath);
         
         // Skip if already using get_device_layout()
         if (strpos($content, 'get_device_layout()') !== false) {
+            continue;
+        }
+        
+        // Skip if using auth_layout (double check)
+        if (strpos($content, 'auth_layout') !== false) {
+            echo "Skipped (auth_layout): " . $filePath . "\n";
+            $skipped++;
             continue;
         }
         
@@ -104,14 +133,15 @@ foreach ($files as $file) {
         );
         
         if ($content !== $newContent) {
-            file_put_contents($file->getPathname(), $newContent);
-            echo "Updated: " . $file->getPathname() . "\n";
+            file_put_contents($filePath, $newContent);
+            echo "Updated: " . $filePath . "\n";
             $updated++;
         }
     }
 }
 
 echo "\nTotal files updated: $updated\n";
+echo "Total files skipped: $skipped\n";
 ```
 
 **Usage:**
@@ -136,11 +166,27 @@ php update_layouts.php
 
 ## Views to Migrate
 
-### Auth Views (4 files)
-- [ ] `app/Views/auth/login.php`
-- [ ] `app/Views/auth/forgot_password.php`
-- [ ] `app/Views/auth/reset_password.php`
-- [ ] `app/Views/auth/change_password.php`
+### Auth Views (4 files) - ⚠️ **NO MIGRATION NEEDED**
+
+**Status**: ✅ **KEEP USING `auth_layout.php`**
+
+Auth views should **NOT** be migrated to desktop/mobile layout system because:
+
+1. ✅ **Already Responsive** - `auth_layout.php` is fully responsive with Tailwind utilities
+2. ✅ **No Navigation Needed** - Auth pages don't require navigation bars, sidebars, or menus
+3. ✅ **Centered Card Design** - Standard best practice for authentication pages
+4. ✅ **Simplified Structure** - Auth pages benefit from minimal, focused layout
+5. ✅ **Production Ready** - Current implementation matches design references
+
+**Files** (Keep using `templates/auth_layout`):
+- ✅ `app/Views/auth/login.php` - Already optimal
+- ✅ `app/Views/auth/forgot_password.php` - Already optimal
+- ✅ `app/Views/auth/reset_password.php` - Already optimal
+- ✅ `app/Views/auth/change_password.php` - Already optimal
+
+**Reference**: See [LOGIN_PAGE_MIGRATION_ANALYSIS.md](../summary/LOGIN_PAGE_MIGRATION_ANALYSIS.md) for detailed analysis.
+
+> **Note**: Auth layout uses `templates/auth_layout.php` which is specifically designed for authentication pages. It should remain separate from the main application layouts (desktop/mobile) as they serve different purposes.
 
 ### Admin Views (30+ files)
 - [ ] `app/Views/admin/dashboard.php`
@@ -337,11 +383,125 @@ echo "Is Tablet: " . (is_tablet_device() ? 'Yes' : 'No');
 <?php endif; ?>
 ```
 
+## Special Case: Auth Layout
+
+### Why Auth Views Don't Need Migration
+
+Authentication pages (`app/Views/auth/*.php`) use `templates/auth_layout.php` and should **NOT** be migrated to desktop/mobile layout system.
+
+**Key Differences**:
+
+| Feature | Auth Layout | Main Layout (Desktop/Mobile) |
+|---------|-------------|------------------------------|
+| Navigation | ❌ None | ✅ Full navigation system |
+| Sidebar | ❌ None | ✅ Desktop sidebar |
+| Bottom Nav | ❌ None | ✅ Mobile bottom nav |
+| Design | Centered card | Full-width application |
+| Purpose | Authentication | Application features |
+| Responsive | ✅ Already responsive | ✅ Device-specific |
+
+### Auth Layout Features
+
+`templates/auth_layout.php` provides:
+- ✅ Centered card design (standard for auth pages)
+- ✅ Gradient background
+- ✅ Fully responsive with Tailwind utilities
+- ✅ Clean, minimal interface
+- ✅ Auto-hide alerts
+- ✅ fadeInUp animation
+- ✅ Mobile-friendly forms
+
+### When to Use Each Layout
+
+```php
+// ✅ Use auth_layout for authentication pages
+<?= $this->extend('templates/auth_layout') ?>
+// Files: login.php, forgot_password.php, reset_password.php, change_password.php
+
+// ✅ Use get_device_layout() for application pages
+<?= $this->extend(get_device_layout()) ?>
+// Files: dashboard.php, absensi/*.php, jurnal/*.php, etc.
+
+// ✅ Use print_layout for print pages
+<?= $this->extend('templates/print_layout') ?>
+// Files: print reports, PDFs, etc.
+```
+
+### Testing Auth Pages
+
+When testing authentication pages, verify:
+
+**Desktop (Chrome, Firefox, Edge, Safari)**:
+- [ ] Centered card appears correctly
+- [ ] Form fields are properly sized
+- [ ] Gradient background displays
+- [ ] Validation errors show properly
+- [ ] Links are clickable
+- [ ] Responsive breakpoints work
+
+**Mobile (iOS Safari, Chrome Android)**:
+- [ ] Card width adjusts for small screens
+- [ ] Touch targets are 44px minimum
+- [ ] Keyboard doesn't obscure form
+- [ ] Auto-focus works properly
+- [ ] Password visibility toggle (if implemented)
+- [ ] "Remember me" checkbox is tappable
+
+**Tablets (iPad, Android tablets)**:
+- [ ] Layout scales appropriately
+- [ ] Not too wide or too narrow
+- [ ] Portrait and landscape modes work
+
+### Optional Auth Enhancements
+
+If you want to improve auth pages in the future:
+
+1. **Larger Touch Targets** (Mobile UX)
+   ```css
+   /* Ensure minimum 44px touch targets */
+   .auth-input { min-height: 44px; }
+   .auth-button { min-height: 48px; }
+   ```
+
+2. **Password Visibility Toggle**
+   ```html
+   <button type="button" class="toggle-password">
+       <i class="fas fa-eye"></i>
+   </button>
+   ```
+
+3. **Loading States**
+   ```javascript
+   button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+   ```
+
+4. **Accessibility Improvements**
+   ```html
+   <label for="username" aria-label="Username">Username</label>
+   <input id="username" aria-required="true" aria-invalid="false">
+   ```
+
+### Auth Layout vs Device Layout Summary
+
+**Don't migrate auth views** because:
+1. They have different requirements (no navigation)
+2. Current implementation is production-ready
+3. Centered card design is best practice
+4. No benefit from device-specific layouts
+5. Maintenance complexity increases without value
+
+**Focus migration efforts** on:
+- Dashboard pages (benefit from device layouts)
+- Absensi/Jurnal pages (heavy mobile usage)
+- Admin pages (desktop-optimized tables)
+
+---
+
 ## Timeline Recommendation
 
 ### Week 1: Preparation & Testing
 - Day 1-2: Test new layouts with example page
-- Day 3-4: Migrate and test authentication pages
+- Day 3-4: ~~Migrate and test authentication pages~~ **SKIP** (use auth_layout)
 - Day 5: Migrate and test dashboards
 
 ### Week 2: Main Features

@@ -59,7 +59,7 @@ writable/session/*
 
 writable/uploads/*
 !writable/uploads/jurnal/index.html
-!writable/uploads/izin/
+!writable/uploads/izin/index.html
 !writable/uploads/index.html
 !writable/uploads/profile/index.html
 

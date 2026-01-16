@@ -154,7 +154,7 @@
                 <div class="flex items-center space-x-2">
                     <?php if (is_logged_in()): ?>
                         <!-- User profile button -->
-                        <button type="button" id="mobile-user-menu-button"
+                        <!-- <button type="button" id="mobile-user-menu-button"
                             class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             <?php if (session()->get('profile_photo')): ?>
                                 <img src="<?= base_url('profile-photo/' . esc(session()->get('profile_photo'))); ?>" 
@@ -167,7 +167,7 @@
                                     </span>
                                 </div>
                             <?php endif; ?>
-                        </button>
+                        </button> -->
                         
                         <!-- Menu button -->
                         <button type="button" id="mobile-menu-button"
@@ -276,7 +276,7 @@
 
     <!-- Main Content -->
     <main class="mobile-content">
-        <div class="px-4 py-4">
+        <div>
             <!-- Page Header -->
             <div class="mb-4">
                 <?= $this->renderSection('actions'); ?>
