@@ -34,57 +34,45 @@
 
     <!-- Stats Grid - 2 Columns on Mobile -->
     <div class="grid grid-cols-2 gap-3 mb-4 px-4">
-        <div class="bg-white rounded-lg shadow-sm p-3">
-            <div class="flex items-center justify-between mb-2">
-                <div class="p-2 rounded-lg bg-blue-100 text-blue-600">
-                    <i class="fas fa-calendar-alt text-lg"></i>
-                </div>
-            </div>
-            <p class="text-xs text-gray-500">Total Jadwal</p>
-            <p class="text-xl font-bold text-gray-900"><?= $stats['total_jadwal']; ?></p>
-            <p class="text-xs text-gray-400 mt-1">
-                <i class="fas fa-clock mr-1"></i><?= $stats['absensi_hari_ini']; ?> hari ini
-            </p>
-        </div>
+        <?= stat_card(
+            'Total Jadwal', 
+            $stats['total_jadwal'], 
+            'calendar-alt', 
+            'blue', 
+            '', 
+            '<i class="fas fa-clock mr-1"></i>' . $stats['absensi_hari_ini'] . ' hari ini',
+            'compact'
+        ); ?>
 
-        <div class="bg-white rounded-lg shadow-sm p-3">
-            <div class="flex items-center justify-between mb-2">
-                <div class="p-2 rounded-lg bg-green-100 text-green-600">
-                    <i class="fas fa-clipboard-check text-lg"></i>
-                </div>
-            </div>
-            <p class="text-xs text-gray-500">Absensi</p>
-            <p class="text-xl font-bold text-gray-900"><?= $stats['absensi_bulan_ini']; ?></p>
-            <p class="text-xs text-gray-400 mt-1">
-                <i class="fas fa-chart-line mr-1"></i>bulan ini
-            </p>
-        </div>
+        <?= stat_card(
+            'Absensi', 
+            $stats['absensi_bulan_ini'], 
+            'clipboard-check', 
+            'green', 
+            '', 
+            '<i class="fas fa-chart-line mr-1"></i>bulan ini',
+            'compact'
+        ); ?>
 
-        <div class="bg-white rounded-lg shadow-sm p-3">
-            <div class="flex items-center justify-between mb-2">
-                <div class="p-2 rounded-lg bg-purple-100 text-purple-600">
-                    <i class="fas fa-book text-lg"></i>
-                </div>
-            </div>
-            <p class="text-xs text-gray-500">Jurnal</p>
-            <p class="text-xl font-bold text-gray-900"><?= $stats['jurnal_bulan_ini']; ?></p>
-            <p class="text-xs text-gray-400 mt-1">
-                <i class="fas fa-check-circle mr-1"></i>bulan ini
-            </p>
-        </div>
+        <?= stat_card(
+            'Jurnal', 
+            $stats['jurnal_bulan_ini'], 
+            'book', 
+            'purple', 
+            '', 
+            '<i class="fas fa-check-circle mr-1"></i>bulan ini',
+            'compact'
+        ); ?>
 
-        <div class="bg-white rounded-lg shadow-sm p-3">
-            <div class="flex items-center justify-between mb-2">
-                <div class="p-2 rounded-lg bg-yellow-100 text-yellow-600">
-                    <i class="fas fa-school text-lg"></i>
-                </div>
-            </div>
-            <p class="text-xs text-gray-500">Kelas</p>
-            <p class="text-xl font-bold text-gray-900"><?= $stats['total_kelas']; ?></p>
-            <p class="text-xs text-gray-400 mt-1">
-                <i class="fas fa-users mr-1"></i>yang diajar
-            </p>
-        </div>
+        <?= stat_card(
+            'Kelas', 
+            $stats['total_kelas'], 
+            'school', 
+            'yellow', 
+            '', 
+            '<i class="fas fa-users mr-1"></i>yang diajar',
+            'compact'
+        ); ?>
     </div>
 
     <!-- Quick Actions - Horizontal Scroll -->
