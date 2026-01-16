@@ -298,14 +298,168 @@ clear_layout_preference();
 return redirect()->back();
 ```
 
+## Shared Components
+
+SIMACCA menyediakan shared components untuk konsistensi UI di seluruh aplikasi.
+
+### Available Components
+
+#### 1. Cards (app/Views/components/cards.php)
+
+**Stat Card**:
+```php
+<?= stat_card('Total Siswa', '250', 'users', 'blue', '/admin/siswa') ?>
+```
+
+**Enhanced Stat Card with Footer & Size Options**:
+```php
+// Mobile/Compact version
+<?= stat_card(
+    'Total Jadwal',           // Label
+    $stats['total_jadwal'],   // Value
+    'calendar-alt',           // Icon (without 'fa-')
+    'blue',                   // Color
+    '',                       // Link (optional)
+    '<i class="fas fa-clock mr-1"></i>5 hari ini',  // Footer (optional)
+    'compact'                 // Size: 'normal' or 'compact'
+); ?>
+
+// Desktop/Normal version
+<?= stat_card(
+    'Total Jadwal', 
+    $stats['total_jadwal'], 
+    'calendar-alt', 
+    'blue', 
+    '', 
+    '<i class="fas fa-clock mr-1"></i>5 absensi hari ini'  // Footer with more text
+); ?>
+```
+
+Parameters:
+- `$label`: Label untuk stat (string)
+- `$value`: Nilai stat (string|int)
+- `$icon`: Font Awesome icon tanpa 'fa-' prefix (string)
+- `$color`: blue|green|yellow|red|purple|indigo|gray (default: 'blue')
+- `$link`: Optional URL untuk clickable card (string, default: '')
+- `$footer`: Optional footer text dengan icon HTML (string, default: '')
+- `$size`: 'normal' atau 'compact' untuk mobile optimization (string, default: 'normal')
+
+**Size Differences**:
+- `normal`: Padding 4, icon text-xl, value text-2xl (Desktop)
+- `compact`: Padding 3, icon text-lg, value text-xl (Mobile)
+
+**Card with Header**:
+```php
+<?= card_start('Judul Card', 'users', ['<button>Action</button>']) ?>
+    <p>Konten card di sini</p>
+<?= card_end() ?>
+```
+
+**Empty State**:
+```php
+<?= empty_state('inbox', 'Tidak ada data', 'Belum ada siswa terdaftar', 'Tambah Siswa', '/admin/siswa/tambah') ?>
+```
+
+**Info Card**:
+```php
+<?= info_card('info-circle', 'Informasi', 'Ini adalah pesan informasi', 'blue') ?>
+```
+
+#### 2. Alerts (app/Views/components/alerts.php)
+
+**Flash Messages**:
+```php
+<?= render_flash_message() ?>  // Auto-render dari session flash
+```
+
+**Alert Types**:
+```php
+<?= alert('success', 'Data berhasil disimpan!') ?>
+<?= alert('error', 'Terjadi kesalahan!') ?>
+<?= alert('warning', 'Perhatian!') ?>
+<?= alert('info', 'Informasi penting') ?>
+```
+
+#### 3. Buttons (app/Views/components/buttons.php)
+
+See component README for complete button options.
+
+#### 4. Forms (app/Views/components/forms.php)
+
+See component README for form components.
+
+### Component Loading
+
+Components di-load otomatis melalui `component_helper.php`:
+
+```php
+// In controller
+helper('component');  // Load component helper
+
+// Components are available in all views
+<?= stat_card(...) ?>
+```
+
+### Component Usage Guidelines
+
+1. **Always use shared components** untuk konsistensi
+2. **Don't duplicate HTML** - gunakan component yang sudah ada
+3. **Extend components** jika perlu fitur tambahan
+4. **Document new components** di component README
+5. **Test components** di berbagai device sizes
+
+### Example: Dashboard Stats
+
+**❌ Don't do this (manual HTML)**:
+```php
+<div class="bg-white rounded-lg shadow p-4">
+    <div class="flex items-center">
+        <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+            <i class="fas fa-users"></i>
+        </div>
+        <div>
+            <p class="text-sm">Total Siswa</p>
+            <p class="text-2xl font-bold">250</p>
+        </div>
+    </div>
+</div>
+```
+
+**✅ Do this (shared component)**:
+```php
+// Simple version
+<?= stat_card('Total Siswa', '250', 'users', 'blue') ?>
+
+// With footer info
+<?= stat_card('Total Siswa', '250', 'users', 'blue', '', '<i class="fas fa-check mr-1"></i>Aktif') ?>
+
+// Mobile optimized
+<?= stat_card('Total Siswa', '250', 'users', 'blue', '', '<i class="fas fa-check mr-1"></i>Aktif', 'compact') ?>
+```
+
+Benefits:
+- ✅ Konsisten UI across aplikasi
+- ✅ Mudah maintenance (update di 1 file)
+- ✅ Lebih sedikit code (-50% lines untuk stat cards)
+- ✅ Automatic responsive handling
+- ✅ Size-aware (normal/compact)
+- ✅ DRY principle
+
+**Real-world Example** (Guru Dashboard):
+- Before: 314 lines (mobile), 465 lines (desktop)
+- After: 303 lines (mobile), 438 lines (desktop)
+- **Savings**: 38 lines total (-4.3% code reduction)
+
 ## Best Practices
 
 1. **Use Auto-Detection**: Gunakan `get_device_layout()` untuk automatic device detection
-2. **Consistent CSS Classes**: Gunakan CSS classes yang sama (btn, card, badge) untuk konsistensi
-3. **Test Both Layouts**: Selalu test di desktop dan mobile
-4. **Mobile-First Content**: Design konten yang mudah dibaca di mobile
-5. **Touch-Friendly**: Gunakan button size yang cukup besar untuk touch (min 44px)
-6. **Avoid Horizontal Scroll**: Pastikan konten tidak overflow di mobile
+2. **Use Shared Components**: Gunakan components dari `app/Views/components/` untuk konsistensi
+3. **Consistent CSS Classes**: Gunakan CSS classes yang sama (btn, card, badge) untuk konsistensi
+4. **Test Both Layouts**: Selalu test di desktop dan mobile
+5. **Mobile-First Content**: Design konten yang mudah dibaca di mobile
+6. **Touch-Friendly**: Gunakan button size yang cukup besar untuk touch (min 44px)
+7. **Avoid Horizontal Scroll**: Pastikan konten tidak overflow di mobile
+8. **DRY Principle**: Jangan duplicate code, gunakan components atau helpers
 
 ## Troubleshooting
 
