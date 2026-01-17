@@ -196,6 +196,20 @@ if (!function_exists('render_single_alert')) {
     }
 }
 
+if (!function_exists('render_flash_message')) {
+    /**
+     * Alias for render_alerts()
+     * Render flash messages from session
+     * 
+     * @param bool $showAll If true, shows all alerts. Default false (only highest priority)
+     * @return string HTML for alert(s)
+     */
+    function render_flash_message($showAll = false)
+    {
+        return render_alerts($showAll);
+    }
+}
+
 if (!function_exists('load_component')) {
     /**
      * Load a single component file

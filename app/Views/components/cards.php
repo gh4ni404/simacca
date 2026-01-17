@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Reusable Card Components
  * 
@@ -24,18 +25,18 @@ if (!function_exists('card_start')) {
     {
         $iconHtml = $icon ? '<i class="fas fa-' . $icon . ' mr-2"></i>' : '';
         $actionsHtml = !empty($actions) ? '<div class="flex gap-2">' . implode('', $actions) . '</div>' : '';
-        
+
         $html = '<div class="bg-white rounded-lg shadow-md overflow-hidden">';
-        
+
         if ($title) {
             $html .= '<div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">';
             $html .= '<h3 class="text-lg font-semibold text-gray-800">' . $iconHtml . esc($title) . '</h3>';
             $html .= $actionsHtml;
             $html .= '</div>';
         }
-        
+
         $html .= '<div class="p-6">';
-        
+
         return $html;
     }
 }
@@ -76,9 +77,9 @@ if (!function_exists('stat_card')) {
             'indigo' => ['bg' => 'bg-indigo-500', 'text' => 'text-indigo-600', 'bg-light' => 'bg-indigo-100'],
             'gray'   => ['bg' => 'bg-gray-500', 'text' => 'text-gray-600', 'bg-light' => 'bg-gray-100'],
         ];
-        
+
         $colors = $colorClasses[$color] ?? $colorClasses['blue'];
-        
+
         // Size-specific classes
         if ($size === 'compact') {
             // Mobile/Compact version
@@ -99,10 +100,10 @@ if (!function_exists('stat_card')) {
             $footerSize = 'text-xs';
             $shadow = 'shadow';
         }
-        
+
         $iconHtml = $icon ? '<i class="fas fa-' . $icon . ' ' . $iconSize . '"></i>' : '';
         $footerHtml = $footer ? '<div class="mt-2 ' . $footerSize . ' text-gray-500">' . $footer . '</div>' : '';
-        
+
         $wrapperClass = 'bg-white rounded-lg ' . $shadow . ' hover:shadow-lg transition-shadow';
         if ($link) {
             $wrapperStart = '<a href="' . $link . '" class="block ' . $wrapperClass . '">';
@@ -111,12 +112,12 @@ if (!function_exists('stat_card')) {
             $wrapperStart = '<div class="' . $wrapperClass . '">';
             $wrapperEnd = '</div>';
         }
-        
+
         // Build the card
         $html = $wrapperStart . '
             <div class="' . $padding . '">
                 <div class="flex items-center';
-        
+
         // For compact, use vertical space efficiently
         if ($size === 'compact') {
             $html .= ' justify-between mb-2">
@@ -138,11 +139,11 @@ if (!function_exists('stat_card')) {
                     </div>
                 </div>';
         }
-        
+
         $html .= $footerHtml . '
             </div>
         ' . $wrapperEnd;
-        
+
         return $html;
     }
 }
@@ -163,13 +164,13 @@ if (!function_exists('empty_state')) {
         $iconHtml = '<i class="fas fa-' . $icon . ' text-6xl text-gray-300 mb-4"></i>';
         $descHtml = $description ? '<p class="text-gray-500 mb-4">' . esc($description) . '</p>' : '';
         $actionHtml = '';
-        
+
         if ($actionText && $actionUrl) {
             $actionHtml = '<a href="' . $actionUrl . '" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-sm transition-colors">
                 <i class="fas fa-plus mr-2"></i>' . esc($actionText) . '
             </a>';
         }
-        
+
         return '<div class="text-center py-12">
             ' . $iconHtml . '
             <h3 class="text-xl font-semibold text-gray-700 mb-2">' . esc($title) . '</h3>
@@ -199,9 +200,9 @@ if (!function_exists('info_card')) {
             'purple' => 'border-purple-500 bg-purple-50',
             'indigo' => 'border-indigo-500 bg-indigo-50',
         ];
-        
+
         $colorClass = $colorClasses[$color] ?? $colorClasses['blue'];
-        
+
         return '<div class="border-l-4 ' . $colorClass . ' p-4 rounded-r-lg">
             <div class="flex items-start">
                 <i class="fas fa-' . $icon . ' text-xl mr-3 mt-0.5"></i>
