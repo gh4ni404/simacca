@@ -385,7 +385,23 @@ Auth views should **NOT** be migrated to desktop/mobile layout system because:
   - **Components**: stat_card (8x), empty_state (2x)
   - **Total**: 496 lines (3 files)
   - **See**: `docs/summary/GURU_ABSENSI_INDEX_MIGRATION.md`
-- [ ] `app/Views/guru/absensi/create.php` - ⏳ PENDING (970 lines, HIGH priority)
+- [x] `app/Views/guru/absensi/create.php` - ✅ **Device Router Pattern** (2026-01-17)
+  - [x] `app/Views/guru/absensi/create_mobile.php` - Mobile optimized (850 lines)
+  - [x] `app/Views/guru/absensi/create_desktop.php` - Desktop optimized (862 lines)
+  - **Status**: ✅ **Fully optimized** - No shared component migration needed
+  - **Pattern**: Device Router Pattern (complex form with jadwal selection)
+  - **Components Used**: 
+    - ✅ Using `render_alerts()` for flash messages
+    - ✅ Custom form implementation (required for complex JavaScript interactions)
+  - **Issues Fixed** (2026-01-17): 
+    - ✅ Removed duplicate date field after jadwal selection
+    - ✅ Fixed JavaScript errors (null addEventListener, null value)
+    - ✅ Separated JS code by PHP conditional (jadwal selected vs not selected)
+  - **Why Not Using form_input()/form_select()**:
+    - Complex JavaScript dependencies (auto-detect hari, mode selection, AJAX loading)
+    - Custom styling with icons, help text, and dynamic interactions
+    - Event listeners require specific element IDs
+    - Manual implementation is more maintainable for this use case
 - [ ] `app/Views/guru/absensi/edit.php` - ⏳ PENDING (713 lines, HIGH priority)
 - [ ] `app/Views/guru/absensi/show.php` - ⏳ PENDING (373 lines, MEDIUM priority)
 - [ ] `app/Views/guru/absensi/print.php` - ⏳ PENDING (313 lines, LOW priority)
@@ -407,7 +423,7 @@ Auth views should **NOT** be migrated to desktop/mobile layout system because:
 
 **Recommended Next Steps**:
 1. ~~Migrate `absensi/index.php`~~ ✅ COMPLETED (2026-01-17)
-2. Migrate `absensi/create.php` (high priority - form-heavy, 970 lines)
+2. ~~Migrate `absensi/create.php`~~ ✅ COMPLETED (2026-01-17)
 3. Migrate `absensi/edit.php` (high priority - form editing, 713 lines)
 4. Migrate `jurnal/index.php` (high priority - mobile usage)
 5. Continue with other absensi views (show.php, print.php)
