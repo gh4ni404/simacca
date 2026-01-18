@@ -129,3 +129,5 @@ _modules/*
 /phpunit*.xml
 
 /public/
+
+error_log
