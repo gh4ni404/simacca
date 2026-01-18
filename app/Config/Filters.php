@@ -139,6 +139,7 @@ class Filters extends BaseFilters
                 'admin/*',
                 'guru/*',
                 'walikelas/*',
+                'wakakur/*',
                 'siswa/*',
                 'dashboard/*',
                 'change-password/*',

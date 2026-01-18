@@ -90,7 +90,7 @@
                     <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Jam</th>
                     <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Guru Mapel</th>
                     <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Mata Pelajaran</th>
-                    <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Kegiatan Pembelajaran</th>
+                    <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Materi Pembelajaran</th>
                     <!-- <th class="px-2 py-2 text-left text-xs font-medium text-gray-700 uppercase border border-gray-300">Wali Kelas</th> -->
                     <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">H</th>
                     <th class="px-2 py-2 text-center text-xs font-medium text-gray-700 uppercase border border-gray-300">S</th>

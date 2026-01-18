@@ -258,15 +258,15 @@ if (!function_exists('get_sidebar_menu')) {
                     'submenu' => [
                         [
                             'title' => 'Jadwal Mengajar',
-                            'url' => '/wakakur/jadwal'
+                            'url' => '/guru/jadwal'
                         ],
                         [
                             'title' => 'Absensi Siswa',
-                            'url' => '/wakakur/absensi'
+                            'url' => '/guru/absensi'
                         ],
                         [
                             'title' => 'Jurnal KBM',
-                            'url' => '/wakakur/jurnal'
+                            'url' => '/guru/jurnal'
                         ]
                     ]
                 ],

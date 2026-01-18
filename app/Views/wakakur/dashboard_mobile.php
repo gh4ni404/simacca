@@ -146,7 +146,7 @@
     </div>
     <div class="p-4">
         <div class="grid grid-cols-2 gap-3">
-            <a href="<?= base_url('wakakur/absensi') ?>" 
+            <a href="<?= base_url('guru/absensi') ?>" 
                class="bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-500 hover:to-blue-600 rounded-xl p-4 text-center border-2 border-blue-200 active:scale-95 transition-all group">
                 <div class="w-12 h-12 bg-blue-500 group-hover:bg-white rounded-full flex items-center justify-center mx-auto mb-2 transition-colors">
                     <i class="fas fa-clipboard-check text-white group-hover:text-blue-500 text-lg"></i>
@@ -162,7 +162,7 @@
                 <span class="text-xs font-semibold text-green-700 group-hover:text-white transition-colors">Laporan Detail</span>
             </a>
             
-            <a href="<?= base_url('wakakur/jurnal') ?>" 
+            <a href="<?= base_url('guru/jurnal') ?>" 
                class="bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-500 hover:to-purple-600 rounded-xl p-4 text-center border-2 border-purple-200 active:scale-95 transition-all group">
                 <div class="w-12 h-12 bg-purple-500 group-hover:bg-white rounded-full flex items-center justify-center mx-auto mb-2 transition-colors">
                     <i class="fas fa-book-open text-white group-hover:text-purple-500 text-lg"></i>
@@ -184,7 +184,7 @@
                 <?php endif; ?>
             </a>
             <?php else: ?>
-            <a href="<?= base_url('wakakur/jadwal') ?>" 
+            <a href="<?= base_url('guru/jadwal') ?>" 
                class="bg-gradient-to-br from-teal-50 to-teal-100 hover:from-teal-500 hover:to-teal-600 rounded-xl p-4 text-center border-2 border-teal-200 active:scale-95 transition-all group">
                 <div class="w-12 h-12 bg-teal-500 group-hover:bg-white rounded-full flex items-center justify-center mx-auto mb-2 transition-colors">
                     <i class="fas fa-calendar-alt text-white group-hover:text-teal-500 text-lg"></i>

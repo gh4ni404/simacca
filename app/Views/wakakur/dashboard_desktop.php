@@ -115,7 +115,7 @@
             </div>
         </div>
         <div class="bg-amber-50 px-6 py-3 rounded-b-xl">
-            <a href="<?= base_url('wakakur/absensi') ?>" class="text-sm text-amber-600 hover:text-amber-800 font-medium flex items-center">
+            <a href="<?= base_url('guru/absensi') ?>" class="text-sm text-amber-600 hover:text-amber-800 font-medium flex items-center">
                 Lihat Detail <i class="fas fa-arrow-right ml-2 text-xs"></i>
             </a>
         </div>
@@ -202,7 +202,7 @@
     </div>
     <div class="p-6">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <a href="<?= base_url('wakakur/absensi') ?>" 
+            <a href="<?= base_url('guru/absensi') ?>" 
                class="group bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-500 hover:to-blue-600 rounded-xl p-6 text-center transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl border-2 border-blue-200 hover:border-blue-500">
                 <div class="flex flex-col items-center">
                     <div class="w-16 h-16 bg-blue-500 group-hover:bg-white rounded-full flex items-center justify-center mb-3 transition-colors duration-300">
@@ -222,7 +222,7 @@
                 </div>
             </a>
             
-            <a href="<?= base_url('wakakur/jurnal') ?>" 
+            <a href="<?= base_url('guru/jurnal') ?>" 
                class="group bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-500 hover:to-purple-600 rounded-xl p-6 text-center transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl border-2 border-purple-200 hover:border-purple-500">
                 <div class="flex flex-col items-center">
                     <div class="w-16 h-16 bg-purple-500 group-hover:bg-white rounded-full flex items-center justify-center mb-3 transition-colors duration-300">
@@ -248,7 +248,7 @@
                 </div>
             </a>
             <?php else: ?>
-            <a href="<?= base_url('wakakur/jadwal') ?>" 
+            <a href="<?= base_url('guru/jadwal') ?>" 
                class="group bg-gradient-to-br from-teal-50 to-teal-100 hover:from-teal-500 hover:to-teal-600 rounded-xl p-6 text-center transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl border-2 border-teal-200 hover:border-teal-500">
                 <div class="flex flex-col items-center">
                     <div class="w-16 h-16 bg-teal-500 group-hover:bg-white rounded-full flex items-center justify-center mb-3 transition-colors duration-300">

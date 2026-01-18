@@ -324,9 +324,9 @@
             } elseif ($role === 'wakakur') {
                 $bottomNavItems = [
                     ['url' => 'wakakur/dashboard', 'icon' => 'fas fa-home', 'label' => 'Beranda'],
-                    ['url' => 'wakakur/absensi', 'icon' => 'fas fa-clipboard-check', 'label' => 'Absensi'],
+                    ['url' => 'guru/absensi', 'icon' => 'fas fa-clipboard-check', 'label' => 'Absensi'],
                     ['url' => 'wakakur/laporan', 'icon' => 'fas fa-chart-bar', 'label' => 'Laporan'],
-                    ['url' => 'wakakur/jurnal', 'icon' => 'fas fa-book', 'label' => 'Jurnal'],
+                    ['url' => 'guru/jurnal', 'icon' => 'fas fa-book', 'label' => 'Jurnal'],
                 ];
             } elseif ($role === 'siswa') {
                 $bottomNavItems = [

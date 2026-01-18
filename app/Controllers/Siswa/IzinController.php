@@ -128,6 +128,12 @@ class IzinController extends BaseController
 
         // Create upload directory if not exists
         $uploadPath = WRITEPATH . 'uploads/izin';
+        
+        // Create directory if not exists
+        if (!is_dir($uploadPath)) {
+            mkdir($uploadPath, 0755, true);
+            log_message('info', 'Created upload directory: ' . $uploadPath);
+        }
         if (!is_dir($uploadPath)) {
             mkdir($uploadPath, 0755, true);
             log_message('info', '[IZIN SISWA] Created upload directory: ' . $uploadPath);

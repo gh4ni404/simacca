@@ -413,11 +413,15 @@
         );
 
         // 2. Gunakan alat tersebut untuk mencetak tanggal
+        // dukung jika $tanggal sudah DateTime/DateTimeInterface atau berupa string/timestamp
+        $dateValue = (isset($tanggal) && $tanggal instanceof DateTimeInterface)
+            ? $tanggal
+            : (is_numeric($tanggal) ? (int) $tanggal : strtotime((string) $tanggal));
         ?>
-        <strong>Tanggal:</strong> <?= $formatter->format(strtotime($tanggal)); ?>
+        <strong>Tanggal:</strong> <?= $formatter->format($dateValue); ?>
         <?php if ($kelasId): ?>
             <br><strong>Kelas:</strong> <?= esc($kelasList[$kelasId] ?? '-'); ?>
-        <?php /**else:*/ ?>
+            <?php /**else:*/ ?>
             <!-- <br><strong>Semua Kelas</strong> -->
         <?php endif; ?>
     </div>
@@ -481,7 +485,7 @@
                 <th style="width: 80px;">Jam<br>Mengajar</th>
                 <th style="width: 95px;">Nama Guru<br>Mapel</th>
                 <th style="width: 85px;">Mata<br>Pelajaran</th>
-                <th style="width: 110px;">Kegiatan<br>Pembelajaran</th>
+                <th style="width: 110px;">Materi<br>Pembelajaran</th>
                 <!-- <th style="width: 85px;">Nama<br>Wali Kelas</th> -->
                 <!-- <th style="width: 45px;">Nama<br>Wali Kelas</th> -->
                 <!-- <th style="width: 15px;">Nama<br>Wali Kelas</th> -->

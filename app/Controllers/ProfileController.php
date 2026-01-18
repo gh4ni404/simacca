@@ -70,7 +70,7 @@ class ProfileController extends BaseController
         $fullName = '';
         
         try {
-            if ($role === 'guru_mapel' || $role === 'wali_kelas') {
+            if ($role === 'guru_mapel' || $role === 'wali_kelas' || $role === 'wakakur') {
                 // Get from guru table
                 $guru = $this->guruModel->where('user_id', $userId)->first();
                 if ($guru && !empty($guru['nama_lengkap'])) {
@@ -396,9 +396,17 @@ class ProfileController extends BaseController
                 // Clear profile completion check cache
                 session()->remove('profile_completed');
 
-                // Delete old photo if exists
-                if ($oldPhoto && file_exists($uploadPath . $oldPhoto)) {
-                    unlink($uploadPath . $oldPhoto);
+                // Delete old photo if exists (with path traversal protection)
+                if ($oldPhoto) {
+                    // Sanitize filename to prevent path traversal
+                    $oldPhoto = basename($oldPhoto);
+                    $fullPath = realpath($uploadPath . $oldPhoto);
+                    
+                    // Verify file is within upload directory before deleting
+                    if ($fullPath && strpos($fullPath, realpath($uploadPath)) === 0 && file_exists($fullPath)) {
+                        @unlink($fullPath); // @ suppresses error if file already deleted
+                        log_message('info', 'Deleted old profile photo: ' . $oldPhoto);
+                    }
                 }
 
                 session()->setFlashdata('success', 'Foto profil berhasil diupdate! 📸✨');
@@ -429,11 +437,15 @@ class ProfileController extends BaseController
 
         if ($photo) {
             $uploadPath = WRITEPATH . 'uploads/profile/';
-            $filePath = $uploadPath . $photo;
+            
+            // Sanitize filename to prevent path traversal
+            $photo = basename($photo);
+            $fullPath = realpath($uploadPath . $photo);
 
-            // Delete file if exists
-            if (file_exists($filePath)) {
-                unlink($filePath);
+            // Verify file is within upload directory before deleting
+            if ($fullPath && strpos($fullPath, realpath($uploadPath)) === 0 && file_exists($fullPath)) {
+                @unlink($fullPath); // @ suppresses error if file not found
+                log_message('info', 'Profile photo deleted: ' . $photo);
             }
 
             // Update database
