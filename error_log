@@ -89,3 +89,5 @@ Stack trace:
 [15-Jan-2026 06:19:21 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
 [15-Jan-2026 06:25:59 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
 [15-Jan-2026 06:26:16 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
+[18-Jan-2026 16:02:23 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
+[18-Jan-2026 16:02:33 UTC] PHP Warning:  chdir(): No such file or directory (errno 2) in /home2/smknbone/simaccaProject/spark on line 66
