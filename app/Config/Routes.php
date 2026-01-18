@@ -160,6 +160,7 @@ $routes->group('guru', ['filter' => 'auth'], function ($routes) {
     $routes->get('jadwal', 'Guru\JadwalController::index', ['filter' => 'role:guru_mapel']);
     // Absensi Routes
     $routes->get('absensi', 'Guru\AbsensiController::index', ['filter' => 'role:guru_mapel']);
+    $routes->get('absensi/kelas/(:num)', 'Guru\AbsensiController::kelas/$1', ['filter' => 'role:guru_mapel']);
     $routes->get('absensi/tambah', 'Guru\AbsensiController::create', ['filter' => 'role:guru_mapel']);
     $routes->post('absensi/simpan', 'Guru\AbsensiController::store', ['filter' => 'role:guru_mapel']);
     $routes->get('absensi/show/(:num)', 'Guru\AbsensiController::show/$1', ['filter' => 'role:guru_mapel']);
