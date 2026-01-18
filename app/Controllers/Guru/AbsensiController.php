@@ -64,6 +64,55 @@ class AbsensiController extends BaseController
             $item['can_edit'] = $this->isAbsensiEditable($item);
             $item['can_delete'] = $this->isAbsensiEditable($item);
         }
+        unset($item); // CRITICAL: Break reference to avoid bugs in next foreach!
+
+        // Group absensi by kelas and mata pelajaran to handle multiple sessions per day
+        $kelasSummary = [];
+        foreach ($absensi as $item) {
+            $kelasId = $item['kelas_id'];
+            $kelasName = $item['nama_kelas'];
+            $mapelName = $item['nama_mapel'];
+            
+            // Create unique key: kelas_id + mata_pelajaran to separate different subjects
+            $summaryKey = $kelasId . '_' . $mapelName;
+            
+            if (!isset($kelasSummary[$summaryKey])) {
+                $kelasSummary[$summaryKey] = [
+                    'kelas_id' => $kelasId,
+                    'kelas_nama' => $kelasName,
+                    'mata_pelajaran' => $mapelName,
+                    'total_pertemuan' => 0,
+                    'total_hadir' => 0,
+                    'total_siswa' => 0,
+                    'avg_kehadiran' => 0,
+                    'last_absensi' => null
+                ];
+            }
+            
+            // Accumulate data
+            $kelasSummary[$summaryKey]['total_pertemuan']++;
+            $kelasSummary[$summaryKey]['total_hadir'] += $item['hadir'] ?? 0;
+            $kelasSummary[$summaryKey]['total_siswa'] = max($kelasSummary[$summaryKey]['total_siswa'], $item['total_siswa'] ?? 0);
+            
+            // Track latest absensi date
+            if (!$kelasSummary[$summaryKey]['last_absensi'] || $item['tanggal'] > $kelasSummary[$summaryKey]['last_absensi']) {
+                $kelasSummary[$summaryKey]['last_absensi'] = $item['tanggal'];
+            }
+        }
+        
+        // Calculate average kehadiran for each kelas
+        foreach ($kelasSummary as &$summary) {
+            $totalExpected = $summary['total_pertemuan'] * $summary['total_siswa'];
+            if ($totalExpected > 0) {
+                $summary['avg_kehadiran'] = round(($summary['total_hadir'] / $totalExpected) * 100, 1);
+            }
+        }
+        unset($summary); // Break reference to avoid bugs in next operations
+        
+        // Sort by kelas name (use uasort to preserve associative keys)
+        uasort($kelasSummary, function($a, $b) {
+            return strcmp($a['kelas_nama'], $b['kelas_nama']);
+        });
 
         $absensiId = $this->request->getGet('absensi_id');
         // Get all classes taught by this teacher
@@ -73,7 +122,7 @@ class AbsensiController extends BaseController
             'title' => 'Manajemen Absensi',
             'pageTitle' => 'Data Absensi',
             'pageDescription' => 'Kelola data absensi siswa',
-            'absensi' => $absensi,
+            'kelasSummary' => $kelasSummary,
             'search' => $search,
             'tanggal' => $tanggal,
             'kelasId' => $kelasId,
@@ -154,7 +203,7 @@ class AbsensiController extends BaseController
             $jadwal && isset($jadwal['kelas_id']) ? $jadwal['kelas_id'] : null,
             $jadwal ? $jadwal['id'] : null
         );
-
+        
         // Get approved izin for this date and class
         $approvedIzin = [];
         if ($jadwal && isset($jadwal['kelas_id'])) {
@@ -306,6 +355,83 @@ class AbsensiController extends BaseController
             $this->session->setFlashdata('error', $e->getMessage());
             return redirect()->back()->withInput();
         }
+    }
+
+    /**
+     * Display absensi list by kelas
+     */
+    public function kelas($kelasId)
+    {
+        // Note: Auth check handled by AuthFilter and RoleFilter
+
+        $userId = $this->session->get('userId');
+        $guru = $this->guruModel->getByUserId($userId);
+
+        if (!$guru) {
+            $this->session->setFlashdata('error', 'Hmm, data guru nggak ketemu 🤔');
+            return redirect()->to('/login');
+        }
+
+        $guruId = $guru['id'];
+        $tanggal = $this->request->getGet('tanggal');
+
+        // Get kelas info
+        $kelas = $this->kelasModel->find($kelasId);
+        if (!$kelas) {
+            throw new PageNotFoundException('Data kelas tidak ditemukan.');
+        }
+
+        // Verify this teacher teaches this class
+        $teachesThisClass = $this->jadwalModel
+            ->where('guru_id', $guruId)
+            ->where('kelas_id', $kelasId)
+            ->countAllResults() > 0;
+
+        if (!$teachesThisClass) {
+            $this->session->setFlashdata('error', 'Sorry, kamu tidak mengajar di kelas ini.');
+            return redirect()->to('/guru/absensi');
+        }
+
+        // Get absensi for this kelas
+        $absensiList = $this->absensiModel->getByGuruAndKelas($guruId, $kelasId, $tanggal);
+        
+        // Add can_edit and can_delete flags
+        foreach ($absensiList as &$item) {
+            $item['can_edit'] = $this->isAbsensiEditable($item);
+            $item['can_delete'] = $this->isAbsensiEditable($item);
+        }
+        unset($item); // CRITICAL: Break reference to avoid bugs!
+
+        // Calculate stats for this kelas
+        $kelasStats = [
+            'total_pertemuan' => count($absensiList),
+            'total_hadir' => 0,
+            'total_siswa' => 0,
+            'avg_kehadiran' => 0
+        ];
+
+        foreach ($absensiList as $item) {
+            $kelasStats['total_hadir'] += $item['hadir'] ?? 0;
+            $kelasStats['total_siswa'] = max($kelasStats['total_siswa'], $item['total_siswa'] ?? 0);
+        }
+
+        if ($kelasStats['total_pertemuan'] > 0 && $kelasStats['total_siswa'] > 0) {
+            $totalExpected = $kelasStats['total_pertemuan'] * $kelasStats['total_siswa'];
+            $kelasStats['avg_kehadiran'] = round(($kelasStats['total_hadir'] / $totalExpected) * 100, 1);
+        }
+
+        $data = [
+            'title' => 'Absensi ' . $kelas['nama_kelas'],
+            'pageTitle' => 'Absensi ' . $kelas['nama_kelas'],
+            'pageDescription' => 'Daftar pertemuan kelas ' . $kelas['nama_kelas'],
+            'kelas' => $kelas,
+            'absensiList' => $absensiList,
+            'kelasStats' => $kelasStats,
+            'guru' => $guru,
+            'tanggal' => $tanggal
+        ];
+
+        return view('guru/absensi/kelas', $data);
     }
 
     /**
@@ -806,7 +932,7 @@ class AbsensiController extends BaseController
             || ($absensi['guru_pengganti_id'] == $guru['id']);
 
         if (!$hasAccess) {
-            $this->session->setFlashdata('error', 'Sorry, ini bukan jadwal kamu.exiexit');
+            $this->session->setFlashdata('error', 'Sorry, ini bukan jadwal kamu.');
             return redirect()->to('/guru/absensi');
         }
 
@@ -909,7 +1035,7 @@ class AbsensiController extends BaseController
     private function getNextPertemuan($guruId, $kelasId = null, $jadwalId = null)
     {
         // If jadwal_id is provided, use it to get the last pertemuan for that specific schedule
-        // This ensures substitute teachers continue from the original teacher's last pertemuan
+        // This ensures each jadwal has its own pertemuan counter
         if ($jadwalId) {
             $lastAbsensi = $this->absensiModel
                 ->where('jadwal_mengajar_id', $jadwalId)
@@ -919,19 +1045,9 @@ class AbsensiController extends BaseController
             return $lastAbsensi ? ($lastAbsensi['pertemuan_ke'] + 1) : 1;
         }
 
-        // Fallback to old logic if jadwal_id is not provided (for initial form load)
-        $builder = $this->absensiModel
-            ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
-            ->where('jadwal_mengajar.guru_id', $guruId);
-
-        if ($kelasId) {
-            $builder->where('jadwal_mengajar.kelas_id', $kelasId);
-        }
-
-        $lastAbsensi = $builder->orderBy('pertemuan_ke', 'DESC')
-            ->first();
-
-        return $lastAbsensi ? ($lastAbsensi['pertemuan_ke'] + 1) : 1;
+        // If jadwal_id not provided, always return 1 for initial form load
+        // User will select jadwal first, then AJAX will get the correct pertemuan number
+        return 1;
     }
 
     private function getHariList()
