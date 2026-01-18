@@ -20,7 +20,8 @@ class JadwalController extends BaseController
     public function index()
     {
         // Get guru data from session
-        $userId = session()->get('user_id');
+        // Support both 'user_id' and 'userId' for backward compatibility
+        $userId = session()->get('user_id') ?? session()->get('userId');
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
