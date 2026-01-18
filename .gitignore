@@ -131,3 +131,4 @@ _modules/*
 /public/
 
 error_log
+/error_log
