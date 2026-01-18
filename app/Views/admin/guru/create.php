@@ -76,6 +76,7 @@
                             <option value="">Pilih Role</option>
                             <option value="guru_mapel" <?= old('role') == 'guru_mapel' ? 'selected' : '' ?>>Guru Mata Pelajaran</option>
                             <option value="wali_kelas" <?= old('role') == 'wali_kelas' ? 'selected' : '' ?>>Wali Kelas</option>
+                            <option value="wakakur" <?= old('role') == 'wakakur' ? 'selected' : '' ?>>Wakil Kepala Kurikulum (Wakakur)</option>
                         </select>
                         <?php if ($validation->hasError('role')): ?>
                             <p class="text-red-200 text-xs mt-1"><?= $validation->getError('role') ?></p>

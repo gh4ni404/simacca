@@ -112,7 +112,9 @@ class AbsensiModel extends Model
                             guru_pengganti.nama_lengkap as nama_guru_pengganti,
                             mata_pelajaran.nama_mapel,
                             kelas.nama_kelas,
-                            jadwal_mengajar.kelas_id')
+                            jadwal_mengajar.kelas_id,
+                            jadwal_mengajar.jam_mulai,
+                            jadwal_mengajar.jam_selesai')
             ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
             ->join('guru', 'guru.id = jadwal_mengajar.guru_id')
             ->join('guru guru_pengganti', 'guru_pengganti.id = absensi.guru_pengganti_id', 'left')

@@ -78,7 +78,7 @@ class GuruController extends BaseController
             'username' => 'required|is_unique[users.username]',
             'password' => 'required|min_length[6]',
             'email' => 'valid_email',
-            'role' => 'required|in_list[guru_mapel,wali_kelas]',
+            'role' => 'required|in_list[guru_mapel,wali_kelas,wakakur]',
             'mata_pelajaran_id' => 'permit_empty',
             'is_wali_kelas' => 'permit_empty'
         ];
@@ -189,7 +189,7 @@ class GuruController extends BaseController
             'nama_lengkap' => 'required',
             'jenis_kelamin' => 'required',
             'email' => 'valid_email',
-            'role' => 'required|in_list[guru_mapel,wali_kelas]',
+            'role' => 'required|in_list[guru_mapel,wali_kelas,wakakur]',
             'mata_pelajaran_id' => 'permit_empty',
             'is_wali_kelas' => 'permit_empty'
         ];
@@ -616,7 +616,7 @@ class GuruController extends BaseController
                     $jenisKelamin = ($jenisKelamin == 'L' || $jenisKelamin == 'P') ? $jenisKelamin : 'L';
 
                     // Validasi role
-                    $role = in_array($role, ['guru_mapel', 'wali_kelas']) ? $role : 'guru_mapel';
+                    $role = in_array($role, ['guru_mapel', 'wali_kelas', 'wakakur']) ? $role : 'guru_mapel';
 
                     // Cek duplikasi NIP
                     $existingNip = $this->guruModel->where('nip', $nip)->first();
@@ -718,7 +718,7 @@ class GuruController extends BaseController
             'D1' => 'USERNAME',
             'E1' => 'PASSWORD',
             'F1' => 'EMAIL',
-            'G1' => 'ROLE (guru_mapel / wali_kelas)',
+            'G1' => 'ROLE (guru_mapel / wali_kelas / wakakur)',
             'H1' => 'MATA_PELAJARAN_ID',
             'I1' => 'KELAS_ID',
             'J1' => 'IS_WALI_KELAS (1/0)',
@@ -764,6 +764,18 @@ class GuruController extends BaseController
                 'wali_kelas',
                 '',
                 3,
+                1
+            ],
+            [
+                '1122334455',
+                'Ahmad Wakakur',
+                'L',
+                'ahmad.wakakur',
+                'password123',
+                'ahmad@email.com',
+                'wakakur',
+                1,
+                5,
                 1
             ]
         ], null, 'A2');

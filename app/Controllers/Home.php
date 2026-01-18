@@ -27,7 +27,9 @@ class Home extends BaseController
             case 'guru_mapel':
                 return redirect()->to('/guru/dashboard');
             case 'wali_kelas':
-                return redirect()->to('/wali_kelas/dashboard');
+                return redirect()->to('/walikelas/dashboard');
+            case 'wakakur':
+                return redirect()->to('/wakakur/dashboard');
             case 'siswa':
                 return redirect()->to('/siswa/dashboard');
             default:

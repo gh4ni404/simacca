@@ -98,6 +98,7 @@ class AuthController extends BaseController
             switch ($user['role']) {
                 case 'guru_mapel':
                 case 'wali_kelas':
+                case 'wakakur':
                     $guru = $this->guruModel->getByUserId($user['id']);
                     if ($guru) {
                         $sessionData['guru_id'] = $guru['id'];
@@ -162,6 +163,8 @@ class AuthController extends BaseController
                 return redirect()->to('/guru/dashboard');
             case 'wali_kelas':
                 return redirect()->to('/walikelas/dashboard');
+            case 'wakakur':
+                return redirect()->to('/wakakur/dashboard');
             case 'siswa':
                 return redirect()->to('/siswa/dashboard');
             default:

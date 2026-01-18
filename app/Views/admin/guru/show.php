@@ -239,6 +239,7 @@ function get_role_name_from_role($role) {
         'admin' => 'Administrator',
         'guru_mapel' => 'Guru Mata Pelajaran',
         'wali_kelas' => 'Wali Kelas',
+        'wakakur' => 'Wakil Kepala Kurikulum',
         'siswa' => 'Siswa'
     ];
     return $roleNames[$role] ?? 'Unknown';

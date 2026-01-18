@@ -23,7 +23,7 @@
 
             <li>Jangan ubah nama kolom</li>
             <li>Jenis kelamin hanya <b>L</b> atau <b>P</b></li>
-            <li>Role: <b>guru_mapel</b> atau <b>wali_kelas</b></li>
+            <li>Role: <b>guru_mapel</b>, <b>wali_kelas</b>, atau <b>wakakur</b></li>
             <li>IS_WALI_KELAS: 1 (ya) / 0 (tidak)</li>
             <li>Kosongkan KELAS_ID jika bukan wali kelas</li>
         </ul>

@@ -321,6 +321,13 @@
                     ['url' => 'walikelas/absensi', 'icon' => 'fas fa-clipboard-check', 'label' => 'Absensi'],
                     ['url' => 'walikelas/izin', 'icon' => 'fas fa-check-circle', 'label' => 'Izin'],
                 ];
+            } elseif ($role === 'wakakur') {
+                $bottomNavItems = [
+                    ['url' => 'wakakur/dashboard', 'icon' => 'fas fa-home', 'label' => 'Beranda'],
+                    ['url' => 'wakakur/absensi', 'icon' => 'fas fa-clipboard-check', 'label' => 'Absensi'],
+                    ['url' => 'wakakur/laporan', 'icon' => 'fas fa-chart-bar', 'label' => 'Laporan'],
+                    ['url' => 'wakakur/jurnal', 'icon' => 'fas fa-book', 'label' => 'Jurnal'],
+                ];
             } elseif ($role === 'siswa') {
                 $bottomNavItems = [
                     ['url' => 'siswa/dashboard', 'icon' => 'fas fa-home', 'label' => 'Beranda'],

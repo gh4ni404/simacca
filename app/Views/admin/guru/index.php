@@ -94,8 +94,9 @@
             <select name="" id="filterRole"
                 class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <option value="">Semua Role</option>
-                <option value="wali_kelas">Wali Kelas</option>
                 <option value="guru_mapel">Guru Mapel</option>
+                <option value="wali_kelas">Wali Kelas</option>
+                <option value="wakakur">Wakakur</option>
             </select>
             <select name="" id="filterStatus"
                 class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
@@ -159,8 +160,12 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900"><?= esc($g['nama_mapel']) ?? '-'; ?></div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <?php if ($g['is_wali_kelas']): ?>
+                            <td class="px-6 py-4 whitespace-nowrap" data-role="<?= esc($g['role']); ?>">
+                                <?php if ($g['role'] === 'wakakur'): ?>
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
+                                        <i class="fas fa-user-graduate mr-1"></i>Wakakur
+                                    </span>
+                                <?php elseif ($g['is_wali_kelas']): ?>
                                     <span class="px-2 py-1 text-xs font-medium rounded-full badge-wali"><i class="fas fa-user-tie mr-1"></i>Wali Kelas</span>
                                     <?php if ($g['kelas_id']): ?>
                                         <div class="text-xs text-gray-500 mt-1 ml-2">Kelas: <?= $g['nama_kelas']; ?></div>
@@ -290,12 +295,13 @@
             const roleCell = row.cells[3];
             const statusCell = row.cells[4];
 
-            const isWaliKelas = roleCell.textContent.includes('Wali Kelas');
+            const roleData = roleCell.getAttribute('data-role');
             const isActive = statusCell.textContent.includes('Aktif');
 
             const roleMatch = roleValue === '' ||
-                (roleValue === 'wali_kelas' && isWaliKelas) ||
-                (roleValue === 'guru_mapel' && !isWaliKelas);
+                (roleValue === 'wakakur' && roleData === 'wakakur') ||
+                (roleValue === 'wali_kelas' && roleData === 'wali_kelas') ||
+                (roleValue === 'guru_mapel' && roleData === 'guru_mapel');
 
             const statusMatch = statusValue === '' ||
                 (statusValue === 'active' && isActive) ||

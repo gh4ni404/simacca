@@ -81,6 +81,7 @@ if (!function_exists('get_role_name')) {
             'admin'         => 'Administrator',
             'guru_mapel'    => 'Guru Mata Pelajaran',
             'wali_kelas'    => 'Wali Kelas',
+            'wakakur'       => 'Wakil Kepala Kurikulum',
             'siswa'         => 'Siswa'
         ];
 
@@ -241,6 +242,53 @@ if (!function_exists('get_sidebar_menu')) {
                     'title' => 'Laporan',
                     'icon' => 'fas fa-chart-bar',
                     'url' => '/walikelas/laporan'
+                ]
+            ],
+            'wakakur' => [
+                [
+                    'title' => 'Dashboard',
+                    'icon' => 'fas fa-tachometer-alt',
+                    'url' => '/wakakur/dashboard',
+                    'active' => ['wakakur/dashboard']
+                ],
+                [
+                    'title' => 'Mengajar',
+                    'icon' => 'fas fa-chalkboard-teacher',
+                    'url' => '#',
+                    'submenu' => [
+                        [
+                            'title' => 'Jadwal Mengajar',
+                            'url' => '/wakakur/jadwal'
+                        ],
+                        [
+                            'title' => 'Absensi Siswa',
+                            'url' => '/wakakur/absensi'
+                        ],
+                        [
+                            'title' => 'Jurnal KBM',
+                            'url' => '/wakakur/jurnal'
+                        ]
+                    ]
+                ],
+                [
+                    'title' => 'Wali Kelas',
+                    'icon' => 'fas fa-users-cog',
+                    'url' => '#',
+                    'submenu' => [
+                        [
+                            'title' => 'Data Siswa',
+                            'url' => '/wakakur/siswa'
+                        ],
+                        [
+                            'title' => 'Persetujuan Izin',
+                            'url' => '/wakakur/izin'
+                        ]
+                    ]
+                ],
+                [
+                    'title' => 'Laporan Detail',
+                    'icon' => 'fas fa-file-chart-line',
+                    'url' => '/wakakur/laporan'
                 ]
             ],
             'siswa' => [

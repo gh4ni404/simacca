@@ -204,6 +204,48 @@ $routes->group('walikelas', ['filter' => 'auth'], function ($routes) {
     $routes->get('laporan', 'WaliKelas\LaporanController::index', ['filter' => 'role:wali_kelas']);
 });
 
+// Wakakur Routes (Combined access: guru_mapel + wali_kelas + laporan detail)
+$routes->group('wakakur', ['filter' => 'auth'], function ($routes) {
+    $routes->get('dashboard', 'Wakakur\DashboardController::index', ['filter' => 'role:wakakur', 'as' => 'wakakur.dashboard']);
+    
+    // Jadwal (from guru_mapel)
+    $routes->get('jadwal', 'Wakakur\JadwalController::index', ['filter' => 'role:wakakur']);
+    
+    // Absensi Routes (from guru_mapel)
+    $routes->get('absensi', 'Wakakur\AbsensiController::index', ['filter' => 'role:wakakur']);
+    $routes->get('absensi/kelas/(:num)', 'Wakakur\AbsensiController::kelas/$1', ['filter' => 'role:wakakur']);
+    $routes->get('absensi/tambah', 'Wakakur\AbsensiController::create', ['filter' => 'role:wakakur']);
+    $routes->post('absensi/simpan', 'Wakakur\AbsensiController::store', ['filter' => 'role:wakakur']);
+    $routes->get('absensi/show/(:num)', 'Wakakur\AbsensiController::show/$1', ['filter' => 'role:wakakur']);
+    $routes->get('absensi/edit/(:num)', 'Wakakur\AbsensiController::edit/$1', ['filter' => 'role:wakakur']);
+    $routes->post('absensi/update/(:num)', 'Wakakur\AbsensiController::update/$1', ['filter' => 'role:wakakur']);
+    $routes->get('absensi/delete/(:num)', 'Wakakur\AbsensiController::delete/$1', ['filter' => 'role:wakakur']);
+    $routes->get('absensi/print/(:num)', 'Wakakur\AbsensiController::print/$1', ['filter' => 'role:wakakur']);
+    $routes->get('absensi/getSiswaByKelas', 'Wakakur\AbsensiController::getSiswaByKelas', ['filter' => 'role:wakakur']);
+    $routes->get('absensi/getJadwalByHari', 'Wakakur\AbsensiController::getJadwalByHari', ['filter' => 'role:wakakur']);
+    $routes->get('absensi/getNextPertemuanByJadwal', 'Wakakur\AbsensiController::getNextPertemuanByJadwal', ['filter' => 'role:wakakur']);
+    
+    // Jurnal Routes (from guru_mapel)
+    $routes->get('jurnal', 'Wakakur\JurnalController::index', ['filter' => 'role:wakakur']);
+    $routes->get('jurnal/preview/(:num)/(:num)', 'Wakakur\JurnalController::preview/$1/$2', ['filter' => 'role:wakakur']);
+    $routes->get('jurnal/tambah/(:num)', 'Wakakur\JurnalController::create/$1', ['filter' => 'role:wakakur']);
+    $routes->post('jurnal/simpan', 'Wakakur\JurnalController::store', ['filter' => 'role:wakakur']);
+    $routes->get('jurnal/show/(:num)', 'Wakakur\JurnalController::show/$1', ['filter' => 'role:wakakur']);
+    $routes->get('jurnal/print/(:num)', 'Wakakur\JurnalController::print/$1', ['filter' => 'role:wakakur']);
+    $routes->get('jurnal/edit/(:num)', 'Wakakur\JurnalController::edit/$1', ['filter' => 'role:wakakur']);
+    $routes->put('jurnal/update/(:num)', 'Wakakur\JurnalController::update/$1', ['filter' => 'role:wakakur']);
+    
+    // Siswa & Izin Routes (from wali_kelas)
+    $routes->get('siswa', 'Wakakur\SiswaController::index', ['filter' => 'role:wakakur']);
+    $routes->get('izin', 'Wakakur\IzinController::index', ['filter' => 'role:wakakur']);
+    $routes->post('izin/setujui/(:num)', 'Wakakur\IzinController::approve/$1', ['filter' => 'role:wakakur']);
+    $routes->post('izin/tolak/(:num)', 'Wakakur\IzinController::reject/$1', ['filter' => 'role:wakakur']);
+    
+    // Laporan Routes (unique to wakakur - school-wide detailed reports)
+    $routes->get('laporan', 'Wakakur\\LaporanController::index', ['filter' => 'role:wakakur']);
+    $routes->get('laporan/print', 'Wakakur\\LaporanController::print', ['filter' => 'role:wakakur']);
+});
+
 // Siswa Routes
 $routes->group('siswa', ['filter' => 'auth'], function ($routes) {
     $routes->get('dashboard', 'Siswa\DashboardController::index', ['filter' => 'role:siswa', 'as' => 'siswa.dashboard']);

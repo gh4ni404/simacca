@@ -42,7 +42,7 @@ class UserModel extends Model
     protected $validationRules      = [
         'username'      => 'required|min_length[3]|max_length[50]|is_unique[users.username]',
         'password'      => 'required|min_length[6]',
-        'role'          => 'required|in_list[admin,guru_mapel,wali_kelas,siswa]',
+        'role'          => 'required|in_list[admin,guru_mapel,wali_kelas,wakakur,siswa]',
         'email'         => 'valid_email',
         'is_active'     => 'permit_empty|in_list[0,1]',
     ];
@@ -130,7 +130,8 @@ class UserModel extends Model
         switch ($user['role']) {
             case 'guru_mapel':
             case 'wali_kelas':
-                # code...
+            case 'wakakur':
+                # code..
                 $guruModel = new GuruModel();
                 $user['detail'] = $guruModel->where('user_id', $userId)->first();
                 break;
@@ -141,7 +142,7 @@ class UserModel extends Model
                 break;
 
             default:
-                # code...
+                # code..
                 break;
         }
         return $user;

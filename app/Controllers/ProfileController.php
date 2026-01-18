@@ -44,6 +44,7 @@ class ProfileController extends BaseController
         switch ($role) {
             case 'guru_mapel':
             case 'wali_kelas':
+            case 'wakakur':
                 $guru = $this->guruModel->getGuruWithMapel($this->guruModel->where('user_id', $userId)->first()['id'] ?? null);
                 $data['guru'] = $guru;
                 break;
