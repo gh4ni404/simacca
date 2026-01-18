@@ -214,13 +214,17 @@ class JadwalMengajarModel extends Model
      */
     public function checkConflict($guruId, $hari, $jamMulai, $jamSelesai, $excludeId = null)
     {
+        $db = \Config\Database::connect();
+        $jamMulaiEscaped = $db->escape($jamMulai);
+        $jamSelesaiEscaped = $db->escape($jamSelesai);
+        
         $builder = $this->where('guru_id', $guruId)
             ->where('hari', $hari)
             ->groupStart()
-            ->where("('$jamMulai' BETWEEN jam_mulai AND jam_selesai)")
-            ->orWhere("('$jamSelesai' BETWEEN jam_mulai AND jam_selesai)")
-            ->orWhere("(jam_mulai BETWEEN '$jamMulai' AND '$jamSelesai')")
-            ->orWhere("(jam_selesai BETWEEN '$jamMulai' AND '$jamSelesai')")
+            ->where("($jamMulaiEscaped BETWEEN jam_mulai AND jam_selesai)")
+            ->orWhere("($jamSelesaiEscaped BETWEEN jam_mulai AND jam_selesai)")
+            ->orWhere("(jam_mulai BETWEEN $jamMulaiEscaped AND $jamSelesaiEscaped)")
+            ->orWhere("(jam_selesai BETWEEN $jamMulaiEscaped AND $jamSelesaiEscaped)")
             ->groupEnd();
 
         if ($excludeId) {
@@ -235,13 +239,17 @@ class JadwalMengajarModel extends Model
      */
     public function checkKelasConflict($kelasId, $hari, $jamMulai, $jamSelesai, $excludeId = null)
     {
+        $db = \Config\Database::connect();
+        $jamMulaiEscaped = $db->escape($jamMulai);
+        $jamSelesaiEscaped = $db->escape($jamSelesai);
+        
         $builder = $this->where('kelas_id', $kelasId)
             ->where('hari', $hari)
             ->groupStart()
-            ->where("('$jamMulai' BETWEEN jam_mulai AND jam_selesai)")
-            ->orWhere("('$jamSelesai' BETWEEN jam_mulai AND jam_selesai)")
-            ->orWhere("(jam_mulai BETWEEN '$jamMulai' AND '$jamSelesai')")
-            ->orWhere("(jam_selesai BETWEEN '$jamMulai' AND '$jamSelesai')")
+            ->where("($jamMulaiEscaped BETWEEN jam_mulai AND jam_selesai)")
+            ->orWhere("($jamSelesaiEscaped BETWEEN jam_mulai AND jam_selesai)")
+            ->orWhere("(jam_mulai BETWEEN $jamMulaiEscaped AND $jamSelesaiEscaped)")
+            ->orWhere("(jam_selesai BETWEEN $jamMulaiEscaped AND $jamSelesaiEscaped)")
             ->groupEnd();
 
         if ($excludeId) {

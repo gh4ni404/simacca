@@ -111,20 +111,20 @@ class AbsensiModel extends Model
                             guru.nama_lengkap as nama_guru,
                             guru_pengganti.nama_lengkap as nama_guru_pengganti,
                             mata_pelajaran.nama_mapel,
-                            kelas.nama_kelas')
+                            kelas.nama_kelas,
+                            jadwal_mengajar.kelas_id')
             ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
             ->join('guru', 'guru.id = jadwal_mengajar.guru_id')
             ->join('guru guru_pengganti', 'guru_pengganti.id = absensi.guru_pengganti_id', 'left')
             ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
             ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
-            ->groupStart()
-                ->where('jadwal_mengajar.guru_id', $guruId)  // Schedule belongs to this teacher
-                ->orWhere('absensi.guru_pengganti_id', $guruId)  // Or this teacher is substitute
-            ->groupEnd()
-            ->orderBy('absensi.tanggal', 'DESC');
+            ->where('jadwal_mengajar.guru_id', $guruId)  // Only get schedules that belong to this teacher
+            ->orderBy('absensi.tanggal', 'DESC')
+            ->orderBy('absensi.id', 'DESC');
 
         if ($startDate && $endDate) {
-            $builder->where("absensi.tanggal BETWEEN '$startDate' AND '$endDate'");
+            $builder->where('absensi.tanggal >=', $startDate);
+            $builder->where('absensi.tanggal <=', $endDate);
         } elseif ($startDate && !$endDate) {
             $builder->where('absensi.tanggal', $startDate);
         }
@@ -194,10 +194,87 @@ class AbsensiModel extends Model
             ->orderBy('absensi.tanggal', 'DESC');
 
         if ($startDate && $endDate) {
-            $builder->where("absensi.tanggal BETWEEN '$startDate' AND '$endDate'");
+            $builder->where('absensi.tanggal >=', $startDate);
+            $builder->where('absensi.tanggal <=', $endDate);
         }
 
         return $builder->findAll();
+    }
+
+    /**
+     * Get absensi by guru and kelas (for detailed view per class)
+     */
+    public function getByGuruAndKelas($guruId, $kelasId, $tanggal = null)
+    {
+        // Get basic absensi data
+        $builder = $this->select('absensi.*,
+                            guru.nama_lengkap as nama_guru,
+                            guru_pengganti.nama_lengkap as nama_guru_pengganti,
+                            mata_pelajaran.nama_mapel,
+                            kelas.nama_kelas,
+                            jadwal_mengajar.kelas_id')
+            ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
+            ->join('guru', 'guru.id = jadwal_mengajar.guru_id')
+            ->join('guru guru_pengganti', 'guru_pengganti.id = absensi.guru_pengganti_id', 'left')
+            ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
+            ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
+            ->where('jadwal_mengajar.kelas_id', $kelasId)
+            ->where('jadwal_mengajar.guru_id', $guruId)  // Only get schedules that belong to this teacher
+            ->orderBy('absensi.tanggal', 'DESC')
+            ->orderBy('absensi.pertemuan_ke', 'DESC')
+            ->orderBy('absensi.id', 'DESC');
+
+        if ($tanggal) {
+            $builder->where('absensi.tanggal', $tanggal);
+        }
+
+        $absensiList = $builder->findAll();
+
+        // If no data, return empty array
+        if (empty($absensiList)) {
+            return [];
+        }
+
+        // Get absensi IDs for batch processing
+        $absensiIds = array_column($absensiList, 'id');
+
+        // Get aggregate data for all absensi in one query
+        $db = \Config\Database::connect();
+        $aggregateQuery = $db->table('absensi_detail')
+            ->select('absensi_id,
+                     COUNT(id) as total_siswa,
+                     SUM(CASE WHEN status = "hadir" THEN 1 ELSE 0 END) as hadir')
+            ->whereIn('absensi_id', $absensiIds)
+            ->groupBy('absensi_id')
+            ->get()
+            ->getResultArray();
+
+        // Create lookup array for fast access
+        $statsLookup = [];
+        foreach ($aggregateQuery as $stat) {
+            $statsLookup[$stat['absensi_id']] = [
+                'total_siswa' => (int)$stat['total_siswa'],
+                'hadir' => (int)$stat['hadir'],
+                'percentage' => $stat['total_siswa'] > 0 
+                    ? round(($stat['hadir'] / $stat['total_siswa']) * 100, 0) 
+                    : 0
+            ];
+        }
+
+        // Merge stats into absensi list
+        foreach ($absensiList as &$absensi) {
+            if (isset($statsLookup[$absensi['id']])) {
+                $absensi['total_siswa'] = $statsLookup[$absensi['id']]['total_siswa'];
+                $absensi['hadir'] = $statsLookup[$absensi['id']]['hadir'];
+                $absensi['percentage'] = $statsLookup[$absensi['id']]['percentage'];
+            } else {
+                $absensi['total_siswa'] = 0;
+                $absensi['hadir'] = 0;
+                $absensi['percentage'] = 0;
+            }
+        }
+
+        return $absensiList;
     }
 
     /**
@@ -227,7 +304,8 @@ class AbsensiModel extends Model
         }
 
         if ($startDate && $endDate) {
-            $builder->where("absensi.tanggal BETWEEN '$startDate' AND '$endDate'");
+            $builder->where('absensi.tanggal >=', $startDate);
+            $builder->where('absensi.tanggal <=', $endDate);
         }
         return $builder->first();
     }
@@ -335,8 +413,9 @@ class AbsensiModel extends Model
                 ->join('guru g', 'g.id = jm.guru_id')
                 ->join('mata_pelajaran mp', 'mp.id = jm.mata_pelajaran_id')
                 ->join('guru wk', 'wk.id = k.wali_kelas_id', 'left')
-                ->join("absensi a", "a.jadwal_mengajar_id = jm.id AND a.tanggal = '$tanggal'", 'left')
+                ->join('absensi a', 'a.jadwal_mengajar_id = jm.id', 'left')
                 ->join('guru gp', 'gp.id = a.guru_pengganti_id', 'left')
+                ->where('a.tanggal', $tanggal)
                 ->join('jurnal_kbm jk', 'jk.absensi_id = a.id', 'left')
                 ->join('absensi_detail ad', 'ad.absensi_id = a.id', 'left')
                 ->where('jm.hari', $dayName);
