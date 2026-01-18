@@ -164,14 +164,15 @@ class JurnalKbmModel extends Model
     {
         $builder = $this->select('jurnal_kbm.*, absensi.tanggal, guru.nama_lengkap as nama_guru, mata_pelajaran.nama_mapel')
             ->join('absensi', 'absensi.id = jurnal_kbm.absensi_id')
-            ->join('jadwal_mengajar', 'jadwall_mengajar.id = absensi.jadwal_mengajar_id')
+            ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
             ->join('guru', 'guru.id = jadwal_mengajar.guru_id')
             ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
             ->where('jadwal_mengajar.kelas_id', $kelasId)
             ->orderBy('absensi.tanggal', 'DESC');
 
         if ($startDate && $endDate) {
-            $builder->where("absensi.tanggal BETWEEN '$startDate' AND '$endDate'");
+            $builder->where('absensi.tanggal >=', $startDate);
+            $builder->where('absensi.tanggal <=', $endDate);
         }
 
         return $builder->findAll();

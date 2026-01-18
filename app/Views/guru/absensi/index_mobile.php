@@ -93,8 +93,8 @@
             </form>
         </div>
 
-        <!-- Absensi List - Card Based -->
-        <?php if (empty($absensi)): ?>
+        <!-- Kelas List - Summary Cards -->
+        <?php if (empty($kelasSummary)): ?>
             <?= empty_state(
                 'clipboard-list',
                 'Belum Ada Data Absensi',
@@ -103,99 +103,88 @@
                 base_url('guru/absensi/tambah')
             ); ?>
         <?php else: ?>
-            <div class="space-y-3">
-                <?php foreach ($absensi as $item): ?>
-                    <?php
-                    $percentage = isset($item['percentage']) ? $item['percentage'] : 0;
-                    $hadir = isset($item['hadir']) ? $item['hadir'] : 0;
-                    $total = isset($item['total_siswa']) ? $item['total_siswa'] : 0;
-                    $barColor = $percentage >= 80 ? 'bg-green-500' : ($percentage >= 60 ? 'bg-yellow-500' : 'bg-red-500');
-
-                    $formatter = new IntlDateFormatter(
-                        'id_ID',
-                        IntlDateFormatter::FULL,
-                        IntlDateFormatter::NONE,
-                        'Asia/Makassar',
-                        IntlDateFormatter::GREGORIAN,
-                        'EEE, d MMM y'
-                    );
-                    $formattedDate = $formatter->format(strtotime($item['tanggal']));
-                    ?>
-                    <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-                        <!-- Header -->
-                        <div class="p-3 bg-gradient-to-r from-gray-50 to-gray-100 border-b">
-                            <div class="flex items-center justify-between text-xs text-gray-600">
-                                <span class="flex items-center">
-                                    <i class="far fa-calendar text-blue-500 mr-1"></i>
-                                    <?= $formattedDate ?>
-                                </span>
-                                <span class="flex items-center">
-                                    <i class="far fa-clock mr-1"></i>
-                                    <?= date('H:i', strtotime($item['created_at'])); ?>
-                                </span>
+            <!-- Kelas Cards -->
+            <div class="space-y-4">
+                <?php foreach ($kelasSummary as $kelas): ?>
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                        <!-- Kelas Header -->
+                        <div class="bg-gradient-to-r from-purple-500 to-purple-600 px-4 py-4">
+                            <div class="flex items-center text-white">
+                                <div class="p-2 bg-white bg-opacity-20 rounded-lg mr-3">
+                                    <i class="fas fa-school text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-bold"><?= esc($kelas['kelas_nama']); ?></h3>
+                                    <p class="text-xs opacity-90"><?= $kelas['total_siswa']; ?> siswa</p>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Content -->
-                        <div class="p-3">
-                            <h3 class="text-base font-bold text-gray-900 mb-1"><?= esc($item['nama_mapel']); ?></h3>
-                            <p class="text-xs text-gray-600 mb-2 flex items-center">
-                                <i class="fas fa-user-tie mr-1 text-gray-400"></i>
-                                <?= esc($item['nama_guru']); ?>
-                            </p>
+                        <!-- Stats -->
+                        <div class="p-4">
+                            <!-- Mata Pelajaran -->
+                            <div class="mb-3">
+                                <p class="text-xs text-gray-500 mb-2">Mata Pelajaran</p>
+                                <div class="flex flex-wrap gap-1">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                                        <i class="fas fa-book mr-1"></i>
+                                        <?= esc($kelas['mata_pelajaran']); ?>
+                                    </span>
+                                </div>
+                            </div>
 
-                            <!-- Info Grid -->
-                            <div class="grid grid-cols-2 gap-2 mb-3">
-                                <div class="flex items-center">
-                                    <div class="p-1.5 bg-purple-100 rounded-lg mr-2">
-                                        <i class="fas fa-school text-purple-600 text-xs"></i>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs text-gray-500">Kelas</p>
-                                        <p class="text-sm font-semibold text-gray-900"><?= esc($item['nama_kelas']); ?></p>
+                            <!-- Stats Grid -->
+                            <div class="grid grid-cols-2 gap-3 mb-3">
+                                <div class="bg-blue-50 rounded-xl p-3">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs text-gray-600 mb-1">Pertemuan</p>
+                                            <p class="text-xl font-bold text-blue-600"><?= $kelas['total_pertemuan']; ?></p>
+                                        </div>
+                                        <div class="p-2 bg-blue-100 rounded-lg">
+                                            <i class="fas fa-hashtag text-blue-600"></i>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="flex items-center">
-                                    <div class="p-1.5 bg-blue-100 rounded-lg mr-2">
-                                        <i class="fas fa-hashtag text-blue-600 text-xs"></i>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs text-gray-500">Pertemuan</p>
-                                        <p class="text-sm font-semibold text-gray-900"><?= $item['pertemuan_ke']; ?></p>
+                                <div class="bg-green-50 rounded-xl p-3">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs text-gray-600 mb-1">Kehadiran</p>
+                                            <p class="text-xl font-bold text-green-600"><?= $kelas['avg_kehadiran']; ?>%</p>
+                                        </div>
+                                        <div class="p-2 bg-green-100 rounded-lg">
+                                            <i class="fas fa-user-check text-green-600"></i>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Attendance Progress -->
-                            <div class="bg-gray-50 rounded-lg p-2 mb-3">
-                                <div class="flex items-center justify-between mb-1">
-                                    <span class="text-xs font-medium text-gray-700">Kehadiran</span>
-                                    <span class="text-xs font-bold text-gray-900"><?= $hadir ?>/<?= $total ?> (<?= $percentage ?>%)</span>
+                            <!-- Last Absensi -->
+                            <?php if ($kelas['last_absensi']): ?>
+                                <div class="bg-gray-50 rounded-xl p-3 mb-3">
+                                    <p class="text-xs text-gray-600 mb-1">Absensi Terakhir</p>
+                                    <p class="text-sm font-semibold text-gray-900">
+                                        <?php
+                                        $formatter = new IntlDateFormatter(
+                                            'id_ID',
+                                            IntlDateFormatter::LONG,
+                                            IntlDateFormatter::NONE,
+                                            'Asia/Makassar',
+                                            IntlDateFormatter::GREGORIAN,
+                                            'd MMMM y'
+                                        );
+                                        echo $formatter->format(strtotime($kelas['last_absensi']));
+                                        ?>
+                                    </p>
                                 </div>
-                                <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                                    <div class="<?= $barColor ?> h-2 rounded-full transition-all" style="width: <?= $percentage ?>%"></div>
-                                </div>
-                            </div>
+                            <?php endif; ?>
 
-                            <!-- Actions -->
-                            <div class="flex gap-2">
-                                <a href="<?= base_url('guru/absensi/print/' . $item['id']); ?>"
-                                    class="flex-1 px-3 py-2 bg-purple-100 hover:bg-purple-200 text-purple-600 text-xs font-semibold rounded-lg text-center transition-all active:scale-95" title="Cetak" target="_blank">
-                                    <i class="fas fa-print"></i> Print
-                                </a>
-                                <?php if (is_absensi_editable($item)): ?>
-                                    <a href="<?= base_url('guru/absensi/edit/' . $item['id']); ?>"
-                                        class="flex-1 px-3 py-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-600 rounded-lg text-center transition-all active:scale-95" title="Edit">
-                                        <i class="fas fa-edit mr-1"></i> Edit
-                                    </a>
-                                <?php endif; ?>
-                                <?php if (is_absensi_editable($item)): ?>
-                                    <button onclick="confirmDelete(<?= $item['id']; ?>)"
-                                        class="px-3 py-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-all active:scale-95" title="Hapus">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                <?php endif; ?>
-                            </div>
+                            <!-- Action Button -->
+                            <a href="<?= base_url('guru/absensi/kelas/' . $kelas['kelas_id']); ?>" 
+                                class="block w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white text-center font-semibold rounded-xl transition-all active:scale-95 shadow-md">
+                                <i class="fas fa-eye mr-2"></i>
+                                Lihat Detail Pertemuan
+                            </a>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -209,30 +198,9 @@
 <?= $this->section('scripts') ?>
 <script>
     function confirmDelete(id) {
-        if (confirm('Apakah Anda yakin ingin menghapus absensi ini?\n\nCatatan: Hanya dapat dihapus dalam 24 jam setelah dibuat.')) {
+        if (confirm('Yakin mau hapus absen ini? Data nggak bisa dikembalikan lho!')) {
             window.location.href = '<?= base_url('guru/absensi/delete/'); ?>' + id;
         }
     }
-
-    function toggleFilter() {
-        const filterForm = document.getElementById('filterForm');
-        const toggleIcon = document.getElementById('filterToggleIcon');
-
-        if (filterForm.classList.contains('hidden')) {
-            filterForm.classList.remove('hidden');
-            toggleIcon.classList.add('rotate-180');
-        } else {
-            filterForm.classList.add('hidden');
-            toggleIcon.classList.remove('rotate-180');
-        }
-    }
-
-    // Auto-show filter if there are active filters
-    document.addEventListener('DOMContentLoaded', function() {
-        const hasActiveFilters = <?= $tanggal || $kelasId || $search ? 'true' : 'false' ?>;
-        if (hasActiveFilters) {
-            toggleFilter();
-        }
-    });
 </script>
 <?= $this->endSection() ?>

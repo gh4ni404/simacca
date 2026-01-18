@@ -98,128 +98,105 @@
         </form>
     </div>
 
-    <!-- Absensi Table -->
-    <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
-        <?php if (empty($absensi)): ?>
-            <div class="p-16">
-                <?= empty_state(
-                    'clipboard-list',
-                    'Belum Ada Data Absensi',
-                    'Mulai dengan menginput data absensi pertama Anda',
-                    'Input Absensi Pertama',
-                    base_url('guru/absensi/tambah')
-                ); ?>
-            </div>
-        <?php else: ?>
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
-                    <tr>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">No</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Tanggal</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Mata Pelajaran</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Kelas</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Pertemuan</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Kehadiran</th>
-                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    <?php $no = 1; ?>
-                    <?php foreach ($absensi as $item): ?>
-                        <tr class="hover:bg-blue-50 transition-colors duration-150">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="text-sm font-semibold text-gray-700"><?= $no++; ?></span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="p-2 bg-blue-100 rounded-lg mr-3">
-                                        <i class="fas fa-calendar-day text-blue-600"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-sm font-semibold text-gray-900">
-                                            <?php
-                                            $formatter = new IntlDateFormatter(
-                                                'id_ID',
-                                                IntlDateFormatter::FULL,
-                                                IntlDateFormatter::NONE,
-                                                'Asia/Makassar',
-                                                IntlDateFormatter::GREGORIAN,
-                                                'EEEE, d MMMM y'
-                                            );
-                                            echo $formatter->format(strtotime($item['tanggal']));
-                                            ?>
-                                        </div>
-                                        <div class="text-xs text-gray-500 flex items-center mt-0.5">
-                                            <i class="far fa-clock mr-1"></i>
-                                            <?= date('H:i', strtotime($item['created_at'])); ?>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="text-sm font-semibold text-gray-900"><?= esc($item['nama_mapel']); ?></div>
-                                <div class="text-xs text-gray-500 flex items-center mt-0.5">
-                                    <i class="fas fa-user-tie mr-1"></i>
-                                    <?= esc($item['nama_guru']); ?>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
-                                    <i class="fas fa-school mr-1.5"></i>
-                                    <?= esc($item['nama_kelas']); ?>
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-sm">
-                                    <i class="fas fa-hashtag mr-1"></i>
-                                    <?= $item['pertemuan_ke']; ?>
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <?php
-                                $percentage = isset($item['percentage']) ? $item['percentage'] : 0;
-                                $hadir = isset($item['hadir']) ? $item['hadir'] : 0;
-                                $total = isset($item['total_siswa']) ? $item['total_siswa'] : 0;
-                                $barColor = $percentage >= 80 ? 'bg-green-500' : ($percentage >= 60 ? 'bg-yellow-500' : 'bg-red-500');
-                                ?>
-                                <div class="w-32">
-                                    <div class="flex items-center justify-between mb-1">
-                                        <span class="text-xs font-medium text-gray-700"><?= $hadir ?>/<?= $total ?></span>
-                                        <span class="text-xs font-bold text-gray-900"><?= $percentage ?>%</span>
-                                    </div>
-                                    <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-                                        <div class="<?= $barColor ?> h-2.5 rounded-full transition-all duration-300" style="width: <?= $percentage ?>%"></div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center">
-                                <div class="flex justify-center space-x-2">
+    <!-- Kelas List - Summary Cards -->
+    <?php if (empty($kelasSummary)): ?>
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden p-16">
+            <?= empty_state(
+                'clipboard-list',
+                'Belum Ada Data Absensi',
+                'Mulai dengan menginput data absensi pertama Anda',
+                'Input Absensi Pertama',
+                base_url('guru/absensi/tambah')
+            ); ?>
+        </div>
+    <?php else: ?>
+        <!-- Kelas Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <?php foreach ($kelasSummary as $kelas): ?>
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                    <!-- Kelas Header -->
+                    <div class="bg-gradient-to-r from-purple-500 to-purple-600 px-6 py-4">
+                        <div class="flex items-center text-white">
+                            <div class="p-3 bg-white bg-opacity-20 rounded-xl mr-3">
+                                <i class="fas fa-school text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold"><?= esc($kelas['kelas_nama']); ?></h3>
+                                <p class="text-sm opacity-90"><?= $kelas['total_siswa']; ?> siswa</p>
+                            </div>
+                        </div>
+                    </div>
 
-                                    <?php if (is_absensi_editable($item)): ?>
-                                        <a href="<?= base_url('guru/absensi/edit/' . $item['id']); ?>"
-                                            class="p-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-600 rounded-lg transition-all transform hover:scale-110" title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                    <?php endif; ?>
-                                    <a href="<?= base_url('guru/absensi/print/' . $item['id']); ?>"
-                                        class="p-2 bg-purple-100 hover:bg-purple-200 text-purple-600 rounded-lg transition-all transform hover:scale-110" title="Cetak" target="_blank">
-                                        <i class="fas fa-print"></i>
-                                    </a>
-                                    <?php if (is_absensi_editable($item)): ?>
-                                        <a href="#"
-                                            onclick="confirmDelete('<?= $item['id']; ?>')"
-                                            class="p-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-all transform hover:scale-110" title="Hapus">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </a>
-                                    <?php endif; ?>
+                    <!-- Stats -->
+                    <div class="p-6">
+                        <!-- Mata Pelajaran -->
+                        <div class="mb-4">
+                            <p class="text-xs text-gray-500 mb-2">Mata Pelajaran</p>
+                            <div class="flex flex-wrap gap-1">
+                                <span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                                    <i class="fas fa-book mr-1"></i>
+                                    <?= esc($kelas['mata_pelajaran']); ?>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Stats Grid -->
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="bg-blue-50 rounded-xl p-3">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-xs text-gray-600 mb-1">Pertemuan</p>
+                                        <p class="text-2xl font-bold text-blue-600"><?= $kelas['total_pertemuan']; ?></p>
+                                    </div>
+                                    <div class="p-2 bg-blue-100 rounded-lg">
+                                        <i class="fas fa-hashtag text-blue-600"></i>
+                                    </div>
                                 </div>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php endif; ?>
-    </div>
+                            </div>
+                            <div class="bg-green-50 rounded-xl p-3">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-xs text-gray-600 mb-1">Kehadiran</p>
+                                        <p class="text-2xl font-bold text-green-600"><?= $kelas['avg_kehadiran']; ?>%</p>
+                                    </div>
+                                    <div class="p-2 bg-green-100 rounded-lg">
+                                        <i class="fas fa-user-check text-green-600"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Last Absensi -->
+                        <?php if ($kelas['last_absensi']): ?>
+                            <div class="bg-gray-50 rounded-xl p-3 mb-4">
+                                <p class="text-xs text-gray-600 mb-1">Absensi Terakhir</p>
+                                <p class="text-sm font-semibold text-gray-900">
+                                    <?php
+                                    $formatter = new IntlDateFormatter(
+                                        'id_ID',
+                                        IntlDateFormatter::LONG,
+                                        IntlDateFormatter::NONE,
+                                        'Asia/Makassar',
+                                        IntlDateFormatter::GREGORIAN,
+                                        'd MMMM y'
+                                    );
+                                    echo $formatter->format(strtotime($kelas['last_absensi']));
+                                    ?>
+                                </p>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Action Button -->
+                        <a href="<?= base_url('guru/absensi/kelas/' . $kelas['kelas_id']); ?>" 
+                            class="block w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white text-center font-semibold rounded-xl transition-all transform hover:scale-105 shadow-md">
+                            <i class="fas fa-eye mr-2"></i>
+                            Lihat Detail Pertemuan
+                        </a>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
 </div>
 
 <?= $this->endSection() ?>
