@@ -1,0 +1,970 @@
+<?= $this->extend('templates/main_layout') ?>
+
+<?= $this->section('content') ?>
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+    <!-- Header Section -->
+    <div class="mb-8">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+                <i class="fas fa-user-check text-white text-2xl"></i>
+            </div>
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">
+                    <span class="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        Input Absensi Siswa
+                    </span>
+                </h1>
+                <p class="text-gray-600 flex items-center mt-1">
+                    <i class="fas fa-info-circle mr-2 text-blue-500 text-sm"></i>
+                    <span class="text-sm">Catat kehadiran siswa untuk pertemuan pembelajaran</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    <?= view('components/alerts') ?>
+
+    <!-- Main Form Container -->
+    <div class="bg-white rounded-2xl shadow-xl p-8">
+        <form action="<?= base_url('guru/absensi/simpan'); ?>" method="post" id="absensiForm">
+            <?= csrf_field(); ?>
+
+            <!-- Jadwal Selection Section -->
+            <div class="mb-8">
+                <div class="flex items-center mb-6">
+                    <div class="p-2 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg mr-3">
+                        <i class="fas fa-calendar-check text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800">Pilih Jadwal Mengajar</h3>
+                </div>
+
+                <?php if ($jadwal): ?>
+                    <!-- Selected Jadwal Card -->
+                    <div class="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-6 mb-6 shadow-md">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-3">
+                                    <div class="p-2 bg-green-500 rounded-lg mr-3">
+                                        <i class="fas fa-check-circle text-white"></i>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs font-semibold text-green-700 uppercase tracking-wide">Jadwal Dipilih</span>
+                                        <h4 class="text-xl font-bold text-gray-900"><?= $jadwal['nama_mapel']; ?></h4>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                                    <div class="flex items-center text-gray-700">
+                                        <div class="p-2 bg-white rounded-lg mr-2 shadow-sm">
+                                            <i class="fas fa-calendar-alt text-blue-500"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-gray-500">Hari</p>
+                                            <p class="font-semibold"><?= $jadwal['hari']; ?></p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center text-gray-700">
+                                        <div class="p-2 bg-white rounded-lg mr-2 shadow-sm">
+                                            <i class="fas fa-clock text-purple-500"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-gray-500">Waktu</p>
+                                            <p class="font-semibold"><?= date('H:i', strtotime($jadwal['jam_mulai'])); ?> - <?= date('H:i', strtotime($jadwal['jam_selesai'])); ?></p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center text-gray-700">
+                                        <div class="p-2 bg-white rounded-lg mr-2 shadow-sm">
+                                            <i class="fas fa-school text-green-500"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-gray-500">Kelas</p>
+                                            <p class="font-semibold"><?= $jadwal['nama_kelas']; ?></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="<?= base_url('guru/absensi/tambah'); ?>" 
+                                class="ml-4 inline-flex items-center px-4 py-2 bg-white hover:bg-gray-50 border border-gray-300 text-gray-700 font-medium rounded-lg shadow-sm transition-all">
+                                <i class="fas fa-exchange-alt mr-2"></i>
+                                Ganti
+                            </a>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="jadwal_mengajar_id" value="<?= $jadwal['id']; ?>">
+                <?php else: ?>
+                    <!-- Mode Selection -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">
+                            <i class="fas fa-question-circle mr-2 text-blue-500"></i>
+                            Mode Input Absensi
+                        </label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <button type="button" id="modeOwnSchedule" 
+                                    class="mode-btn active flex items-center justify-center px-6 py-4 border-2 border-blue-500 bg-blue-50 rounded-xl transition-all hover:shadow-md">
+                                <div class="text-center">
+                                    <i class="fas fa-chalkboard-teacher text-2xl text-blue-600 mb-2"></i>
+                                    <p class="font-bold text-gray-800">Jadwal Saya Sendiri</p>
+                                    <p class="text-xs text-gray-600 mt-1">Mengajar sesuai jadwal reguler</p>
+                                </div>
+                            </button>
+                            <button type="button" id="modeSubstitute" 
+                                    class="mode-btn flex items-center justify-center px-6 py-4 border-2 border-gray-300 bg-white rounded-xl transition-all hover:shadow-md hover:border-purple-300">
+                                <div class="text-center">
+                                    <i class="fas fa-user-plus text-2xl text-purple-600 mb-2"></i>
+                                    <p class="font-bold text-gray-800">Guru Pengganti</p>
+                                    <p class="text-xs text-gray-600 mt-1">Menggantikan guru lain</p>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Jadwal Selection Form -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-calendar-alt mr-1 text-blue-500"></i>
+                                Tanggal Absensi <span class="text-red-500">*</span>
+                            </label>
+                            <input type="date"
+                                id="tanggal"
+                                name="tanggal"
+                                value="<?= $tanggal; ?>"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                required>
+                            <p class="text-xs text-gray-500 mt-1">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Jadwal akan muncul otomatis berdasarkan hari dari tanggal yang dipilih
+                            </p>
+                        </div>
+                        <div>
+                            <label for="jadwal_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-clock mr-1 text-purple-500"></i>
+                                <span id="jadwalLabel">Jadwal</span> <span class="text-red-500">*</span>
+                            </label>
+                            <select id="jadwal_id" name="jadwal_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                <option value="">Pilih tanggal terlebih dahulu</option>
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1" id="hariInfo">
+                                <i class="fas fa-calendar-day mr-1"></i>
+                                <span id="hariText">-</span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Hidden field untuk hari (auto-detected) -->
+                    <input type="hidden" id="hari" name="hari" value="">
+
+                    <!-- Jadwal Hari Ini -->
+                    <?php if (!empty($jadwalHariIni)): ?>
+                        <div class="mt-4">
+                            <p class="text-sm text-gray-600 mb-2">Jadwal hari ini (<?= date('l, d F Y'); ?>):</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <?php foreach ($jadwalHariIni as $jadwalItem): ?>
+                                    <a href="<?= base_url('guru/absensi/tambah?jadwal_id=' . $jadwalItem['id'] . '&tanggal=' . $tanggal); ?>"
+                                        class="border border-gray-300 rounded-lg p-3 hover:bg-gray-50 transition">
+                                        <div class="flex justify-between items-center">
+                                            <div>
+                                                <h4 class="font-medium text-gray-900"><?= $jadwalItem['nama_mapel']; ?></h4>
+                                                <p class="text-sm text-gray-600">
+                                                    <?= date('H:i', strtotime($jadwalItem['jam_mulai'])); ?> - <?= date('H:i', strtotime($jadwalItem['jam_selesai'])); ?>
+                                                    | <?= $jadwalItem['nama_kelas']; ?>
+                                                </p>
+                                            </div>
+                                            <i class="fas fa-arrow-right text-blue-500"></i>
+                                        </div>
+                                    </a>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </div>
+
+            <?php if ($jadwal): ?>
+                <!-- Absensi Details Section -->
+                <div class="mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center">
+                            <div class="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg mr-3">
+                                <i class="fas fa-clipboard-list text-white"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-800">Detail Absensi</h3>
+                        </div>
+                        <div class="px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+                            <span class="text-sm text-gray-600">Tanggal:</span>
+                            <span class="font-bold text-blue-700 ml-2"><?= date('d/m/Y', strtotime($tanggal)); ?></span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label for="pertemuan_ke" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-hashtag mr-2 text-indigo-500"></i>
+                                Pertemuan Ke-
+                                <span class="text-red-500 ml-1">*</span>
+                            </label>
+                            <input type="number"
+                                id="pertemuan_ke"
+                                name="pertemuan_ke"
+                                value="<?= $pertemuanKe; ?>"
+                                min="1"
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                required>
+                        </div>
+                        <div>
+                            <label for="tanggal" class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-calendar-alt mr-2 text-blue-500"></i>
+                                Tanggal Absensi
+                                <span class="text-red-500 ml-1">*</span>
+                            </label>
+                            <input type="date"
+                                id="tanggal"
+                                name="tanggal"
+                                value="<?= $tanggal; ?>"
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                required>
+                        </div>
+                    </div>
+
+                    <!-- Approved Izin Info -->
+                    <?php if (!empty($approvedIzin)): ?>
+                        <div class="bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-300 rounded-xl p-5 mb-6 shadow-sm">
+                            <div class="flex items-start">
+                                <div class="p-2 bg-blue-500 rounded-lg mr-3">
+                                    <i class="fas fa-info-circle text-white"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-sm font-bold text-blue-800 mb-2">
+                                        Informasi Izin yang Disetujui
+                                    </h4>
+                                    <p class="text-sm text-blue-700 mb-3">Siswa berikut telah mengajukan izin dan disetujui:</p>
+                                    <div class="space-y-2">
+                                        <?php foreach ($approvedIzin as $izin): ?>
+                                            <div class="flex items-center bg-white rounded-lg p-3 shadow-sm">
+                                                <i class="fas fa-user-check text-blue-500 mr-3"></i>
+                                                <div class="flex-1">
+                                                    <p class="font-semibold text-gray-800"><?= $izin['nama_lengkap']; ?></p>
+                                                    <p class="text-xs text-gray-500">NIS: <?= $izin['nis']; ?></p>
+                                                </div>
+                                                <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
+                                                    <?= ucfirst($izin['jenis_izin']); ?>
+                                                </span>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <!-- Bulk Actions -->
+                    <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-xl p-5 mb-6 shadow-sm">
+                        <div class="flex items-center justify-between flex-wrap gap-4">
+                            <div class="flex items-center">
+                                <div class="p-2 bg-indigo-500 rounded-lg mr-3">
+                                    <i class="fas fa-bolt text-white"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-indigo-900">Aksi Cepat</h4>
+                                    <p class="text-xs text-indigo-700">Set status untuk semua siswa sekaligus</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-2 flex-wrap">
+                                <button type="button" 
+                                        onclick="setAllStatus('hadir')"
+                                        class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow-md transition-all transform hover:scale-105">
+                                    <i class="fas fa-check-circle mr-1"></i> Semua Hadir
+                                </button>
+                                <button type="button" 
+                                        onclick="setAllStatus('izin')"
+                                        class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow-md transition-all transform hover:scale-105">
+                                    <i class="fas fa-file-alt mr-1"></i> Semua Izin
+                                </button>
+                                <button type="button" 
+                                        onclick="setAllStatus('sakit')"
+                                        class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg shadow-md transition-all transform hover:scale-105">
+                                    <i class="fas fa-medkit mr-1"></i> Semua Sakit
+                                </button>
+                                <button type="button" 
+                                        onclick="setAllStatus('alpa')"
+                                        class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow-md transition-all transform hover:scale-105">
+                                    <i class="fas fa-times-circle mr-1"></i> Semua Alpa
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Indicator (Mobile) -->
+                    <div class="md:hidden mb-4">
+                        <div class="bg-gray-900 text-white px-4 py-2 rounded-full text-center shadow-lg">
+                            <span id="mobile-progress-counter" class="font-semibold text-sm">0 / 0 Siswa Terisi</span>
+                        </div>
+                    </div>
+
+                    <!-- Desktop View: Table -->
+                    <div class="hidden md:block bg-gray-50 rounded-xl p-1 mb-6">
+                        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gradient-to-r from-gray-100 to-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">No</th>
+                                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">NIS</th>
+                                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Nama Siswa</th>
+                                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                                Status Kehadiran
+                                                <span class="ml-2 text-xs font-normal text-gray-500">(Klik tombol untuk memilih)</span>
+                                            </th>
+                                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Keterangan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200" id="siswaTableBody">
+                                        <!-- Will be populated by AJAX -->
+                                        <tr>
+                                            <td colspan="5" class="px-6 py-12 text-center">
+                                                <div class="flex flex-col items-center justify-center">
+                                                    <div class="p-4 bg-blue-100 rounded-full mb-3">
+                                                        <i class="fas fa-spinner fa-spin text-blue-500 text-3xl"></i>
+                                                    </div>
+                                                    <p class="text-gray-600 font-medium">Memuat data siswa...</p>
+                                                    <p class="text-gray-400 text-sm mt-1">Mohon tunggu sebentar</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mobile View: Cards -->
+                    <div class="md:hidden space-y-4 mb-6" id="siswaCardsContainer">
+                        <!-- Will be populated by AJAX -->
+                        <div class="flex flex-col items-center justify-center py-12">
+                            <div class="p-4 bg-blue-100 rounded-full mb-3">
+                                <i class="fas fa-spinner fa-spin text-blue-500 text-3xl"></i>
+                            </div>
+                            <p class="text-gray-600 font-medium">Memuat data siswa...</p>
+                            <p class="text-gray-400 text-sm mt-1">Mohon tunggu sebentar</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t-2 border-gray-200">
+                    <a href="<?= base_url('guru/absensi'); ?>"
+                        class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all shadow-sm">
+                        <i class="fas fa-arrow-left mr-2"></i> Kembali
+                    </a>
+                    <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        <button type="submit"
+                            name="next_action"
+                            value="list"
+                            class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
+                            <i class="fas fa-save mr-2"></i> Simpan Absensi
+                        </button>
+                        <button type="submit"
+                            name="next_action"
+                            value="jurnal"
+                            class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
+                            <i class="fas fa-book mr-2"></i> Lanjut isi Jurnal
+                        </button>
+                    </div>
+                </div>
+            <?php endif; ?>
+        </form>
+    </div>
+</div>
+
+<?php if ($jadwal): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const kelasId = '<?= $jadwal["kelas_id"]; ?>';
+            const tanggal = document.getElementById('tanggal').value;
+
+            // Load siswa data
+            loadSiswaData(kelasId, tanggal);
+
+            // Update siswa data when tanggal changes
+            document.getElementById('tanggal').addEventListener('change', function() {
+                loadSiswaData(kelasId, this.value);
+            });
+        });
+
+        function loadSiswaData(kelasId, tanggal) {
+            const tableBody = document.getElementById('siswaTableBody');
+
+            tableBody.innerHTML = `
+        <tr>
+            <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                <i class="fas fa-spinner fa-spin text-xl mb-2"></i>
+                <p>Memuat data siswa...</p>
+            </td>
+        </tr>
+    `;
+
+            fetch(`<?= base_url('guru/absensi/getSiswaByKelas'); ?>?kelas_id=${kelasId}&tanggal=${tanggal}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        renderSiswaTable(data.siswa, data.approvedIzin, data.statusOptions);
+                    } else {
+                        tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-4 py-8 text-center text-red-500">
+                            <i class="fas fa-exclamation-triangle text-xl mb-2"></i>
+                            <p>${data.message || 'Gagal memuat data siswa'}</p>
+                        </td>
+                    </tr>
+                `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="px-4 py-8 text-center text-red-500">
+                        <i class="fas fa-exclamation-triangle text-xl mb-2"></i>
+                        <p>Terjadi kesalahan saat memuat data</p>
+                    </td>
+                </tr>
+            `;
+                });
+        }
+
+        function renderSiswaTable(siswaList, approvedIzin, statusOptions) {
+            const tableBody = document.getElementById('siswaTableBody');
+            const cardsContainer = document.getElementById('siswaCardsContainer');
+            const mobileProgressCounter = document.getElementById('mobile-progress-counter');
+
+            if (!siswaList || siswaList.length === 0) {
+                tableBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                    <i class="fas fa-users-slash text-xl mb-2"></i>
+                    <p>Tidak ada siswa di kelas ini</p>
+                </td>
+            </tr>
+        `;
+                cardsContainer.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-12 text-gray-500">
+                <i class="fas fa-users-slash text-4xl mb-3"></i>
+                <p class="font-medium">Tidak ada siswa di kelas ini</p>
+            </div>
+        `;
+                return;
+            }
+
+            let html = '';
+            let mobileHtml = '';
+            let approvedIzinMap = {};
+
+            // Initialize mobile progress counter - start at 0 since nothing is manually filled yet
+            if (mobileProgressCounter) {
+                mobileProgressCounter.textContent = `0 / ${siswaList.length} Siswa Terisi`;
+            }
+
+            // Create map of approved izin
+            approvedIzin.forEach(izin => {
+                approvedIzinMap[izin.siswa_id] = {
+                    jenis: izin.jenis_izin,
+                    alasan: izin.alasan
+                };
+            });
+
+            siswaList.forEach((siswa, index) => {
+                const isApprovedIzin = approvedIzinMap[siswa.id];
+                const defaultStatus = isApprovedIzin ? 'izin' : 'hadir';
+                const defaultKeterangan = isApprovedIzin ? `Izin ${isApprovedIzin.jenis}: ${isApprovedIzin.alasan}` : '';
+
+                // Desktop table row
+                html += `
+            <tr class="hover:bg-gray-50">
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">${index + 1}</td>
+                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">${siswa.nis || '-'}</td>
+                <td class="px-4 py-4">
+                    <div class="text-sm font-medium text-gray-900">${siswa.nama_lengkap}</div>
+                    ${isApprovedIzin ? `
+                    <div class="text-xs text-blue-600 mt-1">
+                        <i class="fas fa-info-circle mr-1"></i> Izin disetujui
+                    </div>
+                    ` : ''}
+                </td>
+                <td class="px-4 py-4">
+                    <!-- Hidden input to store the selected status -->
+                    <input type="hidden" name="siswa[${siswa.id}][status]" value="${defaultStatus}" class="status-input" data-siswa-id="${siswa.id}">
+                    
+                    <!-- Status Button Group -->
+                    <div class="flex gap-2 flex-wrap" data-siswa-id="${siswa.id}">
+                        ${Object.entries(statusOptions).map(([value, option]) => {
+                            const isSelected = value === defaultStatus;
+                            const buttonStyles = {
+                                'hadir': {
+                                    active: 'bg-green-500 text-white border-green-600 shadow-md',
+                                    inactive: 'bg-white text-green-700 border-green-300 hover:bg-green-50',
+                                    icon: 'fa-check-circle'
+                                },
+                                'izin': {
+                                    active: 'bg-blue-500 text-white border-blue-600 shadow-md',
+                                    inactive: 'bg-white text-blue-700 border-blue-300 hover:bg-blue-50',
+                                    icon: 'fa-file-alt'
+                                },
+                                'sakit': {
+                                    active: 'bg-yellow-500 text-white border-yellow-600 shadow-md',
+                                    inactive: 'bg-white text-yellow-700 border-yellow-300 hover:bg-yellow-50',
+                                    icon: 'fa-medkit'
+                                },
+                                'alpa': {
+                                    active: 'bg-red-500 text-white border-red-600 shadow-md',
+                                    inactive: 'bg-white text-red-700 border-red-300 hover:bg-red-50',
+                                    icon: 'fa-times-circle'
+                                }
+                            };
+                            
+                            const style = buttonStyles[value];
+                            const activeClass = isSelected ? style.active : style.inactive;
+                            
+                            return `
+                                <button type="button" 
+                                        class="status-btn px-4 py-2 border-2 rounded-lg font-semibold text-sm transition-all transform hover:scale-105 ${activeClass}"
+                                        data-siswa-id="${siswa.id}"
+                                        data-status="${value}"
+                                        onclick="selectStatus(${siswa.id}, '${value}')">
+                                    <i class="fas ${style.icon} mr-1"></i>
+                                    ${option.label}
+                                </button>
+                            `;
+                        }).join('')}
+                    </div>
+                </td>
+                <td class="px-4 py-4">
+                    <input type="text" 
+                           name="siswa[${siswa.id}][keterangan]" 
+                           value="${defaultKeterangan}"
+                           placeholder="Opsional"
+                           class="w-full px-3 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </td>
+            </tr>
+        `;
+
+                // Mobile card view
+                mobileHtml += `
+        <div class="student-card bg-white rounded-2xl shadow-md p-4 border-2 border-transparent transition-all" data-student-id="${siswa.id}">
+            <!-- Student Info -->
+            <div class="flex items-center gap-3 mb-3">
+                <div class="relative">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
+                        ${siswa.nama_lengkap.charAt(0).toUpperCase()}
+                    </div>
+                    <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white items-center justify-center hidden student-check-${siswa.id}">
+                        <i class="fas fa-check text-white text-xs"></i>
+                    </div>
+                </div>
+                <div class="flex-1">
+                    <h3 class="font-bold text-base text-gray-900">${siswa.nama_lengkap}</h3>
+                    <p class="text-xs text-gray-600">NIS: ${siswa.nis || '-'}</p>
+                    ${isApprovedIzin ? `<p class="text-xs text-blue-600 mt-0.5"><i class="fas fa-info-circle mr-1"></i>Izin disetujui</p>` : ''}
+                </div>
+            </div>
+
+            <!-- Hidden Input -->
+            <input type="hidden" name="siswa[${siswa.id}][status]" value="${defaultStatus}" class="status-input" data-siswa-id="${siswa.id}">
+
+            <!-- Status Buttons -->
+            <div class="grid grid-cols-4 gap-2 mb-3">
+                ${Object.entries(statusOptions).map(([value, option]) => {
+                    const isSelected = value === defaultStatus;
+                    const buttonStyles = {
+                        'hadir': {
+                            active: 'bg-green-500 text-white border-green-600',
+                            inactive: 'bg-white text-gray-700 border-gray-300',
+                            icon: 'fa-check-circle'
+                        },
+                        'izin': {
+                            active: 'bg-blue-500 text-white border-blue-600',
+                            inactive: 'bg-white text-gray-700 border-gray-300',
+                            icon: 'fa-file-alt'
+                        },
+                        'sakit': {
+                            active: 'bg-yellow-500 text-white border-yellow-600',
+                            inactive: 'bg-white text-gray-700 border-gray-300',
+                            icon: 'fa-thermometer'
+                        },
+                        'alpa': {
+                            active: 'bg-red-500 text-white border-red-600',
+                            inactive: 'bg-white text-gray-700 border-gray-300',
+                            icon: 'fa-times-circle'
+                        }
+                    };
+                    
+                    const style = buttonStyles[value];
+                    const activeClass = isSelected ? style.active : style.inactive;
+                    
+                    return `
+                        <button type="button" 
+                                class="status-btn flex flex-col items-center justify-center p-3 border-2 rounded-xl transition-all active:scale-95 ${activeClass}"
+                                data-siswa-id="${siswa.id}"
+                                data-status="${value}"
+                                onclick="selectStatus(${siswa.id}, '${value}')">
+                            <i class="fas ${style.icon} text-xl mb-1"></i>
+                            <span class="text-xs font-semibold">${option.label}</span>
+                        </button>
+                    `;
+                }).join('')}
+            </div>
+
+            <!-- Notes Field -->
+            <textarea name="siswa[${siswa.id}][keterangan]"
+                      class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      rows="2"
+                      placeholder="Keterangan (opsional)">${defaultKeterangan}</textarea>
+        </div>
+        `;
+            });
+
+            tableBody.innerHTML = html;
+            cardsContainer.innerHTML = mobileHtml;
+        }
+
+        // Note: selectStatus, setAllStatus, and updateProgressCounters functions
+        // are now defined in global scope below to ensure they're always accessible
+    </script>
+<?php endif; ?>
+
+<script>
+    // Global function - must be outside PHP conditional block
+    // Function to handle status button selection
+    function selectStatus(siswaId, status) {
+        console.log('selectStatus called:', siswaId, status);
+        
+        // Update hidden input value
+        const hiddenInputs = document.querySelectorAll(`.status-input[data-siswa-id="${siswaId}"]`);
+        if (hiddenInputs.length > 0) {
+            hiddenInputs.forEach(input => {
+                input.value = status;
+                // Mark as manually set
+                input.setAttribute('data-manually-set', 'true');
+            });
+            console.log('Hidden inputs updated:', hiddenInputs.length);
+        } else {
+            console.error('Hidden input not found for siswa ID:', siswaId);
+            return;
+        }
+
+        // Define button styles for each status (desktop)
+        const desktopButtonStyles = {
+            'hadir': {
+                active: ['bg-green-500', 'text-white', 'border-green-600', 'shadow-md'],
+                inactive: ['bg-white', 'text-green-700', 'border-green-300', 'hover:bg-green-50']
+            },
+            'izin': {
+                active: ['bg-blue-500', 'text-white', 'border-blue-600', 'shadow-md'],
+                inactive: ['bg-white', 'text-blue-700', 'border-blue-300', 'hover:bg-blue-50']
+            },
+            'sakit': {
+                active: ['bg-yellow-500', 'text-white', 'border-yellow-600', 'shadow-md'],
+                inactive: ['bg-white', 'text-yellow-700', 'border-yellow-300', 'hover:bg-yellow-50']
+            },
+            'alpa': {
+                active: ['bg-red-500', 'text-white', 'border-red-600', 'shadow-md'],
+                inactive: ['bg-white', 'text-red-700', 'border-red-300', 'hover:bg-red-50']
+            }
+        };
+
+        // Define button styles for mobile
+        const mobileButtonStyles = {
+            'hadir': {
+                active: ['bg-green-500', 'text-white', 'border-green-600'],
+                inactive: ['bg-white', 'text-gray-700', 'border-gray-300']
+            },
+            'izin': {
+                active: ['bg-blue-500', 'text-white', 'border-blue-600'],
+                inactive: ['bg-white', 'text-gray-700', 'border-gray-300']
+            },
+            'sakit': {
+                active: ['bg-yellow-500', 'text-white', 'border-yellow-600'],
+                inactive: ['bg-white', 'text-gray-700', 'border-gray-300']
+            },
+            'alpa': {
+                active: ['bg-red-500', 'text-white', 'border-red-600'],
+                inactive: ['bg-white', 'text-gray-700', 'border-gray-300']
+            }
+        };
+
+        // All possible color classes to remove
+        const allColorClasses = [
+            'bg-green-500', 'bg-blue-500', 'bg-yellow-500', 'bg-red-500',
+            'bg-white', 'bg-green-50', 'bg-blue-50', 'bg-yellow-50', 'bg-red-50',
+            'text-white', 'text-green-700', 'text-blue-700', 'text-yellow-700', 'text-red-700', 'text-gray-700',
+            'border-green-600', 'border-blue-600', 'border-yellow-600', 'border-red-600',
+            'border-green-300', 'border-blue-300', 'border-yellow-300', 'border-red-300', 'border-gray-300',
+            'shadow-md', 'hover:bg-green-50', 'hover:bg-blue-50', 'hover:bg-yellow-50', 'hover:bg-red-50'
+        ];
+
+        // Get all status buttons for this student
+        const allButtons = document.querySelectorAll(`.status-btn[data-siswa-id="${siswaId}"]`);
+        console.log('Total buttons found:', allButtons.length);
+        
+        if (allButtons.length === 0) {
+            console.error('No buttons found for siswa ID:', siswaId);
+            return;
+        }
+
+        allButtons.forEach(btn => {
+            const btnStatus = btn.getAttribute('data-status');
+            
+            // Determine if this is a mobile button (has flex-col class)
+            const isMobile = btn.classList.contains('flex-col');
+            const styleSet = isMobile ? mobileButtonStyles : desktopButtonStyles;
+            const style = styleSet[btnStatus];
+            
+            if (!style) {
+                console.warn('No style found for status:', btnStatus);
+                return;
+            }
+            
+            // Remove all color classes
+            btn.classList.remove(...allColorClasses);
+            
+            // Apply appropriate style
+            if (btnStatus === status) {
+                // Active button
+                btn.classList.add(...style.active);
+            } else {
+                // Inactive button
+                btn.classList.add(...style.inactive);
+            }
+        });
+
+        // Update progress counters
+        updateProgressCounters();
+
+        // Show check mark on mobile card
+        const checkMark = document.querySelector(`.student-check-${siswaId}`);
+        if (checkMark) {
+            checkMark.classList.remove('hidden');
+            checkMark.classList.add('flex');
+        }
+
+        // Add visual feedback for mobile card
+        const mobileCard = document.querySelector(`.student-card[data-student-id="${siswaId}"]`);
+        if (mobileCard) {
+            mobileCard.classList.add('border-green-500', 'bg-green-50');
+            setTimeout(() => {
+                mobileCard.classList.remove('bg-green-50');
+            }, 300);
+        }
+        
+        console.log('selectStatus completed for:', siswaId, status);
+    }
+
+    // Function to set all students to the same status
+    function setAllStatus(status) {
+        console.log('setAllStatus called:', status);
+        const hiddenInputs = document.querySelectorAll('.status-input');
+        console.log('Found', hiddenInputs.length, 'students');
+        
+        hiddenInputs.forEach(input => {
+            const siswaId = input.getAttribute('data-siswa-id');
+            selectStatus(siswaId, status);
+        });
+
+        // Update progress
+        if (typeof updateProgressCounters === 'function') {
+            updateProgressCounters();
+        }
+
+        // Show feedback
+        const statusLabels = {
+            'hadir': 'Hadir',
+            'izin': 'Izin',
+            'sakit': 'Sakit',
+            'alpa': 'Alpa'
+        };
+
+        // Create temporary notification
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in';
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <i class="fas fa-check-circle mr-2"></i>
+                <span>Semua siswa di-set <strong>${statusLabels[status]}</strong></span>
+            </div>
+        `;
+        document.body.appendChild(notification);
+
+        // Remove notification after 2 seconds
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transition = 'opacity 0.3s';
+            setTimeout(() => notification.remove(), 300);
+        }, 2000);
+    }
+
+    // Function to update progress counters
+    function updateProgressCounters() {
+        const hiddenInputs = document.querySelectorAll('.status-input');
+        let filledCount = 0;
+        
+        // Count students that have been manually changed (marked with data attribute)
+        hiddenInputs.forEach(input => {
+            const isManuallySet = input.getAttribute('data-manually-set') === 'true';
+            if (isManuallySet) {
+                filledCount++;
+            }
+        });
+
+        const totalCount = hiddenInputs.length;
+        const mobileCounter = document.getElementById('mobile-progress-counter');
+        
+        if (mobileCounter) {
+            mobileCounter.textContent = `${filledCount} / ${totalCount} Siswa Terisi`;
+        }
+    }
+</script>
+
+<script>
+    // Mode selection state
+    let isSubstituteMode = false;
+
+    // Handle mode selection
+    document.getElementById('modeOwnSchedule').addEventListener('click', function() {
+        isSubstituteMode = false;
+        updateModeUI();
+        // Reset jadwal selection
+        document.getElementById('jadwal_id').innerHTML = '<option value="">Pilih Jadwal</option>';
+        document.getElementById('hari').value = '';
+    });
+
+    document.getElementById('modeSubstitute').addEventListener('click', function() {
+        isSubstituteMode = true;
+        updateModeUI();
+        // Reset jadwal selection
+        document.getElementById('jadwal_id').innerHTML = '<option value="">Pilih Jadwal</option>';
+        document.getElementById('hari').value = '';
+    });
+
+    function updateModeUI() {
+        const ownBtn = document.getElementById('modeOwnSchedule');
+        const subBtn = document.getElementById('modeSubstitute');
+        const jadwalLabel = document.getElementById('jadwalLabel');
+
+        if (isSubstituteMode) {
+            // Substitute mode active
+            ownBtn.classList.remove('border-blue-500', 'bg-blue-50');
+            ownBtn.classList.add('border-gray-300', 'bg-white');
+            
+            subBtn.classList.remove('border-gray-300', 'bg-white');
+            subBtn.classList.add('border-purple-500', 'bg-purple-50');
+            
+            jadwalLabel.innerHTML = '<i class="fas fa-exchange-alt mr-1 text-purple-500"></i> Jadwal yang Digantikan';
+        } else {
+            // Own schedule mode active
+            ownBtn.classList.remove('border-gray-300', 'bg-white');
+            ownBtn.classList.add('border-blue-500', 'bg-blue-50');
+            
+            subBtn.classList.remove('border-purple-500', 'bg-purple-50');
+            subBtn.classList.add('border-gray-300', 'bg-white');
+            
+            jadwalLabel.textContent = 'Jadwal';
+        }
+    }
+
+    // Function to get day name from date
+    function getDayFromDate(dateString) {
+        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const date = new Date(dateString);
+        return days[date.getDay()];
+    }
+
+    // Function to load jadwal based on hari
+    function loadJadwalByHari(hari) {
+        const jadwalSelect = document.getElementById('jadwal_id');
+        
+        if (!hari) {
+            jadwalSelect.innerHTML = '<option value="">Pilih tanggal terlebih dahulu</option>';
+            return;
+        }
+
+        jadwalSelect.innerHTML = '<option value="">Memuat jadwal...</option>';
+
+        const url = `<?= base_url('guru/absensi/getJadwalByHari'); ?>?hari=${hari}&substitute=${isSubstituteMode}`;
+
+        fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.jadwal.length > 0) {
+                    let options = '<option value="">Pilih Jadwal</option>';
+                    data.jadwal.forEach(jadwal => {
+                        const waktu = `${jadwal.jam_mulai.substr(0, 5)} - ${jadwal.jam_selesai.substr(0, 5)}`;
+                        if (data.isSubstitute && jadwal.nama_guru) {
+                            // Show teacher name for substitute mode
+                            options += `<option value="${jadwal.id}">${jadwal.nama_mapel} - ${jadwal.nama_kelas} (${waktu}) - Guru: ${jadwal.nama_guru}</option>`;
+                        } else {
+                            options += `<option value="${jadwal.id}">${jadwal.nama_mapel} - ${jadwal.nama_kelas} (${waktu})</option>`;
+                        }
+                    });
+                    jadwalSelect.innerHTML = options;
+
+                    // auto-redirect when a jadwal is selected
+                    jadwalSelect.addEventListener('change', function() {
+                        const selected = this.value;
+                        if (!selected) return;
+                        const tanggalVal = document.getElementById('tanggal') ? document.getElementById('tanggal').value : '';
+                        const targetUrl = '<?= base_url('guru/absensi/tambah'); ?>?jadwal_id=' + encodeURIComponent(selected) + (tanggalVal ? '&tanggal=' + encodeURIComponent(tanggalVal) : '');
+                        window.location.href = targetUrl;
+                    });
+                } else {
+                    const noDataMsg = isSubstituteMode ? 'Tidak ada jadwal di hari ini' : 'Tidak ada jadwal untuk hari ini';
+                    jadwalSelect.innerHTML = `<option value="">${noDataMsg}</option>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                jadwalSelect.innerHTML = '<option value="">Error loading data</option>';
+            });
+    }
+
+    // Handle tanggal selection - auto detect hari and load jadwal
+    document.getElementById('tanggal').addEventListener('change', function() {
+        const tanggal = this.value;
+        
+        if (!tanggal) {
+            document.getElementById('hari').value = '';
+            document.getElementById('hariText').textContent = '-';
+            document.getElementById('jadwal_id').innerHTML = '<option value="">Pilih tanggal terlebih dahulu</option>';
+            return;
+        }
+
+        // Get day name from selected date
+        const hari = getDayFromDate(tanggal);
+        
+        // Update hidden field and display
+        document.getElementById('hari').value = hari;
+        document.getElementById('hariText').textContent = hari;
+        
+        // Load jadwal for this day
+        loadJadwalByHari(hari);
+    });
+
+    // Trigger on page load if tanggal already set
+    window.addEventListener('DOMContentLoaded', function() {
+        const tanggal = document.getElementById('tanggal').value;
+        if (tanggal) {
+            const hari = getDayFromDate(tanggal);
+            document.getElementById('hari').value = hari;
+            document.getElementById('hariText').textContent = hari;
+            loadJadwalByHari(hari);
+        }
+    });
+</script>
+<?= $this->endSection() ?>

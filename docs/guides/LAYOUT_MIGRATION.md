@@ -377,7 +377,7 @@ Auth views should **NOT** be migrated to desktop/mobile layout system because:
 - **Code Reduction**: -38 lines (-4.3%)
 - **See**: [Complete migration details](#1-guru-dashboard) above
 
-**Absensi Views** - 🔄 **IN PROGRESS** (1/5 completed)
+**Absensi Views** - 🔄 **IN PROGRESS** (3/5 completed)
 - [x] `app/Views/guru/absensi/index.php` - ✅ **COMPLETED** (2026-01-17)
   - **Pattern**: Device Router (20 lines)
   - **Mobile**: index_mobile.php (239 lines)
@@ -402,7 +402,30 @@ Auth views should **NOT** be migrated to desktop/mobile layout system because:
     - Custom styling with icons, help text, and dynamic interactions
     - Event listeners require specific element IDs
     - Manual implementation is more maintainable for this use case
-- [ ] `app/Views/guru/absensi/edit.php` - ⏳ PENDING (713 lines, HIGH priority)
+- [x] `app/Views/guru/absensi/edit.php` - ✅ **COMPLETED** (2026-01-17)
+  - **Pattern**: Device Router (20 lines)
+  - **Mobile**: edit_mobile.php (354 lines)
+  - **Desktop**: edit_desktop.php (713 lines)
+  - **Components Used**: 
+    - ✅ `render_flash_message()` - Used in both desktop & mobile
+    - ⚠️ **Missing**: `stat_card()`, `empty_state()`, `card_start()`/`card_end()`
+  - **Total**: 1,087 lines (3 files)
+  - **Layout Compliance**: ✅ PASS
+    - ✅ Proper device router implementation
+    - ✅ Separate mobile/desktop views
+    - ✅ Extends correct layout templates
+    - ✅ Uses `render_flash_message()` helper
+  - **Shared Components**: ⚠️ PARTIAL (1/4 components)
+    - ✅ Alert components used
+    - ❌ Card components not used (custom implementation)
+    - ❌ Form components not used (manual forms)
+    - ❌ Empty state not used (custom implementation)
+  - **Rating**: ⭐⭐⭐⭐ (4/5) - Very Good
+  - **Improvement Opportunities**:
+    1. Info card section could use `info_card()` component
+    2. Student list empty state could use `empty_state()` component
+    3. Consider using shared form components from `forms.php`
+  - **Note**: Manual implementation is acceptable for complex forms with heavy JavaScript interaction
 - [ ] `app/Views/guru/absensi/show.php` - ⏳ PENDING (373 lines, MEDIUM priority)
 - [ ] `app/Views/guru/absensi/print.php` - ⏳ PENDING (313 lines, LOW priority)
 
@@ -419,7 +442,7 @@ Auth views should **NOT** be migrated to desktop/mobile layout system because:
 - [ ] `app/Views/guru/laporan/index_enhanced.php`
 - [ ] `app/Views/guru/laporan/print.php`
 
-**Migration Progress**: 3/15+ files (20%)
+**Migration Progress**: 4/15+ files (26.7%)
 
 **Recommended Next Steps**:
 1. ~~Migrate `absensi/index.php`~~ ✅ COMPLETED (2026-01-17)
