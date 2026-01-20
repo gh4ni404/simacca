@@ -310,20 +310,12 @@
                         class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all shadow-sm">
                         <i class="fas fa-arrow-left mr-2"></i> Kembali
                     </a>
-                    <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                        <button type="submit"
-                            name="next_action"
-                            value="list"
-                            class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
-                            <i class="fas fa-save mr-2"></i> Simpan Absensi
-                        </button>
-                        <button type="submit"
-                            name="next_action"
-                            value="jurnal"
-                            class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
-                            <i class="fas fa-book mr-2"></i> Lanjut isi Jurnal
-                        </button>
-                    </div>
+                    <button type="submit"
+                        name="next_action"
+                        value="jurnal"
+                        class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
+                        <i class="fas fa-book mr-2"></i> Lanjut isi Jurnal
+                    </button>
                 </div>
             <?php endif; ?>
         </form>
