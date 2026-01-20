@@ -85,7 +85,10 @@ class AbsensiController extends BaseController
                     'total_hadir' => 0,
                     'total_siswa' => 0,
                     'avg_kehadiran' => 0,
-                    'last_absensi' => null
+                    'last_absensi' => null,
+                    'jam_mulai' => $item['jam_mulai'] ?? null,
+                    'jam_selesai' => $item['jam_selesai'] ?? null,
+                    'hari' => $item['hari'] ?? null
                 ];
             }
             

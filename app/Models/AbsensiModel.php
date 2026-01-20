@@ -113,6 +113,7 @@ class AbsensiModel extends Model
                             mata_pelajaran.nama_mapel,
                             kelas.nama_kelas,
                             jadwal_mengajar.kelas_id,
+                            jadwal_mengajar.hari,
                             jadwal_mengajar.jam_mulai,
                             jadwal_mengajar.jam_selesai')
             ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
@@ -415,9 +416,8 @@ class AbsensiModel extends Model
                 ->join('guru g', 'g.id = jm.guru_id')
                 ->join('mata_pelajaran mp', 'mp.id = jm.mata_pelajaran_id')
                 ->join('guru wk', 'wk.id = k.wali_kelas_id', 'left')
-                ->join('absensi a', 'a.jadwal_mengajar_id = jm.id', 'left')
+                ->join('absensi a', 'a.jadwal_mengajar_id = jm.id AND a.tanggal = "' . $tanggal . '"', 'left')
                 ->join('guru gp', 'gp.id = a.guru_pengganti_id', 'left')
-                ->where('a.tanggal', $tanggal)
                 ->join('jurnal_kbm jk', 'jk.absensi_id = a.id', 'left')
                 ->join('absensi_detail ad', 'ad.absensi_id = a.id', 'left')
                 ->where('jm.hari', $dayName);

@@ -7,8 +7,8 @@
 **Framework:** CodeIgniter 4.6.4  
 **Database:** MySQL  
 **Styling:** Tailwind CSS  
-**Version:** 1.5.0  
-**Last Updated:** 2026-01-15
+**Version:** 2.0.0  
+**Last Updated:** 2026-01-20
 
 ---
 
@@ -18,13 +18,14 @@ SIMACCA adalah sistem informasi berbasis web untuk monitoring absensi siswa dan 
 
 ### ✨ Fitur Utama
 
-- 🔐 **Multi-Role System** - Admin, Guru Mapel, Wali Kelas, Siswa
+- 🔐 **Multi-Role System** - Admin, Guru Mapel, Wali Kelas, Siswa, Wakakur
 - 📊 **Dashboard Interaktif** - Statistik real-time untuk setiap role
 - ✅ **Absensi Digital** - Input cepat dengan UI mobile-friendly
 - 📝 **Jurnal KBM** - Dokumentasi kegiatan belajar mengajar
 - 📸 **Auto Image Optimization** - Kompresi otomatis 70-85%
 - 👨‍🏫 **Guru Pengganti** - Sistem untuk guru piket/pengganti
-- 📱 **Responsive Design** - Optimized untuk desktop & mobile
+- 📱 **Dual Layout System** - Auto-detect desktop & mobile layouts
+- 🔓 **Admin Unlock Absensi** - Unlock absensi terkunci untuk edit
 - 📧 **Email Notifications** - Password reset & notifikasi otomatis
 - 📄 **Export Reports** - Download laporan dalam format Excel/PDF
 
@@ -75,51 +76,71 @@ php spark serve
 | Dokumen | Deskripsi | Waktu |
 |---------|-----------|-------|
 | [**Quick Start Guide**](docs/guides/QUICK_START.md) | Panduan instalasi super cepat untuk testing | 5 menit |
-| [**Getting Started**](docs/guides/GETTING_STARTED.md) | Pilih skenario instalasi yang tepat | 2 menit |
 | [**System Requirements**](docs/guides/REQUIREMENTS.md) | Cek kebutuhan sistem & compatibility | 5 menit |
+| [**Panduan Instalasi**](docs/guides/PANDUAN_INSTALASI.md) | Panduan instalasi lengkap (Bahasa Indonesia) | 15-30 menit |
 
-### 📖 Panduan Lengkap
+### 📖 Panduan Development
 
 | Dokumen | Untuk Siapa? | Waktu |
 |---------|--------------|-------|
-| [**Panduan Instalasi**](docs/guides/PANDUAN_INSTALASI.md) | Developer & Admin | 15-30 menit |
+| [**Layouts Complete Guide**](docs/guides/LAYOUTS_COMPLETE_GUIDE.md) | Developer | 20 menit |
 | [**Deployment Guide**](docs/guides/DEPLOYMENT_GUIDE.md) | System Admin | 30-60 menit |
-| [**Email Service Setup**](docs/guides/EMAIL_SERVICE_QUICKSTART.md) | Admin | 10 menit |
-| **Import Jadwal** (see in-app guide) | Admin | 5 menit |
+| [**Gmail App Password Setup**](docs/guides/GMAIL_APP_PASSWORD_SETUP.md) | Admin | 10 menit |
 
-### 📋 Referensi
+### 👥 Panduan User
+
+| Dokumen | Untuk Siapa? | Waktu |
+|---------|--------------|-------|
+| [**Admin Unlock Absensi**](docs/guides/ADMIN_UNLOCK_ABSENSI_QUICKSTART.md) | Admin | 5 menit |
+| [**Wakakur Role Guide**](docs/guides/WAKAKUR_ROLE_GUIDE.md) | Wakakur | 10 menit |
+
+### 📋 Referensi Teknis
 
 | Dokumen | Deskripsi |
 |---------|-----------|
-| [**FEATURES.md**](FEATURES.md) | Daftar lengkap semua fitur sistem |
-| [**CHANGELOG.md**](CHANGELOG.md) | History perubahan & update aplikasi |
-| [**TODO.md**](TODO.md) | Roadmap pengembangan & bug tracking |
-| [**CONTRIBUTING.md**](CONTRIBUTING.md) | Panduan untuk kontributor |
+| [**Security Audit Report**](docs/summary/SECURITY_AUDIT_REPORT.md) | Security checklist & findings |
+| [**Routes Optimization**](docs/summary/ROUTES_OPTIMIZATION_SUMMARY.md) | Route architecture |
+| [**Bug Fixes Applied**](docs/summary/BUG_FIXES_APPLIED.md) | Historical bug fixes |
+| [**Database Fix Summary**](docs/summary/DATABASE_FIX_SUMMARY.md) | Database schema fixes |
 
 ### 🗂️ Dokumentasi Lengkap
 
-Dokumentasi telah diorganisir ke dalam folder `docs/` dengan struktur berikut:
+Dokumentasi telah diorganisir dan dirapikan. Struktur baru:
 
 ```
 docs/
-├── guides/          📖 Panduan instalasi, deployment, setup
-├── features/        ✨ Dokumentasi fitur-fitur baru
-├── bugfixes/        🐛 Log perbaikan bug & fixes
-├── email/           📧 Dokumentasi email service & notifikasi
-└── archive/         📦 Dokumentasi legacy (untuk referensi)
+├── README.md        📚 Documentation index (START HERE!)
+├── guides/          📖 How-to guides & tutorials (8 files)
+├── summary/         📋 Technical summaries & specs (6 files)
+└── email/           📧 Email service documentation
 ```
 
-**👉 Lihat semua dokumentasi:** [docs/guides/DOKUMENTASI_INDEX.md](docs/guides/DOKUMENTASI_INDEX.md)
+**👉 Lihat semua dokumentasi:** [docs/README.md](docs/README.md) ⭐ **NEW!**
 
 ---
 
 ## 🎯 Fitur Unggulan
 
-### 📱 Mobile-First Design (v1.4.0)
-- Card-based layout untuk mobile
-- Touch-friendly buttons (48px+ targets)
-- Progress tracking yang selalu visible
-- Smooth animations & visual feedback
+### 📱💻 Dual Layout System (v2.0.0)
+- **Auto-detection** - Otomatis pilih layout desktop/mobile
+- **Desktop Layout** - Sidebar navigation, collapsible menu
+- **Mobile Layout** - Bottom tab bar, touch-optimized
+- **Manual Switch** - User bisa override pilihan layout
+- **Responsive** - Seamless transition antar device
+
+### 🔓 Admin Unlock Absensi (v2.0.0)
+- **Single Unlock** - Unlock satu absensi dengan mudah
+- **Bulk Unlock** - Unlock banyak absensi sekaligus
+- **Time Tracking** - Monitor waktu unlock dengan jelas
+- **Badge System** - Visual indicator untuk status locked/unlocked
+- **24-hour Window** - Guru punya 24 jam untuk edit setelah unlock
+
+### 👨‍🎓 Wakakur Role (v2.0.0)
+- **Dual Access** - Bisa mengajar DAN supervisi
+- **Teaching Features** - Akses penuh ke fitur guru (absensi, jurnal)
+- **Admin Features** - Dashboard sekolah, laporan detail
+- **Student Management** - Kelola data siswa sekolah
+- **Permission Approval** - Approve izin siswa
 
 ### 📸 Auto Image Optimization (v1.5.0)
 - **Auto-rotate EXIF orientation** - Foto landscape otomatis benar
@@ -133,12 +154,6 @@ docs/
 - Auto-detect substitute teacher
 - Dual ownership access control
 - Full integration dengan absensi & jurnal
-
-### 🎨 Modern UI/UX (v1.3.0)
-- Visual status buttons dengan color coding
-- Bulk actions (Semua Hadir/Izin/Sakit/Alpha)
-- Toast notifications & real-time feedback
-- 60-70% faster attendance marking
 
 ---
 
@@ -160,12 +175,15 @@ Setelah server berjalan (`php spark serve`):
 - **Login:** http://localhost:8080/login
 - **Admin Dashboard:** http://localhost:8080/admin/dashboard
 - **Guru Dashboard:** http://localhost:8080/guru/dashboard
+- **Wakakur Dashboard:** http://localhost:8080/wakakur/dashboard
 - **Wali Kelas Dashboard:** http://localhost:8080/walikelas/dashboard
 - **Siswa Dashboard:** http://localhost:8080/siswa/dashboard
 
 **Default Login:**
 - Username: `admin`
 - Password: `admin123`
+
+**Note:** Untuk testing Wakakur role, upgrade user existing via command atau database.
 
 ---
 
@@ -189,15 +207,17 @@ Setelah server berjalan (`php spark serve`):
 | Module | Status | Progress | Last Update |
 |--------|--------|----------|-------------|
 | Authentication | ✅ Complete | 100% | 2026-01-15 |
-| Admin Module | ✅ Complete | 100% | 2026-01-15 |
-| Guru Mapel Module | ✅ Complete | 100% | 2026-01-15 |
+| Admin Module | ✅ Complete | 100% | 2026-01-20 |
+| Admin Unlock Absensi | ✅ Complete | 100% | 2026-01-20 |
+| Guru Mapel Module | ✅ Complete | 100% | 2026-01-20 |
 | Guru Pengganti/Piket | ✅ Complete | 100% | 2026-01-12 |
+| Wakakur Module | ✅ Complete | 100% | 2026-01-20 |
 | Wali Kelas Module | ✅ Complete | 100% | 2026-01-11 |
 | Siswa Module | ✅ Complete | 100% | 2026-01-11 |
+| Dual Layout System | ✅ Complete | 100% | 2026-01-20 |
 | Profile & Photo | ✅ Complete | 100% | 2026-01-15 |
 | Image Optimization | ✅ Complete | 100% | 2026-01-15 |
 | Email Service | ✅ Complete | 100% | 2026-01-15 |
-| Mobile UI | ✅ Complete | 100% | 2026-01-14 |
 
 **Legend:**
 - ✅ Complete - Fully functional & tested
