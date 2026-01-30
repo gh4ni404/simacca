@@ -1,5 +1,57 @@
 # 📋 CHANGELOG - Sistem Absensi Siswa
 
+## [1.6.1] - 2026-01-30
+
+### 🧹 Codebase Cleanup & Maintenance
+**Type:** Maintenance | **Impact:** MEDIUM - Improved codebase quality
+
+#### Files Removed (20 files, ~500 KB freed):
+
+1. **Temporary & Test Files (3 files)**
+   - `app/Controllers/Tester.php` - Unused test controller with debug code
+   - `app/Views/examples/layout_example.php` - Demo/example view file
+   - `public/tmp_rovodev_test_baseurl.php` - Temporary test script
+
+2. **Backup Files (11 files)**
+   - `app/Views/admin/absensi/index.php.backup`
+   - `app/Views/guru/absensi/create.php.backup`
+   - `writable/backups/views/guru/` - 9 backup view files
+   - Complete `writable/backups/` directory structure removed
+
+3. **Old Database Backup (1 file)**
+   - `backup.sql` (286 KB, dated 2026-01-20) - Older backup removed
+   - Kept: `simacca_db.sql` (107 KB, dated 2026-01-13) - Current backup
+
+4. **Example Test Files (4 files)**
+   - `tests/_support/Database/Migrations/2020-02-22-222222_example_migration.php`
+   - `tests/_support/Database/Seeds/ExampleSeeder.php`
+   - `tests/database/ExampleDatabaseTest.php`
+   - `tests/_support/Models/ExampleModel.php`
+
+5. **Empty Directories (2 directories)**
+   - `.qodo/` - Empty directory structure
+   - `app/Views/examples/` - After removing example files
+
+#### Code Quality Improvements:
+- Removed commented debug code (`dd()`) from `app/Controllers/Admin/GuruController.php`
+- Cleaned up unused print_r() statements
+
+#### Impact:
+- ✅ **Cleaner codebase** - Removed 20 unused/temporary files
+- ✅ **Disk space** - Freed ~500 KB
+- ✅ **Better maintainability** - No confusing backup or test files
+- ✅ **Code quality** - Removed debug code and test controllers
+- ✅ **Documentation verified** - No broken references to removed files
+
+#### Files Kept (Important):
+- `simacca_db.sql` - Current database backup (107 KB)
+- `templatejurnal.pdf` - Journal report template
+- `templatelaporanabsensi.pdf` - Attendance report template
+- All production code and configurations
+- All documentation (25 markdown files)
+
+---
+
 ## [1.6.0] - 2026-01-30
 
 ### 📦 Documentation Reorganization
