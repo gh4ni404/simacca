@@ -1,51 +1,43 @@
 <?= $this->extend('templates/main_layout') ?>
 
 <?= $this->section('content') ?>
-<div class="container-fluid px-4">
+<div class="bg-white rounded-xl shadow p-6 mb-6">
     <!-- Header -->
-    <div class="mb-4">
-        <h1 class="h3 mb-0 text-gray-800">
-            <i class="fas fa-fingerprint text-primary"></i> Absensi Guru
-        </h1>
-        <p class="text-muted mb-0">Check-in dan check-out kehadiran harian</p>
+    <div>
+        <h2 class="text-2xl font-bold text-gray-800">
+            <i class="fas fa-fingerprint text-blue-600 mr-2"></i>Absensi Guru
+        </h2>
+        <p class="text-gray-600">Check-in dan check-out kehadiran harian</p>
     </div>
+</div>
 
-    <?php if (session()->getFlashdata('success')): ?>
-        <div class="alert alert-success alert-dismissible fade show" role="alert" id="successAlert">
-            <i class="fas fa-check-circle"></i> <?= session()->getFlashdata('success') ?>
-            <button type="button" class="btn-close" onclick="this.parentElement.style.display='none'"></button>
-        </div>
-    <?php endif; ?>
+<!-- Flash Messages -->
+<?= view('components/alerts') ?>
 
-    <?php if (session()->getFlashdata('error')): ?>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert" id="errorAlert">
-            <i class="fas fa-exclamation-circle"></i> <?= session()->getFlashdata('error') ?>
-            <button type="button" class="btn-close" onclick="this.parentElement.style.display='none'"></button>
-        </div>
-    <?php endif; ?>
-
-    <div class="row">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Left Column: Check-in/Check-out -->
-        <div class="col-lg-8 mb-4">
+        <div class="lg:col-span-2 space-y-6">
             <!-- Today's Status Card -->
-            <div class="card shadow mb-4">
-                <div class="card-header py-3 bg-primary text-white">
-                    <h6 class="m-0 font-weight-bold">
-                        <i class="fas fa-calendar-day"></i> Status Hari Ini - <?= date('d F Y') ?>
-                    </h6>
+            <div class="bg-white rounded-xl shadow">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 rounded-t-xl">
+                    <h3 class="text-lg font-semibold">
+                        <i class="fas fa-calendar-day mr-2"></i>Status Hari Ini - <?= date('d F Y') ?>
+                    </h3>
                 </div>
-                <div class="card-body">
+                <div class="p-6">
                     <?php if ($hasCheckedIn && $todayAbsensi): ?>
                         <!-- Already Checked In -->
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <div class="card border-success">
-                                    <div class="card-body">
-                                        <h6 class="text-success"><i class="fas fa-sign-in-alt"></i> Check-In</h6>
-                                        <p class="h3 mb-2"><?= date('H:i', strtotime($todayAbsensi['check_in'])) ?></p>
-                                        <span class="badge bg-<?= $todayAbsensi['status'] == 'hadir' ? 'success' : 'warning' ?>">
-                                            <?= ucfirst($todayAbsensi['status']) ?>
-                                        </span>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div class="bg-green-50 border-2 border-green-200 rounded-lg p-4">
+                                <div class="flex items-start justify-between mb-3">
+                                    <h4 class="text-green-700 font-semibold flex items-center">
+                                        <i class="fas fa-sign-in-alt mr-2"></i>Check-In
+                                    </h4>
+                                    <span class="px-3 py-1 bg-<?= $todayAbsensi['status'] == 'hadir' ? 'green' : 'yellow' ?>-100 text-<?= $todayAbsensi['status'] == 'hadir' ? 'green' : 'yellow' ?>-800 text-xs font-semibold rounded-full">
+                                        <?= ucfirst($todayAbsensi['status']) ?>
+                                    </span>
+                                </div>
+                                <p class="text-3xl font-bold text-green-800 mb-3"><?= date('H:i', strtotime($todayAbsensi['check_in'])) ?></p>
                                         <?php if ($todayAbsensi['foto_check_in']): ?>
                                             <button type="button" class="btn btn-sm btn-outline-primary mt-2" 
                                                     onclick="showImage('<?= base_url('writable/' . $todayAbsensi['foto_check_in']) ?>')">

@@ -1,205 +1,210 @@
 <?= $this->extend('templates/main_layout') ?>
 
 <?= $this->section('content') ?>
-<div class="container-fluid px-4">
+<div class="bg-white rounded-xl shadow p-6">
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div>
-            <h1 class="h3 mb-0 text-gray-800">
-                <i class="fas fa-user-circle text-primary"></i> Detail Absensi Guru
-            </h1>
-            <p class="text-muted mb-0"><?= esc($guru['nama_lengkap']) ?> - <?= esc($guru['nip'] ?? '') ?></p>
+            <h2 class="text-2xl font-bold text-gray-800">
+                <i class="fas fa-user-circle text-blue-600 mr-2"></i>Detail Absensi Guru
+            </h2>
+            <p class="text-gray-600"><?= esc($guru['nama_lengkap']) ?> - <?= esc($guru['nip'] ?? '') ?></p>
         </div>
-        <div>
-            <a href="<?= base_url('admin/absensi-guru') ?>" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> Kembali
+        <div class="mt-4 md:mt-0">
+            <a href="<?= base_url('admin/absensi-guru') ?>" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i> Kembali
             </a>
         </div>
     </div>
 
+    <!-- Flash Messages -->
+    <?= view('components/alerts') ?>
+
+    <!-- Guru Profile Card -->
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-6">
+        <div class="flex items-center">
+            <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mr-4">
+                <?= strtoupper(substr($guru['nama_lengkap'], 0, 1)) ?>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold text-gray-800"><?= esc($guru['nama_lengkap']) ?></h3>
+                <p class="text-gray-600">NIP: <?= esc($guru['nip'] ?? '-') ?></p>
+                <p class="text-sm text-gray-500">Email: <?= esc($guru['email'] ?? '-') ?></p>
+            </div>
+        </div>
+    </div>
+
     <!-- Monthly Statistics -->
-    <div class="row mb-4">
-        <div class="col-xl-2 col-md-4 col-6 mb-3">
-            <div class="card border-left-success shadow h-100">
-                <div class="card-body py-3">
-                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Hadir</div>
-                    <div class="h5 mb-0 font-weight-bold"><?= $stats['total_hadir'] ?? 0 ?></div>
-                </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div class="text-center">
+                <p class="text-sm text-green-600 uppercase font-semibold mb-1">Hadir</p>
+                <p class="text-2xl font-bold text-green-800"><?= $stats['total_hadir'] ?? 0 ?></p>
             </div>
         </div>
-        <div class="col-xl-2 col-md-4 col-6 mb-3">
-            <div class="card border-left-warning shadow h-100">
-                <div class="card-body py-3">
-                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Terlambat</div>
-                    <div class="h5 mb-0 font-weight-bold"><?= $stats['total_terlambat'] ?? 0 ?></div>
-                </div>
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div class="text-center">
+                <p class="text-sm text-yellow-600 uppercase font-semibold mb-1">Terlambat</p>
+                <p class="text-2xl font-bold text-yellow-800"><?= $stats['total_terlambat'] ?? 0 ?></p>
             </div>
         </div>
-        <div class="col-xl-2 col-md-4 col-6 mb-3">
-            <div class="card border-left-info shadow h-100">
-                <div class="card-body py-3">
-                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Izin</div>
-                    <div class="h5 mb-0 font-weight-bold"><?= $stats['total_izin'] ?? 0 ?></div>
-                </div>
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="text-center">
+                <p class="text-sm text-blue-600 uppercase font-semibold mb-1">Izin</p>
+                <p class="text-2xl font-bold text-blue-800"><?= $stats['total_izin'] ?? 0 ?></p>
             </div>
         </div>
-        <div class="col-xl-2 col-md-4 col-6 mb-3">
-            <div class="card border-left-primary shadow h-100">
-                <div class="card-body py-3">
-                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Sakit</div>
-                    <div class="h5 mb-0 font-weight-bold"><?= $stats['total_sakit'] ?? 0 ?></div>
-                </div>
+        <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+            <div class="text-center">
+                <p class="text-sm text-indigo-600 uppercase font-semibold mb-1">Sakit</p>
+                <p class="text-2xl font-bold text-indigo-800"><?= $stats['total_sakit'] ?? 0 ?></p>
             </div>
         </div>
-        <div class="col-xl-2 col-md-4 col-6 mb-3">
-            <div class="card border-left-danger shadow h-100">
-                <div class="card-body py-3">
-                    <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Alpha</div>
-                    <div class="h5 mb-0 font-weight-bold"><?= $stats['total_alpha'] ?? 0 ?></div>
-                </div>
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div class="text-center">
+                <p class="text-sm text-red-600 uppercase font-semibold mb-1">Alpha</p>
+                <p class="text-2xl font-bold text-red-800"><?= $stats['total_alpha'] ?? 0 ?></p>
             </div>
         </div>
     </div>
 
-    <!-- Filter -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Filter Periode</h6>
+    <!-- Filter Section -->
+    <div class="bg-gray-50 rounded-lg p-4 mb-6">
+        <div class="flex items-center mb-4">
+            <i class="fas fa-calendar text-blue-600 mr-2"></i>
+            <h3 class="text-lg font-semibold text-gray-800">Filter Periode</h3>
         </div>
-        <div class="card-body">
-            <form method="GET" action="">
-                <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <label>Bulan</label>
-                        <select name="bulan" class="form-control">
-                            <?php for ($i = 1; $i <= 12; $i++): ?>
-                                <option value="<?= $i ?>" <?= ($filters['bulan'] ?? '') == $i ? 'selected' : '' ?>>
-                                    <?= date('F', mktime(0, 0, 0, $i, 1)) ?>
-                                </option>
-                            <?php endfor; ?>
-                        </select>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label>Tahun</label>
-                        <select name="tahun" class="form-control">
-                            <?php 
-                            $currentYear = date('Y');
-                            for ($y = $currentYear; $y >= $currentYear - 5; $y--): 
-                            ?>
-                                <option value="<?= $y ?>" <?= ($filters['tahun'] ?? '') == $y ? 'selected' : '' ?>><?= $y ?></option>
-                            <?php endfor; ?>
-                        </select>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label>Status</label>
-                        <select name="status" class="form-control">
-                            <option value="">Semua Status</option>
-                            <option value="hadir" <?= ($filters['status'] ?? '') == 'hadir' ? 'selected' : '' ?>>Hadir</option>
-                            <option value="terlambat" <?= ($filters['status'] ?? '') == 'terlambat' ? 'selected' : '' ?>>Terlambat</option>
-                            <option value="izin" <?= ($filters['status'] ?? '') == 'izin' ? 'selected' : '' ?>>Izin</option>
-                            <option value="sakit" <?= ($filters['status'] ?? '') == 'sakit' ? 'selected' : '' ?>>Sakit</option>
-                            <option value="alpha" <?= ($filters['status'] ?? '') == 'alpha' ? 'selected' : '' ?>>Alpha</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label>&nbsp;</label>
-                        <div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-search"></i> Filter
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
+        <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Bulan</label>
+                <select name="bulan" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <?php for ($i = 1; $i <= 12; $i++): ?>
+                        <option value="<?= $i ?>" <?= ($filters['bulan'] ?? '') == $i ? 'selected' : '' ?>>
+                            <?= date('F', mktime(0, 0, 0, $i, 1)) ?>
+                        </option>
+                    <?php endfor; ?>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Tahun</label>
+                <select name="tahun" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <?php 
+                    $currentYear = date('Y');
+                    for ($y = $currentYear; $y >= $currentYear - 5; $y--): 
+                    ?>
+                        <option value="<?= $y ?>" <?= ($filters['tahun'] ?? '') == $y ? 'selected' : '' ?>><?= $y ?></option>
+                    <?php endfor; ?>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                <select name="status" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Semua Status</option>
+                    <option value="hadir" <?= ($filters['status'] ?? '') == 'hadir' ? 'selected' : '' ?>>Hadir</option>
+                    <option value="terlambat" <?= ($filters['status'] ?? '') == 'terlambat' ? 'selected' : '' ?>>Terlambat</option>
+                    <option value="izin" <?= ($filters['status'] ?? '') == 'izin' ? 'selected' : '' ?>>Izin</option>
+                    <option value="sakit" <?= ($filters['status'] ?? '') == 'sakit' ? 'selected' : '' ?>>Sakit</option>
+                    <option value="alpha" <?= ($filters['status'] ?? '') == 'alpha' ? 'selected' : '' ?>>Alpha</option>
+                </select>
+            </div>
+            <div class="flex items-end space-x-2">
+                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
+                    <i class="fas fa-filter mr-2"></i>Filter
+                </button>
+                <?php if (!empty($filters['bulan']) || !empty($filters['tahun']) || !empty($filters['status'])): ?>
+                    <a href="<?= current_url() ?>" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition">
+                        Reset
+                    </a>
+                <?php endif; ?>
+            </div>
+        </form>
     </div>
 
-    <!-- Absensi History -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Riwayat Absensi</h6>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="text-center" width="5%">No</th>
-                            <th>Tanggal</th>
-                            <th class="text-center">Jam Masuk</th>
-                            <th class="text-center">Jam Keluar</th>
-                            <th class="text-center">Status</th>
-                            <th>Keterangan</th>
+    <!-- Data Table -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Check In</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Check Out</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Durasi (menit)</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Keterangan</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                <?php if (!empty($absensiList)): ?>
+                    <?php foreach ($absensiList as $index => $absensi): ?>
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= $index + 1 ?></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <?= date('d/m/Y', strtotime($absensi['tanggal'])) ?>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <?php if ($absensi['check_in']): ?>
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        <?= date('H:i', strtotime($absensi['check_in'])) ?>
+                                    </span>
+                                <?php else: ?>
+                                    <span class="text-gray-400">-</span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <?php if ($absensi['check_out']): ?>
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        <?= date('H:i', strtotime($absensi['check_out'])) ?>
+                                    </span>
+                                <?php else: ?>
+                                    <span class="text-gray-400">-</span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-900">
+                                <?php if (!empty($absensi['durasi_menit'])): ?>
+                                    <span class="font-semibold"><?= $absensi['durasi_menit'] ?></span>
+                                <?php else: ?>
+                                    <span class="text-gray-400">-</span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <?php
+                                $badgeColors = [
+                                    'hadir' => 'bg-green-100 text-green-800',
+                                    'terlambat' => 'bg-yellow-100 text-yellow-800',
+                                    'izin' => 'bg-blue-100 text-blue-800',
+                                    'sakit' => 'bg-indigo-100 text-indigo-800',
+                                    'alpha' => 'bg-red-100 text-red-800'
+                                ];
+                                $colorClass = $badgeColors[$absensi['status']] ?? 'bg-gray-100 text-gray-800';
+                                ?>
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full <?= $colorClass ?>">
+                                    <?= ucfirst($absensi['status']) ?>
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-900">
+                                <?= esc($absensi['keterangan_masuk'] ?? '-') ?>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($absensiList)): ?>
-                            <tr>
-                                <td colspan="6" class="text-center text-muted py-4">
-                                    <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
-                                    Tidak ada data absensi
-                                </td>
-                            </tr>
-                        <?php else: ?>
-                            <?php 
-                            $no = 1;
-                            foreach ($absensiList as $absensi): 
-                            ?>
-                                <tr>
-                                    <td class="text-center"><?= $no++ ?></td>
-                                    <td><?= date('d/m/Y (l)', strtotime($absensi['tanggal'])) ?></td>
-                                    <td class="text-center">
-                                        <?= $absensi['check_in'] ? date('H:i', strtotime($absensi['check_in'])) : '-' ?>
-                                    </td>
-                                    <td class="text-center">
-                                        <?= $absensi['check_out'] ? date('H:i', strtotime($absensi['check_out'])) : '-' ?>
-                                    </td>
-                                    <td class="text-center">
-                                        <?php
-                                        $badgeClass = [
-                                            'hadir' => 'success',
-                                            'terlambat' => 'warning',
-                                            'izin' => 'info',
-                                            'sakit' => 'primary',
-                                            'alpha' => 'danger'
-                                        ];
-                                        $class = $badgeClass[$absensi['status']] ?? 'secondary';
-                                        ?>
-                                        <span class="badge bg-<?= $class ?>"><?= ucfirst($absensi['status']) ?></span>
-                                    </td>
-                                    <td><?= esc($absensi['keterangan_masuk'] ?? '-') ?></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-
-            <?php if ($pager && count($absensiList) > 0): ?>
-                <div class="mt-3">
-                    <?= $pager->links() ?>
-                </div>
-            <?php endif; ?>
-        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                            <i class="fas fa-inbox text-4xl mb-2 block"></i>
+                            <p>Tidak ada data absensi</p>
+                        </td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
     </div>
-</div>
 
-<style>
-.border-left-primary {
-    border-left: 0.25rem solid #4e73df !important;
-}
-.border-left-success {
-    border-left: 0.25rem solid #1cc88a !important;
-}
-.border-left-warning {
-    border-left: 0.25rem solid #f6c23e !important;
-}
-.border-left-info {
-    border-left: 0.25rem solid #36b9cc !important;
-}
-.border-left-danger {
-    border-left: 0.25rem solid #e74a3b !important;
-}
-</style>
+    <!-- Pagination -->
+    <?php if ($pager && count($absensiList) > 0): ?>
+        <div class="mt-6">
+            <?= $pager->links() ?>
+        </div>
+    <?php endif; ?>
+</div>
 
 <?= $this->endSection() ?>
