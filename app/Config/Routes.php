@@ -146,6 +146,13 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('absensi/unlock/(:num)', 'Admin\AbsensiController::unlock/$1', ['filter' => 'role:admin']);
     $routes->post('absensi/bulk-unlock', 'Admin\AbsensiController::bulkUnlock', ['filter' => 'role:admin']);
 
+    // Absensi Guru Management
+    $routes->get('absensi-guru', 'Admin\AbsensiGuruController::index', ['filter' => 'role:admin']);
+    $routes->get('absensi-guru/laporan', 'Admin\AbsensiGuruController::laporan', ['filter' => 'role:admin']);
+    $routes->get('absensi-guru/detail/(:num)', 'Admin\AbsensiGuruController::detail/$1', ['filter' => 'role:admin']);
+    $routes->post('absensi-guru/update-status', 'Admin\AbsensiGuruController::updateStatus', ['filter' => 'role:admin']);
+    $routes->get('absensi-guru/export-excel', 'Admin\AbsensiGuruController::exportExcel', ['filter' => 'role:admin']);
+
     // Laporan
     $routes->get('laporan/absensi', 'Admin\LaporanController::absensi', ['filter' => 'role:admin']);
     $routes->get('laporan/absensi-detail', 'Admin\LaporanController::absensiDetail', ['filter' => 'role:admin']);
@@ -189,6 +196,14 @@ $routes->group('guru', ['filter' => 'role:guru_mapel,wakakur'], function ($route
     // Laporan Routes
     $routes->get('laporan', 'Guru\LaporanController::index', ['as' => 'guru.laporan']);
     $routes->get('laporan/print', 'Guru\LaporanController::print');
+    
+    // Absensi Guru (Self Check-in/Check-out)
+    $routes->get('absensi-guru', 'Guru\AbsensiGuruController::index', ['as' => 'guru.absensi_guru']);
+    $routes->post('absensi-guru/check-in', 'Guru\AbsensiGuruController::checkIn');
+    $routes->post('absensi-guru/check-out', 'Guru\AbsensiGuruController::checkOut');
+    $routes->get('absensi-guru/history', 'Guru\AbsensiGuruController::history');
+    $routes->get('absensi-guru/show/(:num)', 'Guru\AbsensiGuruController::show/$1');
+    $routes->get('absensi-guru/camera', 'Guru\AbsensiGuruController::camera');
 });
 
 // Wali Kelas Routes
@@ -219,6 +234,12 @@ $routes->group('wakakur', ['filter' => 'role:wakakur'], function ($routes) {
     // Detailed Reports (school-wide administrative reports)
     $routes->get('laporan', 'Wakakur\LaporanController::index', ['as' => 'wakakur.laporan']);
     $routes->get('laporan/print', 'Wakakur\LaporanController::print');
+    
+    // Absensi Guru Monitoring
+    $routes->get('absensi-guru', 'Wakakur\AbsensiGuruController::index', ['as' => 'wakakur.absensi_guru']);
+    $routes->get('absensi-guru/laporan', 'Wakakur\AbsensiGuruController::laporan');
+    $routes->get('absensi-guru/detail/(:num)', 'Wakakur\AbsensiGuruController::detail/$1');
+    $routes->get('absensi-guru/export-excel', 'Wakakur\AbsensiGuruController::exportExcel');
 });
 
 // Siswa Routes
