@@ -77,23 +77,15 @@ class AbsensiGuruController extends BaseController
             ]);
         }
 
-        // Validation rules
-        $rules = [
-            'foto' => [
-                'rules' => 'uploaded[foto]|max_size[foto,2048]|is_image[foto]',
-                'errors' => [
-                    'uploaded' => 'Foto wajib diupload',
-                    'max_size' => 'Ukuran foto maksimal 2MB',
-                    'is_image' => 'File harus berupa gambar'
-                ]
-            ]
-        ];
-
-        if (!$this->validate($rules)) {
+        // Check if using base64 or file upload
+        $fotoBase64 = $this->request->getPost('foto_base64');
+        $fotoFile = $this->request->getFile('foto');
+        
+        // Validate that at least one photo method is used
+        if (empty($fotoBase64) && (!$fotoFile || !$fotoFile->isValid())) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $this->validator->getErrors()
+                'message' => 'Foto wajib diupload atau diambil menggunakan kamera'
             ]);
         }
 
@@ -101,11 +93,17 @@ class AbsensiGuruController extends BaseController
         $data = [
             'tanggal' => Time::today()->toDateString(),
             'check_in' => Time::now()->toTimeString(),
-            'foto' => $this->request->getFile('foto'),
             'catatan' => $this->request->getPost('keterangan_masuk'),
             'latitude' => $this->request->getPost('latitude'),
             'longitude' => $this->request->getPost('longitude'),
         ];
+
+        // Handle photo - prioritize base64 from camera
+        if (!empty($fotoBase64)) {
+            $data['foto_base64'] = $fotoBase64;
+        } else {
+            $data['foto'] = $fotoFile;
+        }
 
         // Perform check-in
         $result = $this->absensiGuruService->checkIn($guru['id'], $data);
@@ -135,25 +133,6 @@ class AbsensiGuruController extends BaseController
             ]);
         }
 
-        // Validation rules (foto optional for check-out)
-        $rules = [
-            'foto' => [
-                'rules' => 'max_size[foto,2048]|is_image[foto]',
-                'errors' => [
-                    'max_size' => 'Ukuran foto maksimal 2MB',
-                    'is_image' => 'File harus berupa gambar'
-                ]
-            ]
-        ];
-
-        if (!$this->validate($rules)) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Validasi gagal',
-                'errors' => $this->validator->getErrors()
-            ]);
-        }
-
         // Prepare data
         $data = [
             'check_out' => Time::now()->toTimeString(),
@@ -162,10 +141,14 @@ class AbsensiGuruController extends BaseController
             'longitude' => $this->request->getPost('longitude'),
         ];
 
-        // Add foto if uploaded
-        $foto = $this->request->getFile('foto');
-        if ($foto && $foto->isValid()) {
-            $data['foto'] = $foto;
+        // Handle photo (optional for check-out)
+        $fotoBase64 = $this->request->getPost('foto_base64');
+        $fotoFile = $this->request->getFile('foto');
+        
+        if (!empty($fotoBase64)) {
+            $data['foto_base64'] = $fotoBase64;
+        } elseif ($fotoFile && $fotoFile->isValid()) {
+            $data['foto'] = $fotoFile;
         }
 
         // Perform check-out

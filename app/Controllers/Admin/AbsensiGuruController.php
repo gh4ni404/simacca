@@ -39,10 +39,19 @@ class AbsensiGuruController extends BaseController
         $absensiList = $result['success'] ? $result['data']['data'] : [];
         $pager = $result['success'] ? $result['data']['pager'] : null;
 
+        // Check if this is an AJAX request for auto-refresh
+        if ($this->request->isAJAX() || $this->request->getGet('ajax')) {
+            return $this->response->setJSON([
+                'success' => true,
+                'summary' => $summary,
+                'absensiList' => $absensiList
+            ]);
+        }
+
         // Get all guru for filter dropdown
         $guruList = $this->guruModel
-            ->select('guru.id, guru.nama, guru.nip')
-            ->orderBy('guru.nama', 'ASC')
+            ->select('guru.id, guru.nama_lengkap as nama, guru.nip')
+            ->orderBy('guru.nama_lengkap', 'ASC')
             ->findAll();
 
         $data = [
@@ -78,8 +87,8 @@ class AbsensiGuruController extends BaseController
 
         // Get all guru for filter dropdown
         $guruList = $this->guruModel
-            ->select('guru.id, guru.nama, guru.nip')
-            ->orderBy('guru.nama', 'ASC')
+            ->select('guru.id, guru.nama_lengkap as nama, guru.nip')
+            ->orderBy('guru.nama_lengkap', 'ASC')
             ->findAll();
 
         // Calculate statistics for the period

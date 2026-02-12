@@ -174,6 +174,11 @@ if (!function_exists('get_sidebar_menu')) {
                     'url' => '/admin/absensi'
                 ],
                 [
+                    'title' => 'Absensi Guru',
+                    'icon' => 'fas fa-user-check',
+                    'url' => '/admin/absensi-guru'
+                ],
+                [
                     'title' => 'Laporan',
                     'icon' => 'fas fa-chart-bar',
                     'url' => '#',
@@ -196,7 +201,7 @@ if (!function_exists('get_sidebar_menu')) {
             'guru_mapel' => [
                 [
                     'title' => 'Dashboard',
-                    'icon' => 'fas fa=tachometer-alt',
+                    'icon' => 'fas fa-tachometer-alt',
                     'url' => '/guru/dashboard',
                     'active' => ['guru/dashboard']
                 ],
@@ -204,6 +209,11 @@ if (!function_exists('get_sidebar_menu')) {
                     'title' => 'Absensi Siswa',
                     'icon' => 'fas fa-clipboard-check',
                     'url' => '/guru/absensi'
+                ],
+                [
+                    'title' => 'Absensi Guru',
+                    'icon' => 'fas fa-user-check',
+                    'url' => '/guru/absensi-guru'
                 ],
                 [
                     'title' => 'Jurnal KBM',
@@ -284,6 +294,11 @@ if (!function_exists('get_sidebar_menu')) {
                             'url' => '/wakakur/izin'
                         ]
                     ]
+                ],
+                [
+                    'title' => 'Absensi Guru',
+                    'icon' => 'fas fa-user-check',
+                    'url' => '/wakakur/absensi-guru'
                 ],
                 [
                     'title' => 'Laporan Detail',

@@ -75,9 +75,14 @@ class AbsensiGuruService extends BaseService
                 return $this->error('Anda sudah melakukan check-in hari ini');
             }
 
-            // Handle foto upload
+            // Handle foto upload (base64 or file)
             $fotoPath = null;
-            if (isset($data['foto']) && $data['foto'] !== null) {
+            if (isset($data['foto_base64']) && !empty($data['foto_base64'])) {
+                $fotoPath = $this->handleBase64Image($data['foto_base64'], 'check-in', $guruId);
+                if (!$fotoPath) {
+                    return $this->error('Gagal menyimpan foto dari kamera');
+                }
+            } elseif (isset($data['foto']) && $data['foto'] !== null) {
                 $fotoPath = $this->handleFotoUpload($data['foto'], 'check-in', $guruId);
                 if (!$fotoPath) {
                     return $this->error('Gagal mengupload foto');
@@ -103,11 +108,11 @@ class AbsensiGuruService extends BaseService
 
             // Save to database
             if ($this->absensiGuruModel->insert($absensiData)) {
-                return $this->success('Check-in berhasil', [
+                return $this->success([
                     'id' => $this->absensiGuruModel->getInsertID(),
                     'status' => $status,
                     'check_in' => $checkIn
-                ]);
+                ], 'Check-in berhasil');
             }
 
             return $this->error('Gagal menyimpan data check-in');
@@ -135,9 +140,14 @@ class AbsensiGuruService extends BaseService
                 return $this->error('Anda sudah melakukan check-out hari ini');
             }
 
-            // Handle foto upload
+            // Handle foto upload (base64 or file)
             $fotoPath = null;
-            if (isset($data['foto']) && $data['foto'] !== null) {
+            if (isset($data['foto_base64']) && !empty($data['foto_base64'])) {
+                $fotoPath = $this->handleBase64Image($data['foto_base64'], 'check-out', $guruId);
+                if (!$fotoPath) {
+                    return $this->error('Gagal menyimpan foto dari kamera');
+                }
+            } elseif (isset($data['foto']) && $data['foto'] !== null) {
                 $fotoPath = $this->handleFotoUpload($data['foto'], 'check-out', $guruId);
                 if (!$fotoPath) {
                     return $this->error('Gagal mengupload foto');
@@ -167,12 +177,12 @@ class AbsensiGuruService extends BaseService
 
             // Update database
             if ($this->absensiGuruModel->update($absensi['id'], $updateData)) {
-                return $this->success('Check-out berhasil', [
+                return $this->success([
                     'id' => $absensi['id'],
                     'check_out' => $checkOut,
                     'durasi_menit' => $durasiMenit,
                     'early_checkout' => $earlyCheckout
-                ]);
+                ], 'Check-out berhasil');
             }
 
             return $this->error('Gagal menyimpan data check-out');
@@ -231,6 +241,48 @@ class AbsensiGuruService extends BaseService
     }
 
     /**
+     * Handle base64 image data from camera
+     */
+    protected function handleBase64Image(string $base64Data, string $type, int $guruId): ?string
+    {
+        try {
+            // Create upload directory if not exists
+            $uploadPath = WRITEPATH . 'uploads/absensi_guru/';
+            if (!is_dir($uploadPath)) {
+                mkdir($uploadPath, 0755, true);
+            }
+
+            // Remove data:image/jpeg;base64, prefix if exists
+            if (strpos($base64Data, 'data:image') === 0) {
+                $base64Data = preg_replace('/^data:image\/\w+;base64,/', '', $base64Data);
+            }
+
+            // Decode base64
+            $imageData = base64_decode($base64Data);
+            if ($imageData === false) {
+                log_message('error', 'Failed to decode base64 image');
+                return null;
+            }
+
+            // Generate filename
+            $timestamp = Time::now()->format('YmdHis');
+            $filename = "guru_{$guruId}_{$type}_{$timestamp}.jpg";
+            $filepath = $uploadPath . $filename;
+
+            // Save image
+            if (file_put_contents($filepath, $imageData)) {
+                return 'uploads/absensi_guru/' . $filename;
+            }
+
+            return null;
+
+        } catch (\Exception $e) {
+            log_message('error', 'AbsensiGuruService::handleBase64Image - ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Get absensi history for guru with pagination
      */
     public function getHistory(int $guruId, array $filters = []): array
@@ -260,10 +312,10 @@ class AbsensiGuruService extends BaseService
             $data = $builder->paginate($perPage);
             $pager = $this->absensiGuruModel->pager;
 
-            return $this->success('Data berhasil diambil', [
+            return $this->success([
                 'data' => $data,
                 'pager' => $pager
-            ]);
+            ], 'Data berhasil diambil');
 
         } catch (\Exception $e) {
             log_message('error', 'AbsensiGuruService::getHistory - ' . $e->getMessage());
@@ -326,7 +378,7 @@ class AbsensiGuruService extends BaseService
 
             $stats['total_izin'] = count($izin);
 
-            return $this->success('Statistik berhasil diambil', $stats);
+            return $this->success($stats, 'Statistik berhasil diambil');
 
         } catch (\Exception $e) {
             log_message('error', 'AbsensiGuruService::getMonthlyStats - ' . $e->getMessage());
@@ -341,7 +393,7 @@ class AbsensiGuruService extends BaseService
     {
         try {
             $builder = $this->absensiGuruModel
-                ->select('absensi_guru.*, guru.nama as nama_guru, guru.nip, users.email')
+                ->select('absensi_guru.*, guru.nama_lengkap as nama_guru, guru.nip, users.email')
                 ->join('guru', 'guru.id = absensi_guru.guru_id')
                 ->join('users', 'users.id = guru.user_id')
                 ->orderBy('absensi_guru.tanggal', 'DESC')
@@ -373,10 +425,10 @@ class AbsensiGuruService extends BaseService
             $data = $builder->paginate($perPage);
             $pager = $this->absensiGuruModel->pager;
 
-            return $this->success('Data berhasil diambil', [
+            return $this->success([
                 'data' => $data,
                 'pager' => $pager
-            ]);
+            ], 'Data berhasil diambil');
 
         } catch (\Exception $e) {
             log_message('error', 'AbsensiGuruService::getAllAbsensiForAdmin - ' . $e->getMessage());
@@ -394,7 +446,7 @@ class AbsensiGuruService extends BaseService
             
             // Get today's absensi
             $absensiToday = $this->absensiGuruModel
-                ->select('absensi_guru.*, guru.nama as nama_guru')
+                ->select('absensi_guru.*, guru.nama_lengkap as nama_guru')
                 ->join('guru', 'guru.id = absensi_guru.guru_id')
                 ->where('absensi_guru.tanggal', $today)
                 ->findAll();
@@ -430,7 +482,7 @@ class AbsensiGuruService extends BaseService
                 }
             }
 
-            return $this->success('Data berhasil diambil', $stats);
+            return $this->success($stats, 'Data berhasil diambil');
 
         } catch (\Exception $e) {
             log_message('error', 'AbsensiGuruService::getTodaySummary - ' . $e->getMessage());
@@ -466,7 +518,7 @@ class AbsensiGuruService extends BaseService
             }
 
             if ($this->absensiGuruModel->update($absensiId, $updateData)) {
-                return $this->success('Status berhasil diupdate');
+                return $this->success(null, 'Status berhasil diupdate');
             }
 
             return $this->error('Gagal mengupdate status');
@@ -484,11 +536,11 @@ class AbsensiGuruService extends BaseService
     {
         try {
             $builder = $this->absensiGuruModel
-                ->select('absensi_guru.*, guru.nama as nama_guru, guru.nip, users.email')
+                ->select('absensi_guru.*, guru.nama_lengkap as nama_guru, guru.nip, users.email')
                 ->join('guru', 'guru.id = absensi_guru.guru_id')
                 ->join('users', 'users.id = guru.user_id')
                 ->orderBy('absensi_guru.tanggal', 'ASC')
-                ->orderBy('guru.nama', 'ASC');
+                ->orderBy('guru.nama_lengkap', 'ASC');
 
             // Apply filters
             if (!empty($filters['tanggal_mulai'])) {
@@ -517,7 +569,7 @@ class AbsensiGuruService extends BaseService
 
             $data = $builder->findAll();
 
-            return $this->success('Laporan berhasil digenerate', $data);
+            return $this->success($data, 'Laporan berhasil digenerate');
 
         } catch (\Exception $e) {
             log_message('error', 'AbsensiGuruService::generateLaporan - ' . $e->getMessage());

@@ -10,6 +10,7 @@ use App\Models\JurnalKbmModel;
 use App\Models\IzinSiswaModel;
 use App\Models\KelasModel;
 use App\Models\MataPelajaranModel;
+use App\Models\AbsensiGuruModel;
 
 class DashboardController extends BaseController
 {
@@ -20,6 +21,7 @@ class DashboardController extends BaseController
     protected $izinModel;
     protected $kelasModel;
     protected $mapelModel;
+    protected $absensiGuruModel;
     protected $session;
 
     public function __construct()
@@ -31,6 +33,7 @@ class DashboardController extends BaseController
         $this->izinModel = new IzinSiswaModel();
         $this->kelasModel = new KelasModel();
         $this->mapelModel = new MataPelajaranModel();
+        $this->absensiGuruModel = new AbsensiGuruModel();
         $this->session = session();
         
         // Note: Auth check removed - handled by AuthFilter and RoleFilter
@@ -68,6 +71,7 @@ class DashboardController extends BaseController
             'chartData' => $this->getChartData($guruId),
             'quickActions' => $this->getQuickActions($guru),
             'mapel' => $this->getMataPelajaran($guruId),
+            'absensiGuruToday' => $this->getAbsensiGuruToday($guruId),
         ];
 
         return view('guru/dashboard', $data);
@@ -374,5 +378,17 @@ class DashboardController extends BaseController
             ->groupBy('kelas.id')
             ->orderBy('kelas.tingkat, kelas.nama_kelas')
             ->findAll();
+    }
+
+    /**
+     * Get today's absensi guru status
+     */
+    private function getAbsensiGuruToday($guruId)
+    {
+        $today = date('Y-m-d');
+        return $this->absensiGuruModel
+            ->where('guru_id', $guruId)
+            ->where('tanggal', $today)
+            ->first();
     }
 }

@@ -243,7 +243,7 @@
 
 <!-- Check-In Modal -->
 <div class="modal fade" id="checkInModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title"><i class="fas fa-sign-in-alt"></i> Check-In</h5>
@@ -251,11 +251,57 @@
             </div>
             <form id="checkInForm" enctype="multipart/form-data">
                 <div class="modal-body">
+                    <!-- Camera Section -->
                     <div class="mb-3">
-                        <label class="form-label">Foto <span class="text-danger">*</span></label>
-                        <input type="file" class="form-control" name="foto" id="fotoCheckIn" accept="image/*" capture="user" required>
-                        <small class="text-muted">Upload foto selfie untuk check-in</small>
+                        <label class="form-label">Foto Selfie <span class="text-danger">*</span></label>
+                        
+                        <!-- Camera/Upload Toggle -->
+                        <div class="btn-group w-100 mb-3" role="group">
+                            <input type="radio" class="btn-check" name="photoMethodCheckIn" id="cameraCheckIn" checked>
+                            <label class="btn btn-outline-primary py-2 py-sm-1" for="cameraCheckIn">
+                                <i class="fas fa-camera"></i> <span class="d-none d-sm-inline">Ambil</span> Foto
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="photoMethodCheckIn" id="uploadCheckIn">
+                            <label class="btn btn-outline-primary py-2 py-sm-1" for="uploadCheckIn">
+                                <i class="fas fa-upload"></i> Upload<span class="d-none d-sm-inline"> File</span>
+                            </label>
+                        </div>
+
+                        <!-- Camera Interface -->
+                        <div id="cameraContainerCheckIn" class="camera-container">
+                            <div class="position-relative bg-dark rounded" style="min-height: 300px;">
+                                <video id="videoCheckIn" class="w-100 rounded" autoplay playsinline style="display: none;"></video>
+                                <canvas id="canvasCheckIn" class="w-100 rounded" style="display: none;"></canvas>
+                                <div id="cameraPlaceholderCheckIn" class="d-flex align-items-center justify-content-center h-100 text-white" style="min-height: 300px;">
+                                    <div class="text-center">
+                                        <i class="fas fa-camera fa-3x mb-3"></i>
+                                        <p>Klik tombol untuk mengaktifkan kamera</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-2 d-grid gap-2 d-sm-flex">
+                                <button type="button" class="btn btn-success flex-sm-fill" id="startCameraCheckIn">
+                                    <i class="fas fa-video"></i> <span class="d-none d-sm-inline">Aktifkan</span> Kamera
+                                </button>
+                                <button type="button" class="btn btn-primary flex-sm-fill" id="captureCheckIn" style="display: none;">
+                                    <i class="fas fa-camera"></i> Ambil Foto
+                                </button>
+                                <button type="button" class="btn btn-warning flex-sm-fill" id="retakeCheckIn" style="display: none;">
+                                    <i class="fas fa-redo"></i> Ulangi
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- File Upload Interface -->
+                        <div id="uploadContainerCheckIn" class="upload-container" style="display: none;">
+                            <input type="file" class="form-control" id="fotoCheckIn" name="foto" accept="image/*" capture="user">
+                            <small class="text-muted">Upload foto selfie untuk check-in</small>
+                        </div>
+
+                        <input type="hidden" name="foto_base64" id="fotoBase64CheckIn">
                     </div>
+
                     <div class="mb-3">
                         <label class="form-label">Keterangan (Opsional)</label>
                         <textarea class="form-control" name="keterangan_masuk" rows="3"></textarea>
@@ -263,9 +309,9 @@
                     <input type="hidden" name="latitude" id="latitudeCheckIn">
                     <input type="hidden" name="longitude" id="longitudeCheckIn">
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary" id="btnSubmitCheckIn">
+                <div class="modal-footer flex-column flex-sm-row">
+                    <button type="button" class="btn btn-secondary w-100 w-sm-auto mb-2 mb-sm-0" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary w-100 w-sm-auto" id="btnSubmitCheckIn">
                         <i class="fas fa-save"></i> Submit Check-In
                     </button>
                 </div>
@@ -276,7 +322,7 @@
 
 <!-- Check-Out Modal -->
 <div class="modal fade" id="checkOutModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
                 <h5 class="modal-title"><i class="fas fa-sign-out-alt"></i> Check-Out</h5>
@@ -284,11 +330,57 @@
             </div>
             <form id="checkOutForm" enctype="multipart/form-data">
                 <div class="modal-body">
+                    <!-- Camera Section -->
                     <div class="mb-3">
-                        <label class="form-label">Foto (Opsional)</label>
-                        <input type="file" class="form-control" name="foto" id="fotoCheckOut" accept="image/*" capture="user">
-                        <small class="text-muted">Upload foto untuk check-out (opsional)</small>
+                        <label class="form-label">Foto Selfie (Opsional)</label>
+                        
+                        <!-- Camera/Upload Toggle -->
+                        <div class="btn-group w-100 mb-3" role="group">
+                            <input type="radio" class="btn-check" name="photoMethodCheckOut" id="cameraCheckOut" checked>
+                            <label class="btn btn-outline-info py-2 py-sm-1" for="cameraCheckOut">
+                                <i class="fas fa-camera"></i> <span class="d-none d-sm-inline">Ambil</span> Foto
+                            </label>
+                            
+                            <input type="radio" class="btn-check" name="photoMethodCheckOut" id="uploadCheckOut">
+                            <label class="btn btn-outline-info py-2 py-sm-1" for="uploadCheckOut">
+                                <i class="fas fa-upload"></i> Upload<span class="d-none d-sm-inline"> File</span>
+                            </label>
+                        </div>
+
+                        <!-- Camera Interface -->
+                        <div id="cameraContainerCheckOut" class="camera-container">
+                            <div class="position-relative bg-dark rounded" style="min-height: 300px;">
+                                <video id="videoCheckOut" class="w-100 rounded" autoplay playsinline style="display: none;"></video>
+                                <canvas id="canvasCheckOut" class="w-100 rounded" style="display: none;"></canvas>
+                                <div id="cameraPlaceholderCheckOut" class="d-flex align-items-center justify-content-center h-100 text-white" style="min-height: 300px;">
+                                    <div class="text-center">
+                                        <i class="fas fa-camera fa-3x mb-3"></i>
+                                        <p>Klik tombol untuk mengaktifkan kamera</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-2 d-grid gap-2 d-sm-flex">
+                                <button type="button" class="btn btn-success flex-sm-fill" id="startCameraCheckOut">
+                                    <i class="fas fa-video"></i> <span class="d-none d-sm-inline">Aktifkan</span> Kamera
+                                </button>
+                                <button type="button" class="btn btn-info flex-sm-fill" id="captureCheckOut" style="display: none;">
+                                    <i class="fas fa-camera"></i> Ambil Foto
+                                </button>
+                                <button type="button" class="btn btn-warning flex-sm-fill" id="retakeCheckOut" style="display: none;">
+                                    <i class="fas fa-redo"></i> Ulangi
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- File Upload Interface -->
+                        <div id="uploadContainerCheckOut" class="upload-container" style="display: none;">
+                            <input type="file" class="form-control" id="fotoCheckOut" name="foto" accept="image/*" capture="user">
+                            <small class="text-muted">Upload foto untuk check-out (opsional)</small>
+                        </div>
+
+                        <input type="hidden" name="foto_base64" id="fotoBase64CheckOut">
                     </div>
+
                     <div class="mb-3">
                         <label class="form-label">Keterangan (Opsional)</label>
                         <textarea class="form-control" name="keterangan_keluar" rows="3"></textarea>
@@ -296,9 +388,9 @@
                     <input type="hidden" name="latitude" id="latitudeCheckOut">
                     <input type="hidden" name="longitude" id="longitudeCheckOut">
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-info" id="btnSubmitCheckOut">
+                <div class="modal-footer flex-column flex-sm-row">
+                    <button type="button" class="btn btn-secondary w-100 w-sm-auto mb-2 mb-sm-0" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-info w-100 w-sm-auto" id="btnSubmitCheckOut">
                         <i class="fas fa-save"></i> Submit Check-Out
                     </button>
                 </div>
@@ -323,6 +415,151 @@
 </div>
 
 <script>
+// Camera handling class
+class CameraHandler {
+    constructor(prefix) {
+        this.prefix = prefix;
+        this.video = document.getElementById(`video${prefix}`);
+        this.canvas = document.getElementById(`canvas${prefix}`);
+        this.placeholder = document.getElementById(`cameraPlaceholder${prefix}`);
+        this.startBtn = document.getElementById(`startCamera${prefix}`);
+        this.captureBtn = document.getElementById(`capture${prefix}`);
+        this.retakeBtn = document.getElementById(`retake${prefix}`);
+        this.base64Input = document.getElementById(`fotoBase64${prefix}`);
+        this.stream = null;
+        this.photoTaken = false;
+        
+        this.initEventListeners();
+    }
+    
+    initEventListeners() {
+        this.startBtn?.addEventListener('click', () => this.startCamera());
+        this.captureBtn?.addEventListener('click', () => this.capturePhoto());
+        this.retakeBtn?.addEventListener('click', () => this.retakePhoto());
+    }
+    
+    async startCamera() {
+        try {
+            this.stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: 'user',
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                } 
+            });
+            
+            this.video.srcObject = this.stream;
+            this.video.style.display = 'block';
+            this.placeholder.style.display = 'none';
+            this.startBtn.style.display = 'none';
+            this.captureBtn.style.display = 'block';
+            
+        } catch (error) {
+            console.error('Error accessing camera:', error);
+            alert('Tidak dapat mengakses kamera. Pastikan Anda memberikan izin kamera.');
+        }
+    }
+    
+    capturePhoto() {
+        // Set canvas size to match video
+        this.canvas.width = this.video.videoWidth;
+        this.canvas.height = this.video.videoHeight;
+        
+        // Draw video frame to canvas
+        const context = this.canvas.getContext('2d');
+        context.drawImage(this.video, 0, 0);
+        
+        // Get base64 image
+        const imageData = this.canvas.toDataURL('image/jpeg', 0.8);
+        this.base64Input.value = imageData;
+        
+        // Stop camera stream
+        this.stopCamera();
+        
+        // Show captured image
+        this.canvas.style.display = 'block';
+        this.video.style.display = 'none';
+        this.captureBtn.style.display = 'none';
+        this.retakeBtn.style.display = 'block';
+        
+        this.photoTaken = true;
+    }
+    
+    retakePhoto() {
+        this.canvas.style.display = 'none';
+        this.base64Input.value = '';
+        this.photoTaken = false;
+        this.startCamera();
+    }
+    
+    stopCamera() {
+        if (this.stream) {
+            this.stream.getTracks().forEach(track => track.stop());
+            this.stream = null;
+        }
+    }
+    
+    reset() {
+        this.stopCamera();
+        this.video.style.display = 'none';
+        this.canvas.style.display = 'none';
+        this.placeholder.style.display = 'flex';
+        this.startBtn.style.display = 'block';
+        this.captureBtn.style.display = 'none';
+        this.retakeBtn.style.display = 'none';
+        this.base64Input.value = '';
+        this.photoTaken = false;
+    }
+    
+    hasPhoto() {
+        return this.photoTaken || this.base64Input.value !== '';
+    }
+}
+
+// Initialize camera handlers
+const cameraCheckIn = new CameraHandler('CheckIn');
+const cameraCheckOut = new CameraHandler('CheckOut');
+
+// Toggle between camera and file upload
+document.getElementById('cameraCheckIn')?.addEventListener('change', function() {
+    if (this.checked) {
+        document.getElementById('cameraContainerCheckIn').style.display = 'block';
+        document.getElementById('uploadContainerCheckIn').style.display = 'none';
+    }
+});
+
+document.getElementById('uploadCheckIn')?.addEventListener('change', function() {
+    if (this.checked) {
+        document.getElementById('cameraContainerCheckIn').style.display = 'none';
+        document.getElementById('uploadContainerCheckIn').style.display = 'block';
+        cameraCheckIn.reset();
+    }
+});
+
+document.getElementById('cameraCheckOut')?.addEventListener('change', function() {
+    if (this.checked) {
+        document.getElementById('cameraContainerCheckOut').style.display = 'block';
+        document.getElementById('uploadContainerCheckOut').style.display = 'none';
+    }
+});
+
+document.getElementById('uploadCheckOut')?.addEventListener('change', function() {
+    if (this.checked) {
+        document.getElementById('cameraContainerCheckOut').style.display = 'none';
+        document.getElementById('uploadContainerCheckOut').style.display = 'block';
+        cameraCheckOut.reset();
+    }
+});
+
+// Clean up camera on modal close
+document.getElementById('checkInModal')?.addEventListener('hidden.bs.modal', function() {
+    cameraCheckIn.reset();
+});
+
+document.getElementById('checkOutModal')?.addEventListener('hidden.bs.modal', function() {
+    cameraCheckOut.reset();
+});
+
 document.addEventListener('DOMContentLoaded', function() {
     const checkInModal = new bootstrap.Modal(document.getElementById('checkInModal'));
     const checkOutModal = new bootstrap.Modal(document.getElementById('checkOutModal'));
@@ -349,6 +586,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check-In Form Submit
     document.getElementById('checkInForm').addEventListener('submit', function(e) {
         e.preventDefault();
+        
+        // Validate photo
+        const usingCamera = document.getElementById('cameraCheckIn').checked;
+        const usingUpload = document.getElementById('uploadCheckIn').checked;
+        
+        if (usingCamera && !cameraCheckIn.hasPhoto()) {
+            alert('Silakan ambil foto selfie terlebih dahulu');
+            return;
+        }
+        
+        if (usingUpload && !document.getElementById('fotoCheckIn').files.length) {
+            alert('Silakan pilih file foto terlebih dahulu');
+            return;
+        }
+        
         const formData = new FormData(this);
         submitAbsensi('check-in', formData);
     });
@@ -422,5 +674,115 @@ function showImage(url) {
     imageModal.show();
 }
 </script>
+
+<style>
+/* Mobile Responsive Improvements */
+@media (max-width: 575.98px) {
+    /* Reduce camera container height on mobile */
+    #cameraPlaceholderCheckIn,
+    #cameraPlaceholderCheckOut {
+        min-height: 200px !important;
+    }
+    
+    /* Full width buttons on mobile */
+    .modal-footer button {
+        font-size: 0.95rem;
+        padding: 0.6rem 1rem;
+    }
+    
+    /* Larger touch targets */
+    .btn-group label {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Stack camera buttons vertically on small screens */
+    .d-grid.gap-2 {
+        row-gap: 0.5rem;
+    }
+    
+    /* Better spacing for camera buttons */
+    .d-grid button {
+        padding: 0.65rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Adjust video and canvas for mobile */
+    #videoCheckIn, #canvasCheckIn,
+    #videoCheckOut, #canvasCheckOut {
+        max-height: 300px;
+        object-fit: cover;
+    }
+    
+    /* Modal title adjustment */
+    .modal-title {
+        font-size: 1.1rem;
+    }
+    
+    /* Form labels */
+    .form-label {
+        font-size: 0.95rem;
+        margin-bottom: 0.4rem;
+    }
+    
+    /* Textarea adjustment */
+    textarea.form-control {
+        font-size: 0.9rem;
+    }
+}
+
+@media (min-width: 576px) {
+    /* Desktop gap between buttons */
+    .d-sm-flex {
+        gap: 0.5rem;
+    }
+}
+
+/* Camera container improvements */
+.camera-container {
+    position: relative;
+}
+
+.camera-container video,
+.camera-container canvas {
+    border-radius: 0.375rem;
+    background: #000;
+}
+
+/* Touch-friendly button sizing */
+.btn-group label {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-group label:active {
+    transform: scale(0.98);
+}
+
+/* Modal fullscreen improvements */
+@media (max-width: 575.98px) {
+    .modal-fullscreen-sm-down .modal-body {
+        padding: 1rem;
+    }
+    
+    .modal-fullscreen-sm-down .modal-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    .modal-fullscreen-sm-down .modal-footer {
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* Spinner animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.fa-spinner.fa-spin {
+    animation: spin 1s linear infinite;
+}
+</style>
 
 <?= $this->endSection() ?>

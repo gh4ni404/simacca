@@ -75,6 +75,88 @@
         ); ?>
     </div>
 
+    <!-- Absensi Guru Widget - Mobile -->
+    <div class="mb-4 mx-4 bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-3">
+            <h3 class="text-sm font-semibold text-white flex items-center">
+                <i class="fas fa-user-check mr-2"></i>
+                Absensi Guru Hari Ini
+            </h3>
+        </div>
+        <div class="p-4">
+            <?php if ($absensiGuruToday): ?>
+                <div class="space-y-3">
+                    <!-- Check In Status -->
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-600 mb-1">Check In</p>
+                                <p class="text-xl font-bold text-green-600">
+                                    <?= $absensiGuruToday['jam_masuk'] ? date('H:i', strtotime($absensiGuruToday['jam_masuk'])) : '-'; ?>
+                                </p>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    <?= $absensiGuruToday['status_kehadiran'] === 'hadir' ? 'Tepat waktu' : ucfirst($absensiGuruToday['status_kehadiran']); ?>
+                                </p>
+                            </div>
+                            <i class="fas fa-sign-in-alt text-2xl text-green-400"></i>
+                        </div>
+                    </div>
+
+                    <!-- Check Out Status -->
+                    <div class="bg-<?= $absensiGuruToday['jam_keluar'] ? 'blue' : 'gray'; ?>-50 border border-<?= $absensiGuruToday['jam_keluar'] ? 'blue' : 'gray'; ?>-200 rounded-lg p-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-600 mb-1">Check Out</p>
+                                <p class="text-xl font-bold text-<?= $absensiGuruToday['jam_keluar'] ? 'blue' : 'gray'; ?>-600">
+                                    <?= $absensiGuruToday['jam_keluar'] ? date('H:i', strtotime($absensiGuruToday['jam_keluar'])) : 'Belum'; ?>
+                                </p>
+                                <?php if ($absensiGuruToday['jam_keluar']): ?>
+                                    <?php
+                                    $jamMasuk = strtotime($absensiGuruToday['jam_masuk']);
+                                    $jamKeluar = strtotime($absensiGuruToday['jam_keluar']);
+                                    $durasi = ($jamKeluar - $jamMasuk) / 3600;
+                                    ?>
+                                    <p class="text-xs text-gray-500 mt-1">Durasi: <?= number_format($durasi, 1); ?> jam</p>
+                                <?php else: ?>
+                                    <p class="text-xs text-gray-500 mt-1">Sedang bertugas</p>
+                                <?php endif; ?>
+                            </div>
+                            <i class="fas fa-sign-out-alt text-2xl text-<?= $absensiGuruToday['jam_keluar'] ? 'blue' : 'gray'; ?>-400"></i>
+                        </div>
+                    </div>
+
+                    <!-- Action Button -->
+                    <div class="text-center">
+                        <?php if (!$absensiGuruToday['jam_keluar']): ?>
+                            <a href="<?= base_url('guru/absensi-guru'); ?>" 
+                               class="block bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white px-4 py-3 rounded-lg font-semibold transition-colors">
+                                <i class="fas fa-sign-out-alt mr-2"></i>
+                                Check Out Sekarang
+                            </a>
+                        <?php else: ?>
+                            <a href="<?= base_url('guru/absensi-guru'); ?>" 
+                               class="block bg-gray-500 hover:bg-gray-600 active:bg-gray-700 text-white px-4 py-3 rounded-lg font-semibold transition-colors">
+                                <i class="fas fa-history mr-2"></i>
+                                Lihat Riwayat
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php else: ?>
+                <div class="text-center py-6">
+                    <i class="fas fa-calendar-times text-5xl text-gray-300 mb-3"></i>
+                    <h4 class="text-base font-semibold text-gray-700 mb-2">Belum Check In</h4>
+                    <p class="text-sm text-gray-500 mb-4">Lakukan check in untuk mencatat kehadiran</p>
+                    <a href="<?= base_url('guru/absensi-guru'); ?>" 
+                       class="block bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        Check In Sekarang
+                    </a>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
     <!-- Quick Actions - Horizontal Scroll -->
     <div class="mb-4">
         <div class="flex items-center justify-between px-4 mb-3">
