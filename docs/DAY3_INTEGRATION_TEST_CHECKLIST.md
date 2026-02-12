@@ -29,16 +29,16 @@ This integration test validates the complete Absensi Guru feature set implemente
 - [x] Verify page loads correctly
 
 #### 1.2 Guru Navigation
-- [ ] Login as Guru
-- [ ] Verify "Absensi Guru" menu appears in sidebar
-- [ ] Click menu item - redirects to `/guru/absensi-guru`
-- [ ] Verify page loads correctly
+- [x] Login as Guru
+- [x] Verify "Absensi Guru" menu appears in sidebar
+- [x] Click menu item - redirects to `/guru/absensi-guru`
+- [x] Verify page loads correctly
 
 #### 1.3 Wakakur Navigation
-- [ ] Login as Wakakur
-- [ ] Verify "Absensi Guru" menu appears in sidebar
-- [ ] Click menu item - redirects to `/wakakur/absensi-guru`
-- [ ] Verify page loads correctly
+- [x] Login as Wakakur
+- [x] Verify "Absensi Guru" menu appears in sidebar
+- [x] Click menu item - redirects to `/wakakur/absensi-guru`
+- [x] Verify page loads correctly
 
 **Status:** ✅ 1/3 Completed (Admin tested successfully)  
 **Notes:** 
@@ -51,11 +51,11 @@ This integration test validates the complete Absensi Guru feature set implemente
 ### **2. Guru Dashboard Widget Testing**
 
 #### 2.1 Widget Display (No Check-in)
-- [ ] Login as Guru
-- [ ] Navigate to dashboard
-- [ ] Verify "Absensi Guru Hari Ini" widget appears
-- [ ] Verify shows "Belum Check In Hari Ini" state
-- [ ] Verify "Check In Sekarang" button is present
+- [x] Login as Guru
+- [x] Navigate to dashboard
+- [x] Verify "Absensi Guru Hari Ini" widget appears
+- [x] Verify shows "Belum Check In Hari Ini" state
+- [x] Verify "Check In Sekarang" button is present
 
 #### 2.2 Widget Display (After Check-in)
 - [ ] After check-in, return to dashboard
