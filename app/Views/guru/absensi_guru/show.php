@@ -61,7 +61,7 @@
                                     <div class="mb-3">
                                         <strong>Waktu:</strong>
                                         <p class="h4 text-success">
-                                            <?= $absensi['jam_masuk'] ? date('H:i:s', strtotime($absensi['jam_masuk'])) : '-' ?>
+                                            <?= $absensi['check_in'] ? date('H:i:s', strtotime($absensi['check_in'])) : '-' ?>
                                         </p>
                                     </div>
 
@@ -90,17 +90,17 @@
                         </div>
 
                         <div class="col-md-6 mb-4">
-                            <div class="card border-<?= $absensi['jam_keluar'] ? 'info' : 'secondary' ?>">
+                            <div class="card border-<?= $absensi['check_out'] ? 'info' : 'secondary' ?>">
                                 <div class="card-body">
-                                    <h6 class="text-<?= $absensi['jam_keluar'] ? 'info' : 'muted' ?> mb-3">
+                                    <h6 class="text-<?= $absensi['check_out'] ? 'info' : 'muted' ?> mb-3">
                                         <i class="fas fa-sign-out-alt"></i> Check-Out
                                     </h6>
                                     
                                     <div class="mb-3">
                                         <strong>Waktu:</strong>
-                                        <?php if ($absensi['jam_keluar']): ?>
+                                        <?php if ($absensi['check_out']): ?>
                                             <p class="h4 text-info">
-                                                <?= date('H:i:s', strtotime($absensi['jam_keluar'])) ?>
+                                                <?= date('H:i:s', strtotime($absensi['check_out'])) ?>
                                             </p>
                                         <?php else: ?>
                                             <p class="text-muted">Belum check-out</p>
@@ -132,14 +132,14 @@
                         </div>
                     </div>
 
-                    <?php if ($absensi['jam_masuk'] && $absensi['jam_keluar']): ?>
+                    <?php if ($absensi['check_in'] && $absensi['check_out']): ?>
                         <hr>
                         <div class="row">
                             <div class="col-md-12">
                                 <h6 class="text-muted mb-2">Durasi Kerja</h6>
                                 <?php
-                                $masuk = strtotime($absensi['jam_masuk']);
-                                $keluar = strtotime($absensi['jam_keluar']);
+                                $masuk = strtotime($absensi['check_in']);
+                                $keluar = strtotime($absensi['check_out']);
                                 $diff = $keluar - $masuk;
                                 $hours = floor($diff / 3600);
                                 $minutes = floor(($diff % 3600) / 60);
@@ -157,7 +157,7 @@
         <!-- Photo Cards -->
         <div class="col-lg-4 mb-4">
             <!-- Check-In Photo -->
-            <?php if ($absensi['foto_masuk']): ?>
+            <?php if ($absensi['foto_check_in']): ?>
                 <div class="card shadow mb-4">
                     <div class="card-header py-3 bg-success text-white">
                         <h6 class="m-0 font-weight-bold">
@@ -165,14 +165,14 @@
                         </h6>
                     </div>
                     <div class="card-body text-center">
-                        <img src="<?= base_url('writable/' . $absensi['foto_masuk']) ?>" 
+                        <img src="<?= base_url('writable/' . $absensi['foto_check_in']) ?>" 
                              class="img-fluid rounded" 
                              alt="Foto Check-In"
                              style="max-height: 300px; cursor: pointer;"
-                             onclick="showImage('<?= base_url('writable/' . $absensi['foto_masuk']) ?>')">
+                             onclick="showImage('<?= base_url('writable/' . $absensi['foto_check_in']) ?>')">
                         <p class="mt-2 mb-0">
                             <small class="text-muted">
-                                <?= $absensi['jam_masuk'] ? date('H:i:s', strtotime($absensi['jam_masuk'])) : '' ?>
+                                <?= $absensi['check_in'] ? date('H:i:s', strtotime($absensi['check_in'])) : '' ?>
                             </small>
                         </p>
                     </div>
@@ -180,7 +180,7 @@
             <?php endif; ?>
 
             <!-- Check-Out Photo -->
-            <?php if ($absensi['foto_keluar']): ?>
+            <?php if ($absensi['foto_check_out']): ?>
                 <div class="card shadow mb-4">
                     <div class="card-header py-3 bg-info text-white">
                         <h6 class="m-0 font-weight-bold">
@@ -188,14 +188,14 @@
                         </h6>
                     </div>
                     <div class="card-body text-center">
-                        <img src="<?= base_url('writable/' . $absensi['foto_keluar']) ?>" 
+                        <img src="<?= base_url('writable/' . $absensi['foto_check_out']) ?>" 
                              class="img-fluid rounded" 
                              alt="Foto Check-Out"
                              style="max-height: 300px; cursor: pointer;"
-                             onclick="showImage('<?= base_url('writable/' . $absensi['foto_keluar']) ?>')">
+                             onclick="showImage('<?= base_url('writable/' . $absensi['foto_check_out']) ?>')">
                         <p class="mt-2 mb-0">
                             <small class="text-muted">
-                                <?= $absensi['jam_keluar'] ? date('H:i:s', strtotime($absensi['jam_keluar'])) : '' ?>
+                                <?= $absensi['check_out'] ? date('H:i:s', strtotime($absensi['check_out'])) : '' ?>
                             </small>
                         </p>
                     </div>

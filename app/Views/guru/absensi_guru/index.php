@@ -11,16 +11,16 @@
     </div>
 
     <?php if (session()->getFlashdata('success')): ?>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <div class="alert alert-success alert-dismissible fade show" role="alert" id="successAlert">
             <i class="fas fa-check-circle"></i> <?= session()->getFlashdata('success') ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close" onclick="this.parentElement.style.display='none'"></button>
         </div>
     <?php endif; ?>
 
     <?php if (session()->getFlashdata('error')): ?>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" id="errorAlert">
             <i class="fas fa-exclamation-circle"></i> <?= session()->getFlashdata('error') ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close" onclick="this.parentElement.style.display='none'"></button>
         </div>
     <?php endif; ?>
 
@@ -42,13 +42,13 @@
                                 <div class="card border-success">
                                     <div class="card-body">
                                         <h6 class="text-success"><i class="fas fa-sign-in-alt"></i> Check-In</h6>
-                                        <p class="h3 mb-2"><?= date('H:i', strtotime($todayAbsensi['jam_masuk'])) ?></p>
+                                        <p class="h3 mb-2"><?= date('H:i', strtotime($todayAbsensi['check_in'])) ?></p>
                                         <span class="badge bg-<?= $todayAbsensi['status'] == 'hadir' ? 'success' : 'warning' ?>">
                                             <?= ucfirst($todayAbsensi['status']) ?>
                                         </span>
-                                        <?php if ($todayAbsensi['foto_masuk']): ?>
+                                        <?php if ($todayAbsensi['foto_check_in']): ?>
                                             <button type="button" class="btn btn-sm btn-outline-primary mt-2" 
-                                                    onclick="showImage('<?= base_url('writable/' . $todayAbsensi['foto_masuk']) ?>')">
+                                                    onclick="showImage('<?= base_url('writable/' . $todayAbsensi['foto_check_in']) ?>')">
                                                 <i class="fas fa-image"></i> Lihat Foto
                                             </button>
                                         <?php endif; ?>
@@ -62,11 +62,11 @@
                                             <i class="fas fa-sign-out-alt"></i> Check-Out
                                         </h6>
                                         <?php if ($hasCheckedOut): ?>
-                                            <p class="h3 mb-2"><?= date('H:i', strtotime($todayAbsensi['jam_keluar'])) ?></p>
+                                            <p class="h3 mb-2"><?= date('H:i', strtotime($todayAbsensi['check_out'])) ?></p>
                                             <span class="badge bg-info">Selesai</span>
-                                            <?php if ($todayAbsensi['foto_keluar']): ?>
+                                            <?php if ($todayAbsensi['foto_check_out']): ?>
                                                 <button type="button" class="btn btn-sm btn-outline-primary mt-2" 
-                                                        onclick="showImage('<?= base_url('writable/' . $todayAbsensi['foto_keluar']) ?>')">
+                                                        onclick="showImage('<?= base_url('writable/' . $todayAbsensi['foto_check_out']) ?>')">
                                                     <i class="fas fa-image"></i> Lihat Foto
                                                 </button>
                                             <?php endif; ?>
@@ -140,10 +140,10 @@
                                         <tr>
                                             <td><?= date('d/m/Y', strtotime($history['tanggal'])) ?></td>
                                             <td class="text-center">
-                                                <?= $history['jam_masuk'] ? date('H:i', strtotime($history['jam_masuk'])) : '-' ?>
+                                                <?= $history['check_in'] ? date('H:i', strtotime($history['check_in'])) : '-' ?>
                                             </td>
                                             <td class="text-center">
-                                                <?= $history['jam_keluar'] ? date('H:i', strtotime($history['jam_keluar'])) : '-' ?>
+                                                <?= $history['check_out'] ? date('H:i', strtotime($history['check_out'])) : '-' ?>
                                             </td>
                                             <td class="text-center">
                                                 <?php
@@ -228,12 +228,14 @@
                     </h6>
                 </div>
                 <div class="card-body">
-                    <p class="mb-2"><strong>Waktu Check-In:</strong> 06:00 - 07:00</p>
-                    <p class="mb-2"><strong>Batas Terlambat:</strong> 07:00</p>
-                    <p class="mb-2"><strong>Waktu Kerja:</strong> 07:00 - 16:00</p>
+                    <p class="mb-2"><strong>Waktu Check-In:</strong> 06:00 - 10:00</p>
+                    <p class="mb-2"><strong>Batas Tepat Waktu:</strong> 07:15</p>
+                    <p class="mb-2"><strong>Batas Akhir Hadir:</strong> 10:00</p>
+                    <p class="mb-2"><strong>Jam Kerja Minimum:</strong> 8 jam (480 menit)</p>
                     <hr>
                     <small class="text-muted">
-                        <i class="fas fa-lightbulb"></i> Check-in sebelum pukul 07:00 untuk status hadir tepat waktu
+                        <i class="fas fa-lightbulb"></i> <strong>Tips:</strong> Check-in sebelum 07:15 untuk status hadir tepat waktu. 
+                        Setelah 07:15 akan tercatat terlambat. Check-in setelah 10:00 akan tercatat alpha.
                     </small>
                 </div>
             </div>
@@ -242,12 +244,12 @@
 </div>
 
 <!-- Check-In Modal -->
-<div class="modal fade" id="checkInModal" tabindex="-1">
+<div class="modal fade hidden" id="checkInModal" tabindex="-1" role="dialog" data-modal-overlay="checkInModal">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
-        <div class="modal-content">
+        <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title"><i class="fas fa-sign-in-alt"></i> Check-In</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" onclick="closeModal('checkInModal'); cameraCheckIn.reset();"></button>
             </div>
             <form id="checkInForm" enctype="multipart/form-data">
                 <div class="modal-body">
@@ -310,7 +312,7 @@
                     <input type="hidden" name="longitude" id="longitudeCheckIn">
                 </div>
                 <div class="modal-footer flex-column flex-sm-row">
-                    <button type="button" class="btn btn-secondary w-100 w-sm-auto mb-2 mb-sm-0" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-secondary w-100 w-sm-auto mb-2 mb-sm-0" onclick="closeModal('checkInModal'); cameraCheckIn.reset();">Batal</button>
                     <button type="submit" class="btn btn-primary w-100 w-sm-auto" id="btnSubmitCheckIn">
                         <i class="fas fa-save"></i> Submit Check-In
                     </button>
@@ -321,12 +323,12 @@
 </div>
 
 <!-- Check-Out Modal -->
-<div class="modal fade" id="checkOutModal" tabindex="-1">
+<div class="modal fade hidden" id="checkOutModal" tabindex="-1" role="dialog" data-modal-overlay="checkOutModal">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
-        <div class="modal-content">
+        <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header bg-info text-white">
                 <h5 class="modal-title"><i class="fas fa-sign-out-alt"></i> Check-Out</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" onclick="closeModal('checkOutModal'); cameraCheckOut.reset();"></button>
             </div>
             <form id="checkOutForm" enctype="multipart/form-data">
                 <div class="modal-body">
@@ -389,7 +391,7 @@
                     <input type="hidden" name="longitude" id="longitudeCheckOut">
                 </div>
                 <div class="modal-footer flex-column flex-sm-row">
-                    <button type="button" class="btn btn-secondary w-100 w-sm-auto mb-2 mb-sm-0" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-secondary w-100 w-sm-auto mb-2 mb-sm-0" onclick="closeModal('checkOutModal'); cameraCheckOut.reset();">Batal</button>
                     <button type="submit" class="btn btn-info w-100 w-sm-auto" id="btnSubmitCheckOut">
                         <i class="fas fa-save"></i> Submit Check-Out
                     </button>
@@ -400,12 +402,12 @@
 </div>
 
 <!-- Image Preview Modal -->
-<div class="modal fade" id="imageModal" tabindex="-1">
+<div class="modal fade hidden" id="imageModal" tabindex="-1" role="dialog" data-modal-overlay="imageModal">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content">
+        <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
                 <h5 class="modal-title">Foto Absensi</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" onclick="closeModal('imageModal');"></button>
             </div>
             <div class="modal-body text-center">
                 <img id="previewImage" src="" class="img-fluid" alt="Foto Absensi">
@@ -551,26 +553,20 @@ document.getElementById('uploadCheckOut')?.addEventListener('change', function()
     }
 });
 
-// Clean up camera on modal close
-document.getElementById('checkInModal')?.addEventListener('hidden.bs.modal', function() {
-    cameraCheckIn.reset();
-});
-
-document.getElementById('checkOutModal')?.addEventListener('hidden.bs.modal', function() {
-    cameraCheckOut.reset();
-});
+// Clean up camera on modal close - handled by close button events
+// No Bootstrap modal events needed
 
 document.addEventListener('DOMContentLoaded', function() {
-    const checkInModal = new bootstrap.Modal(document.getElementById('checkInModal'));
-    const checkOutModal = new bootstrap.Modal(document.getElementById('checkOutModal'));
-    const imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
+    // Modals are now handled by the modal_scripts() helper
+    // No need to initialize Bootstrap modals
 
     // Check-In Button
     const btnCheckIn = document.getElementById('btnCheckIn');
     if (btnCheckIn) {
         btnCheckIn.addEventListener('click', function() {
             getLocation('checkIn');
-            checkInModal.show();
+            openModal('checkInModal');
+            setTimeout(() => cameraCheckIn.start(), 100);
         });
     }
 
@@ -579,7 +575,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (btnCheckOut) {
         btnCheckOut.addEventListener('click', function() {
             getLocation('checkOut');
-            checkOutModal.show();
+            openModal('checkOutModal');
+            setTimeout(() => cameraCheckOut.start(), 100);
         });
     }
 
@@ -633,6 +630,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Submit Absensi
+    // Get CSRF token from meta tag or cookie
+    function getCsrfToken() {
+        return '<?= csrf_hash() ?>';
+    }
+
     function submitAbsensi(type, formData) {
         const url = type === 'check-in' ? '<?= base_url('guru/absensi-guru/check-in') ?>' : '<?= base_url('guru/absensi-guru/check-out') ?>';
         const btn = type === 'check-in' ? document.getElementById('btnSubmitCheckIn') : document.getElementById('btnSubmitCheckOut');
@@ -644,7 +646,8 @@ document.addEventListener('DOMContentLoaded', function() {
             method: 'POST',
             body: formData,
             headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': getCsrfToken()
             }
         })
         .then(response => response.json())
@@ -670,12 +673,45 @@ document.addEventListener('DOMContentLoaded', function() {
 // Show Image
 function showImage(url) {
     document.getElementById('previewImage').src = url;
-    const imageModal = new bootstrap.Modal(document.getElementById('imageModal'));
-    imageModal.show();
+    openModal('imageModal');
 }
 </script>
 
 <style>
+    /* Modal Styles for Tailwind Integration */
+    .modal.fade {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1050;
+        align-items: center;
+        justify-content: center;
+        overflow-y: auto;
+    }
+    
+    .modal.hidden {
+        display: none !important;
+    }
+    
+    .modal-dialog {
+        max-width: 90%;
+        margin: 1.75rem auto;
+    }
+    
+    .modal-lg {
+        max-width: 800px;
+    }
+    
+    .modal-content {
+        background: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Existing Styles */
 /* Mobile Responsive Improvements */
 @media (max-width: 575.98px) {
     /* Reduce camera container height on mobile */

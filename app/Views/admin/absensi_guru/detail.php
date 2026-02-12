@@ -8,7 +8,7 @@
             <h1 class="h3 mb-0 text-gray-800">
                 <i class="fas fa-user-circle text-primary"></i> Detail Absensi Guru
             </h1>
-            <p class="text-muted mb-0"><?= esc($guru['nama']) ?> - <?= esc($guru['nip'] ?? '') ?></p>
+            <p class="text-muted mb-0"><?= esc($guru['nama_lengkap']) ?> - <?= esc($guru['nip'] ?? '') ?></p>
         </div>
         <div>
             <a href="<?= base_url('admin/absensi-guru') ?>" class="btn btn-outline-secondary">
@@ -149,10 +149,10 @@
                                     <td class="text-center"><?= $no++ ?></td>
                                     <td><?= date('d/m/Y (l)', strtotime($absensi['tanggal'])) ?></td>
                                     <td class="text-center">
-                                        <?= $absensi['jam_masuk'] ? date('H:i', strtotime($absensi['jam_masuk'])) : '-' ?>
+                                        <?= $absensi['check_in'] ? date('H:i', strtotime($absensi['check_in'])) : '-' ?>
                                     </td>
                                     <td class="text-center">
-                                        <?= $absensi['jam_keluar'] ? date('H:i', strtotime($absensi['jam_keluar'])) : '-' ?>
+                                        <?= $absensi['check_out'] ? date('H:i', strtotime($absensi['check_out'])) : '-' ?>
                                     </td>
                                     <td class="text-center">
                                         <?php

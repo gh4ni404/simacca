@@ -70,6 +70,12 @@ class AbsensiGuruService extends BaseService
     public function checkIn(int $guruId, array $data): array
     {
         try {
+            // Rate limiting: 3 attempts per 5 minutes
+            $rateLimitResult = $this->checkRateLimit($guruId, 'checkin');
+            if (!$rateLimitResult['allowed']) {
+                return $this->error($rateLimitResult['message']);
+            }
+
             // Validate guru hasn't checked in yet today
             if ($this->hasCheckedInToday($guruId)) {
                 return $this->error('Anda sudah melakukan check-in hari ini');
@@ -93,6 +99,10 @@ class AbsensiGuruService extends BaseService
             $checkIn = $data['check_in'] ?? Time::now()->toTimeString();
             $status = $this->determineStatus($checkIn);
 
+            // Get user_id from guru_id
+            $guru = $this->guruModel->find($guruId);
+            $userId = $guru['user_id'] ?? session()->get('user_id');
+
             // Prepare absensi data
             $absensiData = [
                 'guru_id' => $guruId,
@@ -103,7 +113,7 @@ class AbsensiGuruService extends BaseService
                 'latitude_check_in' => $data['latitude'] ?? null,
                 'longitude_check_in' => $data['longitude'] ?? null,
                 'status' => $status,
-                'created_by' => $guruId,
+                'created_by' => $userId,
             ];
 
             // Save to database
@@ -129,6 +139,12 @@ class AbsensiGuruService extends BaseService
     public function checkOut(int $guruId, array $data): array
     {
         try {
+            // Rate limiting: 3 attempts per 5 minutes
+            $rateLimitResult = $this->checkRateLimit($guruId, 'checkout');
+            if (!$rateLimitResult['allowed']) {
+                return $this->error($rateLimitResult['message']);
+            }
+
             // Get today's absensi record
             $absensi = $this->getTodayAbsensi($guruId);
             
@@ -215,21 +231,29 @@ class AbsensiGuruService extends BaseService
     protected function handleFotoUpload($foto, string $type, int $guruId): ?string
     {
         try {
-            // Create upload directory if not exists
-            $uploadPath = WRITEPATH . 'uploads/absensi_guru/';
+            // Create date hierarchy directory structure (YYYY/MM/DD)
+            $year = date('Y');
+            $month = date('m');
+            $day = date('d');
+            $uploadPath = WRITEPATH . "uploads/absensi_guru/{$year}/{$month}/{$day}/";
+            
             if (!is_dir($uploadPath)) {
                 mkdir($uploadPath, 0755, true);
             }
 
-            // Generate filename
-            $timestamp = Time::now()->format('YmdHis');
+            // Generate filename with simplified format
+            $timestamp = date('His'); // HourMinuteSecond only
             $extension = $foto->getExtension();
-            $filename = "guru_{$guruId}_{$type}_{$timestamp}.{$extension}";
+            $filename = "{$type}_guru{$guruId}_{$timestamp}.jpg"; // Always save as JPG
             $filepath = $uploadPath . $filename;
 
             // Move uploaded file
             if ($foto->move($uploadPath, $filename)) {
-                return 'uploads/absensi_guru/' . $filename;
+                // Optimize image using helper (max 1024px, 85% quality)
+                optimize_image($filepath, $filepath, 1024, 1024, 85);
+                
+                // Return relative path from writable/
+                return "uploads/absensi_guru/{$year}/{$month}/{$day}/{$filename}";
             }
 
             return null;
@@ -246,8 +270,12 @@ class AbsensiGuruService extends BaseService
     protected function handleBase64Image(string $base64Data, string $type, int $guruId): ?string
     {
         try {
-            // Create upload directory if not exists
-            $uploadPath = WRITEPATH . 'uploads/absensi_guru/';
+            // Create date hierarchy directory structure (YYYY/MM/DD)
+            $year = date('Y');
+            $month = date('m');
+            $day = date('d');
+            $uploadPath = WRITEPATH . "uploads/absensi_guru/{$year}/{$month}/{$day}/";
+            
             if (!is_dir($uploadPath)) {
                 mkdir($uploadPath, 0755, true);
             }
@@ -264,14 +292,18 @@ class AbsensiGuruService extends BaseService
                 return null;
             }
 
-            // Generate filename
-            $timestamp = Time::now()->format('YmdHis');
-            $filename = "guru_{$guruId}_{$type}_{$timestamp}.jpg";
+            // Generate filename with simplified format
+            $timestamp = date('His'); // HourMinuteSecond only
+            $filename = "{$type}_guru{$guruId}_{$timestamp}.jpg";
             $filepath = $uploadPath . $filename;
 
             // Save image
             if (file_put_contents($filepath, $imageData)) {
-                return 'uploads/absensi_guru/' . $filename;
+                // Optimize image using helper (max 1024px, 85% quality)
+                optimize_image($filepath, $filepath, 1024, 1024, 85);
+                
+                // Return relative path from writable/
+                return "uploads/absensi_guru/{$year}/{$month}/{$day}/{$filename}";
             }
 
             return null;
@@ -280,6 +312,47 @@ class AbsensiGuruService extends BaseService
             log_message('error', 'AbsensiGuruService::handleBase64Image - ' . $e->getMessage());
             return null;
         }
+    }
+
+    /**
+     * Check rate limit for anti-fraud protection
+     * 
+     * @param int $guruId
+     * @param string $action 'checkin' or 'checkout'
+     * @return array ['allowed' => bool, 'message' => string]
+     */
+    protected function checkRateLimit(int $guruId, string $action): array
+    {
+        $cache = \Config\Services::cache();
+        $cacheKey = "absensi_guru_ratelimit_{$action}_{$guruId}";
+        
+        // Get current attempts
+        $attempts = $cache->get($cacheKey);
+        
+        if ($attempts === null) {
+            // First attempt - set to 1 with 5 minute TTL
+            $cache->save($cacheKey, 1, 300); // 300 seconds = 5 minutes
+            return [
+                'allowed' => true,
+                'message' => ''
+            ];
+        }
+        
+        // Check if limit exceeded
+        if ($attempts >= 3) {
+            return [
+                'allowed' => false,
+                'message' => 'Terlalu banyak percobaan. Silakan tunggu 5 menit sebelum mencoba lagi.'
+            ];
+        }
+        
+        // Increment attempts
+        $cache->save($cacheKey, $attempts + 1, 300);
+        
+        return [
+            'allowed' => true,
+            'message' => ''
+        ];
     }
 
     /**
@@ -292,7 +365,7 @@ class AbsensiGuruService extends BaseService
                 ->select('absensi_guru.*')
                 ->where('guru_id', $guruId)
                 ->orderBy('tanggal', 'DESC')
-                ->orderBy('jam_masuk', 'DESC');
+                ->orderBy('check_in', 'DESC');
 
             // Apply filters
             if (!empty($filters['bulan'])) {

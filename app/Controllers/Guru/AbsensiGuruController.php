@@ -49,7 +49,7 @@ class AbsensiGuruController extends BaseController
             'recentHistory' => $recentHistory,
             'monthlyStats' => $monthlyStats,
             'hasCheckedIn' => $todayAbsensi !== null,
-            'hasCheckedOut' => $todayAbsensi !== null && $todayAbsensi['jam_keluar'] !== null,
+            'hasCheckedOut' => $todayAbsensi !== null && $todayAbsensi['check_out'] !== null,
         ];
 
         return view('guru/absensi_guru/index', $data);

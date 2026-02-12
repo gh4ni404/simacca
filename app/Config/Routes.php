@@ -191,7 +191,7 @@ $routes->group('guru', ['filter' => 'role:guru_mapel,wakakur'], function ($route
     $routes->get('jurnal/show/(:num)', 'Guru\JurnalController::show/$1');
     $routes->get('jurnal/print/(:num)', 'Guru\JurnalController::print/$1');
     $routes->get('jurnal/edit/(:num)', 'Guru\\JurnalController::edit/$1');
-    $routes->match(['post', 'put'], 'jurnal/update/(:num)', 'Guru\\JurnalController::update/$1');
+    $routes->match(['POST', 'PUT'], 'jurnal/update/(:num)', 'Guru\\JurnalController::update/$1');
     
     // Laporan Routes
     $routes->get('laporan', 'Guru\LaporanController::index', ['as' => 'guru.laporan']);

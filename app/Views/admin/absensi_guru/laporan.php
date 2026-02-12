@@ -109,7 +109,7 @@
                             <option value="">Semua Guru</option>
                             <?php foreach ($guruList as $guru): ?>
                                 <option value="<?= $guru['id'] ?>" <?= ($filters['guru_id'] ?? '') == $guru['id'] ? 'selected' : '' ?>>
-                                    <?= esc($guru['nama']) ?>
+                                    <?= esc($guru['nama_lengkap']) ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -182,10 +182,10 @@
                                     <td><?= esc($absensi['nama_guru']) ?></td>
                                     <td><?= esc($absensi['nip'] ?? '-') ?></td>
                                     <td class="text-center">
-                                        <?= $absensi['jam_masuk'] ? date('H:i', strtotime($absensi['jam_masuk'])) : '-' ?>
+                                        <?= $absensi['check_in'] ? date('H:i', strtotime($absensi['check_in'])) : '-' ?>
                                     </td>
                                     <td class="text-center">
-                                        <?= $absensi['jam_keluar'] ? date('H:i', strtotime($absensi['jam_keluar'])) : '-' ?>
+                                        <?= $absensi['check_out'] ? date('H:i', strtotime($absensi['check_out'])) : '-' ?>
                                     </td>
                                     <td class="text-center">
                                         <?php

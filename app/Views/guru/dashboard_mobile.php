@@ -92,10 +92,10 @@
                             <div>
                                 <p class="text-xs text-gray-600 mb-1">Check In</p>
                                 <p class="text-xl font-bold text-green-600">
-                                    <?= $absensiGuruToday['jam_masuk'] ? date('H:i', strtotime($absensiGuruToday['jam_masuk'])) : '-'; ?>
+                                    <?= $absensiGuruToday['check_in'] ? date('H:i', strtotime($absensiGuruToday['check_in'])) : '-'; ?>
                                 </p>
                                 <p class="text-xs text-gray-500 mt-1">
-                                    <?= $absensiGuruToday['status_kehadiran'] === 'hadir' ? 'Tepat waktu' : ucfirst($absensiGuruToday['status_kehadiran']); ?>
+                                    <?= $absensiGuruToday['status'] === 'hadir' ? 'Tepat waktu' : ucfirst($absensiGuruToday['status']); ?>
                                 </p>
                             </div>
                             <i class="fas fa-sign-in-alt text-2xl text-green-400"></i>
@@ -103,31 +103,31 @@
                     </div>
 
                     <!-- Check Out Status -->
-                    <div class="bg-<?= $absensiGuruToday['jam_keluar'] ? 'blue' : 'gray'; ?>-50 border border-<?= $absensiGuruToday['jam_keluar'] ? 'blue' : 'gray'; ?>-200 rounded-lg p-3">
+                    <div class="bg-<?= $absensiGuruToday['check_out'] ? 'blue' : 'gray'; ?>-50 border border-<?= $absensiGuruToday['check_out'] ? 'blue' : 'gray'; ?>-200 rounded-lg p-3">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-xs text-gray-600 mb-1">Check Out</p>
-                                <p class="text-xl font-bold text-<?= $absensiGuruToday['jam_keluar'] ? 'blue' : 'gray'; ?>-600">
-                                    <?= $absensiGuruToday['jam_keluar'] ? date('H:i', strtotime($absensiGuruToday['jam_keluar'])) : 'Belum'; ?>
+                                <p class="text-xl font-bold text-<?= $absensiGuruToday['check_out'] ? 'blue' : 'gray'; ?>-600">
+                                    <?= $absensiGuruToday['check_out'] ? date('H:i', strtotime($absensiGuruToday['check_out'])) : 'Belum'; ?>
                                 </p>
-                                <?php if ($absensiGuruToday['jam_keluar']): ?>
+                                <?php if ($absensiGuruToday['check_out']): ?>
                                     <?php
-                                    $jamMasuk = strtotime($absensiGuruToday['jam_masuk']);
-                                    $jamKeluar = strtotime($absensiGuruToday['jam_keluar']);
-                                    $durasi = ($jamKeluar - $jamMasuk) / 3600;
+                                    $checkIn = strtotime($absensiGuruToday['check_in']);
+                                    $checkOut = strtotime($absensiGuruToday['check_out']);
+                                    $durasi = ($checkOut - $checkIn) / 3600;
                                     ?>
                                     <p class="text-xs text-gray-500 mt-1">Durasi: <?= number_format($durasi, 1); ?> jam</p>
                                 <?php else: ?>
                                     <p class="text-xs text-gray-500 mt-1">Sedang bertugas</p>
                                 <?php endif; ?>
                             </div>
-                            <i class="fas fa-sign-out-alt text-2xl text-<?= $absensiGuruToday['jam_keluar'] ? 'blue' : 'gray'; ?>-400"></i>
+                            <i class="fas fa-sign-out-alt text-2xl text-<?= $absensiGuruToday['check_out'] ? 'blue' : 'gray'; ?>-400"></i>
                         </div>
                     </div>
 
                     <!-- Action Button -->
                     <div class="text-center">
-                        <?php if (!$absensiGuruToday['jam_keluar']): ?>
+                        <?php if (!$absensiGuruToday['check_out']): ?>
                             <a href="<?= base_url('guru/absensi-guru'); ?>" 
                                class="block bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white px-4 py-3 rounded-lg font-semibold transition-colors">
                                 <i class="fas fa-sign-out-alt mr-2"></i>

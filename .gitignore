@@ -62,6 +62,7 @@ writable/uploads/*
 !writable/uploads/izin/index.html
 !writable/uploads/index.html
 !writable/uploads/profile/index.html
+!writable/uploads/absensi_guru/
 
 writable/debugbar/*
 !writable/debugbar/index.html

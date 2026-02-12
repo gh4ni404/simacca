@@ -154,9 +154,9 @@
                             foreach ($absensiList as $absensi): 
                                 // Calculate duration
                                 $durasi = '-';
-                                if ($absensi['jam_masuk'] && $absensi['jam_keluar']) {
-                                    $masuk = strtotime($absensi['jam_masuk']);
-                                    $keluar = strtotime($absensi['jam_keluar']);
+                                if ($absensi['check_in'] && $absensi['check_out']) {
+                                    $masuk = strtotime($absensi['check_in']);
+                                    $keluar = strtotime($absensi['check_out']);
                                     $diff = $keluar - $masuk;
                                     $hours = floor($diff / 3600);
                                     $minutes = floor(($diff % 3600) / 60);
@@ -171,15 +171,15 @@
                                         <small class="text-muted"><?= date('l', strtotime($absensi['tanggal'])) ?></small>
                                     </td>
                                     <td class="text-center">
-                                        <?php if ($absensi['jam_masuk']): ?>
-                                            <span class="badge bg-success"><?= date('H:i', strtotime($absensi['jam_masuk'])) ?></span>
+                                        <?php if ($absensi['check_in']): ?>
+                                            <span class="badge bg-success"><?= date('H:i', strtotime($absensi['check_in'])) ?></span>
                                         <?php else: ?>
                                             <span class="badge bg-secondary">-</span>
                                         <?php endif; ?>
                                     </td>
                                     <td class="text-center">
-                                        <?php if ($absensi['jam_keluar']): ?>
-                                            <span class="badge bg-info"><?= date('H:i', strtotime($absensi['jam_keluar'])) ?></span>
+                                        <?php if ($absensi['check_out']): ?>
+                                            <span class="badge bg-info"><?= date('H:i', strtotime($absensi['check_out'])) ?></span>
                                         <?php else: ?>
                                             <span class="badge bg-warning">Belum</span>
                                         <?php endif; ?>

@@ -27,14 +27,14 @@
     <?php if (session()->getFlashdata('success')): ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="fas fa-check-circle"></i> <?= session()->getFlashdata('success') ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close" onclick="this.parentElement.style.display='none'"></button>
         </div>
     <?php endif; ?>
 
     <?php if (session()->getFlashdata('error')): ?>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="fas fa-exclamation-circle"></i> <?= session()->getFlashdata('error') ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close" onclick="this.parentElement.style.display='none'"></button>
         </div>
     <?php endif; ?>
 
@@ -161,7 +161,7 @@
                             <option value="">Semua Guru</option>
                             <?php foreach ($guruList as $guru): ?>
                                 <option value="<?= $guru['id'] ?>" <?= ($filters['guru_id'] ?? '') == $guru['id'] ? 'selected' : '' ?>>
-                                    <?= esc($guru['nama']) ?>
+                                    <?= esc($guru['nama_lengkap']) ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -235,15 +235,15 @@
                                     <td><?= esc($absensi['nip'] ?? '-') ?></td>
                                     <td class="text-center"><?= date('d/m/Y', strtotime($absensi['tanggal'])) ?></td>
                                     <td class="text-center">
-                                        <?php if ($absensi['jam_masuk']): ?>
-                                            <span class="badge bg-success"><?= date('H:i', strtotime($absensi['jam_masuk'])) ?></span>
+                                        <?php if ($absensi['check_in']): ?>
+                                            <span class="badge bg-success"><?= date('H:i', strtotime($absensi['check_in'])) ?></span>
                                         <?php else: ?>
                                             <span class="badge bg-secondary">-</span>
                                         <?php endif; ?>
                                     </td>
                                     <td class="text-center">
-                                        <?php if ($absensi['jam_keluar']): ?>
-                                            <span class="badge bg-info"><?= date('H:i', strtotime($absensi['jam_keluar'])) ?></span>
+                                        <?php if ($absensi['check_out']): ?>
+                                            <span class="badge bg-info"><?= date('H:i', strtotime($absensi['check_out'])) ?></span>
                                         <?php else: ?>
                                             <span class="badge bg-warning">Belum</span>
                                         <?php endif; ?>
@@ -290,12 +290,12 @@
 </div>
 
 <!-- Update Status Modal -->
-<div class="modal fade" id="updateStatusModal" tabindex="-1">
+<div class="modal fade hidden" id="updateStatusModal" tabindex="-1" role="dialog" data-modal-overlay="updateStatusModal">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
                 <h5 class="modal-title">Update Status Absensi</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" onclick="closeModal('updateStatusModal')"></button>
             </div>
             <div class="modal-body">
                 <form id="updateStatusForm">
@@ -317,7 +317,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('updateStatusModal')">Batal</button>
                 <button type="button" class="btn btn-primary" id="btnSaveStatus">Simpan</button>
             </div>
         </div>
@@ -568,12 +568,12 @@ function updateTable(absensiList) {
             <td class="text-center">${index + 1}</td>
             <td>${absensi.guru_nama || '-'}</td>
             <td class="text-center">${absensi.tanggal || '-'}</td>
-            <td class="text-center">${absensi.jam_masuk || '-'}</td>
-            <td class="text-center">${absensi.jam_keluar || '-'}</td>
+            <td class="text-center">${absensi.check_in || '-'}</td>
+            <td class="text-center">${absensi.check_out || '-'}</td>
             <td>${absensi.keterangan || '-'}</td>
             <td class="text-center">
-                <span class="badge bg-${badgeClass[absensi.status_kehadiran] || 'secondary'}">
-                    ${absensi.status_kehadiran ? absensi.status_kehadiran.charAt(0).toUpperCase() + absensi.status_kehadiran.slice(1) : '-'}
+                <span class="badge bg-${badgeClass[absensi.status] || 'secondary'}">
+                    ${absensi.status ? absensi.status.charAt(0).toUpperCase() + absensi.status.slice(1) : '-'}
                 </span>
             </td>
             <td class="text-center">
@@ -583,7 +583,7 @@ function updateTable(absensiList) {
                 </a>
                 <button type="button" class="btn btn-sm btn-warning btn-update-status" 
                         data-id="${absensi.id}"
-                        data-status="${absensi.status_kehadiran}"
+                        data-status="${absensi.status}"
                         title="Update Status">
                     <i class="fas fa-edit"></i>
                 </button>
@@ -604,8 +604,7 @@ function attachUpdateButtonListeners() {
             document.getElementById('absensi_id').value = id;
             document.getElementById('status').value = status;
             
-            const modal = new bootstrap.Modal(document.getElementById('updateStatusModal'));
-            modal.show();
+            openModal('updateStatusModal');
         });
     });
 }
@@ -614,22 +613,8 @@ function attachUpdateButtonListeners() {
 document.addEventListener('DOMContentLoaded', function() {
     startAutoRefresh();
     
-    // Existing code below
-    // Update Status Modal
-    const updateStatusModal = new bootstrap.Modal(document.getElementById('updateStatusModal'));
-    
-    document.querySelectorAll('.btn-update-status').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const absensiId = this.dataset.id;
-            const currentStatus = this.dataset.status;
-            
-            document.getElementById('absensi_id').value = absensiId;
-            document.getElementById('status').value = currentStatus;
-            document.getElementById('keterangan').value = '';
-            
-            updateStatusModal.show();
-        });
-    });
+    // Attach update button listeners (already handled by attachUpdateButtonListeners function)
+    attachUpdateButtonListeners();
     
     // Save Status
     document.getElementById('btnSaveStatus').addEventListener('click', function() {

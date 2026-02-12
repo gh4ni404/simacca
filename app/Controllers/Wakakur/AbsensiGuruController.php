@@ -50,7 +50,7 @@ class AbsensiGuruController extends BaseController
 
         // Get all guru for filter dropdown
         $guruList = $this->guruModel
-            ->select('guru.id, guru.nama_lengkap as nama, guru.nip')
+            ->select('guru.id, guru.nama_lengkap, guru.nip')
             ->orderBy('guru.nama_lengkap', 'ASC')
             ->findAll();
 
@@ -87,7 +87,7 @@ class AbsensiGuruController extends BaseController
 
         // Get all guru for filter dropdown
         $guruList = $this->guruModel
-            ->select('guru.id, guru.nama_lengkap as nama, guru.nip')
+            ->select('guru.id, guru.nama_lengkap, guru.nip')
             ->orderBy('guru.nama_lengkap', 'ASC')
             ->findAll();
 
@@ -136,7 +136,7 @@ class AbsensiGuruController extends BaseController
         $stats = $statsResult['success'] ? $statsResult['data'] : [];
 
         $data = [
-            'title' => 'Detail Absensi Guru - ' . $guru['nama'],
+            'title' => 'Detail Absensi Guru - ' . $guru['nama_lengkap'],
             'guru' => $guru,
             'absensiList' => $absensiList,
             'pager' => $pager,
