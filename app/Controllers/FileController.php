@@ -91,4 +91,51 @@ class FileController extends BaseController
         readfile($filepath);
         exit;
     }
+
+    /**
+     * Serve absensi guru photo from writable/uploads/absensi_guru
+     * This controller provides secure access to uploaded attendance photos
+     * Supports nested directory structure: YYYY/MM/DD/filename.jpg
+     */
+    public function absensiGuruFoto($year, $month, $day, $filename)
+    {
+        // Sanitize inputs to prevent directory traversal
+        $year = basename($year);
+        $month = basename($month);
+        $day = basename($day);
+        $filename = basename($filename);
+        
+        // Build file path
+        $filepath = WRITEPATH . 'uploads/absensi_guru/' . $year . '/' . $month . '/' . $day . '/' . $filename;
+        
+        // Check if file exists
+        if (!file_exists($filepath)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Foto absensi tidak ditemukan 🔍');
+        }
+        
+        // Get file info
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $filepath);
+        finfo_close($finfo);
+        
+        // Verify it's an image
+        if (!str_starts_with($mimeType, 'image/')) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('File bukan gambar');
+        }
+        
+        // Clear any output buffers to prevent whitespace corruption
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+        
+        // Set headers
+        header('Content-Type: ' . $mimeType);
+        header('Content-Length: ' . filesize($filepath));
+        header('Cache-Control: public, max-age=31536000');
+        header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 31536000) . ' GMT');
+        
+        // Output file directly
+        readfile($filepath);
+        exit;
+    }
 }

@@ -20,6 +20,7 @@ class AbsensiGuruController extends BaseController
 
     /**
      * Display absensi guru page (check-in/check-out interface)
+     * Combined with history for better UX
      */
     public function index()
     {
@@ -38,8 +39,21 @@ class AbsensiGuruController extends BaseController
         $historyResult = $this->absensiGuruService->getHistory($guru['id'], ['per_page' => 7]);
         $recentHistory = $historyResult['success'] ? $historyResult['data']['data'] : [];
 
+        // Get filter parameters for history tab
+        $filters = [
+            'bulan' => $this->request->getGet('bulan') ?? \CodeIgniter\I18n\Time::now()->month,
+            'tahun' => $this->request->getGet('tahun') ?? \CodeIgniter\I18n\Time::now()->year,
+            'status' => $this->request->getGet('status'),
+            'per_page' => 20
+        ];
+
+        // Get full history for history tab
+        $fullHistoryResult = $this->absensiGuruService->getHistory($guru['id'], $filters);
+        $absensiList = $fullHistoryResult['success'] ? $fullHistoryResult['data']['data'] : [];
+        $pager = $fullHistoryResult['success'] ? $fullHistoryResult['data']['pager'] : null;
+
         // Get monthly stats
-        $statsResult = $this->absensiGuruService->getMonthlyStats($guru['id']);
+        $statsResult = $this->absensiGuruService->getMonthlyStats($guru['id'], $filters['bulan'], $filters['tahun']);
         $monthlyStats = $statsResult['success'] ? $statsResult['data'] : [];
 
         $data = [
@@ -50,6 +64,10 @@ class AbsensiGuruController extends BaseController
             'monthlyStats' => $monthlyStats,
             'hasCheckedIn' => $todayAbsensi !== null,
             'hasCheckedOut' => $todayAbsensi !== null && $todayAbsensi['check_out'] !== null,
+            // History tab data
+            'absensiList' => $absensiList,
+            'pager' => $pager,
+            'filters' => $filters,
         ];
 
         return view('guru/absensi_guru/index', $data);
@@ -159,44 +177,16 @@ class AbsensiGuruController extends BaseController
 
     /**
      * Display history page
+     * @deprecated Redirects to main page with history tab
      */
     public function history()
     {
-        $userId = session()->get('user_id');
+        // Redirect to the unified interface with history tab
+        $params = $this->request->getGet();
+        $params['tab'] = 'history';
+        $queryString = http_build_query($params);
         
-        // Get guru data
-        $guru = $this->guruModel->where('user_id', $userId)->first();
-        if (!$guru) {
-            return redirect()->to('/guru/dashboard')->with('error', 'Data guru tidak ditemukan');
-        }
-
-        // Get filter parameters
-        $filters = [
-            'bulan' => $this->request->getGet('bulan') ?? Time::now()->month,
-            'tahun' => $this->request->getGet('tahun') ?? Time::now()->year,
-            'status' => $this->request->getGet('status'),
-            'per_page' => 31
-        ];
-
-        // Get absensi history
-        $result = $this->absensiGuruService->getHistory($guru['id'], $filters);
-        $absensiList = $result['success'] ? $result['data']['data'] : [];
-        $pager = $result['success'] ? $result['data']['pager'] : null;
-
-        // Get monthly stats
-        $statsResult = $this->absensiGuruService->getMonthlyStats($guru['id'], $filters['bulan'], $filters['tahun']);
-        $monthlyStats = $statsResult['success'] ? $statsResult['data'] : [];
-
-        $data = [
-            'title' => 'Riwayat Absensi',
-            'guru' => $guru,
-            'absensiList' => $absensiList,
-            'pager' => $pager,
-            'filters' => $filters,
-            'monthlyStats' => $monthlyStats
-        ];
-
-        return view('guru/absensi_guru/history', $data);
+        return redirect()->to('/guru/absensi-guru' . ($queryString ? '?' . $queryString : '?tab=history'));
     }
 
     /**

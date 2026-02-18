@@ -265,6 +265,7 @@ $routes->group('profile', ['filter' => 'auth'], function ($routes) {
 
 // File Routes (for serving uploaded files)
 $routes->get('files/jurnal/(:segment)', 'FileController::jurnalFoto/$1');
+$routes->get('files/absensi-guru/(:segment)/(:segment)/(:segment)/(:segment)', 'FileController::absensiGuruFoto/$1/$2/$3/$4');
 $routes->get('profile-photo/(:segment)', 'FileController::profilePhoto/$1');
 
 // Layout Switcher Routes (for testing and manual switching)
