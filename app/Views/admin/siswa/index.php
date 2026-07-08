@@ -17,6 +17,16 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
+<script>
+<?php 
+$_importErrors = session()->getFlashdata('errors');
+if (!empty($_importErrors)):
+    foreach ((array)$_importErrors as $err): 
+        echo "console.log(" . json_encode($err) . ");\n";
+    endforeach; 
+endif; 
+?>
+</script>
 <div class="bg-white rounded-xl shadow p-6">
     <!-- Header -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
@@ -103,6 +113,7 @@
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div class="w-full md:w-1/3 mb-4 md:mb-0">
             <form action="<?= base_url('admin/siswa') ?>" method="GET" class="relative">
+                <input type="hidden" name="status" value="<?= esc($status ?? 'active') ?>">
                 <input type="text" name="search" 
                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
                        placeholder="Cari siswa (nama/NIS)..."
@@ -111,30 +122,27 @@
                     <i class="fas fa-search"></i>
                 </div>
                 <?php if ($keyword): ?>
-                    <a href="<?= base_url('admin/siswa') ?>" class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600">
+                    <a href="<?= base_url('admin/siswa') ?>?status=<?= esc($status ?? 'active') ?>" class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600">
                         <i class="fas fa-times"></i>
                     </a>
                 <?php endif; ?>
             </form>
         </div>
         <div class="flex space-x-2">
-            <select id="filterKelas" class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <select id="filterKelas" class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" onchange="window.location='<?= base_url('admin/siswa') ?>?kelas_id='+this.value+'&status=<?= $status ?? 'active' ?><?= $keyword ? '&search='.urlencode($keyword) : '' ?>'">
                 <option value="">Semua Kelas</option>
-                <?php 
-                $kelasModel = new \App\Models\KelasModel();
-                $allKelas = $kelasModel->findAll();
-                foreach ($allKelas as $k): ?>
-                    <option value="<?= $k['id'] ?>"><?= esc($k['nama_kelas']) ?></option>
+                <?php foreach ($allKelas as $k): ?>
+                    <option value="<?= $k['id'] ?>" <?= ($kelasId ?? '') == $k['id'] ? 'selected' : '' ?>><?= esc($k['nama_kelas']) ?></option>
                 <?php endforeach; ?>
             </select>
-            <select id="filterStatus" class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <option value="">Semua Status</option>
-                <option value="active">Aktif</option>
-                <option value="inactive">Nonaktif</option>
+            <select id="filterStatus" class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" onchange="window.location='<?= base_url('admin/siswa') ?>?status='+this.value<?= $kelasId ? "+'&kelas_id=$kelasId'" : '' ?><?= $keyword ? "+'&search=".urlencode($keyword)."'" : '' ?>">
+                <option value="active" <?= ($status ?? 'active') === 'active' ? 'selected' : '' ?>>Aktif</option>
+                <option value="inactive" <?= ($status ?? '') === 'inactive' ? 'selected' : '' ?>>Nonaktif</option>
+                <option value="all" <?= ($status ?? '') === 'all' ? 'selected' : '' ?>>Semua Status</option>
             </select>
-            <button id="resetFilter" class="border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50">
+            <a href="<?= base_url('admin/siswa') ?>" class="border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50 flex items-center">
                 Reset
-            </button>
+            </a>
         </div>
     </div>
 
@@ -276,6 +284,20 @@
 
     <!-- Pagination -->
     <?php if ($totalSiswa > $perPage): ?>
+        <?php
+        $totalPages = ceil($totalSiswa / $perPage);
+        $startPage = max(1, (int)$currentPage - 2);
+        $endPage = min($totalPages, (int)$currentPage + 2);
+
+        $baseParams = ['status' => $status];
+        if ($keyword) $baseParams['search'] = $keyword;
+        if ($kelasId) $baseParams['kelas_id'] = $kelasId;
+
+        function pageUrl($pageNum, $baseParams) {
+            $params = array_merge($baseParams, ['page' => $pageNum]);
+            return '?' . http_build_query($params);
+        }
+        ?>
         <div class="mt-6 flex justify-between items-center">
             <div class="text-sm text-gray-700">
                 Menampilkan <span class="font-medium"><?= (($currentPage - 1) * $perPage) + 1 ?></span> 
@@ -284,26 +306,21 @@
             </div>
             <div class="flex space-x-2">
                 <?php if ($currentPage > 1): ?>
-                    <a href="?page=<?= $currentPage - 1 ?><?= $keyword ? '&search=' . urlencode($keyword) : '' ?>" 
+                    <a href="<?= pageUrl($currentPage - 1, $baseParams) ?>" 
                        class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">
                         Sebelumnya
                     </a>
                 <?php endif; ?>
                 
-                <?php 
-                $totalPages = ceil($totalSiswa / $perPage);
-                $startPage = max(1, $currentPage - 2);
-                $endPage = min($totalPages, $currentPage + 2);
-                
-                for ($i = $startPage; $i <= $endPage; $i++): ?>
-                    <a href="?page=<?= $i ?><?= $keyword ? '&search=' . urlencode($keyword) : '' ?>" 
+                <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+                    <a href="<?= pageUrl($i, $baseParams) ?>" 
                        class="px-3 py-1 border <?= $i == $currentPage ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 hover:bg-gray-50' ?> rounded">
                         <?= $i ?>
                     </a>
                 <?php endfor; ?>
                 
                 <?php if ($currentPage < $totalPages): ?>
-                    <a href="?page=<?= $currentPage + 1 ?><?= $keyword ? '&search=' . urlencode($keyword) : '' ?>" 
+                    <a href="<?= pageUrl($currentPage + 1, $baseParams) ?>" 
                        class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">
                         Selanjutnya
                     </a>
@@ -351,43 +368,7 @@
 </form>
 
 <script>
-    // Filter functionality
-    document.getElementById('filterKelas').addEventListener('change', function() {
-        filterTable();
-    });
-
-    document.getElementById('filterStatus').addEventListener('change', function() {
-        filterTable();
-    });
-
-    function filterTable() {
-        const kelasValue = document.getElementById('filterKelas').value;
-        const statusValue = document.getElementById('filterStatus').value;
-        const rows = document.querySelectorAll('#siswaTable tbody tr');
-        
-        rows.forEach(row => {
-            if (kelasValue === '' && statusValue === '') {
-                row.style.display = '';
-                return;
-            }
-            
-            const kelasData = row.getAttribute('data-kelas');
-            const statusData = row.getAttribute('data-status');
-            
-            const kelasMatch = kelasValue === '' || kelasData == kelasValue;
-            const statusMatch = statusValue === '' || statusData === statusValue;
-            
-            row.style.display = (kelasMatch && statusMatch) ? '' : 'none';
-        });
-    }
-
-    // Reset filter
-    document.getElementById('resetFilter').addEventListener('click', function() {
-        document.getElementById('filterKelas').value = '';
-        document.getElementById('filterStatus').value = '';
-        const rows = document.querySelectorAll('#siswaTable tbody tr');
-        rows.forEach(row => row.style.display = '');
-    });
+    // Filters handled by server-side reload via onchange
 
     // Bulk selection
     document.getElementById('selectAll').addEventListener('change', function() {

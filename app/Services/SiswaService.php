@@ -46,19 +46,39 @@ class SiswaService extends BaseService
     {
         try {
             $keyword = $filters['search'] ?? null;
-            
+            $status = $filters['status'] ?? 'active';
+            $kelasId = $filters['kelas_id'] ?? null;
+            $page = (int) ($filters['page'] ?? 1);
+            $perPage = (int) ($filters['perPage'] ?? 10);
+            $offset = ($page - 1) * $perPage;
+            $tahunAjaran = $filters['tahun_ajaran'] ?? get_active_tahun_ajaran();
+
+            $modelFilters = [
+                'status' => $status,
+                'kelas_id' => $kelasId,
+            ];
+
             if ($keyword) {
-                $siswa = $this->siswaModel->searchSiswa($keyword);
-                $total = count($siswa);
+                $total = $this->siswaModel->countSearch($keyword, $status, $kelasId, $tahunAjaran);
+                $siswa = $this->siswaModel->searchSiswa($keyword, $status, $perPage, $offset, $kelasId, $tahunAjaran);
             } else {
-                $siswa = $this->siswaModel->getAllSiswa();
-                $total = $this->siswaModel->countAll();
+                $siswa = $this->siswaModel->getAllSiswa($status, $perPage, $offset, $kelasId, $tahunAjaran);
+                $total = match ($status) {
+                    'inactive' => $this->siswaModel->countInactive($tahunAjaran),
+                    'all' => $this->siswaModel->countAll(),
+                    default => $this->siswaModel->countActive($tahunAjaran),
+                };
+                if ($kelasId) {
+                    $total = $this->siswaModel->getCountKelasById($kelasId, $status, $tahunAjaran);
+                }
             }
-            
+
             return $this->successResponse([
                 'siswa' => $siswa,
                 'total' => $total,
-                'kelasSummary' => $this->siswaModel->getCountByKelas()
+                'perPage' => $perPage,
+                'currentPage' => $page,
+                'kelasSummary' => $this->siswaModel->getCountByKelas($tahunAjaran)
             ]);
         } catch (\Exception $e) {
             $this->logError('getAllSiswa', $e);
@@ -537,6 +557,85 @@ class SiswaService extends BaseService
      * 
      * @return array
      */
+    /**
+     * Rollover siswa ke tahun ajaran baru: naik kelas otomatis
+     * - Tingkat 10 → 11 (cari kelas dengan jurusan sama)
+     * - Tingkat 11 → 12 (cari kelas dengan jurusan sama)
+     * - Tingkat 12 → Lulus (nonaktifkan user)
+     *
+     * @param string $newTahunAjaran Tahun ajaran baru (format: YYYY/YYYY)
+     * @return array
+     */
+    public function rolloverTahunAjaran(string $newTahunAjaran): array
+    {
+        try {
+            $naikCount = 0;
+            $lulusCount = 0;
+            $skipped = [];
+            $updated = [];
+
+            // Get all active siswa with kelas info
+            $siswaList = $this->siswaModel
+                ->select('siswa.*, kelas.tingkat, kelas.jurusan, kelas.nama_kelas')
+                ->join('kelas', 'kelas.id = siswa.kelas_id')
+                ->join('users', 'users.id = siswa.user_id')
+                ->where('users.is_active', 1)
+                ->findAll();
+
+            foreach ($siswaList as $siswa) {
+                $tingkat = (int) $siswa['tingkat'];
+                $jurusan = $siswa['jurusan'];
+                $nextTingkat = $tingkat + 1;
+
+                if ($tingkat < 12) {
+                    // Cari kelas tujuan dengan tingkat+1 dan jurusan sama
+                    $targetKelas = $this->kelasModel
+                        ->where('tingkat', $nextTingkat)
+                        ->where('jurusan', $jurusan)
+                        ->first();
+
+                    if (!$targetKelas) {
+                        $skipped[] = "{$siswa['nama_lengkap']} (NIS: {$siswa['nis']}) - Kelas {$siswa['nama_kelas']} → tidak ada kelas tingkat $nextTingkat untuk jurusan $jurusan";
+                        continue;
+                    }
+
+                    // Update kelas_id dan tahun_ajaran
+                    $this->siswaModel->update($siswa['id'], [
+                        'kelas_id' => $targetKelas['id'],
+                        'tahun_ajaran' => $newTahunAjaran,
+                    ]);
+
+                    $naikCount++;
+                    $updated[] = "{$siswa['nama_lengkap']} (NIS: {$siswa['nis']}): {$siswa['nama_kelas']} → {$targetKelas['nama_kelas']}";
+                } else {
+                    // Tingkat 12 → Lulus: nonaktifkan user
+                    $this->userModel->update($siswa['user_id'], ['is_active' => 0]);
+
+                    // Update tahun_ajaran tetap disimpan untuk histori
+                    $this->siswaModel->update($siswa['id'], [
+                        'tahun_ajaran' => $newTahunAjaran,
+                    ]);
+
+                    $lulusCount++;
+                    $updated[] = "{$siswa['nama_lengkap']} (NIS: {$siswa['nis']}): {$siswa['nama_kelas']} → LULUS";
+                }
+            }
+
+            $this->logInfo('rolloverTahunAjaran', "Naik kelas: $naikCount, Lulus: $lulusCount, Skipped: " . count($skipped));
+
+            return $this->successResponse([
+                'naik_kelas' => $naikCount,
+                'lulus' => $lulusCount,
+                'skipped' => $skipped,
+                'updated' => $updated,
+                'message' => "Rollover selesai: $naikCount siswa naik kelas, $lulusCount siswa lulus." . (!empty($skipped) ? ' ' . count($skipped) . ' siswa dilewati.' : '')
+            ]);
+        } catch (\Exception $e) {
+            $this->logError('rolloverTahunAjaran', $e);
+            return $this->errorResponse('Gagal menjalankan rollover: ' . $e->getMessage());
+        }
+    }
+
     private function getTahunAjaranList(): array
     {
         $currentYear = date('Y');
@@ -585,6 +684,10 @@ class SiswaService extends BaseService
             $errors = [];
             $createdClasses = []; // Track kelas baru yang dibuat
 
+            // Set non-strict mode to auto-reset transStatus after each iteration
+            $db = \Config\Database::connect();
+            $db->transStrict(false);
+
             foreach ($rows as $index => $row) {
                 // Skip empty rows
                 if (empty($row[0]) || empty($row[1]) || empty($row[2])) {
@@ -592,6 +695,9 @@ class SiswaService extends BaseService
                 }
 
                 $rowNumber = $index + 2; // Excel row number (header = row 1)
+
+                $nis = '';
+                $username = '';
 
                 try {
                     // Validate and sanitize data
@@ -618,82 +724,133 @@ class SiswaService extends BaseService
                         throw new \Exception("Jenis kelamin harus L atau P");
                     }
 
-                    // Use transaction for each row (allows partial success)
-                    $db = \Config\Database::connect();
-                    $db->transStart();
-
                     // Generate username and password
                     $username = !empty($row[7]) ? trim($row[7]) : 'siswa_' . $nis;
                     $password = !empty($row[8]) ? trim($row[8]) : 'siswa123';
                     $email = !empty($row[6]) ? trim($row[6]) : null;
 
-                    // 1. Create user account
-                    $userData = [
-                        'username' => $username,
-                        'password' => $password,
-                        'role' => 'siswa',
-                        'email' => $email,
-                        'is_active' => 1,
-                        'created_at' => date('Y-m-d H:i:s')
-                    ];
+                    // Check if NIS already exists in database
+                    $existingSiswa = $this->siswaModel->where('nis', $nis)->first();
 
-                    $userId = $this->userModel->insert($userData);
-                    
-                    if (!$userId) {
-                        throw new \Exception("Gagal membuat user account");
+                    if ($existingSiswa) {
+                        // Get existing user
+                        $existingUser = $this->userModel->find($existingSiswa['user_id']);
+
+                        if ($existingUser && $existingUser['is_active'] == 1) {
+                            // ACTIVE student with same NIS → UPDATE existing records
+                            $db->transStart();
+
+                            // Get or create kelas
+                            $kelasId = $this->getKelasIdByName($namaKelas);
+
+                            // Update user data (only email if provided)
+                            $userUpdate = ['password' => $password];
+                            if (!empty($email)) {
+                                $userUpdate['email'] = $email;
+                            }
+                            $this->userModel->update($existingUser['id'], $userUpdate);
+
+                            // Update siswa data
+                            $this->siswaModel->update($existingSiswa['id'], [
+                                'nama_lengkap' => $namaLengkap,
+                                'jenis_kelamin' => $jenisKelamin,
+                                'kelas_id' => $kelasId,
+                                'tahun_ajaran' => $tahunAjaran,
+                            ]);
+
+                            $db->transComplete();
+                            $successCount++;
+
+                            // Track kelas
+                            if (!isset($createdClasses[$namaKelas])) {
+                                $createdClasses[$namaKelas] = true;
+                            }
+                        } else {
+                            // INACTIVE student → REACTIVATE and UPDATE
+                            $db->transStart();
+
+                            $kelasId = $this->getKelasIdByName($namaKelas);
+
+                            // Reactivate user and update data
+                            $userUpdate = [
+                                'password' => $password,
+                                'is_active' => 1,
+                            ];
+                            if (!empty($email)) {
+                                $userUpdate['email'] = $email;
+                            }
+                            $this->userModel->update($existingUser['id'], $userUpdate);
+
+                            // Update siswa data
+                            $this->siswaModel->update($existingSiswa['id'], [
+                                'nama_lengkap' => $namaLengkap,
+                                'jenis_kelamin' => $jenisKelamin,
+                                'kelas_id' => $kelasId,
+                                'tahun_ajaran' => $tahunAjaran,
+                            ]);
+
+                            $db->transComplete();
+                            $successCount++;
+
+                            if (!isset($createdClasses[$namaKelas])) {
+                                $createdClasses[$namaKelas] = true;
+                            }
+                        }
+                    } else {
+                        // NEW student → CREATE user + siswa
+                        $db->transStart();
+
+                        // 1. Create user account
+                        $userData = [
+                            'username' => $username,
+                            'password' => $password,
+                            'role' => 'siswa',
+                            'email' => $email,
+                            'is_active' => 1,
+                            'created_at' => date('Y-m-d H:i:s')
+                        ];
+
+                        $userId = $this->userModel->insert($userData);
+
+                        if (!$userId) {
+                            throw new \Exception("Gagal membuat user account");
+                        }
+
+                        // 2. Get or create kelas
+                        $kelasId = $this->getKelasIdByName($namaKelas);
+
+                        if (!isset($createdClasses[$namaKelas])) {
+                            $createdClasses[$namaKelas] = true;
+                        }
+
+                        // 3. Create siswa data
+                        $siswaData = [
+                            'user_id' => $userId,
+                            'nis' => $nis,
+                            'nama_lengkap' => $namaLengkap,
+                            'jenis_kelamin' => $jenisKelamin,
+                            'kelas_id' => $kelasId,
+                            'tahun_ajaran' => $tahunAjaran,
+                            'created_at' => date('Y-m-d H:i:s')
+                        ];
+
+                        $siswaId = $this->siswaModel->insert($siswaData);
+
+                        if (!$siswaId) {
+                            throw new \Exception("Gagal membuat data siswa");
+                        }
+
+                        $db->transComplete();
+                        $successCount++;
                     }
-
-                    // 2. Get or create kelas
-                    $kelasId = $this->getKelasIdByName($namaKelas);
-                    
-                    // Track kelas baru yang dibuat
-                    if (!isset($createdClasses[$namaKelas])) {
-                        $createdClasses[$namaKelas] = true;
-                    }
-
-                    // 3. Create siswa data
-                    $siswaData = [
-                        'user_id' => $userId,
-                        'nis' => $nis,
-                        'nama_lengkap' => $namaLengkap,
-                        'jenis_kelamin' => $jenisKelamin,
-                        'kelas_id' => $kelasId,
-                        'tahun_ajaran' => $tahunAjaran,
-                        'created_at' => date('Y-m-d H:i:s')
-                    ];
-
-                    $siswaId = $this->siswaModel->insert($siswaData);
-                    
-                    if (!$siswaId) {
-                        throw new \Exception("Gagal membuat data siswa");
-                    }
-
-                    $db->transComplete();
-
-                    if ($db->transStatus() === FALSE) {
-                        throw new \Exception("Transaksi database gagal");
-                    }
-
-                    $successCount++;
                 } catch (\Exception $e) {
+                    // Safe to call even if no transaction active (check transDepth internally)
                     if (isset($db)) {
                         $db->transRollback();
                     }
                     $errorCount++;
                     
-                    // Detailed error message
-                    $errorMsg = $e->getMessage();
-                    
-                    // Add context based on error type
-                    if (strpos($errorMsg, 'Duplicate entry') !== false) {
-                        if (strpos($errorMsg, 'nis') !== false) {
-                            $errorMsg = "NIS '$nis' sudah terdaftar";
-                        } elseif (strpos($errorMsg, 'username') !== false) {
-                            $errorMsg = "Username '$username' sudah digunakan";
-                        }
-                    }
-                    
-                    $errors[] = "Baris $rowNumber (NIS: $nis, Nama: $namaLengkap): $errorMsg";
+                    $errors[] = "Baris $rowNumber (NIS: $nis, Nama: $namaLengkap): " . $e->getMessage();
                 }
             }
             
@@ -853,7 +1010,8 @@ class SiswaService extends BaseService
     public function exportToExcel(): array
     {
         try {
-            $siswa = $this->siswaModel->getAllSiswa();
+            $tahunAjaran = get_active_tahun_ajaran();
+            $siswa = $this->siswaModel->getAllSiswa('active', null, 0, null, $tahunAjaran);
 
             // Create Excel file using PhpSpreadsheet
             $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();

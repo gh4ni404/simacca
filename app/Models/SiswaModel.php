@@ -61,13 +61,33 @@ class SiswaModel extends Model
     /**
      * Get all siswa with user and kelas data
      */
-    public function getAllSiswa()
+    public function getAllSiswa($status = 'active', $limit = null, $offset = 0, $kelasId = null, $tahunAjaran = null)
     {
-        return $this->select('siswa.*, users.username, users.email, users.is_active, users.profile_photo, kelas.nama_kelas')
+        $this->select('siswa.*, users.username, users.email, users.is_active, users.profile_photo, kelas.nama_kelas')
             ->join('users', 'users.id = siswa.user_id')
-            ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
-            ->orderBy('siswa.nama_lengkap', 'ASC')
-            ->findAll();
+            ->join('kelas', 'kelas.id = siswa.kelas_id', 'left');
+
+        if ($status === 'active') {
+            $this->where('users.is_active', 1);
+        } elseif ($status === 'inactive') {
+            $this->where('users.is_active', 0);
+        }
+
+        if ($kelasId) {
+            $this->where('siswa.kelas_id', $kelasId);
+        }
+
+        if ($tahunAjaran) {
+            $this->where('siswa.tahun_ajaran', $tahunAjaran);
+        }
+
+        $this->orderBy('siswa.nama_lengkap', 'ASC');
+
+        if ($limit !== null) {
+            $this->limit($limit, $offset);
+        }
+
+        return $this->findAll();
     }
 
     /**
@@ -85,40 +105,118 @@ class SiswaModel extends Model
     /**
      * Get siswa by kelas
      */
-    public function getByKelas($kelasId)
+    public function getByKelas($kelasId, $tahunAjaran = null)
     {
-        return $this->where('siswa.kelas_id', $kelasId)
+        $this->where('siswa.kelas_id', $kelasId)
             ->join('users', 'users.id = siswa.user_id')
             ->select('siswa.*, users.username')
-            ->orderBy('siswa.nama_lengkap', 'ASC')
-            ->findAll();
+            ->orderBy('siswa.nama_lengkap', 'ASC');
+
+        if ($tahunAjaran) {
+            $this->where('siswa.tahun_ajaran', $tahunAjaran);
+        }
+
+        return $this->findAll();
     }
 
     /**
-     * Get Jumlah siswa per kelas
+     * Get Jumlah siswa aktif per kelas
      */
-    public function getCountByKelas()
+    public function getCountByKelas($tahunAjaran = null)
     {
-        return $this->select('kelas.nama_kelas, COUNT(siswa.id) as jumlah_siswa')
+        $this->select('kelas.nama_kelas, COUNT(siswa.id) as jumlah_siswa')
             ->join('kelas', 'kelas.id = siswa.kelas_id')
-            ->groupBy('siswa.kelas_id')
-            ->findAll();
+            ->join('users', 'users.id = siswa.user_id')
+            ->where('users.is_active', 1);
+
+        if ($tahunAjaran) {
+            $this->where('siswa.tahun_ajaran', $tahunAjaran);
+        }
+
+        return $this->groupBy('siswa.kelas_id')->findAll();
     }
 
-    /**
-     * Search siswa by nama atau NIS
-     */
-    public function searchSiswa($keyword)
+    public function countActive($tahunAjaran = null)
     {
-        return $this->select('siswa.*, users.username, users.email, users.is_active, users.profile_photo, kelas.nama_kelas')
+        $this->join('users', 'users.id = siswa.user_id')
+            ->where('users.is_active', 1);
+
+        if ($tahunAjaran) {
+            $this->where('siswa.tahun_ajaran', $tahunAjaran);
+        }
+
+        return $this->countAllResults();
+    }
+
+    public function countInactive($tahunAjaran = null)
+    {
+        $this->join('users', 'users.id = siswa.user_id')
+            ->where('users.is_active', 0);
+
+        if ($tahunAjaran) {
+            $this->where('siswa.tahun_ajaran', $tahunAjaran);
+        }
+
+        return $this->countAllResults();
+    }
+
+    public function searchSiswa($keyword, $status = 'active', $limit = null, $offset = 0, $kelasId = null, $tahunAjaran = null)
+    {
+        $this->select('siswa.*, users.username, users.email, users.is_active, users.profile_photo, kelas.nama_kelas')
             ->join('users', 'users.id = siswa.user_id')
             ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
             ->groupStart()
                 ->like('siswa.nama_lengkap', $keyword)
                 ->orLike('siswa.nis', $keyword)
-            ->groupEnd()
-            ->orderBy('siswa.nama_lengkap', 'ASC')
-            ->findAll();
+            ->groupEnd();
+
+        if ($status === 'active') {
+            $this->where('users.is_active', 1);
+        } elseif ($status === 'inactive') {
+            $this->where('users.is_active', 0);
+        }
+
+        if ($kelasId) {
+            $this->where('siswa.kelas_id', $kelasId);
+        }
+
+        if ($tahunAjaran) {
+            $this->where('siswa.tahun_ajaran', $tahunAjaran);
+        }
+
+        $this->orderBy('siswa.nama_lengkap', 'ASC');
+
+        if ($limit !== null) {
+            $this->limit($limit, $offset);
+        }
+
+        return $this->findAll();
+    }
+
+    public function countSearch($keyword, $status = 'active', $kelasId = null, $tahunAjaran = null)
+    {
+        $this->select('siswa.id')
+            ->join('users', 'users.id = siswa.user_id')
+            ->groupStart()
+                ->like('siswa.nama_lengkap', $keyword)
+                ->orLike('siswa.nis', $keyword)
+            ->groupEnd();
+
+        if ($status === 'active') {
+            $this->where('users.is_active', 1);
+        } elseif ($status === 'inactive') {
+            $this->where('users.is_active', 0);
+        }
+
+        if ($kelasId) {
+            $this->where('siswa.kelas_id', $kelasId);
+        }
+
+        if ($tahunAjaran) {
+            $this->where('siswa.tahun_ajaran', $tahunAjaran);
+        }
+
+        return $this->countAllResults();
     }
 
     /**
@@ -136,10 +234,18 @@ class SiswaModel extends Model
         return $builder->findAll();
     }
 
-    public function getCountKelasById($kelasId) {
-        return $this
-            ->where('kelas_id', $kelasId)
-            ->countAllResults();
+    public function getCountKelasById($kelasId, $status = 'active', $tahunAjaran = null) {
+        $this->join('users', 'users.id = siswa.user_id')
+            ->where('siswa.kelas_id', $kelasId);
+        if ($status === 'active') {
+            $this->where('users.is_active', 1);
+        } elseif ($status === 'inactive') {
+            $this->where('users.is_active', 0);
+        }
+        if ($tahunAjaran) {
+            $this->where('siswa.tahun_ajaran', $tahunAjaran);
+        }
+        return $this->countAllResults();
     }
 
     /**

@@ -25,11 +25,22 @@ class SiswaController extends BaseController
     public function index()
     {
         $perPage = 10;
-        $currentPage = $this->request->getVar('page') ?? 1;
         $keyword = $this->request->getVar('search');
+        $status = $this->request->getVar('status') ?? 'active';
+        $kelasId = $this->request->getVar('kelas_id');
+        $currentPage = $this->request->getVar('page') ?? 1;
 
         // Use service to get siswa data
-        $result = $this->siswaService->getAllSiswa(['search' => $keyword]);
+        $result = $this->siswaService->getAllSiswa([
+            'search' => $keyword,
+            'status' => $status,
+            'kelas_id' => $kelasId,
+            'page' => $currentPage,
+            'perPage' => $perPage
+        ]);
+
+        $kelasModel = new \App\Models\KelasModel();
+        $allKelas = $kelasModel->findAll();
 
         $data = [
             'title' => 'Manajemen Siswa',
@@ -41,7 +52,10 @@ class SiswaController extends BaseController
             'kelasSummary' => $result['data']['kelasSummary'],
             'currentPage' => $currentPage,
             'perPage' => $perPage,
-            'keyword' => $keyword
+            'keyword' => $keyword,
+            'status' => $status,
+            'kelasId' => $kelasId,
+            'allKelas' => $allKelas
         ];
 
         return view('admin/siswa/index', $data);
@@ -320,7 +334,7 @@ class SiswaController extends BaseController
 
         if ($result['success']) {
             if (!empty($result['data']['errors'])) {
-                session()->setFlashdata('import_errors', $result['data']['errors']);
+                session()->setFlashdata('errors', $result['data']['errors']);
             }
             session()->setFlashdata('success', $result['data']['message']);
             return redirect()->to('/admin/siswa');

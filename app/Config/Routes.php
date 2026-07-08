@@ -179,6 +179,11 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('pembimbing-pkl/get-pembimbing-by-tempat-pkl', 'Admin\PembimbingPklController::getPembimbingByTempatPkl', ['filter' => 'role:admin']);
     $routes->post('pembimbing-pkl/get-siswa-pkl-by-tempat-pkl', 'Admin\PembimbingPklController::getSiswaPklByTempatPkl', ['filter' => 'role:admin']);
 
+    // Pengaturan
+    $routes->get('pengaturan', 'Admin\PengaturanController::index', ['filter' => 'role:admin']);
+    $routes->post('pengaturan/update', 'Admin\PengaturanController::update', ['filter' => 'role:admin']);
+    $routes->post('pengaturan/rollover', 'Admin\PengaturanController::rollover', ['filter' => 'role:admin']);
+
     // Laporan
     $routes->get('laporan/absensi', 'Admin\LaporanController::absensi', ['filter' => 'role:admin']);
     $routes->get('laporan/absensi-detail', 'Admin\LaporanController::absensiDetail', ['filter' => 'role:admin']);

@@ -29,7 +29,7 @@ abstract class BaseController extends Controller
 
     // protected $session;
     protected $request;
-    protected $helpers = ['form', 'url', 'session', 'auth'];
+    protected $helpers = ['form', 'url', 'session', 'auth', 'setting'];
 
     /**
      * @return void

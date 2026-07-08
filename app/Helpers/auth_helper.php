@@ -216,6 +216,12 @@ if (!function_exists('get_sidebar_menu')) {
                             'url' => '/admin/laporan/statistik'
                         ]
                     ]
+                ],
+                [
+                    'title' => 'Pengaturan',
+                    'icon' => 'fas fa-cog',
+                    'url' => '/admin/pengaturan',
+                    'active' => ['admin/pengaturan']
                 ]
             ],
             'guru_mapel' => [
