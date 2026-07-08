@@ -153,6 +153,32 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('absensi-guru/update-status', 'Admin\AbsensiGuruController::updateStatus', ['filter' => 'role:admin']);
     $routes->get('absensi-guru/export-excel', 'Admin\AbsensiGuruController::exportExcel', ['filter' => 'role:admin']);
 
+    // Pembimbing PKL
+    $routes->get('pembimbing-pkl', 'Admin\PembimbingPklController::index', ['filter' => 'role:admin']);
+    $routes->get('pembimbing-pkl/tambah', 'Admin\PembimbingPklController::create', ['filter' => 'role:admin']);
+    $routes->post('pembimbing-pkl/simpan', 'Admin\PembimbingPklController::store', ['filter' => 'role:admin']);
+    $routes->get('pembimbing-pkl/edit/(:num)', 'Admin\PembimbingPklController::edit/$1', ['filter' => 'role:admin']);
+    $routes->post('pembimbing-pkl/update/(:num)', 'Admin\PembimbingPklController::update/$1', ['filter' => 'role:admin']);
+    $routes->get('pembimbing-pkl/hapus/(:num)', 'Admin\PembimbingPklController::delete/$1', ['filter' => 'role:admin']);
+
+    // Tempat PKL
+    $routes->get('pembimbing-pkl/tempat-pkl', 'Admin\PembimbingPklController::tempatPkl', ['filter' => 'role:admin']);
+    $routes->post('pembimbing-pkl/tempat-pkl/simpan', 'Admin\PembimbingPklController::storeTempatPkl', ['filter' => 'role:admin']);
+    $routes->post('pembimbing-pkl/tempat-pkl/update/(:num)', 'Admin\PembimbingPklController::updateTempatPkl/$1', ['filter' => 'role:admin']);
+    $routes->get('pembimbing-pkl/tempat-pkl/hapus/(:num)', 'Admin\PembimbingPklController::deleteTempatPkl/$1', ['filter' => 'role:admin']);
+
+    // Siswa PKL
+    $routes->get('pembimbing-pkl/siswa-pkl', 'Admin\PembimbingPklController::siswaPkl', ['filter' => 'role:admin']);
+    $routes->get('pembimbing-pkl/siswa-pkl/tambah', 'Admin\PembimbingPklController::siswaPklCreate', ['filter' => 'role:admin']);
+    $routes->post('pembimbing-pkl/siswa-pkl/simpan', 'Admin\PembimbingPklController::siswaPklStore', ['filter' => 'role:admin']);
+    $routes->get('pembimbing-pkl/siswa-pkl/hapus/(:num)', 'Admin\PembimbingPklController::siswaPklDelete/$1', ['filter' => 'role:admin']);
+    $routes->get('pembimbing-pkl/siswa-pkl/batch', 'Admin\PembimbingPklController::siswaPklBatch', ['filter' => 'role:admin']);
+    $routes->post('pembimbing-pkl/siswa-pkl/batch-simpan', 'Admin\PembimbingPklController::siswaPklBatchStore', ['filter' => 'role:admin']);
+
+    // AJAX
+    $routes->post('pembimbing-pkl/get-pembimbing-by-tempat-pkl', 'Admin\PembimbingPklController::getPembimbingByTempatPkl', ['filter' => 'role:admin']);
+    $routes->post('pembimbing-pkl/get-siswa-pkl-by-tempat-pkl', 'Admin\PembimbingPklController::getSiswaPklByTempatPkl', ['filter' => 'role:admin']);
+
     // Laporan
     $routes->get('laporan/absensi', 'Admin\LaporanController::absensi', ['filter' => 'role:admin']);
     $routes->get('laporan/absensi-detail', 'Admin\LaporanController::absensiDetail', ['filter' => 'role:admin']);

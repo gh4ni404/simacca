@@ -160,6 +160,25 @@ if (!function_exists('get_sidebar_menu')) {
                     ]
                 ],
                 [
+                    'title' => 'Pembimbing PKL',
+                    'icon' => 'fas fa-user-graduate',
+                    'url' => '#',
+                    'submenu' => [
+                        [
+                            'title' => 'Pembagian Pembimbing',
+                            'url' => '/admin/pembimbing-pkl',
+                        ],
+                        [
+                            'title' => 'Penempatan Siswa',
+                            'url' => '/admin/pembimbing-pkl/siswa-pkl'
+                        ],
+                        [
+                            'title' => 'Tempat PKL',
+                            'url' => '/admin/pembimbing-pkl/tempat-pkl'
+                        ],
+                    ]
+                ],
+                [
                     'title' => 'Mata Pelajaran',
                     'url' => '/admin/mata-pelajaran'
                 ],
