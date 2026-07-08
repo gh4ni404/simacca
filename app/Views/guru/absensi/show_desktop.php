@@ -1,4 +1,4 @@
-<?= $this->extend('templates/desktop_layout') ?>
+<?= $this->extend(get_device_layout()) ?>
 
 <?= $this->section('pageTitle') ?>Detail Absensi - <?= $absensi['nama_mapel'] ?><?= $this->endSection() ?>
 

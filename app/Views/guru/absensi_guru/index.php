@@ -1,4 +1,4 @@
-<?= $this->extend('templates/main_layout') ?>
+<?= $this->extend(get_device_layout()) ?>
 
 <?= $this->section('content') ?>
 <div class="bg-white rounded-xl shadow p-6 mb-6">
@@ -24,7 +24,7 @@
                 class="tab-button flex-1 py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors"
                 data-tab="dashboard"
                 role="tab">
-                <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                <i class="fas fa-th mr-2"></i>Dashboard
             </button>
             <button type="button"
                 class="tab-button flex-1 py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors"

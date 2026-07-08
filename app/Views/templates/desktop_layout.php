@@ -55,172 +55,310 @@
         .flash-warn { background:#FFFBEB; color:#92400E; border:1px solid #FDE68A; }
         .flash .close { margin-left:auto; color:inherit; cursor:pointer; }
         
-        /* Desktop-specific navigation styles */
-        .nav-dropdown:hover .nav-dropdown-menu {
-            display: block;
+        /* Sidebar — clean, minimal design */
+        .sidebar {
+            width: 260px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-        
-        /* Wider content area for desktop */
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 0.625rem 0.75rem;
+            margin-bottom: 2px;
+            border-radius: 0.5rem;
+            color: #374151;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+        .sidebar-item:hover {
+            background: #F3F4F6;
+            color: #3B82F6;
+        }
+        .sidebar-item.active {
+            background: #EFF6FF;
+            color: #3B82F6;
+            font-weight: 600;
+        }
+        .sidebar-item i:first-child {
+            width: 1.25rem;
+            font-size: 1rem;
+            flex-shrink: 0;
+            color: #9CA3AF;
+        }
+        .sidebar-item.active i:first-child,
+        .sidebar-item:hover i:first-child {
+            color: #3B82F6;
+        }
+        .sidebar-item span {
+            margin-left: 0.75rem;
+            flex: 1;
+        }
+        .sidebar-chevron {
+            font-size: 0.75rem;
+            color: #9CA3AF;
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+        .sidebar-chevron.open {
+            transform: rotate(180deg);
+        }
+        /* Submenu: collapsible with vertical border line */
+        .sidebar-sub {
+            overflow: hidden;
+            transition: max-height 0.25s ease;
+        }
+        .sidebar-sub.closed {
+            max-height: 0 !important;
+        }
+        .sidebar-sub-inner {
+            margin-left: 1.75rem;
+            padding-left: 0.75rem;
+            border-left: 2px solid #CBD5E1;
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+        }
+        .sidebar-sub a {
+            display: block;
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 1px;
+            border-radius: 0.25rem;
+            color: #6B7280;
+            font-size: 0.8125rem;
+            transition: all 0.15s;
+        }
+        .sidebar-sub a:hover {
+            color: #3B82F6;
+        }
+        .sidebar-sub a.active {
+            color: #3B82F6;
+            font-weight: 600;
+        }
+
+        /* Fluid container for desktop */
         .desktop-container {
-            max-width: 1400px;
+            width: 100%;
         }
     </style>
     <?= $this->renderSection('styles'); ?>
 </head>
 
 <body class="bg-gray-100">
-    <!-- Desktop Navigation -->
-    <nav class="bg-white shadow-lg">
-        <div class="desktop-container mx-auto px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex">
-                    <!-- Logo -->
-                    <div class="flex-shrink-0 flex items-center">
-                        <i class="fas fa-graduation-cap text-indigo-600 text-2xl mr-3"></i>
-                        <span class="text-xl font-bold text-gray-800">SIMACCA</span>
-                    </div>
-
-                    <!-- Desktop Menu -->
-                    <div class="ml-10 flex space-x-4">
-                        <?php if (is_logged_in()) : ?>
-                            <?php $menu = get_sidebar_menu(); ?>
-                            <?php foreach ($menu as $item): ?>
-                                <?php if (isset($item['submenu'])) : ?>
-                                    <!-- Dropdown Menu -->
-                                    <div class="relative nav-dropdown group">
-                                        <button class="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium flex items-center">
-                                            <?= $item['title']; ?>
-                                            <i class="fas fa-chevron-down ml-2 text-xs"></i>
-                                        </button>
-                                        <div class="nav-dropdown-menu absolute hidden bg-white shadow-lg rounded-md mt-1 py-2 z-50 min-w-[200px]">
-                                            <?php foreach ($item['submenu'] as $subitem): ?>
-                                                <a href="<?= base_url($subitem['url']); ?>"
-                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 whitespace-nowrap">
-                                                    <?= $subitem['title']; ?>
-                                                </a>
-                                            <?php endforeach; ?>
-                                        </div>
-                                    </div>
-                                <?php else: ?>
-                                    <a href="<?= base_url($item['url']); ?>"
-                                        class="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium inline-flex items-center">
-                                        <?= $item['title']; ?>
-                                    </a>
-                                <?php endif; ?>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </div>
+    <?php if (is_logged_in()): ?>
+    <!-- Sidebar + Main Layout -->
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="sidebar bg-white border-r border-gray-200 fixed left-0 top-0 z-40">
+            <!-- Header: Logo + App Name -->
+            <div class="flex items-center gap-3 px-5 h-16 border-b border-gray-100 flex-shrink-0">
+                <div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-graduation-cap text-white text-sm"></i>
                 </div>
+                <span class="text-base font-bold text-gray-900 tracking-tight">SIMACCA</span>
+            </div>
 
-                <!-- Right side - User Menu -->
-                <div class="flex items-center">
-                    <?php if (is_logged_in()): ?>
-                        <div class="relative ml-3">
-                            <div class="flex items-center space-x-4">
-                                <div class="text-right">
-                                    <p class="text-sm font-medium text-gray-900"><?= session()->get('nama_lengkap'); ?></p>
-                                    <p class="text-xs text-gray-500"><?= get_role_name(); ?></p>
-                                </div>
-                                <div class="relative">
-                                    <button type="button" id="user-menu-button"
-                                        class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                        <span class="sr-only">Open user menu</span>
-                                        <?php if (session()->get('profile_photo')): ?>
-                                            <img src="<?= base_url('profile-photo/' . esc(session()->get('profile_photo'))); ?>" 
-                                                 alt="<?= esc(session()->get('nama_lengkap') ?? session()->get('username')); ?>"
-                                                 class="h-10 w-10 rounded-full object-cover border-2 border-indigo-200">
-                                        <?php else: ?>
-                                            <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                                                <span class="text-indigo-600 font-semibold text-sm">
-                                                    <?= strtoupper(substr(session()->get('nama_lengkap') ?? session()->get('username') ?? 'U', 0, 2)); ?>
-                                                </span>
-                                            </div>
-                                        <?php endif; ?>
-                                    </button>
-
-                                    <!-- Dropdown menu -->
-                                    <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                                        <a href="<?= base_url('profile'); ?>"
-                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50">
-                                            <i class="fas fa-user-circle mr-2"></i> Profil
+            <!-- Navigation -->
+            <nav class="flex-1 overflow-y-auto px-3 py-4">
+                <?php $menu = get_sidebar_menu(); ?>
+                <?php $currentUrl = uri_string(); ?>
+                <?php foreach ($menu as $item): ?>
+                    <?php if (isset($item['submenu'])): ?>
+                        <?php
+                        $isParentActive = false;
+                        if (isset($item['active'])) {
+                            foreach ($item['active'] as $a) {
+                                if (strpos($currentUrl, $a) !== false) { $isParentActive = true; break; }
+                            }
+                        }
+                        if (!$isParentActive) {
+                            foreach ($item['submenu'] as $sub) {
+                                if (strpos($currentUrl, ltrim($sub['url'], '/')) !== false) {
+                                    $isParentActive = true;
+                                    break;
+                                }
+                            }
+                        }
+                        ?>
+                        <div class="sidebar-group mb-0.5" data-active="<?= $isParentActive ? '1' : '0' ?>">
+                            <button class="sidebar-item w-full text-left <?= $isParentActive ? 'active' : '' ?> sidebar-dropdown-btn">
+                                <i class="<?= $item['icon'] ?? 'fas fa-circle' ?>"></i>
+                                <span><?= $item['title'] ?></span>
+                                <i class="fas fa-chevron-down sidebar-chevron <?= $isParentActive ? 'open' : '' ?>"></i>
+                            </button>
+                            <div class="sidebar-sub <?= $isParentActive ? '' : 'closed' ?>" style="max-height: <?= $isParentActive ? '500px' : '0' ?>">
+                                <div class="sidebar-sub-inner">
+                                    <?php foreach ($item['submenu'] as $sub): ?>
+                                        <?php
+                                        $subUrl = ltrim($sub['url'], '/');
+                                        $isSubActive = strpos($currentUrl, $subUrl) !== false;
+                                        ?>
+                                        <a href="<?= base_url($sub['url']); ?>" class="<?= $isSubActive ? 'active' : '' ?>">
+                                            <?= $sub['title']; ?>
                                         </a>
-                                        <a href="<?= base_url('change-password'); ?>"
-                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50">
-                                            <i class="fas fa-key mr-2"></i> Ubah Password
-                                        </a>
-                                        <div class="border-t border-gray-100"></div>
-                                        <a href="<?= base_url('logout'); ?>"
-                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50">
-                                            <i class="fas fa-sign-out-alt mr-2"></i> Logout
-                                        </a>
-                                    </div>
+                                    <?php endforeach; ?>
                                 </div>
                             </div>
                         </div>
                     <?php else: ?>
-                        <a href="<?= base_url('login'); ?>"
-                            class="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">
-                            Login
+                        <?php
+                        $url = ltrim($item['url'], '/');
+                        $isActive = false;
+                        if (isset($item['active'])) {
+                            foreach ($item['active'] as $a) {
+                                if (strpos($currentUrl, $a) !== false) { $isActive = true; break; }
+                            }
+                        } else {
+                            $isActive = strpos($currentUrl, $url) !== false;
+                        }
+                        ?>
+                        <a href="<?= base_url($item['url']); ?>" class="sidebar-item <?= $isActive ? 'active' : '' ?>">
+                            <i class="<?= $item['icon'] ?? 'fas fa-circle' ?>"></i>
+                            <span><?= $item['title']; ?></span>
                         </a>
                     <?php endif; ?>
+                <?php endforeach; ?>
+            </nav>
+
+            <!-- Footer: User info + account toggle -->
+            <div class="flex-shrink-0 border-t border-gray-100 px-3 py-3">
+                <div class="relative">
+                    <button type="button" id="sidebar-user-btn"
+                        class="flex items-center w-full px-2 py-2 rounded-lg hover:bg-gray-50 transition-colors text-left">
+                        <?php if (session()->get('profile_photo')): ?>
+                            <img src="<?= base_url('profile-photo/' . esc(session()->get('profile_photo'))); ?>" 
+                                 alt="<?= esc(session()->get('nama_lengkap') ?? session()->get('username')); ?>"
+                                 class="h-8 w-8 rounded-full object-cover flex-shrink-0">
+                        <?php else: ?>
+                            <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+                                <span class="text-white font-semibold text-xs">
+                                    <?= strtoupper(substr(session()->get('nama_lengkap') ?? session()->get('username') ?? 'U', 0, 2)); ?>
+                                </span>
+                            </div>
+                        <?php endif; ?>
+                        <div class="ml-3 flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900 truncate leading-tight"><?= session()->get('nama_lengkap'); ?></p>
+                            <p class="text-xs text-gray-400 truncate leading-tight"><?= get_role_name(); ?></p>
+                        </div>
+                        <i class="fas fa-chevron-up text-xs text-gray-400 flex-shrink-0 sidebar-user-chevron"></i>
+                    </button>
+                    <!-- Dropdown -->
+                    <div id="sidebar-user-dropdown" class="hidden absolute bottom-full left-0 right-0 mb-1 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
+                        <a href="<?= base_url('profile'); ?>"
+                            class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-user-circle mr-2 text-gray-400 w-4"></i> Profil
+                        </a>
+                        <a href="<?= base_url('change-password'); ?>"
+                            class="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-key mr-2 text-gray-400 w-4"></i> Ubah Password
+                        </a>
+                        <div class="border-t border-gray-100 my-1"></div>
+                        <a href="<?= base_url('logout'); ?>"
+                            class="flex items-center px-3 py-2 text-sm text-red-600 hover:bg-red-50">
+                            <i class="fas fa-sign-out-alt mr-2 text-red-400 w-4"></i> Logout
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
-    </nav>
+        </aside>
 
-    <!-- Main Content -->
-    <main class="py-6">
-        <div class="desktop-container mx-auto px-6 lg:px-8">
-            <!-- Page Header -->
-            <div class="mb-6">
-                <div class="flex items-center justify-between">
-                    <div class="ml-4 flex-shrink-0">
-                        <?= $this->renderSection('actions'); ?>
+        <!-- Main Content -->
+        <main class="ml-[260px] flex-1 min-h-screen">
+            <!-- Top Bar -->
+            <div class="sticky top-0 bg-white border-b border-gray-200 z-30">
+                <div class="desktop-container mx-auto px-6 lg:px-8">
+                    <div class="flex items-center justify-between h-16">
+                        <div>
+                            <h1 class="text-lg font-semibold text-gray-900"><?= $title ?? 'Dashboard'; ?></h1>
+                            <p class="text-xs text-gray-500"><?= get_role_name(); ?></p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <?= $this->renderSection('actions'); ?>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Flash Messages -->
-            <?= render_alerts() ?>
-
             <!-- Content -->
+            <div class="desktop-container mx-auto px-6 lg:px-8 py-6">
+                <!-- Flash Messages -->
+                <?= render_alerts() ?>
+
+                <!-- Content -->
+                <?= $this->renderSection('content'); ?>
+            </div>
+
+            <!-- Footer -->
+            <footer class="border-t border-gray-200 bg-white">
+                <div class="desktop-container mx-auto px-6 lg:px-8 py-4">
+                    <div class="flex justify-between items-center">
+                        <div class="text-sm text-gray-500">
+                            <p>&copy; <?= date('Y'); ?> SIMACCA. All rights reserved.</p>
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            <p>v1.0.0 - <?= get_role_name(); ?> (Desktop View)</p>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </main>
+    </div>
+    <?php else: ?>
+    <!-- Not logged in - simple layout -->
+    <main class="py-6">
+        <div class="desktop-container mx-auto px-6 lg:px-8">
             <?= $this->renderSection('content'); ?>
         </div>
     </main>
-
-    <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200">
-        <div class="desktop-container mx-auto py-4 px-6 lg:px-8">
-            <div class="flex justify-between items-center">
-                <div class="text-sm text-gray-500">
-                    <p>&copy; <?= date('Y'); ?> SIMACCA. All rights reserved.</p>
-                </div>
-                <div class="text-sm text-gray-500">
-                    <p>v1.0.0 - <?= get_role_name(); ?> (Desktop View)</p>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <?php endif; ?>
 
     <script>
-        // User dropdown toggle
-        const userMenuButton = document.getElementById('user-menu-button');
-        if (userMenuButton) {
-            userMenuButton.addEventListener('click', function() {
-                const dropdown = document.getElementById('user-dropdown');
-                if (dropdown) dropdown.classList.toggle('hidden');
+        // Sidebar dropdown toggle
+        document.querySelectorAll('.sidebar-dropdown-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const group = this.closest('.sidebar-group');
+                const sub = group.querySelector('.sidebar-sub');
+                const chevron = this.querySelector('.sidebar-chevron');
+                const isOpen = !sub.classList.contains('closed');
+                
+                if (isOpen) {
+                    sub.classList.add('closed');
+                    sub.style.maxHeight = '0';
+                    if (chevron) chevron.classList.remove('open');
+                } else {
+                    sub.classList.remove('closed');
+                    sub.style.maxHeight = sub.scrollHeight + 'px';
+                    if (chevron) chevron.classList.add('open');
+                }
+            });
+        });
+
+        // User dropdown toggle (footer)
+        const userBtn = document.getElementById('sidebar-user-btn');
+        const userDropdown = document.getElementById('sidebar-user-dropdown');
+        const userChevron = document.querySelector('.sidebar-user-chevron');
+        if (userBtn && userDropdown) {
+            userBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isOpen = !userDropdown.classList.contains('hidden');
+                userDropdown.classList.toggle('hidden');
+                if (userChevron) {
+                    userChevron.classList.toggle('fa-chevron-up', isOpen);
+                    userChevron.classList.toggle('fa-chevron-down', !isOpen);
+                }
+            });
+            document.addEventListener('click', function(event) {
+                if (!userBtn.contains(event.target) && !userDropdown.contains(event.target)) {
+                    userDropdown.classList.add('hidden');
+                    if (userChevron) {
+                        userChevron.classList.add('fa-chevron-up');
+                        userChevron.classList.remove('fa-chevron-down');
+                    }
+                }
             });
         }
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {
-            const dropdown = document.getElementById('user-dropdown');
-            const button = document.getElementById('user-menu-button');
-            if (!dropdown || !button) return;
-            if (!button.contains(event.target) && !dropdown.contains(event.target)) {
-                dropdown.classList.add('hidden');
-            }
-        });
 
         // Flash close buttons
         document.querySelectorAll('.flash .close').forEach(btn => {

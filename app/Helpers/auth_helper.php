@@ -136,7 +136,7 @@ if (!function_exists('get_sidebar_menu')) {
             'admin' => [
                 [
                     'title' => 'Dashboard',
-                    'icon' => 'fas fa-tachometer-alt',
+                    'icon' => 'fas fa-th',
                     'url' => '/admin/dashboard',
                     'active' => ['admin/dashboard']
                 ],
@@ -180,6 +180,7 @@ if (!function_exists('get_sidebar_menu')) {
                 ],
                 [
                     'title' => 'Mata Pelajaran',
+                    'icon' => 'fas fa-book',
                     'url' => '/admin/mata-pelajaran'
                 ],
                 [
@@ -220,7 +221,7 @@ if (!function_exists('get_sidebar_menu')) {
             'guru_mapel' => [
                 [
                     'title' => 'Dashboard',
-                    'icon' => 'fas fa-tachometer-alt',
+                    'icon' => 'fas fa-th',
                     'url' => '/guru/dashboard',
                     'active' => ['guru/dashboard']
                 ],
@@ -248,7 +249,7 @@ if (!function_exists('get_sidebar_menu')) {
             'wali_kelas' => [
                 [
                     'title' => 'Dashboard',
-                    'icon' => 'fas fa-tachometer-alt',
+                    'icon' => 'fas fa-th',
                     'url' => '/walikelas/dashboard',
                     'active' => ['walikelas/dashboard']
                 ],
@@ -276,7 +277,7 @@ if (!function_exists('get_sidebar_menu')) {
             'wakakur' => [
                 [
                     'title' => 'Dashboard',
-                    'icon' => 'fas fa-tachometer-alt',
+                    'icon' => 'fas fa-th',
                     'url' => '/wakakur/dashboard',
                     'active' => ['wakakur/dashboard']
                 ],
@@ -321,14 +322,14 @@ if (!function_exists('get_sidebar_menu')) {
                 ],
                 [
                     'title' => 'Laporan Detail',
-                    'icon' => 'fas fa-file-chart-line',
+                    'icon' => 'fas fa-chart-bar',
                     'url' => '/wakakur/laporan'
                 ]
             ],
             'siswa' => [
                 [
                     'title' => 'Dashboard',
-                    'icon' => 'fas fa-tachometer-alt',
+                    'icon' => 'fas fa-th',
                     'url' => '/siswa/dashboard',
                     'active' => ['siswa/dashboard']
                 ],

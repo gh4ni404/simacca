@@ -4,8 +4,9 @@
  * Routes to appropriate view based on device type
  */
 
-// Detect device type
-$isMobile = is_mobile_device();
+// Detect device type (respects manual layout override)
+$layout = get_device_layout();
+$isMobile = ($layout === 'templates/mobile_layout');
 
 // Route to appropriate view
 if ($isMobile) {

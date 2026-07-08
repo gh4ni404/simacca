@@ -305,6 +305,7 @@
                     ['url' => 'admin/dashboard', 'icon' => 'fas fa-home', 'label' => 'Beranda'],
                     ['url' => 'admin/guru', 'icon' => 'fas fa-users', 'label' => 'Guru'],
                     ['url' => 'admin/siswa', 'icon' => 'fas fa-user-graduate', 'label' => 'Siswa'],
+                    ['url' => 'admin/kelas', 'icon' => 'fas fa-school', 'label' => 'Kelas'],
                     ['url' => 'admin/laporan/absensi', 'icon' => 'fas fa-chart-bar', 'label' => 'Laporan'],
                 ];
             } elseif ($role === 'guru_mapel') {
@@ -331,7 +332,7 @@
             } elseif ($role === 'siswa') {
                 $bottomNavItems = [
                     ['url' => 'siswa/dashboard', 'icon' => 'fas fa-home', 'label' => 'Beranda'],
-                    ['url' => 'siswa/jadwal', 'icon' => 'fas fa-calendar', 'label' => 'Jadwal'],
+                    ['url' => 'siswa/jadwal', 'icon' => 'fas fa-calendar-alt', 'label' => 'Jadwal'],
                     ['url' => 'siswa/absensi', 'icon' => 'fas fa-clipboard-check', 'label' => 'Absensi'],
                     ['url' => 'siswa/izin', 'icon' => 'fas fa-file-medical', 'label' => 'Izin'],
                     ['url' => 'siswa/profil', 'icon' => 'fas fa-user', 'label' => 'Profil'],

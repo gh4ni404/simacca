@@ -1,4 +1,4 @@
-<?= $this->extend('templates/main_layout') ?>
+<?= $this->extend(get_device_layout()) ?>
 
 <?= $this->section('content') ?>
 <!-- Main Container -->

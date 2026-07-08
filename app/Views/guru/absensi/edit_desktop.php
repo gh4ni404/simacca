@@ -1,4 +1,4 @@
-<?= $this->extend('templates/desktop_layout') ?>
+<?= $this->extend(get_device_layout()) ?>
 
 <?= $this->section('content') ?>
 <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
