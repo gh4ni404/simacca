@@ -20,6 +20,10 @@ class PengaturanController extends BaseController
 
     public function index()
     {
+        $settingModel = new \App\Models\SettingModel();
+        $rolloverBackup = $settingModel->get('rollover_backup');
+        $rolloverBackupData = $rolloverBackup ? json_decode($rolloverBackup, true) : null;
+
         $data = [
             'title' => 'Pengaturan',
             'pageTitle' => 'Pengaturan Sistem',
@@ -27,6 +31,7 @@ class PengaturanController extends BaseController
             'user' => $this->getUserData(),
             'activeTahunAjaran' => get_active_tahun_ajaran(),
             'tahunAjaranList' => get_tahun_ajaran_list(),
+            'rolloverBackup' => $rolloverBackupData,
         ];
 
         return view('admin/pengaturan/index', $data);
@@ -37,7 +42,13 @@ class PengaturanController extends BaseController
         $tahunAjaran = $this->request->getPost('tahun_ajaran');
 
         if (!$tahunAjaran) {
-            session()->setFlashdata('error', 'Tahun ajaran harus dipilih.');
+            session()->setFlashdata('error', 'Tahun ajaran harus diisi.');
+            return redirect()->to('/admin/pengaturan');
+        }
+
+        $error = validate_tahun_ajaran($tahunAjaran);
+        if ($error) {
+            session()->setFlashdata('errors', [$error]);
             return redirect()->to('/admin/pengaturan');
         }
 
@@ -63,6 +74,19 @@ class PengaturanController extends BaseController
             $message = $data['message'];
             session()->setFlashdata('rollover_result', $data);
             session()->setFlashdata('success', $message);
+        } else {
+            session()->setFlashdata('error', $result['message']);
+        }
+
+        return redirect()->to('/admin/pengaturan');
+    }
+
+    public function revert()
+    {
+        $result = $this->siswaService->revertRollover();
+
+        if ($result['success']) {
+            session()->setFlashdata('success', $result['data']['message']);
         } else {
             session()->setFlashdata('error', $result['message']);
         }

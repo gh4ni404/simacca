@@ -6,6 +6,7 @@ use App\Models\SiswaModel;
 use App\Models\UserModel;
 use App\Models\KelasModel;
 use App\Models\AbsensiDetailModel;
+use App\Models\SettingModel;
 
 /**
  * SiswaService
@@ -160,7 +161,7 @@ class SiswaService extends BaseService
                 'nama_lengkap' => $data['nama_lengkap'],
                 'jenis_kelamin' => $data['jenis_kelamin'],
                 'kelas_id' => $data['kelas_id'],
-                'tahun_ajaran' => $data['tahun_ajaran'],
+                'tahun_ajaran' => get_active_tahun_ajaran(),
                 'created_at' => date('Y-m-d H:i:s')
             ];
 
@@ -228,7 +229,6 @@ class SiswaService extends BaseService
                     'nama_lengkap' => $data['nama_lengkap'],
                     'jenis_kelamin' => $data['jenis_kelamin'],
                     'kelas_id' => $data['kelas_id'],
-                    'tahun_ajaran' => $data['tahun_ajaran']
                 ];
 
                 $this->siswaModel->update($id, $siswaData);
@@ -576,12 +576,33 @@ class SiswaService extends BaseService
 
             // Get all active siswa with kelas info
             $siswaList = $this->siswaModel
-                ->select('siswa.*, kelas.tingkat, kelas.jurusan, kelas.nama_kelas')
+                ->select('siswa.*, kelas.tingkat, kelas.jurusan, kelas.nama_kelas, users.is_active as user_is_active')
                 ->join('kelas', 'kelas.id = siswa.kelas_id')
                 ->join('users', 'users.id = siswa.user_id')
                 ->where('users.is_active', 1)
                 ->findAll();
 
+            // Kumpulkan backup SEMUA siswa dulu sebelum perubahan apa pun
+            $backup = [];
+            foreach ($siswaList as $siswa) {
+                $backup[] = [
+                    'siswa_id' => $siswa['id'],
+                    'user_id' => $siswa['user_id'],
+                    'kelas_id' => $siswa['kelas_id'],
+                    'tahun_ajaran' => $siswa['tahun_ajaran'],
+                    'is_active' => $siswa['user_is_active'],
+                ];
+            }
+
+            // Simpan backup ke settings SEBELUM melakukan perubahan
+            $settingModel = new SettingModel();
+            $settingModel->setSetting('rollover_backup', json_encode([
+                'new_tahun_ajaran' => $newTahunAjaran,
+                'created_at' => date('Y-m-d H:i:s'),
+                'changes' => $backup,
+            ]));
+
+            // Lakukan rollover
             foreach ($siswaList as $siswa) {
                 $tingkat = (int) $siswa['tingkat'];
                 $jurusan = $siswa['jurusan'];
@@ -628,6 +649,7 @@ class SiswaService extends BaseService
                 'lulus' => $lulusCount,
                 'skipped' => $skipped,
                 'updated' => $updated,
+                'has_backup' => true,
                 'message' => "Rollover selesai: $naikCount siswa naik kelas, $lulusCount siswa lulus." . (!empty($skipped) ? ' ' . count($skipped) . ' siswa dilewati.' : '')
             ]);
         } catch (\Exception $e) {
@@ -636,17 +658,64 @@ class SiswaService extends BaseService
         }
     }
 
+    public function revertRollover(): array
+    {
+        try {
+            $settingModel = new SettingModel();
+            $backupJson = $settingModel->get('rollover_backup');
+
+            if (!$backupJson) {
+                return $this->errorResponse('Tidak ada data rollover yang bisa di-revert.');
+            }
+
+            $backup = json_decode($backupJson, true);
+            $changes = $backup['changes'] ?? [];
+
+            if (empty($changes)) {
+                return $this->errorResponse('Data backup kosong.');
+            }
+
+            $revertCount = 0;
+            $errors = [];
+
+            foreach ($changes as $item) {
+                try {
+                    // Kembalikan data siswa
+                    $this->siswaModel->update($item['siswa_id'], [
+                        'kelas_id' => $item['kelas_id'],
+                        'tahun_ajaran' => $item['tahun_ajaran'],
+                    ]);
+
+                    // Kembalikan status aktif user
+                    $this->userModel->update($item['user_id'], [
+                        'is_active' => $item['is_active'],
+                    ]);
+
+                    $revertCount++;
+                } catch (\Exception $e) {
+                    $errors[] = "Gagal revert siswa ID {$item['siswa_id']}: " . $e->getMessage();
+                }
+            }
+
+            // Hapus backup setelah revert berhasil
+            $settingModel->setSetting('rollover_backup', '');
+
+            $this->logInfo('revertRollover', "Revert sukses: $revertCount siswa");
+
+            return $this->successResponse([
+                'reverted' => $revertCount,
+                'errors' => $errors,
+                'message' => "Rollover berhasil di-revert: $revertCount siswa dikembalikan." . (!empty($errors) ? ' ' . count($errors) . ' gagal.' : '')
+            ]);
+        } catch (\Exception $e) {
+            $this->logError('revertRollover', $e);
+            return $this->errorResponse('Gagal revert rollover: ' . $e->getMessage());
+        }
+    }
+
     private function getTahunAjaranList(): array
     {
-        $currentYear = date('Y');
-        $years = [];
-
-        for ($i = -2; $i <= 2; $i++) {
-            $year = $currentYear + $i;
-            $years[] = ($year - 1) . '/' . $year;
-        }
-
-        return $years;
+        return get_tahun_ajaran_list();
     }
 
     /**

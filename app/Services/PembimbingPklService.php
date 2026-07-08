@@ -62,7 +62,6 @@ class PembimbingPklService extends BaseService
         $rules = [
             'guru_id'       => 'required|numeric',
             'tempat_pkl_id' => 'required|numeric',
-            'tahun_ajaran'  => 'required',
         ];
 
         if (!$this->validate($data, $rules)) {
@@ -73,7 +72,7 @@ class PembimbingPklService extends BaseService
             $insertData = [
                 'guru_id'       => $data['guru_id'],
                 'tempat_pkl_id' => $data['tempat_pkl_id'],
-                'tahun_ajaran'  => $data['tahun_ajaran'],
+                'tahun_ajaran'  => get_active_tahun_ajaran(),
                 'created_at'    => date('Y-m-d H:i:s'),
             ];
 
@@ -100,7 +99,6 @@ class PembimbingPklService extends BaseService
         $rules = [
             'guru_id'       => 'required|numeric',
             'tempat_pkl_id' => 'required|numeric',
-            'tahun_ajaran'  => 'required',
         ];
 
         if (!$this->validate($data, $rules)) {
@@ -111,7 +109,6 @@ class PembimbingPklService extends BaseService
             $updateData = [
                 'guru_id'       => $data['guru_id'],
                 'tempat_pkl_id' => $data['tempat_pkl_id'],
-                'tahun_ajaran'  => $data['tahun_ajaran'],
             ];
 
             $this->pembimbingPklModel->update($id, $updateData);
@@ -341,26 +338,26 @@ class PembimbingPklService extends BaseService
 
     public function createSiswaPkl(array $data): array
     {
+        $tahunAjaran = get_active_tahun_ajaran();
         $rules = [
             'siswa_id'      => 'required|numeric',
             'tempat_pkl_id' => 'required|numeric',
-            'tahun_ajaran'  => 'required',
         ];
 
         if (!$this->validate($data, $rules)) {
             return $this->errorResponse('Validasi gagal');
         }
 
-        $existing = $this->siswaPklModel->getBySiswaAndTahun($data['siswa_id'], $data['tahun_ajaran']);
+        $existing = $this->siswaPklModel->getBySiswaAndTahun($data['siswa_id'], $tahunAjaran);
         if ($existing) {
             return $this->errorResponse('Siswa sudah memiliki penempatan PKL di tahun ajaran ini');
         }
 
-        return $this->executeInTransaction(function () use ($data) {
+        return $this->executeInTransaction(function () use ($data, $tahunAjaran) {
             $insertData = [
                 'siswa_id'      => $data['siswa_id'],
                 'tempat_pkl_id' => $data['tempat_pkl_id'],
-                'tahun_ajaran'  => $data['tahun_ajaran'],
+                'tahun_ajaran'  => $tahunAjaran,
                 'created_at'    => date('Y-m-d H:i:s'),
             ];
 
@@ -374,11 +371,13 @@ class PembimbingPklService extends BaseService
         });
     }
 
-    public function createSiswaPklBatch(array $siswaIds, int $tempatPklId, string $tahunAjaran): array
+    public function createSiswaPklBatch(array $siswaIds, int $tempatPklId): array
     {
         if (empty($siswaIds)) {
             return $this->errorResponse('Tidak ada siswa yang dipilih');
         }
+
+        $tahunAjaran = get_active_tahun_ajaran();
 
         return $this->executeInTransaction(function () use ($siswaIds, $tempatPklId, $tahunAjaran) {
             $success = 0;

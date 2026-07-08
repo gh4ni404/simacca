@@ -51,26 +51,6 @@
                         <?php endif; ?>
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Ajaran *</label>
-                        <select name="tahun_ajaran" required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="">Pilih Tahun Ajaran</option>
-                            <?php
-                            $currentYear = date('Y');
-                            $startYear = $currentYear - 2;
-                            for ($y = $startYear; $y <= $currentYear + 1; $y++):
-                                $ta = $y . '/' . ($y + 1);
-                            ?>
-                                <option value="<?= $ta ?>" <?= (old('tahun_ajaran') == $ta) ? 'selected' : '' ?>>
-                                    <?= $ta ?>
-                                </option>
-                            <?php endfor; ?>
-                        </select>
-                        <?php if ($validation->hasError('tahun_ajaran')): ?>
-                            <p class="text-red-600 text-xs mt-1"><?= $validation->getError('tahun_ajaran') ?></p>
-                        <?php endif; ?>
-                    </div>
                 </div>
             </div>
 

@@ -110,7 +110,7 @@ class JadwalService extends BaseService
                 'jam_mulai' => $data['jam_mulai'],
                 'jam_selesai' => $data['jam_selesai'],
                 'semester' => $data['semester'],
-                'tahun_ajaran' => $data['tahun_ajaran']
+                'tahun_ajaran' => get_active_tahun_ajaran()
             ];
 
             // Save to database
@@ -162,7 +162,6 @@ class JadwalService extends BaseService
                 'jam_mulai' => $data['jam_mulai'],
                 'jam_selesai' => $data['jam_selesai'],
                 'semester' => $data['semester'],
-                'tahun_ajaran' => $data['tahun_ajaran']
             ];
 
             // Update database

@@ -34,7 +34,7 @@ class PembimbingPklModel extends Model
     protected $validationRules      = [
         'guru_id'       => 'required|numeric',
         'tempat_pkl_id' => 'required|numeric',
-        'tahun_ajaran'  => 'required',
+        'tahun_ajaran'  => 'required|regex_match[/\d{4}\/\d{4}/]',
     ];
     protected $validationMessages   = [];
     protected $skipValidation       = false;

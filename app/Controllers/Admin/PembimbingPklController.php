@@ -47,7 +47,6 @@ class PembimbingPklController extends BaseController
             'user'              => $this->getUserData(),
             'guruList'          => $listsResult['data']['guruList'] ?? [],
             'tempatPklList'     => $listsResult['data']['tempatPklList'] ?? [],
-            'tahunAjaranList'   => $listsResult['data']['tahunAjaranList'] ?? [],
             'validation'        => \Config\Services::validation(),
         ];
 
@@ -59,7 +58,6 @@ class PembimbingPklController extends BaseController
         $data = [
             'guru_id'       => $this->request->getPost('guru_id'),
             'tempat_pkl_id' => $this->request->getPost('tempat_pkl_id'),
-            'tahun_ajaran'  => $this->request->getPost('tahun_ajaran'),
         ];
 
         $result = $this->pembimbingPklService->createPembimbingPkl($data);
@@ -91,7 +89,6 @@ class PembimbingPklController extends BaseController
             'pembimbing'        => $pembimbingResult['data'],
             'guruList'          => $listsResult['data']['guruList'] ?? [],
             'tempatPklList'     => $listsResult['data']['tempatPklList'] ?? [],
-            'tahunAjaranList'   => $listsResult['data']['tahunAjaranList'] ?? [],
             'validation'        => \Config\Services::validation(),
         ];
 
@@ -103,7 +100,6 @@ class PembimbingPklController extends BaseController
         $data = [
             'guru_id'       => $this->request->getPost('guru_id'),
             'tempat_pkl_id' => $this->request->getPost('tempat_pkl_id'),
-            'tahun_ajaran'  => $this->request->getPost('tahun_ajaran'),
         ];
 
         $result = $this->pembimbingPklService->updatePembimbingPkl($id, $data);
@@ -229,7 +225,6 @@ class PembimbingPklController extends BaseController
             'user'              => $this->getUserData(),
             'siswaList'         => $listsResult['data']['siswaList'] ?? [],
             'tempatPklList'     => $listsResult['data']['tempatPklList'] ?? [],
-            'tahunAjaranList'   => $listsResult['data']['tahunAjaranList'] ?? [],
             'validation'        => \Config\Services::validation(),
         ];
 
@@ -241,7 +236,6 @@ class PembimbingPklController extends BaseController
         $data = [
             'siswa_id'      => $this->request->getPost('siswa_id'),
             'tempat_pkl_id' => $this->request->getPost('tempat_pkl_id'),
-            'tahun_ajaran'  => $this->request->getPost('tahun_ajaran'),
         ];
 
         $result = $this->pembimbingPklService->createSiswaPkl($data);
@@ -256,7 +250,7 @@ class PembimbingPklController extends BaseController
 
     public function siswaPklBatch()
     {
-        $tahunAjaran = $this->request->getGet('tahun_ajaran') ?? date('Y') . '/' . (date('Y') + 1);
+        $tahunAjaran = get_active_tahun_ajaran();
         $tempatPklId = $this->request->getGet('tempat_pkl_id');
 
         $siswaResult = $this->pembimbingPklService->getSiswaXIIWithPlacement($tahunAjaran);
@@ -268,7 +262,6 @@ class PembimbingPklController extends BaseController
             'user'              => $this->getUserData(),
             'siswaList'         => $siswaResult['data'] ?? [],
             'tempatPklList'     => $this->pembimbingPklService->getFormLists()['data']['tempatPklList'] ?? [],
-            'tahunAjaran'       => $tahunAjaran,
             'selectedTempatPkl' => $tempatPklId,
             'validation'        => \Config\Services::validation(),
         ];
@@ -280,14 +273,13 @@ class PembimbingPklController extends BaseController
     {
         $siswaIds       = $this->request->getPost('siswa_ids');
         $tempatPklId    = $this->request->getPost('tempat_pkl_id');
-        $tahunAjaran    = $this->request->getPost('tahun_ajaran');
 
         if (empty($siswaIds) || !is_array($siswaIds)) {
             session()->setFlashdata('error', 'Pilih minimal satu siswa');
             return redirect()->back()->withInput();
         }
 
-        $result = $this->pembimbingPklService->createSiswaPklBatch($siswaIds, $tempatPklId, $tahunAjaran);
+        $result = $this->pembimbingPklService->createSiswaPklBatch($siswaIds, $tempatPklId);
 
         if (!$result['success']) {
             session()->setFlashdata('error', $result['message']);

@@ -28,8 +28,8 @@
     <form action="<?= base_url('admin/pembimbing-pkl/siswa-pkl/batch-simpan') ?>" method="POST" id="batchForm">
         <?= csrf_field() ?>
 
-        <!-- Pilih Tempat PKL dan Tahun Ajaran -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-lg border">
+        <!-- Pilih Tempat PKL -->
+        <div class="mb-6 p-4 bg-gray-50 rounded-lg border">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Tempat PKL *</label>
                 <select name="tempat_pkl_id" id="filterTempatPkl" required
@@ -40,21 +40,6 @@
                             <?= esc($nama) ?>
                         </option>
                     <?php endforeach; ?>
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Ajaran *</label>
-                <select name="tahun_ajaran" id="filterTahunAjaran" required
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <?php
-                    $currentYear = date('Y');
-                    for ($y = $currentYear - 2; $y <= $currentYear + 1; $y++):
-                        $ta = $y . '/' . ($y + 1);
-                    ?>
-                        <option value="<?= $ta ?>" <?= $tahunAjaran == $ta ? 'selected' : '' ?>>
-                            <?= $ta ?>
-                        </option>
-                    <?php endfor; ?>
                 </select>
             </div>
         </div>
@@ -208,15 +193,14 @@
         updateCount();
 
         const tempatPklSelect = document.getElementById('filterTempatPkl');
-        const tahunAjaranSelect = document.getElementById('filterTahunAjaran');
+        const tahunAjaran = '<?= get_active_tahun_ajaran() ?>';
         const pembimbingInfo = document.getElementById('pembimbingInfo');
         const pembimbingNama = document.getElementById('pembimbingNama');
 
         function loadPembimbing() {
             const tempatPklId = tempatPklSelect.value;
-            const tahunAjaran = tahunAjaranSelect.value;
 
-            if (!tempatPklId || !tahunAjaran) {
+            if (!tempatPklId) {
                 pembimbingInfo.classList.add('hidden');
                 return;
             }
@@ -249,9 +233,8 @@
         }
 
         tempatPklSelect.addEventListener('change', loadPembimbing);
-        tahunAjaranSelect.addEventListener('change', loadPembimbing);
 
-        if (tempatPklSelect.value && tahunAjaranSelect.value) {
+        if (tempatPklSelect.value) {
             loadPembimbing();
         }
     });

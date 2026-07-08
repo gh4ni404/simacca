@@ -24,10 +24,26 @@ if (!function_exists('get_tahun_ajaran_list')) {
     {
         $currentYear = date('Y');
         $years = [];
-        for ($i = -2; $i <= 2; $i++) {
+        for ($i = -3; $i <= 5; $i++) {
             $year = $currentYear + $i;
             $years[] = ($year - 1) . '/' . $year;
         }
         return $years;
+    }
+}
+
+if (!function_exists('validate_tahun_ajaran')) {
+    function validate_tahun_ajaran(string $tahunAjaran): ?string
+    {
+        if (!preg_match('/^\d{4}\/\d{4}$/', $tahunAjaran)) {
+            return 'Format tahun ajaran harus YYYY/YYYY (contoh: 2028/2029)';
+        }
+        $parts = explode('/', $tahunAjaran);
+        $tahun1 = (int) $parts[0];
+        $tahun2 = (int) $parts[1];
+        if ($tahun2 !== $tahun1 + 1) {
+            return 'Tahun ajaran tidak valid: ' . $tahun1 . '/' . $tahun2 . '. Harus berurutan (contoh: 2027/2028)';
+        }
+        return null;
     }
 }

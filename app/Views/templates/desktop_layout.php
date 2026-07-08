@@ -193,7 +193,7 @@
                                     <?php foreach ($item['submenu'] as $sub): ?>
                                         <?php
                                         $subUrl = ltrim($sub['url'], '/');
-                                        $isSubActive = strpos($currentUrl, $subUrl) !== false;
+                                        $isSubActive = $currentUrl === $subUrl;
                                         ?>
                                         <a href="<?= base_url($sub['url']); ?>" class="<?= $isSubActive ? 'active' : '' ?>">
                                             <?= $sub['title']; ?>

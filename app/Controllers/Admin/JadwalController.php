@@ -76,8 +76,6 @@ class JadwalController extends BaseController
             'kelasOptions' => $formLists['data']['kelasOptions'],
             'hariList' => $formLists['data']['hariList'],
             'semesterList' => $formLists['data']['semesterList'],
-            'tahunAjaranList' => $formLists['data']['tahunAjaranList'],
-            'currentYear' => date('Y')
         ];
 
         return view('admin/jadwal/create', $data);
@@ -94,8 +92,9 @@ class JadwalController extends BaseController
         }
 
         // Validate input
-        $jadwalModel = new \App\Models\JadwalMengajarModel();
-        if (!$this->validate($jadwalModel->getValidationRules())) {
+        $rules = (new \App\Models\JadwalMengajarModel())->getValidationRules();
+        unset($rules['tahun_ajaran']);
+        if (!$this->validate($rules)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
@@ -108,7 +107,6 @@ class JadwalController extends BaseController
             'jam_mulai' => $this->request->getPost('jam_mulai'),
             'jam_selesai' => $this->request->getPost('jam_selesai'),
             'semester' => $this->request->getPost('semester'),
-            'tahun_ajaran' => $this->request->getPost('tahun_ajaran')
         ];
 
         $result = $this->jadwalService->createJadwal($data);
@@ -151,8 +149,6 @@ class JadwalController extends BaseController
             'kelasOptions' => $formLists['data']['kelasOptions'],
             'hariList' => $formLists['data']['hariList'],
             'semesterList' => $formLists['data']['semesterList'],
-            'tahunAjaranList' => $formLists['data']['tahunAjaranList'],
-            'currentYear' => date('Y')
         ];
 
         return view('admin/jadwal/edit', $data);
@@ -169,8 +165,9 @@ class JadwalController extends BaseController
         }
 
         // Validate input
-        $jadwalModel = new \App\Models\JadwalMengajarModel();
-        if (!$this->validate($jadwalModel->getValidationRules())) {
+        $rules = (new \App\Models\JadwalMengajarModel())->getValidationRules();
+        unset($rules['tahun_ajaran']);
+        if (!$this->validate($rules)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
@@ -183,7 +180,6 @@ class JadwalController extends BaseController
             'jam_mulai' => $this->request->getPost('jam_mulai'),
             'jam_selesai' => $this->request->getPost('jam_selesai'),
             'semester' => $this->request->getPost('semester'),
-            'tahun_ajaran' => $this->request->getPost('tahun_ajaran')
         ];
 
         $result = $this->jadwalService->updateJadwal($id, $data);

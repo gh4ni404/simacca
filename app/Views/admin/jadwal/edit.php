@@ -152,29 +152,6 @@
                     <?php if (session('errors.semester')): ?>
                         <p class="mt-1 text-sm text-red-600"><?= session('errors.semester'); ?></p>
                     <?php endif; ?>
-                </div>
-
-                <!-- Tahun Ajaran -->
-                <div>
-                    <label for="tahun_ajaran" class="block text-sm font-medium text-gray-700 mb-2">
-                        Tahun Ajaran *
-                    </label>
-                    <select id="tahun_ajaran"
-                        name="tahun_ajaran"
-                        class="w-full px-4 py-2 border <?= session('errors.tahun_ajaran') ? 'border-red-500' : 'border-gray-300'; ?> rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        required>
-                        <option value="">Pilih Tahun Ajaran</option>
-                        <?php foreach ($tahunAjaranList as $key => $value): ?>
-                            <option value="<?= $key; ?>" <?= (old('tahun_ajaran', $jadwal['tahun_ajaran']) == $key) ? 'selected' : ''; ?>>
-                                <?= $value; ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                    <?php if (session('errors.tahun_ajaran')): ?>
-                        <p class="mt-1 text-sm text-red-600"><?= session('errors.tahun_ajaran'); ?></p>
-                    <?php endif; ?>
-                    <p class="mt-1 text-xs text-gray-500">Format: <?= $currentYear ?>/<?= $currentYear + 1 ?></p>
-                </div>
             </div>
 
             <!-- Konflik Check -->

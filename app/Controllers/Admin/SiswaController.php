@@ -75,7 +75,6 @@ class SiswaController extends BaseController
             'user' => $this->getUserData(),
             'kelasList' => $formLists['data']['kelasList'],
             'validation' => \Config\Services::validation(),
-            'tahunAjaranList' => $formLists['data']['tahunAjaranList']
         ];
 
         return view('admin/siswa/tambah', $data);
@@ -92,7 +91,6 @@ class SiswaController extends BaseController
             'nama_lengkap' => 'required',
             'jenis_kelamin' => 'required',
             'kelas_id' => 'required|numeric',
-            'tahun_ajaran' => 'required',
             'username' => 'required|is_unique[users.username]',
             'password' => 'required|min_length[6]',
             'email' => 'valid_email'
@@ -108,7 +106,6 @@ class SiswaController extends BaseController
             'nama_lengkap' => $this->request->getPost('nama_lengkap'),
             'jenis_kelamin' => $this->request->getPost('jenis_kelamin'),
             'kelas_id' => $this->request->getPost('kelas_id'),
-            'tahun_ajaran' => $this->request->getPost('tahun_ajaran'),
             'username' => $this->request->getPost('username'),
             'password' => $this->request->getPost('password'),
             'email' => $this->request->getPost('email')
@@ -147,7 +144,6 @@ class SiswaController extends BaseController
             'siswa' => $result['data']['siswa'],
             'userData' => $result['data']['user'],
             'kelasList' => $formLists['data']['kelasList'],
-            'tahunAjaranList' => $formLists['data']['tahunAjaranList'],
             'validation' => \Config\Services::validation()
         ];
 
@@ -165,7 +161,6 @@ class SiswaController extends BaseController
             'nama_lengkap' => 'required',
             'jenis_kelamin' => 'required',
             'kelas_id' => 'required|numeric',
-            'tahun_ajaran' => 'required',
             'username' => 'required',
             'email' => 'valid_email'
         ];
@@ -185,7 +180,6 @@ class SiswaController extends BaseController
             'nama_lengkap' => $this->request->getPost('nama_lengkap'),
             'jenis_kelamin' => $this->request->getPost('jenis_kelamin'),
             'kelas_id' => $this->request->getPost('kelas_id'),
-            'tahun_ajaran' => $this->request->getPost('tahun_ajaran'),
             'username' => $this->request->getPost('username'),
             'email' => $this->request->getPost('email'),
             'password' => $this->request->getPost('password')

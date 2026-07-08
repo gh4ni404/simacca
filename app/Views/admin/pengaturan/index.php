@@ -13,16 +13,15 @@
 
         <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 mb-2">Tahun Ajaran Aktif</label>
-            <p class="text-gray-500 text-xs mb-3">Semua data siswa, jadwal, dan kegiatan akan menggunakan tahun ajaran ini.</p>
-            <select name="tahun_ajaran"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <option value="">Pilih Tahun Ajaran</option>
-                <?php foreach ($tahunAjaranList as $tahun): ?>
-                    <option value="<?= $tahun ?>" <?= $activeTahunAjaran == $tahun ? 'selected' : '' ?>>
-                        <?= $tahun ?>
-                    </option>
+            <p class="text-gray-500 text-xs mb-3">Semua data siswa, jadwal, dan kegiatan akan menggunakan tahun ajaran ini. Format: <strong>YYYY/YYYY</strong> (contoh: 2028/2029).</p>
+            <input type="text" name="tahun_ajaran" value="<?= old('tahun_ajaran', $activeTahunAjaran) ?>"
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                   placeholder="2028/2029" maxlength="9">
+            <?php if (session()->getFlashdata('errors')): ?>
+                <?php foreach (session()->getFlashdata('errors') as $err): ?>
+                    <p class="text-red-600 text-xs mt-1"><?= esc($err) ?></p>
                 <?php endforeach; ?>
-            </select>
+            <?php endif; ?>
         </div>
 
         <div class="flex items-center space-x-3">
@@ -50,13 +49,32 @@
             <li>Semua siswa akan diupdate <strong>tahun ajaran</strong>-nya</li>
         </ul>
 
-        <form action="<?= base_url('admin/pengaturan/rollover') ?>" method="post" onsubmit="return confirm('Yakin akan menjalankan rollover? Data kelas siswa akan berubah dan tidak bisa dibatalkan.')">
-            <?= csrf_field() ?>
-            <input type="hidden" name="tahun_ajaran" value="<?= $activeTahunAjaran ?>">
-            <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-lg">
-                <i class="fas fa-arrow-up mr-2"></i> Jalankan Rollover
-            </button>
-        </form>
+        <?php if ($rolloverBackup && !empty($rolloverBackup['changes'])): ?>
+            <!-- Ada backup rollover, tampilkan opsi revert -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                <p class="text-sm text-yellow-800 font-medium mb-2">
+                    <i class="fas fa-history mr-1"></i> Rollover terakhir: <?= esc($rolloverBackup['created_at'] ?? '') ?>
+                </p>
+                <p class="text-sm text-yellow-700 mb-3">
+                    <?= count($rolloverBackup['changes']) ?> siswa telah di-rollover ke tahun ajaran <?= esc($rolloverBackup['new_tahun_ajaran'] ?? '') ?>.
+                </p>
+                <form action="<?= base_url('admin/pengaturan/revert') ?>" method="post" onsubmit="return confirm('Yakin akan revert rollover? Semua perubahan akan dikembalikan ke keadaan sebelum rollover.')">
+                    <?= csrf_field() ?>
+                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm">
+                        <i class="fas fa-undo mr-2"></i> Revert Rollover
+                    </button>
+                </form>
+            </div>
+        <?php else: ?>
+            <!-- Tidak ada backup, tampilkan tombol rollover -->
+            <form action="<?= base_url('admin/pengaturan/rollover') ?>" method="post" onsubmit="return confirm('Yakin akan menjalankan rollover? Data kelas siswa akan berubah. Simpan backup otomatis akan dibuat untuk keperluan revert.')">
+                <?= csrf_field() ?>
+                <input type="hidden" name="tahun_ajaran" value="<?= $activeTahunAjaran ?>">
+                <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-lg">
+                    <i class="fas fa-arrow-up mr-2"></i> Jalankan Rollover
+                </button>
+            </form>
+        <?php endif; ?>
     </div>
 
     <!-- Rollover Result -->

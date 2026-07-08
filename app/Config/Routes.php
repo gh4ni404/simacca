@@ -183,6 +183,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('pengaturan', 'Admin\PengaturanController::index', ['filter' => 'role:admin']);
     $routes->post('pengaturan/update', 'Admin\PengaturanController::update', ['filter' => 'role:admin']);
     $routes->post('pengaturan/rollover', 'Admin\PengaturanController::rollover', ['filter' => 'role:admin']);
+    $routes->post('pengaturan/revert', 'Admin\PengaturanController::revert', ['filter' => 'role:admin']);
 
     // Laporan
     $routes->get('laporan/absensi', 'Admin\LaporanController::absensi', ['filter' => 'role:admin']);
