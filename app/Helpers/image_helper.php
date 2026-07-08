@@ -216,7 +216,7 @@ if (!function_exists('optimize_image')) {
             $savings = $originalSize > 0 ? round((($originalSize - $newSize) / $originalSize) * 100, 2) : 0;
             
             log_message('info', sprintf(
-                'Image optimized: %s → %s (%.2f%% smaller, %dx%d → %dx%d)',
+                'Image optimized: %s -> %s (%.2f%% smaller, %dx%d -> %dx%d)',
                 basename($sourcePath),
                 basename($destPath),
                 $savings,
@@ -277,6 +277,20 @@ if (!function_exists('optimize_izin_photo')) {
     function optimize_izin_photo(string $sourcePath, string $destPath): bool
     {
         // Izin photos: max 1920x1920, quality 85
+        return optimize_image($sourcePath, $destPath, 1920, 1920, 85);
+    }
+}
+
+if (!function_exists('optimize_jurnal_pkl_photo')) {
+    /**
+     * Optimize jurnal PKL photo with specific settings
+     * 
+     * @param string $sourcePath Full path to source image
+     * @param string $destPath Full path to destination
+     * @return bool True on success, false on failure
+     */
+    function optimize_jurnal_pkl_photo(string $sourcePath, string $destPath): bool
+    {
         return optimize_image($sourcePath, $destPath, 1920, 1920, 85);
     }
 }

@@ -229,6 +229,11 @@ $routes->group('guru', ['filter' => 'role:guru_mapel,wakakur'], function ($route
     $routes->get('laporan', 'Guru\LaporanController::index', ['as' => 'guru.laporan']);
     $routes->get('laporan/print', 'Guru\LaporanController::print');
     
+    // Jurnal PKL (Verifikasi Pembimbing)
+    $routes->get('jurnal-pkl', 'Guru\JurnalPklController::index', ['as' => 'guru.jurnal_pkl']);
+    $routes->post('jurnal-pkl/verify/(:num)', 'Guru\JurnalPklController::verify/$1');
+    $routes->get('jurnal-pkl/detail/(:num)', 'Guru\JurnalPklController::detail/$1');
+
     // Absensi Guru (Self Check-in/Check-out)
     $routes->get('absensi-guru', 'Guru\AbsensiGuruController::index', ['as' => 'guru.absensi_guru']);
     $routes->post('absensi-guru/check-in', 'Guru\AbsensiGuruController::checkIn');
@@ -285,6 +290,16 @@ $routes->group('siswa', ['filter' => 'role:siswa'], function ($routes) {
     $routes->get('profil', 'Siswa\ProfilController::index', ['as' => 'siswa.profil']);
     $routes->post('profil/update', 'Siswa\ProfilController::update');
     $routes->post('profil/change-password', 'Siswa\ProfilController::changePassword');
+
+    // Jurnal PKL
+    $routes->get('jurnal-pkl', 'Siswa\JurnalPklController::index', ['as' => 'siswa.jurnal_pkl']);
+    $routes->get('jurnal-pkl/tambah', 'Siswa\JurnalPklController::create');
+    $routes->post('jurnal-pkl/simpan', 'Siswa\JurnalPklController::store');
+    $routes->get('jurnal-pkl/edit/(:num)', 'Siswa\JurnalPklController::edit/$1');
+    $routes->post('jurnal-pkl/update/(:num)', 'Siswa\JurnalPklController::update/$1');
+    $routes->get('jurnal-pkl/hapus/(:num)', 'Siswa\JurnalPklController::delete/$1');
+    $routes->get('jurnal-pkl/detail/(:num)/(:num)', 'Siswa\JurnalPklController::detail/$1/$2');
+    $routes->get('jurnal-pkl/cetak/(:num)/(:num)', 'Siswa\JurnalPklController::print/$1/$2');
 });
 
 // Profile Routes (for all roles)
@@ -297,6 +312,7 @@ $routes->group('profile', ['filter' => 'auth'], function ($routes) {
 
 // File Routes (for serving uploaded files)
 $routes->get('files/jurnal/(:segment)', 'FileController::jurnalFoto/$1');
+$routes->get('files/jurnal-pkl/(:segment)', 'FileController::jurnalPklFoto/$1');
 $routes->get('files/absensi-guru/(:segment)/(:segment)/(:segment)/(:segment)', 'FileController::absensiGuruFoto/$1/$2/$3/$4');
 $routes->get('profile-photo/(:segment)', 'FileController::profilePhoto/$1');
 

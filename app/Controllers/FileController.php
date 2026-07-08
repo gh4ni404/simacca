@@ -93,6 +93,40 @@ class FileController extends BaseController
     }
 
     /**
+     * Serve jurnal PKL foto from writable/uploads/jurnal_pkl
+     */
+    public function jurnalPklFoto($filename)
+    {
+        $filename = basename($filename);
+
+        $filepath = WRITEPATH . 'uploads/jurnal_pkl/' . $filename;
+
+        if (!file_exists($filepath)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('File tidak ditemukan');
+        }
+
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $filepath);
+        finfo_close($finfo);
+
+        if (!str_starts_with($mimeType, 'image/')) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('File bukan gambar');
+        }
+
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        header('Content-Type: ' . $mimeType);
+        header('Content-Length: ' . filesize($filepath));
+        header('Cache-Control: public, max-age=31536000');
+        header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 31536000) . ' GMT');
+
+        readfile($filepath);
+        exit;
+    }
+
+    /**
      * Serve absensi guru photo from writable/uploads/absensi_guru
      * This controller provides secure access to uploaded attendance photos
      * Supports nested directory structure: YYYY/MM/DD/filename.jpg

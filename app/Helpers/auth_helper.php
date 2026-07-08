@@ -247,6 +247,12 @@ if (!function_exists('get_sidebar_menu')) {
                     'url' => '/guru/jurnal'
                 ],
                 [
+                    'title' => 'Verifikasi Jurnal PKL',
+                    'icon' => 'fas fa-check-double',
+                    'url' => '/guru/jurnal-pkl',
+                    'active' => ['guru/jurnal-pkl']
+                ],
+                [
                     'title' => 'Laporan',
                     'icon' => 'fas fa-chart-bar',
                     'url' => '/guru/laporan'
@@ -348,6 +354,12 @@ if (!function_exists('get_sidebar_menu')) {
                     'title' => 'Absensi',
                     'icon' => 'fas fa-clipboard-check',
                     'url' => '/siswa/absensi'
+                ],
+                [
+                    'title' => 'Jurnal PKL',
+                    'icon' => 'fas fa-book',
+                    'url' => '/siswa/jurnal-pkl',
+                    'active' => ['siswa/jurnal-pkl']
                 ],
                 [
                     'title' => 'Pengajuan Izin',

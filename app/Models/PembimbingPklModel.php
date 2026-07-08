@@ -81,6 +81,19 @@ class PembimbingPklModel extends Model
             ->findAll();
     }
 
+    public function getByTempatPklAndTahun($tempatPklId, $tahunAjaran)
+    {
+        return $this->select('
+                pembimbing_pkl.*,
+                guru.nama_lengkap AS nama_guru,
+                guru.nip
+            ')
+            ->join('guru', 'guru.id = pembimbing_pkl.guru_id')
+            ->where('pembimbing_pkl.tempat_pkl_id', $tempatPklId)
+            ->where('pembimbing_pkl.tahun_ajaran', $tahunAjaran)
+            ->first();
+    }
+
     public function getTahunAjaranList()
     {
         $data = $this->select('tahun_ajaran')
