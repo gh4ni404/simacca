@@ -156,15 +156,6 @@ class Filters extends BaseFilters
                 'reset-password/*'
             ]
         ],
-        'profile_completion' => [
-            'before' => [
-                'admin/*',
-                'guru/*',
-                'walikelas/*',
-                'siswa/*',
-                'dashboard/*',
-                'change-password/*',
-            ]
-        ]
+
     ];
 }
