@@ -67,8 +67,18 @@ class JurnalPklModel extends Model
         return $this->findAll();
     }
 
-    public function getBySiswaAndWeek($siswaId, $tahun, $minggu)
+    public function getBySiswaAndWeek($siswaId, $tahun, $minggu, $startDate = null, $weekBase = null)
     {
+        if ($startDate && $weekBase) {
+            $sql = "SELECT * FROM {$this->table}
+                    WHERE siswa_id = ?
+                    AND FLOOR(DATEDIFF(tanggal, ?) / 7) + 1 = ?
+                    AND tanggal >= ?
+                    ORDER BY tanggal ASC";
+
+            return $this->db->query($sql, [$siswaId, $weekBase, $minggu, $startDate])->getResultArray();
+        }
+
         $builder = $this->db->table($this->table)
             ->where('siswa_id', $siswaId)
             ->where('YEAR(tanggal)', $tahun)
@@ -78,8 +88,27 @@ class JurnalPklModel extends Model
         return $builder->get()->getResultArray();
     }
 
-    public function getWeeklyGrouped($siswaId)
+    public function getWeeklyGrouped($siswaId, $startDate = null, $weekBase = null)
     {
+        if ($startDate && $weekBase) {
+            $sql = "SELECT
+                        YEAR(MIN(tanggal)) AS tahun,
+                        FLOOR(DATEDIFF(tanggal, ?) / 7) + 1 AS minggu_ke,
+                        MIN(tanggal) AS tanggal_mulai,
+                        MAX(tanggal) AS tanggal_selesai,
+                        COUNT(*) AS total_entry,
+                        SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending,
+                        SUM(CASE WHEN status = 'disetujui' THEN 1 ELSE 0 END) AS disetujui,
+                        SUM(CASE WHEN status = 'revisi' THEN 1 ELSE 0 END) AS revisi,
+                        SUM(CASE WHEN status = 'ditolak' THEN 1 ELSE 0 END) AS ditolak
+                    FROM jurnal_pkl
+                    WHERE siswa_id = ? AND tanggal >= ?
+                    GROUP BY minggu_ke
+                    ORDER BY minggu_ke DESC";
+
+            return $this->db->query($sql, [$weekBase, $siswaId, $startDate])->getResultArray();
+        }
+
         $sql = "SELECT
                     YEAR(tanggal) AS tahun,
                     WEEK(tanggal, 1) AS minggu_ke,
@@ -123,8 +152,26 @@ class JurnalPklModel extends Model
         return $this->db->query($sql, [$guruId])->getResultArray();
     }
 
-    public function getByPembimbingAndWeek($guruId, $tahun, $minggu)
+    public function getByPembimbingAndWeek($guruId, $tahun, $minggu, $startDate = null, $weekBase = null)
     {
+        if ($startDate && $weekBase) {
+            $sql = "SELECT jp.*, 
+                           s.nama_lengkap AS nama_siswa,
+                           s.nis,
+                           k.nama_kelas
+                    FROM jurnal_pkl jp
+                    JOIN siswa s ON s.id = jp.siswa_id
+                    JOIN kelas k ON k.id = s.kelas_id
+                    JOIN siswa_pkl sp ON sp.siswa_id = s.id
+                    JOIN pembimbing_pkl pp ON pp.tempat_pkl_id = sp.tempat_pkl_id AND pp.tahun_ajaran = sp.tahun_ajaran
+                    WHERE pp.guru_id = ?
+                    AND FLOOR(DATEDIFF(jp.tanggal, ?) / 7) + 1 = ?
+                    AND jp.tanggal >= ?
+                    ORDER BY s.nama_lengkap, jp.tanggal ASC";
+
+            return $this->db->query($sql, [$guruId, $weekBase, $minggu, $startDate])->getResultArray();
+        }
+
         $sql = "SELECT jp.*, 
                        s.nama_lengkap AS nama_siswa,
                        s.nis,

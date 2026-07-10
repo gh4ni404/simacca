@@ -176,6 +176,17 @@ class GuruService extends BaseService
 
             $this->log('info', "Guru created successfully: {$data['nama_lengkap']} (ID: {$guruId})");
 
+            // 4. Send welcome email if email is provided
+            if (!empty($data['email'])) {
+                $this->sendWelcomeEmail(
+                    $data['email'],
+                    $data['username'],
+                    $data['password'],
+                    $data['role'],
+                    $data['nama_lengkap']
+                );
+            }
+
             return [
                 'guru_id' => $guruId,
                 'user_id' => $userId
@@ -481,6 +492,31 @@ class GuruService extends BaseService
             $this->log('info', "Password change notification sent to: {$email}");
         } else {
             $this->log('warning', "Failed to send password notification to: {$email}");
+        }
+    }
+
+    protected function sendWelcomeEmail(
+        string $email,
+        string $username,
+        string $password,
+        string $role,
+        string $fullName
+    ): void {
+        helper('email');
+
+        $emailSent = send_welcome_email(
+            $email,
+            $username,
+            $password,
+            $role,
+            $fullName,
+            $email
+        );
+
+        if ($emailSent) {
+            $this->log('info', "Welcome email sent to: {$email}");
+        } else {
+            $this->log('warning', "Failed to send welcome email to: {$email}");
         }
     }
 

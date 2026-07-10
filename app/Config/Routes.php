@@ -184,6 +184,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('pengaturan/update', 'Admin\PengaturanController::update', ['filter' => 'role:admin']);
     $routes->post('pengaturan/rollover', 'Admin\PengaturanController::rollover', ['filter' => 'role:admin']);
     $routes->post('pengaturan/revert', 'Admin\PengaturanController::revert', ['filter' => 'role:admin']);
+    $routes->post('pengaturan/update-jurnal-pkl-start', 'Admin\PengaturanController::updateJurnalPklStart', ['filter' => 'role:admin']);
 
     // Laporan
     $routes->get('laporan/absensi', 'Admin\LaporanController::absensi', ['filter' => 'role:admin']);

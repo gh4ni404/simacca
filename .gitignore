@@ -59,10 +59,11 @@ writable/session/*
 
 writable/uploads/*
 !writable/uploads/jurnal/index.html
+!writable/uploads/jurnal_pkl/index.html
 !writable/uploads/izin/index.html
 !writable/uploads/index.html
 !writable/uploads/profile/index.html
-!writable/uploads/absensi_guru/
+!writable/uploads/absensi_guru/index.html
 
 writable/debugbar/*
 !writable/debugbar/index.html

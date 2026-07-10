@@ -173,6 +173,17 @@ class SiswaService extends BaseService
 
             $this->logInfo('createSiswa', "Created siswa: $siswaId, user: $userId");
 
+            // 3. Send welcome email if email is provided
+            if (!empty($data['email'])) {
+                $this->sendWelcomeEmail(
+                    $data['email'],
+                    $data['username'],
+                    $data['password'],
+                    'siswa',
+                    $data['nama_lengkap']
+                );
+            }
+
             return $this->successResponse([
                 'siswa_id' => $siswaId,
                 'user_id' => $userId,
@@ -263,6 +274,31 @@ class SiswaService extends BaseService
         } catch (\Exception $e) {
             $this->logError('updateSiswa', $e);
             return $this->errorResponse('Gagal mengupdate data siswa: ' . $e->getMessage());
+        }
+    }
+
+    protected function sendWelcomeEmail(
+        string $email,
+        string $username,
+        string $password,
+        string $role,
+        string $fullName
+    ): void {
+        helper('email');
+
+        $emailSent = send_welcome_email(
+            $email,
+            $username,
+            $password,
+            $role,
+            $fullName,
+            $email
+        );
+
+        if ($emailSent) {
+            $this->logInfo('createSiswa', "Welcome email sent to: {$email}");
+        } else {
+            $this->logWarning('createSiswa', "Failed to send welcome email to: {$email}");
         }
     }
 
@@ -911,6 +947,24 @@ class SiswaService extends BaseService
 
                         $db->transComplete();
                         $successCount++;
+
+                        // Send welcome email for NEW students
+                        if (!empty($email)) {
+                            helper('email');
+                            $emailSent = send_welcome_email(
+                                $email,
+                                $username,
+                                $password,
+                                'siswa',
+                                $namaLengkap,
+                                $email
+                            );
+                            if ($emailSent) {
+                                $this->logInfo('processExcelImport', "Welcome email sent to: {$email}");
+                            } else {
+                                $this->logWarning('processExcelImport', "Failed to send welcome email to: {$email}");
+                            }
+                        }
                     }
                 } catch (\Exception $e) {
                     // Safe to call even if no transaction active (check transDepth internally)

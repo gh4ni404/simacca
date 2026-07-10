@@ -16,7 +16,17 @@
     ];
     ?>
 
-    <?php if (!empty($entries)): $start = new DateTime(); $start->setISODate($tahun, $minggu); $weekEnd = clone $start; $weekEnd->modify('+6 days'); ?>
+    <?php if (!empty($entries)):
+        if (!empty($jurnalPklStartDate)) {
+            $range = get_week_range($jurnalPklStartDate, $minggu);
+            $start = new DateTime($range['start']);
+            $weekEnd = new DateTime($range['end']);
+        } else {
+            $start = new DateTime();
+            $start->setISODate($tahun, $minggu);
+            $weekEnd = clone $start; $weekEnd->modify('+6 days');
+        }
+    ?>
     <div class="bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl shadow-lg p-6 mb-8 text-white">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between">
             <div class="flex items-center gap-4">

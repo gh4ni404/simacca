@@ -32,10 +32,15 @@ class JurnalPklService extends BaseService
         }
     }
 
-    public function getWeeklyGrouped(int $siswaId): array
+    public function getWeeklyGrouped(int $siswaId, ?string $startDate = null): array
     {
         try {
-            $data = $this->jurnalModel->getWeeklyGrouped($siswaId);
+            if ($startDate === null) {
+                helper('setting');
+                $startDate = get_jurnal_pkl_start_date();
+            }
+            $weekBase = $startDate ? get_jurnal_pkl_week_base() : null;
+            $data = $this->jurnalModel->getWeeklyGrouped($siswaId, $startDate, $weekBase);
 
             return $this->success($data);
         } catch (\Exception $e) {
@@ -44,10 +49,15 @@ class JurnalPklService extends BaseService
         }
     }
 
-    public function getByWeek(int $siswaId, int $tahun, int $minggu): array
+    public function getByWeek(int $siswaId, int $tahun, int $minggu, ?string $startDate = null): array
     {
         try {
-            $data = $this->jurnalModel->getBySiswaAndWeek($siswaId, $tahun, $minggu);
+            if ($startDate === null) {
+                helper('setting');
+                $startDate = get_jurnal_pkl_start_date();
+            }
+            $weekBase = $startDate ? get_jurnal_pkl_week_base() : null;
+            $data = $this->jurnalModel->getBySiswaAndWeek($siswaId, $tahun, $minggu, $startDate, $weekBase);
 
             return $this->success($data);
         } catch (\Exception $e) {

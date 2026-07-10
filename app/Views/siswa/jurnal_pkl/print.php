@@ -355,10 +355,16 @@
         </div>
 
         <?php
-        $start = new DateTime();
-        $start->setISODate($tahun, $minggu);
-        $end = clone $start;
-        $end->modify('+6 days');
+        if (!empty($jurnalPklStartDate)) {
+            $range = get_week_range($jurnalPklStartDate, $minggu);
+            $start = new DateTime($range['start']);
+            $end = new DateTime($range['end']);
+        } else {
+            $start = new DateTime();
+            $start->setISODate($tahun, $minggu);
+            $end = clone $start;
+            $end->modify('+6 days');
+        }
         $bulanNama = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         $hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
         ?>

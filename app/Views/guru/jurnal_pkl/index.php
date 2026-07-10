@@ -70,7 +70,7 @@
                         <?php endif; ?>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-center">
-                        <button onclick="openVerifyModal(<?= $jurnal['id']; ?>, '<?= esc($jurnal['nama_siswa']); ?>', '<?= esc($jurnal['nama_kegiatan']); ?>')"
+                        <button onclick="openVerifyModal(<?= $jurnal['id']; ?>, '<?= esc($jurnal['nama_siswa']); ?>', '<?= esc($jurnal['nama_kegiatan']); ?>', '<?= $jurnal['foto'] ? base_url('files/jurnal-pkl/' . $jurnal['foto']) : '' ?>')"
                                 class="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-xs font-medium">
                             <i class="fas fa-check mr-1"></i>
                             Verifikasi
@@ -102,6 +102,14 @@
             <div id="verifyInfo" class="mb-4 p-3 bg-gray-50 rounded-lg">
                 <p class="text-sm"><span class="font-medium">Siswa:</span> <span id="verifySiswa"></span></p>
                 <p class="text-sm"><span class="font-medium">Kegiatan:</span> <span id="verifyKegiatan"></span></p>
+            </div>
+
+            <div id="verifyFotoContainer" class="mb-4 hidden">
+                <p class="text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-camera mr-2 text-yellow-500"></i>
+                    Foto Dokumentasi:
+                </p>
+                <img id="verifyFoto" src="" class="max-h-64 rounded-lg shadow mx-auto">
             </div>
 
             <form id="verifyForm" method="POST">
@@ -162,11 +170,22 @@
 </div>
 
 <script>
-function openVerifyModal(id, siswa, kegiatan) {
+function openVerifyModal(id, siswa, kegiatan, foto) {
     document.getElementById('verifyModal').classList.remove('hidden');
     document.getElementById('verifySiswa').textContent = siswa;
     document.getElementById('verifyKegiatan').textContent = kegiatan;
     document.getElementById('verifyForm').action = '<?= base_url('guru/jurnal-pkl/verify/'); ?>' + id;
+
+    // Show foto if available
+    const fotoContainer = document.getElementById('verifyFotoContainer');
+    const fotoImg = document.getElementById('verifyFoto');
+    if (foto) {
+        fotoImg.src = foto;
+        fotoContainer.classList.remove('hidden');
+    } else {
+        fotoImg.src = '';
+        fotoContainer.classList.add('hidden');
+    }
 
     // Reset form
     document.querySelectorAll('input[name="status"]').forEach(r => r.checked = false);

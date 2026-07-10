@@ -9,6 +9,8 @@ use App\Models\SiswaPklModel;
 use App\Models\TempatPklModel;
 use App\Models\PembimbingPklModel;
 
+helper('setting');
+
 class JurnalPklController extends BaseController
 {
     protected $siswaModel;
@@ -30,8 +32,9 @@ class JurnalPklController extends BaseController
         }
 
         $status = $this->request->getGet('status');
+        $jurnalPklStartDate = get_jurnal_pkl_start_date();
 
-        $weeklyResult = $this->jurnalService->getWeeklyGrouped($siswa['id']);
+        $weeklyResult = $this->jurnalService->getWeeklyGrouped($siswa['id'], $jurnalPklStartDate);
         $weeklyData = $weeklyResult['success'] ? $weeklyResult['data'] : [];
 
         $statsResult = $this->jurnalService->getStatistics($siswa['id']);
@@ -45,6 +48,7 @@ class JurnalPklController extends BaseController
             'weeklyData' => $weeklyData,
             'stats' => $stats,
             'status' => $status,
+            'jurnalPklStartDate' => $jurnalPklStartDate,
         ];
 
         return view('siswa/jurnal_pkl/index', $data);
@@ -366,7 +370,8 @@ class JurnalPklController extends BaseController
             return redirect()->to('/access-denied')->with('error', 'Data siswa tidak ditemukan');
         }
 
-        $result = $this->jurnalService->getByWeek($siswa['id'], $tahun, $minggu);
+        $jurnalPklStartDate = get_jurnal_pkl_start_date();
+        $result = $this->jurnalService->getByWeek($siswa['id'], $tahun, $minggu, $jurnalPklStartDate);
         $entries = $result['success'] ? $result['data'] : [];
 
         $allDisetujui = !empty($entries);
@@ -384,6 +389,7 @@ class JurnalPklController extends BaseController
             'tahun' => $tahun,
             'minggu' => $minggu,
             'allDisetujui' => $allDisetujui,
+            'jurnalPklStartDate' => $jurnalPklStartDate,
         ];
 
         return view('siswa/jurnal_pkl/detail', $data);
@@ -398,7 +404,8 @@ class JurnalPklController extends BaseController
             return redirect()->to('/access-denied')->with('error', 'Data siswa tidak ditemukan');
         }
 
-        $result = $this->jurnalService->getByWeek($siswa['id'], $tahun, $minggu);
+        $jurnalPklStartDate = get_jurnal_pkl_start_date();
+        $result = $this->jurnalService->getByWeek($siswa['id'], $tahun, $minggu, $jurnalPklStartDate);
         $entries = $result['success'] ? $result['data'] : [];
 
         $allDisetujui = !empty($entries);
@@ -435,6 +442,7 @@ class JurnalPklController extends BaseController
             'tempatPkl' => $tempatPkl,
             'siswaPkl' => $siswaPkl,
             'pembimbing' => $pembimbing,
+            'jurnalPklStartDate' => $jurnalPklStartDate,
         ];
 
         return view('siswa/jurnal_pkl/print', $data);
