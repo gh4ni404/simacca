@@ -10,7 +10,7 @@ class IzinSiswaModel extends Model
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
-    protected $useSoftDeletes   = false;
+    protected $useSoftDeletes   = true;
     protected $protectFields    = true;
     protected $allowedFields    = [
         'siswa_id',
@@ -68,7 +68,7 @@ class IzinSiswaModel extends Model
                             siswa.nama_lengkap,
                             siswa.nis,
                             kelas.nama_kelas')
-            ->join('siswa', 'siswa.id = izin_siswa.siswa_id')
+            ->join('siswa', 'siswa.id = izin_siswa.siswa_id AND siswa.deleted_at IS NULL')
             ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
             ->orderBy('izin_siswa.tanggal', 'DESC')
             ->orderBy('izin_siswa.status', 'ASC')
@@ -91,7 +91,7 @@ class IzinSiswaModel extends Model
     public function getByKelas($kelasId, $status = null)
     {
         $builder = $this->select('izin_siswa.*, siswa.nama_lengkap, siswa.nis')
-            ->join('siswa', 'siswa.id = izin_siswa.siswa_id')
+            ->join('siswa', 'siswa.id = izin_siswa.siswa_id AND siswa.deleted_at IS NULL')
             ->where('siswa.kelas_id', $kelasId)
             ->orderBy('izin_siswa.tanggal', 'DESC');
 
@@ -108,7 +108,7 @@ class IzinSiswaModel extends Model
     public function getByStatus($status)
     {
         return $this->select('izin_siswa.*, siswa.nama_lengkap, siswa.nis')
-            ->join('siswa', 'siswa.id = izin_siswa.siswa_id')
+            ->join('siswa', 'siswa.id = izin_siswa.siswa_id AND siswa.deleted_at IS NULL')
             ->where('izin_siswa.status', $status)
             ->orderBy('izin_siswa.tanggal', 'DESC')
             ->findAll();
@@ -120,7 +120,7 @@ class IzinSiswaModel extends Model
     public function getPendingApproval($kelasId)
     {
         return $this->select('izin_siswa.*, siswa.nama_lengkap, siswa.nis')
-            ->join('siswa', 'siswa.id = izin_siswa.siswa_id')
+            ->join('siswa', 'siswa.id = izin_siswa.siswa_id AND siswa.deleted_at IS NULL')
             ->where('siswa.kelas_id', $kelasId)
             ->where('izin_siswa.status', 'pending')
             ->orderBy('izin_siswa.tanggal', 'DESC')
@@ -167,7 +167,7 @@ class IzinSiswaModel extends Model
     public function getApprovedIzinByDate($tanggal, $kelasId) {
         $builder = $this->where('tanggal', $tanggal)
         ->where('status', 'disetujui')
-        ->join('siswa', 'siswa.id = izin_siswa.siswa_id')
+        ->join('siswa', 'siswa.id = izin_siswa.siswa_id AND siswa.deleted_at IS NULL')
         ->select('izin_siswa.*, siswa.nama_lengkap, siswa.nis, siswa.kelas_id');
         
         if ($kelasId) {
@@ -182,7 +182,7 @@ class IzinSiswaModel extends Model
      */
     public function getPendingIzin($limit = 5) {
         return $this->select('izin_siswa.*, siswa.nama_lengkap, siswa.nis, kelas.nama_kelas')
-        ->join('siswa', 'siswa.id = izin_siswa.siswa_id')
+        ->join('siswa', 'siswa.id = izin_siswa.siswa_id AND siswa.deleted_at IS NULL')
         ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
         ->where('izin_siswa.status', 'pending')
         ->orderBy('izin_siswa.tanggal', 'DESC')

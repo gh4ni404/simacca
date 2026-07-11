@@ -223,7 +223,7 @@ class DashboardController extends BaseController
         // Get pending izin with subquery - OPTIMIZATION
         return $this->izinModel->select('izin_siswa.id, izin_siswa.tanggal, izin_siswa.alasan, izin_siswa.status,
                                         siswa.nama_lengkap, siswa.nis, kelas.nama_kelas')
-            ->join('siswa', 'siswa.id = izin_siswa.siswa_id')
+            ->join('siswa', 'siswa.id = izin_siswa.siswa_id AND siswa.deleted_at IS NULL')
             ->join('kelas', 'kelas.id = siswa.kelas_id')
             ->join('jadwal_mengajar', 'jadwal_mengajar.kelas_id = kelas.id AND jadwal_mengajar.guru_id = ' . (int)$guruId)
             ->where('izin_siswa.status', 'pending')

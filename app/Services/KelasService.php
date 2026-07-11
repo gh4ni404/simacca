@@ -7,12 +7,6 @@ use App\Models\GuruModel;
 use App\Models\SiswaModel;
 use CodeIgniter\Database\Exceptions\DatabaseException;
 
-/**
- * KelasService
- * 
- * Business logic layer for managing kelas (class) operations
- * Handles validation, data processing, and complex operations
- */
 class KelasService extends BaseService
 {
     protected KelasModel $kelasModel;
@@ -27,23 +21,19 @@ class KelasService extends BaseService
         $this->siswaModel = new SiswaModel();
     }
 
-    /**
-     * Get all kelas with pagination and search
-     * 
-     * @param int $perPage Number of items per page
-     * @param string|null $search Search term
-     * @return array
-     */
     public function getAllKelas(int $perPage = 20, ?string $search = null): array
     {
         try {
+            $tahunAjaran = get_active_tahun_ajaran();
+
             $builder = $this->kelasModel
                 ->select('kelas.*, 
                          guru.nama_lengkap as nama_wali_kelas,
                          guru.nip as nip_wali_kelas,
                          COUNT(siswa.id) as jumlah_siswa')
+                ->where('kelas.tahun_ajaran', $tahunAjaran)
                 ->join('guru', 'guru.id = kelas.wali_kelas_id', 'left')
-                ->join('siswa', 'siswa.kelas_id = kelas.id', 'left')
+                ->join('siswa', 'siswa.kelas_id = kelas.id AND siswa.tahun_ajaran = kelas.tahun_ajaran AND siswa.deleted_at IS NULL', 'left')
                 ->groupBy('kelas.id');
 
             if ($search) {
@@ -68,12 +58,6 @@ class KelasService extends BaseService
         }
     }
 
-    /**
-     * Get kelas by ID with complete details
-     * 
-     * @param int $id
-     * @return array
-     */
     public function getKelasById(int $id): array
     {
         try {
@@ -83,8 +67,8 @@ class KelasService extends BaseService
                 return $this->error('Kelas tidak ditemukan', 404);
             }
 
-            // Get list of students in this class
             $siswa = $this->siswaModel->where('kelas_id', $id)
+                ->where('tahun_ajaran', $kelas['tahun_ajaran'])
                 ->orderBy('nama_lengkap', 'ASC')
                 ->findAll();
 
@@ -97,16 +81,12 @@ class KelasService extends BaseService
         }
     }
 
-    /**
-     * Create new kelas
-     * 
-     * @param array $data
-     * @return array
-     */
     public function createKelas(array $data): array
     {
         try {
             $this->db->transStart();
+
+            $tahunAjaran = $data['tahun_ajaran'] ?? get_active_tahun_ajaran();
 
             // Validate wali kelas if provided
             if (!empty($data['wali_kelas_id'])) {
@@ -115,19 +95,21 @@ class KelasService extends BaseService
                     return $this->error('Guru tidak ditemukan');
                 }
 
-                // Check if guru is already wali kelas for another class
-                $existingKelas = $this->kelasModel->where('wali_kelas_id', $data['wali_kelas_id'])->first();
+                $existingKelas = $this->kelasModel
+                    ->where('wali_kelas_id', $data['wali_kelas_id'])
+                    ->where('tahun_ajaran', $tahunAjaran)
+                    ->first();
                 if ($existingKelas) {
                     return $this->error('Guru ini sudah menjadi wali kelas di kelas ' . $existingKelas['nama_kelas']);
                 }
             }
 
-            // Check if kelas name already exists
-            $existingKelas = $this->kelasModel->where('nama_kelas', $data['nama_kelas'])->first();
-            if ($existingKelas) {
-                return $this->error('Nama kelas sudah digunakan');
+            // Check if nama_kelas + tahun_ajaran already exists
+            if (!$this->kelasModel->isUnique($data['nama_kelas'], $tahunAjaran)) {
+                return $this->error('Nama kelas sudah digunakan di tahun ajaran ini');
             }
 
+            $data['tahun_ajaran'] = $tahunAjaran;
             $kelasId = $this->kelasModel->insert($data);
 
             if (!$kelasId) {
@@ -152,19 +134,11 @@ class KelasService extends BaseService
         }
     }
 
-    /**
-     * Update kelas
-     * 
-     * @param int $id
-     * @param array $data
-     * @return array
-     */
     public function updateKelas(int $id, array $data): array
     {
         try {
             $this->db->transStart();
 
-            // Check if kelas exists
             $kelas = $this->kelasModel->find($id);
             if (!$kelas) {
                 return $this->error('Kelas tidak ditemukan', 404);
@@ -177,24 +151,20 @@ class KelasService extends BaseService
                     return $this->error('Guru tidak ditemukan');
                 }
 
-                // Check if guru is already wali kelas for another class (excluding current class)
                 $existingKelas = $this->kelasModel
                     ->where('wali_kelas_id', $data['wali_kelas_id'])
                     ->where('id !=', $id)
+                    ->where('tahun_ajaran', $kelas['tahun_ajaran'])
                     ->first();
                 if ($existingKelas) {
                     return $this->error('Guru ini sudah menjadi wali kelas di kelas ' . $existingKelas['nama_kelas']);
                 }
             }
 
-            // Check if kelas name already exists (excluding current class)
+            // Check if nama_kelas + tahun_ajaran already exists (excluding current class)
             if (isset($data['nama_kelas'])) {
-                $existingKelas = $this->kelasModel
-                    ->where('nama_kelas', $data['nama_kelas'])
-                    ->where('id !=', $id)
-                    ->first();
-                if ($existingKelas) {
-                    return $this->error('Nama kelas sudah digunakan');
+                if (!$this->kelasModel->isUnique($data['nama_kelas'], $kelas['tahun_ajaran'], $id)) {
+                    return $this->error('Nama kelas sudah digunakan di tahun ajaran ini');
                 }
             }
 
@@ -222,25 +192,19 @@ class KelasService extends BaseService
         }
     }
 
-    /**
-     * Delete kelas
-     * 
-     * @param int $id
-     * @return array
-     */
     public function deleteKelas(int $id): array
     {
         try {
             $this->db->transStart();
 
-            // Check if kelas exists
             $kelas = $this->kelasModel->find($id);
             if (!$kelas) {
                 return $this->error('Kelas tidak ditemukan', 404);
             }
 
-            // Check if there are students in this class
-            $siswaCount = $this->siswaModel->where('kelas_id', $id)->countAllResults();
+            $siswaCount = $this->siswaModel->where('kelas_id', $id)
+                ->where('tahun_ajaran', $kelas['tahun_ajaran'])
+                ->countAllResults();
             if ($siswaCount > 0) {
                 return $this->error('Tidak dapat menghapus kelas yang masih memiliki siswa. Silakan pindahkan atau hapus siswa terlebih dahulu.');
             }
@@ -268,24 +232,21 @@ class KelasService extends BaseService
         }
     }
 
-    /**
-     * Get kelas statistics
-     * 
-     * @return array
-     */
     public function getKelasStatistics(): array
     {
         try {
+            $tahunAjaran = get_active_tahun_ajaran();
+
             $statistics = [
-                'total_kelas' => $this->kelasModel->countAll(),
+                'total_kelas' => $this->kelasModel->where('tahun_ajaran', $tahunAjaran)->countAllResults(),
                 'kelas_per_tingkat' => [],
-                'kelas_tanpa_wali' => $this->kelasModel->getKelasWithoutWali(),
+                'kelas_tanpa_wali' => $this->kelasModel->getKelasWithoutWali($tahunAjaran),
                 'rata_rata_siswa_per_kelas' => 0
             ];
 
-            // Get count per tingkat
             $tingkatStats = $this->kelasModel
                 ->select('tingkat, COUNT(*) as total')
+                ->where('tahun_ajaran', $tahunAjaran)
                 ->groupBy('tingkat')
                 ->orderBy('tingkat', 'ASC')
                 ->findAll();
@@ -294,10 +255,10 @@ class KelasService extends BaseService
                 $statistics['kelas_per_tingkat'][$stat['tingkat']] = $stat['total'];
             }
 
-            // Calculate average students per class
             $avgResult = $this->db->table('kelas')
-                ->select('AVG(siswa_count) as avg_siswa')
-                ->join('(SELECT kelas_id, COUNT(*) as siswa_count FROM siswa GROUP BY kelas_id) as siswa_stats', 
+                ->select('AVG(IFNULL(siswa_count, 0)) as avg_siswa')
+                ->where('kelas.tahun_ajaran', $tahunAjaran)
+                ->join('(SELECT kelas_id, COUNT(*) as siswa_count FROM siswa WHERE tahun_ajaran = ' . $this->db->escape($tahunAjaran) . ' AND deleted_at IS NULL GROUP BY kelas_id) as siswa_stats', 
                        'siswa_stats.kelas_id = kelas.id', 'left')
                 ->get()
                 ->getRowArray();
@@ -311,16 +272,13 @@ class KelasService extends BaseService
         }
     }
 
-    /**
-     * Get kelas list for dropdown
-     * 
-     * @param int|null $tingkat Filter by tingkat
-     * @return array
-     */
     public function getKelasForDropdown(?int $tingkat = null): array
     {
         try {
-            $builder = $this->kelasModel->orderBy('tingkat, nama_kelas');
+            $tahunAjaran = get_active_tahun_ajaran();
+            $builder = $this->kelasModel
+                ->where('tahun_ajaran', $tahunAjaran)
+                ->orderBy('tingkat, nama_kelas');
 
             if ($tingkat) {
                 $builder->where('tingkat', $tingkat);
@@ -340,30 +298,23 @@ class KelasService extends BaseService
         }
     }
 
-    /**
-     * Assign wali kelas to a class
-     * 
-     * @param int $kelasId
-     * @param int $guruId
-     * @return array
-     */
     public function assignWaliKelas(int $kelasId, int $guruId): array
     {
         try {
-            // Check if kelas exists
             $kelas = $this->kelasModel->find($kelasId);
             if (!$kelas) {
                 return $this->error('Kelas tidak ditemukan', 404);
             }
 
-            // Check if guru exists
             $guru = $this->guruModel->find($guruId);
             if (!$guru) {
                 return $this->error('Guru tidak ditemukan', 404);
             }
 
-            // Check if guru is already wali kelas for another class
-            $existingKelas = $this->kelasModel->where('wali_kelas_id', $guruId)->first();
+            $existingKelas = $this->kelasModel
+                ->where('wali_kelas_id', $guruId)
+                ->where('tahun_ajaran', $kelas['tahun_ajaran'])
+                ->first();
             if ($existingKelas && $existingKelas['id'] != $kelasId) {
                 return $this->error('Guru ini sudah menjadi wali kelas di kelas ' . $existingKelas['nama_kelas']);
             }
@@ -375,16 +326,9 @@ class KelasService extends BaseService
         }
     }
 
-    /**
-     * Remove wali kelas from a class
-     * 
-     * @param int $kelasId
-     * @return array
-     */
     public function removeWaliKelas(int $kelasId): array
     {
         try {
-            // Check if kelas exists
             $kelas = $this->kelasModel->find($kelasId);
             if (!$kelas) {
                 return $this->error('Kelas tidak ditemukan', 404);
@@ -397,29 +341,36 @@ class KelasService extends BaseService
         }
     }
 
-    /**
-     * Get kelas by wali kelas ID
-     * 
-     * @param int $guruId
-     * @return array
-     */
     public function getKelasByWaliKelas(int $guruId): array
     {
         try {
-            $kelas = $this->kelasModel->getByWaliKelas($guruId);
+            $tahunAjaran = get_active_tahun_ajaran();
+            $kelas = $this->kelasModel->getByWaliKelas($guruId, $tahunAjaran);
 
             if (!$kelas) {
                 return $this->error('Guru ini tidak menjadi wali kelas', 404);
             }
 
-            // Get student count
-            $siswaCount = $this->siswaModel->where('kelas_id', $kelas['id'])->countAllResults();
+            $siswaCount = $this->siswaModel->where('kelas_id', $kelas['id'])
+                ->where('tahun_ajaran', $kelas['tahun_ajaran'])
+                ->countAllResults();
             $kelas['jumlah_siswa'] = $siswaCount;
 
             return $this->success($kelas);
         } catch (\Exception $e) {
             log_message('error', 'Error in KelasService::getKelasByWaliKelas: ' . $e->getMessage());
             return $this->error('Gagal mengambil data kelas: ' . $e->getMessage());
+        }
+    }
+
+    public function getKelasWithoutWali(): array
+    {
+        try {
+            $tahunAjaran = get_active_tahun_ajaran();
+            return $this->kelasModel->getKelasWithoutWali($tahunAjaran);
+        } catch (\Exception $e) {
+            log_message('error', 'Error in KelasService::getKelasWithoutWali: ' . $e->getMessage());
+            return [];
         }
     }
 }

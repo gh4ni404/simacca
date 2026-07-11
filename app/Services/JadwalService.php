@@ -295,7 +295,7 @@ class JadwalService extends BaseService
             return $this->successResponse([
                 'guruOptions' => $this->guruModel->getGuruDropdown(),
                 'mapelOptions' => $this->mapelModel->getAllMapelForDropdown(),
-                'kelasOptions' => $this->kelasModel->getListKelas(),
+                'kelasOptions' => $this->kelasModel->getListKelas(get_active_tahun_ajaran()),
                 'hariList' => $this->jadwalModel->getHariList(),
                 'semesterList' => $this->jadwalModel->getSemesterList(),
                 'tahunAjaranList' => $this->jadwalModel->getTahunAjaranList()

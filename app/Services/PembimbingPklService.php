@@ -69,10 +69,31 @@ class PembimbingPklService extends BaseService
         }
 
         return $this->executeInTransaction(function () use ($data) {
+            $tahunAjaran = get_active_tahun_ajaran();
+
+            // Check if a record already exists (including soft-deleted)
+            $existing = $this->db->table('pembimbing_pkl')
+                ->where('guru_id', $data['guru_id'])
+                ->where('tempat_pkl_id', $data['tempat_pkl_id'])
+                ->where('tahun_ajaran', $tahunAjaran)
+                ->get()
+                ->getRowArray();
+
+            if ($existing) {
+                if (!is_null($existing['deleted_at'])) {
+                    // Restore soft-deleted record
+                    $this->db->table('pembimbing_pkl')
+                        ->where('id', $existing['id'])
+                        ->update(['deleted_at' => null]);
+                    return ['id' => $existing['id']];
+                }
+                throw new \Exception('Data pembimbing PKL untuk guru dan tempat PKL ini sudah ada pada tahun ajaran ini');
+            }
+
             $insertData = [
                 'guru_id'       => $data['guru_id'],
                 'tempat_pkl_id' => $data['tempat_pkl_id'],
-                'tahun_ajaran'  => get_active_tahun_ajaran(),
+                'tahun_ajaran'  => $tahunAjaran,
                 'created_at'    => date('Y-m-d H:i:s'),
             ];
 
@@ -262,7 +283,7 @@ class PembimbingPklService extends BaseService
     public function getSiswaXII(): array
     {
         try {
-            $kelasXII = $this->kelasModel->getByTingkat('12');
+            $kelasXII = $this->kelasModel->getByTingkat('12', get_active_tahun_ajaran());
 
             if (empty($kelasXII)) {
                 return $this->successResponse([]);
@@ -290,7 +311,7 @@ class PembimbingPklService extends BaseService
     public function getSiswaXIIWithPlacement(string $tahunAjaran): array
     {
         try {
-            $kelasXII = $this->kelasModel->getByTingkat('12');
+            $kelasXII = $this->kelasModel->getByTingkat('12', get_active_tahun_ajaran());
 
             if (empty($kelasXII)) {
                 return $this->successResponse([]);
@@ -384,9 +405,26 @@ class PembimbingPklService extends BaseService
             $skipped = 0;
 
             foreach ($siswaIds as $siswaId) {
-                $existing = $this->siswaPklModel->getBySiswaAndTahun($siswaId, $tahunAjaran);
+                // Check including soft-deleted records via raw query
+                $existing = $this->db->table('siswa_pkl')
+                    ->where('siswa_id', $siswaId)
+                    ->where('tahun_ajaran', $tahunAjaran)
+                    ->get()
+                    ->getRowArray();
+
                 if ($existing) {
-                    $skipped++;
+                    if (!is_null($existing['deleted_at'])) {
+                        // Restore soft-deleted record
+                        $this->db->table('siswa_pkl')
+                            ->where('id', $existing['id'])
+                            ->update([
+                                'tempat_pkl_id' => $tempatPklId,
+                                'deleted_at' => null,
+                            ]);
+                        $success++;
+                    } else {
+                        $skipped++;
+                    }
                     continue;
                 }
 
@@ -451,7 +489,7 @@ class PembimbingPklService extends BaseService
         try {
             $siswa = $this->siswaPklModel
                 ->select('siswa_pkl.*, siswa.nama_lengkap AS nama_siswa, siswa.nis, kelas.nama_kelas')
-                ->join('siswa', 'siswa.id = siswa_pkl.siswa_id')
+                ->join('siswa', 'siswa.id = siswa_pkl.siswa_id AND siswa.deleted_at IS NULL')
                 ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
                 ->where('siswa_pkl.tempat_pkl_id', $tempatPklId)
                 ->where('siswa_pkl.tahun_ajaran', $tahunAjaran)
@@ -469,7 +507,7 @@ class PembimbingPklService extends BaseService
     public function getFormListsSiswa(): array
     {
         try {
-            $kelasXII = $this->kelasModel->getByTingkat('12');
+            $kelasXII = $this->kelasModel->getByTingkat('12', get_active_tahun_ajaran());
 
             $siswaDropdown = [];
             if (!empty($kelasXII)) {
@@ -505,7 +543,7 @@ class PembimbingPklService extends BaseService
     public function getSiswaPklStats(): array
     {
         try {
-            $kelasXII = $this->kelasModel->getByTingkat('12');
+            $kelasXII = $this->kelasModel->getByTingkat('12', get_active_tahun_ajaran());
 
             $totalSiswaXII = 0;
             if (!empty($kelasXII)) {
@@ -517,7 +555,9 @@ class PembimbingPklService extends BaseService
                     ->countAllResults();
             }
 
-            $sudahDitempatkan = $this->siswaPklModel->countAll();
+            $sudahDitempatkan = $this->siswaPklModel
+                ->where('tahun_ajaran', get_active_tahun_ajaran())
+                ->countAllResults();
 
             $data = [
                 'totalSiswaXII'     => $totalSiswaXII,

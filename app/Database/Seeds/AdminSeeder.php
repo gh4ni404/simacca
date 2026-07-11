@@ -69,6 +69,7 @@ class AdminSeeder extends Seeder
                 'nama_kelas'    => 'X RPL 1',
                 'tingkat'       => '10',
                 'jurusan'       => 'RPL',
+                'tahun_ajaran'  => get_active_tahun_ajaran(),
                 'wali_kelas_id' => null,
             ],
         ];

@@ -309,10 +309,11 @@ class PembimbingPklController extends BaseController
             return redirect()->to('/admin/pembimbing-pkl');
         }
 
-        $tempatPklId = $this->request->getPost('tempat_pkl_id');
-        $tahunAjaran = $this->request->getPost('tahun_ajaran');
+        $json = $this->request->getJSON();
+        $tempatPklId = $json->tempat_pkl_id ?? null;
+        $tahunAjaran = $json->tahun_ajaran ?? null;
 
-        $result = $this->pembimbingPklService->getPembimbingByTempatPkl($tempatPklId, $tahunAjaran);
+        $result = $this->pembimbingPklService->getPembimbingByTempatPkl((int) $tempatPklId, $tahunAjaran);
 
         return $this->response->setJSON($result['data'] ?? []);
     }
@@ -323,10 +324,11 @@ class PembimbingPklController extends BaseController
             return redirect()->to('/admin/pembimbing-pkl');
         }
 
-        $tempatPklId = $this->request->getPost('tempat_pkl_id');
-        $tahunAjaran = $this->request->getPost('tahun_ajaran');
+        $json = $this->request->getJSON();
+        $tempatPklId = $json->tempat_pkl_id ?? null;
+        $tahunAjaran = $json->tahun_ajaran ?? null;
 
-        $result = $this->pembimbingPklService->getSiswaPklByTempatPkl($tempatPklId, $tahunAjaran);
+        $result = $this->pembimbingPklService->getSiswaPklByTempatPkl((int) $tempatPklId, $tahunAjaran);
 
         return $this->response->setJSON($result['data'] ?? []);
     }

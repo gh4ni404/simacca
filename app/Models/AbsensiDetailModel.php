@@ -62,7 +62,7 @@ class AbsensiDetailModel extends Model
         return $this->select('absensi_detail.*,
                             siswa.nama_lengkap,
                             siswa.nis')
-            ->join('siswa', 'siswa.id = absensi_detail.siswa_id')
+            ->join('siswa', 'siswa.id = absensi_detail.siswa_id AND siswa.deleted_at IS NULL')
             ->where('absensi_id', $absensiId)
             ->orderBy('siswa.nama_lengkap')
             ->findAll();
@@ -159,13 +159,18 @@ class AbsensiDetailModel extends Model
             ->update();
     }
 
-    public function getAbsensiToday($today)
+    public function getAbsensiToday($today, $kelasId = null)
     {
-        return $this->select('absensi_detail.*')
+        $builder = $this->select('absensi_detail.*')
             ->join('absensi', 'absensi.id = absensi_detail.absensi_id')
             ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
-            ->where('absensi.tanggal', $today)
-            ->countAllResults();;
+            ->where('absensi.tanggal', $today);
+
+        if ($kelasId) {
+            $builder->where('jadwal_mengajar.kelas_id', $kelasId);
+        }
+
+        return $builder->countAllResults();
     }
 
     public function getAbsensiThisMonth($first, $last, $kelasId)
@@ -176,7 +181,7 @@ class AbsensiDetailModel extends Model
             ->where('jadwal_mengajar.kelas_id', $kelasId)
             ->where('absensi.tanggal >=', $first)
             ->where('absensi.tanggal <=', $last)
-            ->countAllResults();;
+            ->countAllResults();
     }
 
     public function getStatistikBulanan($month, $year)
@@ -308,6 +313,7 @@ class AbsensiDetailModel extends Model
                 s.kelas_id,
                 k.nama_kelas')
             ->join('kelas k', 'k.id = s.kelas_id')
+            ->where('s.deleted_at IS NULL', null, false)
             ->whereIn('s.kelas_id', $kelasYangAdaJadwal);
         
         if ($kelasId) {
@@ -325,7 +331,7 @@ class AbsensiDetailModel extends Model
                 SUM(CASE WHEN ad.status = "izin" THEN 1 ELSE 0 END) as total_izin,
                 SUM(CASE WHEN ad.status = "alpa" THEN 1 ELSE 0 END) as total_alpa')
             ->join('absensi a', 'a.id = ad.absensi_id')
-            ->join('siswa s', 's.id = ad.siswa_id')
+            ->join('siswa s', 's.id = ad.siswa_id AND s.deleted_at IS NULL')
             ->where('a.tanggal', $tanggal)
             ->whereIn('s.kelas_id', $kelasYangAdaJadwal);
 

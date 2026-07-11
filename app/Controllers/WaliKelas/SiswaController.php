@@ -34,7 +34,7 @@ class SiswaController extends BaseController
         }
 
         // Get kelas data
-        $kelas = $this->kelasModel->getByWaliKelas($guru['id']);
+        $kelas = $this->kelasModel->getByWaliKelas($guru['id'], get_active_tahun_ajaran());
 
         if (!$kelas) {
             return redirect()->to('/access-denied')->with('error', 'Anda belum ditugaskan sebagai wali kelas');
@@ -45,6 +45,7 @@ class SiswaController extends BaseController
             ->select('siswa.*, users.username, users.email, users.is_active')
             ->join('users', 'users.id = siswa.user_id')
             ->where('siswa.kelas_id', $kelas['id'])
+            ->where('siswa.tahun_ajaran', get_active_tahun_ajaran())
             ->orderBy('siswa.nama_lengkap', 'ASC')
             ->findAll();
 

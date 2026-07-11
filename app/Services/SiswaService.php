@@ -7,6 +7,8 @@ use App\Models\UserModel;
 use App\Models\KelasModel;
 use App\Models\AbsensiDetailModel;
 use App\Models\SettingModel;
+use App\Models\RolloverHistoryModel;
+use App\Models\RolloverBackupModel;
 
 /**
  * SiswaService
@@ -22,6 +24,8 @@ class SiswaService extends BaseService
     protected $userModel;
     protected $kelasModel;
     protected $absensiDetailModel;
+    protected $rolloverHistoryModel;
+    protected $rolloverBackupModel;
     
     /**
      * Performance: Cache kelas lookups during import to avoid N+1 queries
@@ -35,6 +39,8 @@ class SiswaService extends BaseService
         $this->userModel = new UserModel();
         $this->kelasModel = new KelasModel();
         $this->absensiDetailModel = new AbsensiDetailModel();
+        $this->rolloverHistoryModel = new RolloverHistoryModel();
+        $this->rolloverBackupModel = new RolloverBackupModel();
     }
 
     /**
@@ -84,6 +90,32 @@ class SiswaService extends BaseService
         } catch (\Exception $e) {
             $this->logError('getAllSiswa', $e);
             return $this->errorResponse('Gagal mengambil data siswa: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get all matching siswa IDs (no pagination) for bulk select-all
+     *
+     * @param array $filters
+     * @return array
+     */
+    public function getAllSiswaIds(array $filters = []): array
+    {
+        try {
+            $keyword = $filters['search'] ?? null;
+            $status = $filters['status'] ?? 'active';
+            $kelasId = $filters['kelas_id'] ?? null;
+            $tahunAjaran = $filters['tahun_ajaran'] ?? get_active_tahun_ajaran();
+
+            $ids = $this->siswaModel->getAllSiswaIds($status, $kelasId, $tahunAjaran, $keyword);
+
+            return $this->successResponse([
+                'ids' => $ids,
+                'total' => count($ids)
+            ]);
+        } catch (\Exception $e) {
+            $this->logError('getAllSiswaIds', $e);
+            return $this->errorResponse('Gagal mengambil data ID siswa: ' . $e->getMessage());
         }
     }
 
@@ -468,6 +500,76 @@ class SiswaService extends BaseService
     }
 
     /**
+     * Batch check NIS status for import preview.
+     * Returns status for each NIS: 'new', 'active', or 'inactive'
+     * 
+     * @param array $nisList Array of NIS strings
+     * @return array
+     */
+    public function checkNisBatch(array $nisList): array
+    {
+        try {
+            $nisList = array_unique(array_filter(array_map('trim', $nisList)));
+
+            if (empty($nisList)) {
+                return $this->successResponse(['results' => []]);
+            }
+
+            // Get all siswa matching the NIS list (bypass soft deletes to detect deleted records)
+            $existingSiswa = $this->db->table('siswa')
+                ->select('siswa.nis, siswa.deleted_at, users.is_active')
+                ->join('users', 'users.id = siswa.user_id')
+                ->whereIn('siswa.nis', $nisList)
+                ->get()
+                ->getResultArray();
+
+            // Build lookup map: nis => { is_active, is_deleted, deleted_at }
+            $nisInfoMap = [];
+            foreach ($existingSiswa as $siswa) {
+                $nisInfoMap[$siswa['nis']] = [
+                    'is_active' => (int) $siswa['is_active'],
+                    'is_deleted' => !is_null($siswa['deleted_at']),
+                    'deleted_at' => $siswa['deleted_at'],
+                ];
+            }
+
+            $results = [];
+            foreach ($nisList as $nis) {
+                if (isset($nisInfoMap[$nis])) {
+                    $info = $nisInfoMap[$nis];
+                    if ($info['is_deleted']) {
+                        $deletedDate = date('d M Y', strtotime($info['deleted_at']));
+                        $results[$nis] = [
+                            'status' => 'deleted',
+                            'label' => "Siswa Dihapus ($deletedDate)",
+                        ];
+                    } elseif ($info['is_active']) {
+                        $results[$nis] = [
+                            'status' => 'active',
+                            'label' => 'Sudah Aktif',
+                        ];
+                    } else {
+                        $results[$nis] = [
+                            'status' => 'inactive',
+                            'label' => 'Nonaktif (Akan Diaktifkan)',
+                        ];
+                    }
+                } else {
+                    $results[$nis] = [
+                        'status' => 'new',
+                        'label' => 'Siap Import',
+                    ];
+                }
+            }
+
+            return $this->successResponse(['results' => $results]);
+        } catch (\Exception $e) {
+            $this->logError('checkNisBatch', $e);
+            return $this->errorResponse('Gagal memeriksa NIS: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Check username availability
      * 
      * @param string $username
@@ -504,7 +606,7 @@ class SiswaService extends BaseService
     {
         try {
             return $this->successResponse([
-                'kelasList' => $this->kelasModel->getListKelas(),
+                'kelasList' => $this->kelasModel->getListKelas(get_active_tahun_ajaran()),
                 'tahunAjaranList' => $this->getTahunAjaranList()
             ]);
         } catch (\Exception $e) {
@@ -522,7 +624,7 @@ class SiswaService extends BaseService
     {
         try {
             $total = $this->siswaModel->countAll();
-            $byKelas = $this->siswaModel->getCountByKelas();
+            $byKelas = $this->siswaModel->getCountByKelas(get_active_tahun_ajaran());
             
             // Count active/inactive
             $active = $this->siswaModel
@@ -595,8 +697,8 @@ class SiswaService extends BaseService
      */
     /**
      * Rollover siswa ke tahun ajaran baru: naik kelas otomatis
-     * - Tingkat 10 → 11 (cari kelas dengan jurusan sama)
-     * - Tingkat 11 → 12 (cari kelas dengan jurusan sama)
+     * - Kelas baru dibuat per tahun ajaran dengan nama yang konsisten
+     * - X-AT → XI-AT, XI-MPLB 1 → XII-MPLB 1, dll
      * - Tingkat 12 → Lulus (nonaktifkan user)
      *
      * @param string $newTahunAjaran Tahun ajaran baru (format: YYYY/YYYY)
@@ -609,16 +711,20 @@ class SiswaService extends BaseService
             $lulusCount = 0;
             $skipped = [];
             $updated = [];
+            $createdKelas = [];
 
-            // Get all active siswa with kelas info
+            $fromYear = get_active_tahun_ajaran();
+
+            // Get all active siswa with kelas info from the current year
             $siswaList = $this->siswaModel
-                ->select('siswa.*, kelas.tingkat, kelas.jurusan, kelas.nama_kelas, users.is_active as user_is_active')
+                ->select('siswa.*, kelas.tingkat, kelas.jurusan, kelas.nama_kelas, kelas.wali_kelas_id, users.is_active as user_is_active')
                 ->join('kelas', 'kelas.id = siswa.kelas_id')
                 ->join('users', 'users.id = siswa.user_id')
                 ->where('users.is_active', 1)
+                ->where('siswa.tahun_ajaran', $fromYear)
                 ->findAll();
 
-            // Kumpulkan backup SEMUA siswa dulu sebelum perubahan apa pun
+            // Backup data sebelum perubahan
             $backup = [];
             foreach ($siswaList as $siswa) {
                 $backup[] = [
@@ -630,63 +736,116 @@ class SiswaService extends BaseService
                 ];
             }
 
-            // Simpan backup ke settings SEBELUM melakukan perubahan
-            $settingModel = new SettingModel();
-            $settingModel->setSetting('rollover_backup', json_encode([
-                'new_tahun_ajaran' => $newTahunAjaran,
-                'created_at' => date('Y-m-d H:i:s'),
-                'changes' => $backup,
-            ]));
+            // Simpan metadata ke rollover_history
+            $historyId = $this->rolloverHistoryModel->insert([
+                'from_year'      => $fromYear,
+                'to_year'        => $newTahunAjaran,
+                'total_students' => 0,
+                'naik_kelas'     => 0,
+                'lulus'          => 0,
+                'skipped_count'  => 0,
+            ]);
+            if (!$historyId) {
+                return $this->errorResponse('Gagal menyimpan history rollover.');
+            }
 
-            // Lakukan rollover
-            foreach ($siswaList as $siswa) {
-                $tingkat = (int) $siswa['tingkat'];
-                $jurusan = $siswa['jurusan'];
-                $nextTingkat = $tingkat + 1;
-
-                if ($tingkat < 12) {
-                    // Cari kelas tujuan dengan tingkat+1 dan jurusan sama
-                    $targetKelas = $this->kelasModel
-                        ->where('tingkat', $nextTingkat)
-                        ->where('jurusan', $jurusan)
-                        ->first();
-
-                    if (!$targetKelas) {
-                        $skipped[] = "{$siswa['nama_lengkap']} (NIS: {$siswa['nis']}) - Kelas {$siswa['nama_kelas']} → tidak ada kelas tingkat $nextTingkat untuk jurusan $jurusan";
-                        continue;
-                    }
-
-                    // Update kelas_id dan tahun_ajaran
-                    $this->siswaModel->update($siswa['id'], [
-                        'kelas_id' => $targetKelas['id'],
-                        'tahun_ajaran' => $newTahunAjaran,
-                    ]);
-
-                    $naikCount++;
-                    $updated[] = "{$siswa['nama_lengkap']} (NIS: {$siswa['nis']}): {$siswa['nama_kelas']} → {$targetKelas['nama_kelas']}";
-                } else {
-                    // Tingkat 12 → Lulus: nonaktifkan user
-                    $this->userModel->update($siswa['user_id'], ['is_active' => 0]);
-
-                    // Update tahun_ajaran tetap disimpan untuk histori
-                    $this->siswaModel->update($siswa['id'], [
-                        'tahun_ajaran' => $newTahunAjaran,
-                    ]);
-
-                    $lulusCount++;
-                    $updated[] = "{$siswa['nama_lengkap']} (NIS: {$siswa['nis']}): {$siswa['nama_kelas']} → LULUS";
+            // Simpan backup data
+            if (!empty($backup)) {
+                if (!$this->rolloverBackupModel->insertBatchForHistory($historyId, $backup)) {
+                    return $this->errorResponse('Gagal menyimpan data backup rollover.');
                 }
             }
 
-            $this->logInfo('rolloverTahunAjaran', "Naik kelas: $naikCount, Lulus: $lulusCount, Skipped: " . count($skipped));
+            // Kelompokkan siswa berdasarkan kelas asal (nama_kelas → semua siswa di kelas itu)
+            $groups = [];
+            foreach ($siswaList as $siswa) {
+                $groups[$siswa['kelas_id']][] = $siswa;
+            }
+
+            // Proses setiap grup kelas
+            foreach ($groups as $sourceKelasId => $groupStudents) {
+                $sourceKelas = $groupStudents[0];
+                $tingkat = (int) $sourceKelas['tingkat'];
+
+                if ($tingkat >= 12) {
+                    // Tingkat 12 → Lulus
+                    foreach ($groupStudents as $siswa) {
+                        $this->userModel->update($siswa['user_id'], ['is_active' => 0]);
+                        $this->siswaModel->update($siswa['id'], [
+                            'tahun_ajaran' => $newTahunAjaran,
+                        ]);
+                        $lulusCount++;
+                        $updated[] = "{$siswa['nama_lengkap']} (NIS: {$siswa['nis']}): {$siswa['nama_kelas']} → LULUS";
+                    }
+                    continue;
+                }
+
+                // Hitung nama kelas tujuan untuk tahun berikutnya
+                $nextNamaKelas = $this->computeNextKelasName($sourceKelas['nama_kelas']);
+                $nextTingkat = (string) ($tingkat + 1);
+
+                // Cari atau buat kelas tujuan di tahun berikutnya
+                $targetKelas = $this->kelasModel
+                    ->where('nama_kelas', $nextNamaKelas)
+                    ->where('tahun_ajaran', $newTahunAjaran)
+                    ->first();
+
+                if (!$targetKelas) {
+                    // Buat kelas baru untuk tahun berikutnya
+                    $this->kelasModel->skipValidation(true);
+                    try {
+                        $newKelasId = $this->kelasModel->insert([
+                            'nama_kelas'    => $nextNamaKelas,
+                            'tingkat'       => $nextTingkat,
+                            'jurusan'       => $sourceKelas['jurusan'],
+                            'tahun_ajaran'  => $newTahunAjaran,
+                            'wali_kelas_id' => null, // Wali kelas ditugaskan manual
+                        ]);
+
+                        if (!$newKelasId) {
+                            throw new \Exception("Gagal membuat kelas $nextNamaKelas");
+                        }
+
+                        $targetKelas = $this->kelasModel->find($newKelasId);
+                        $createdKelas[] = $nextNamaKelas;
+                        $this->logInfo('rolloverTahunAjaran', "Created kelas: $nextNamaKelas (ID: $newKelasId) for $newTahunAjaran");
+                    } finally {
+                        $this->kelasModel->skipValidation(false);
+                    }
+                }
+
+                // Pindahkan semua siswa ke kelas tujuan
+                foreach ($groupStudents as $siswa) {
+                    $this->siswaModel->update($siswa['id'], [
+                        'kelas_id'      => $targetKelas['id'],
+                        'tahun_ajaran'  => $newTahunAjaran,
+                    ]);
+                    $naikCount++;
+                    $updated[] = "{$siswa['nama_lengkap']} (NIS: {$siswa['nis']}): {$siswa['nama_kelas']} → {$nextNamaKelas}";
+                }
+            }
+
+            // Update metadata history
+            $this->rolloverHistoryModel->update($historyId, [
+                'total_students' => $naikCount + $lulusCount,
+                'naik_kelas'     => $naikCount,
+                'lulus'          => $lulusCount,
+                'skipped_count'  => count($skipped),
+            ]);
+
+            $this->logInfo('rolloverTahunAjaran', "Naik kelas: $naikCount, Lulus: $lulusCount, Kelas baru: " . implode(', ', $createdKelas));
 
             return $this->successResponse([
-                'naik_kelas' => $naikCount,
-                'lulus' => $lulusCount,
-                'skipped' => $skipped,
-                'updated' => $updated,
-                'has_backup' => true,
-                'message' => "Rollover selesai: $naikCount siswa naik kelas, $lulusCount siswa lulus." . (!empty($skipped) ? ' ' . count($skipped) . ' siswa dilewati.' : '')
+                'history_id'    => $historyId,
+                'naik_kelas'    => $naikCount,
+                'lulus'         => $lulusCount,
+                'skipped'       => $skipped,
+                'updated'       => $updated,
+                'created_kelas' => $createdKelas,
+                'has_backup'    => true,
+                'message'       => "Rollover selesai: $naikCount siswa naik kelas, $lulusCount siswa lulus."
+                    . (!empty($createdKelas) ? ' ' . count($createdKelas) . ' kelas baru dibuat.' : '')
+                    . (!empty($skipped) ? ' ' . count($skipped) . ' siswa dilewati.' : '')
             ]);
         } catch (\Exception $e) {
             $this->logError('rolloverTahunAjaran', $e);
@@ -694,18 +853,63 @@ class SiswaService extends BaseService
         }
     }
 
-    public function revertRollover(): array
+    /**
+     * Compute next year's class name from current class name.
+     * e.g. X-AT → XI-AT, XI-MPLB 1 → XII-MPLB 1, XII-DKV → LULUS (returns null)
+     *
+     * @param string $currentName Current class name (e.g. "X-AT", "XI-MPLB 1")
+     * @return string|null Next class name or null if graduating (XII → graduation)
+     */
+    private function computeNextKelasName(string $currentName): string
     {
-        try {
-            $settingModel = new SettingModel();
-            $backupJson = $settingModel->get('rollover_backup');
+        $tingkatMap = [
+            'X'    => 'XI',
+            'XI'   => 'XII',
+            'XII'  => null, // Graduation - no next class
+        ];
 
-            if (!$backupJson) {
-                return $this->errorResponse('Tidak ada data rollover yang bisa di-revert.');
+        // Match patterns like "X-AT", "XI-MPLB 1", "XII-DKV 2"
+        if (preg_match('/^(X{1,3}|X?I{1,2}V?I{0,3})([\s\-_].+)$/', strtoupper($currentName), $matches)) {
+            $roman = $matches[1];
+            $suffix = $matches[2];
+
+            if (!isset($tingkatMap[$roman]) || $tingkatMap[$roman] === null) {
+                throw new \Exception("Kelas tingkat XII tidak bisa naik kelas");
             }
 
-            $backup = json_decode($backupJson, true);
-            $changes = $backup['changes'] ?? [];
+            return $tingkatMap[$roman] . $suffix;
+        }
+
+        // Fallback: try numeric matching (10, 11, 12)
+        if (preg_match('/^(10|11|12)([\s\-_].+)$/', $currentName, $matches)) {
+            $num = (int) $matches[1];
+            $suffix = $matches[2];
+
+            if ($num >= 12) {
+                throw new \Exception("Kelas tingkat 12 tidak bisa naik kelas");
+            }
+
+            return (string) ($num + 1) . $suffix;
+        }
+
+        throw new \Exception("Format nama kelas '$currentName' tidak dikenali");
+    }
+
+    public function revertRollover(int $historyId): array
+    {
+        try {
+            // Get history record
+            $history = $this->rolloverHistoryModel->find($historyId);
+            if (!$history) {
+                return $this->errorResponse('Data rollover tidak ditemukan.');
+            }
+
+            if ($history['reverted_at'] !== null) {
+                return $this->errorResponse('Rollover ini sudah di-revert sebelumnya.');
+            }
+
+            // Get backup data for this history (lazy load)
+            $changes = $this->rolloverBackupModel->getByHistoryId($historyId);
 
             if (empty($changes)) {
                 return $this->errorResponse('Data backup kosong.');
@@ -718,13 +922,13 @@ class SiswaService extends BaseService
                 try {
                     // Kembalikan data siswa
                     $this->siswaModel->update($item['siswa_id'], [
-                        'kelas_id' => $item['kelas_id'],
-                        'tahun_ajaran' => $item['tahun_ajaran'],
+                        'kelas_id' => $item['old_kelas_id'],
+                        'tahun_ajaran' => $item['old_tahun_ajaran'],
                     ]);
 
                     // Kembalikan status aktif user
                     $this->userModel->update($item['user_id'], [
-                        'is_active' => $item['is_active'],
+                        'is_active' => $item['old_is_active'],
                     ]);
 
                     $revertCount++;
@@ -733,12 +937,18 @@ class SiswaService extends BaseService
                 }
             }
 
-            // Hapus backup setelah revert berhasil
-            $settingModel->setSetting('rollover_backup', '');
+            // Mark history sebagai reverted - harus berhasil sebelum hapus backup
+            if (!$this->rolloverHistoryModel->markReverted($historyId)) {
+                return $this->errorResponse('Gagal menandai rollover sebagai reverted.');
+            }
 
-            $this->logInfo('revertRollover', "Revert sukses: $revertCount siswa");
+            // Hapus backup data (cleanup)
+            $this->rolloverBackupModel->deleteByHistoryId($historyId);
+
+            $this->logInfo('revertRollover', "Revert sukses: $revertCount siswa dari history #$historyId");
 
             return $this->successResponse([
+                'history_id' => $historyId,
                 'reverted' => $revertCount,
                 'errors' => $errors,
                 'message' => "Rollover berhasil di-revert: $revertCount siswa dikembalikan." . (!empty($errors) ? ' ' . count($errors) . ' gagal.' : '')
@@ -786,6 +996,8 @@ class SiswaService extends BaseService
 
             $successCount = 0;
             $errorCount = 0;
+            $skippedCount = 0;
+            $restoredCount = 0;
             $errors = [];
             $createdClasses = []; // Track kelas baru yang dibuat
 
@@ -834,42 +1046,85 @@ class SiswaService extends BaseService
                     $password = !empty($row[8]) ? trim($row[8]) : 'siswa123';
                     $email = !empty($row[6]) ? trim($row[6]) : null;
 
-                    // Check if NIS already exists in database
-                    $existingSiswa = $this->siswaModel->where('nis', $nis)->first();
+                    // Check if NIS already exists in database (bypass soft deletes)
+                    $existingSiswa = $this->db->table('siswa')
+                        ->where('nis', $nis)
+                        ->get()
+                        ->getRowArray();
 
                     if ($existingSiswa) {
-                        // Get existing user
-                        $existingUser = $this->userModel->find($existingSiswa['user_id']);
+                        // Find user via raw query to also detect soft-deleted users
+                        $existingUser = $this->db->table('users')
+                            ->where('id', $existingSiswa['user_id'])
+                            ->get()
+                            ->getRowArray();
 
-                        if ($existingUser && $existingUser['is_active'] == 1) {
-                            // ACTIVE student with same NIS → UPDATE existing records
+                        if (!is_null($existingSiswa['deleted_at'])) {
+                            // SOFT-DELETED student → RESTORE and UPDATE
                             $db->transStart();
 
-                            // Get or create kelas
                             $kelasId = $this->getKelasIdByName($namaKelas);
 
-                            // Update user data (only email if provided)
-                            $userUpdate = ['password' => $password];
-                            if (!empty($email)) {
-                                $userUpdate['email'] = $email;
-                            }
-                            $this->userModel->update($existingUser['id'], $userUpdate);
+                            // Restore siswa via raw query (bypasses allowedFields + soft-delete WHERE filter)
+                            $this->db->table('siswa')
+                                ->where('id', $existingSiswa['id'])
+                                ->update([
+                                    'nama_lengkap' => $namaLengkap,
+                                    'jenis_kelamin' => $jenisKelamin,
+                                    'kelas_id' => $kelasId,
+                                    'tahun_ajaran' => $tahunAjaran,
+                                    'deleted_at' => null,
+                                ]);
 
-                            // Update siswa data
-                            $this->siswaModel->update($existingSiswa['id'], [
-                                'nama_lengkap' => $namaLengkap,
-                                'jenis_kelamin' => $jenisKelamin,
-                                'kelas_id' => $kelasId,
-                                'tahun_ajaran' => $tahunAjaran,
-                            ]);
+                            // Restore user account (whether active or soft-deleted)
+                            if ($existingUser) {
+                                $userUpdate = [
+                                    'password' => $password,
+                                    'is_active' => 1,
+                                    'deleted_at' => null,
+                                ];
+                                if (!empty($email)) {
+                                    $userUpdate['email'] = $email;
+                                }
+                                // Use raw update to bypass soft delete filter
+                                $this->db->table('users')
+                                    ->where('id', $existingUser['id'])
+                                    ->update($userUpdate);
+                            } else {
+                                // User record doesn't exist at all — create new one
+                                $userData = [
+                                    'username' => $username,
+                                    'password' => $password,
+                                    'role' => 'siswa',
+                                    'email' => $email,
+                                    'is_active' => 1,
+                                    'created_at' => date('Y-m-d H:i:s')
+                                ];
+                                $userId = $this->userModel->insert($userData);
+                                if (!$userId) {
+                                    throw new \Exception("Gagal membuat ulang user account");
+                                }
+                                $this->siswaModel->update($existingSiswa['id'], [
+                                    'user_id' => $userId,
+                                ]);
+                            }
 
                             $db->transComplete();
-                            $successCount++;
+                            $restoredCount++;
 
-                            // Track kelas
                             if (!isset($createdClasses[$namaKelas])) {
                                 $createdClasses[$namaKelas] = true;
                             }
+
+                        } elseif ($existingUser && $existingUser['is_active'] == 1) {
+                            // ACTIVE student with same NIS → SKIP (no changes)
+                            $skippedCount++;
+
+                            if (!isset($createdClasses[$namaKelas])) {
+                                $createdClasses[$namaKelas] = true;
+                            }
+
+                            continue;
                         } else {
                             // INACTIVE student → REACTIVATE and UPDATE
                             $db->transStart();
@@ -982,13 +1237,16 @@ class SiswaService extends BaseService
                 ? " Kelas baru dibuat: " . implode(', ', array_keys($createdClasses)) . "."
                 : "";
 
-            $message = "Import selesai. Berhasil: $successCount, Gagal: $errorCount." . $kelasBaruInfo;
+            $restoredInfo = $restoredCount > 0 ? " Dipulihkan: $restoredCount," : "";
+            $message = "Import selesai. Berhasil: $successCount,$restoredInfo Dilewati (sudah aktif): $skippedCount, Gagal: $errorCount." . $kelasBaruInfo;
 
-            $this->logInfo('processExcelImport', "Import completed - Success: $successCount, Failed: $errorCount");
+            $this->logInfo('processExcelImport', "Import completed - Success: $successCount, Restored: $restoredCount, Skipped (active): $skippedCount, Failed: $errorCount");
 
             return $this->successResponse([
                 'success_count' => $successCount,
                 'error_count' => $errorCount,
+                'skipped_count' => $skippedCount,
+                'restored_count' => $restoredCount,
                 'errors' => $errors,
                 'created_classes' => array_keys($createdClasses),
                 'message' => $message
@@ -1000,128 +1258,92 @@ class SiswaService extends BaseService
     }
 
     /**
-     * Get kelas ID by name, create if not exists
-     * Uses caching to avoid N+1 queries during import
+     * Get kelas ID by name + tahun_ajaran, create if not exists.
+     * Uses caching to avoid N+1 queries during import.
      * 
      * @param string $namaKelas
+     * @param string|null $tahunAjaran defaults to active year
      * @return int Kelas ID
      * @throws \Exception
      */
-    private function getKelasIdByName(string $namaKelas): int
+    private function getKelasIdByName(string $namaKelas, ?string $tahunAjaran = null): int
     {
-        // Validate input
         if (empty($namaKelas) || trim($namaKelas) === '') {
             throw new \Exception("Nama kelas tidak boleh kosong");
         }
-        
-        // Normalize whitespace
+
         $namaKelas = trim($namaKelas);
-        
-        // Validate length (max 10 chars in database)
+        $tahunAjaran = $tahunAjaran ?: get_active_tahun_ajaran();
+
         if (strlen($namaKelas) > 10) {
             throw new \Exception("Nama kelas '$namaKelas' terlalu panjang (max 10 karakter)");
         }
-        
-        // Check cache first to avoid repeated DB queries
-        if (isset($this->kelasCache[$namaKelas])) {
-            return $this->kelasCache[$namaKelas];
+
+        $cacheKey = $namaKelas . '|' . $tahunAjaran;
+        if (isset($this->kelasCache[$cacheKey])) {
+            return $this->kelasCache[$cacheKey];
         }
-        
-        // Check if kelas already exists
-        $kelas = $this->kelasModel->where('nama_kelas', $namaKelas)->first();
-        
+
+        $kelas = $this->kelasModel
+            ->where('nama_kelas', $namaKelas)
+            ->where('tahun_ajaran', $tahunAjaran)
+            ->first();
+
         if ($kelas) {
-            // Cache the result
-            $this->kelasCache[$namaKelas] = $kelas['id'];
+            $this->kelasCache[$cacheKey] = $kelas['id'];
             return $kelas['id'];
         }
-        
-        // Kelas doesn't exist, create new
-        // Parse nama kelas to get tingkat and jurusan
-        // Supported formats: X-RPL, XI-RPL, XII-RPL, 10-RPL, 11-RPL, 12-RPL
+
+        // Kelas doesn't exist for this year, create new
+        $tingkatMap = ['X' => '10', 'XI' => '11', 'XII' => '12'];
         $tingkat = null;
         $jurusan = null;
-        
-        // Convert to uppercase first
         $namaKelasUpper = strtoupper($namaKelas);
-        
-        // Try to parse format "X-RPL" or "10-RPL"
+
         if (preg_match('/^(X|XI|XII|10|11|12)[\s\-_](.+)$/', $namaKelasUpper, $matches)) {
-            // Convert roman numerals to numbers
-            $tingkatMap = [
-                'X' => '10',
-                'XI' => '11', 
-                'XII' => '12'
-            ];
-            
-            $tingkatInput = $matches[1];
-            $tingkat = isset($tingkatMap[$tingkatInput]) ? $tingkatMap[$tingkatInput] : $tingkatInput;
+            $tingkat = isset($tingkatMap[$matches[1]]) ? $tingkatMap[$matches[1]] : $matches[1];
             $jurusan = trim($matches[2]);
         } else {
-            // If format doesn't match, use default
             $tingkat = '10';
             $jurusan = $namaKelas;
         }
-        
-        // Validate tingkat must be 10, 11, or 12
+
         if (!in_array($tingkat, ['10', '11', '12'])) {
-            throw new \Exception("Tingkat kelas '$namaKelas' tidak valid. Format yang didukung: X-XXX, XI-XXX, XII-XXX, atau 10-XXX, 11-XXX, 12-XXX");
+            throw new \Exception("Tingkat kelas '$namaKelas' tidak valid");
         }
-        
-        // Validate jurusan length (max 50 chars)
+
         if (strlen($jurusan) > 50) {
             throw new \Exception("Nama jurusan untuk kelas '$namaKelas' terlalu panjang (max 50 karakter)");
         }
-        
-        // Create new kelas
-        $kelasData = [
-            'nama_kelas' => $namaKelas,
-            'tingkat' => $tingkat,
-            'jurusan' => $jurusan,
-            'wali_kelas_id' => null
-        ];
-        
+
+        $this->kelasModel->skipValidation(true);
         try {
-            // Skip validation to avoid is_unique constraint during auto-create
-            $this->kelasModel->skipValidation(true);
-            
-            try {
-                $kelasId = $this->kelasModel->insert($kelasData);
-                
-                // Double check to handle race condition
-                if (!$kelasId) {
-                    $kelas = $this->kelasModel->where('nama_kelas', $namaKelas)->first();
-                    if ($kelas) {
-                        $this->kelasCache[$namaKelas] = $kelas['id'];
-                        return $kelas['id'];
-                    }
-                    throw new \Exception("Gagal membuat kelas '$namaKelas'");
-                }
-                
-                // Cache the newly created kelas
-                $this->kelasCache[$namaKelas] = $kelasId;
-                
-                $this->logInfo('getKelasIdByName', "Created new kelas: $namaKelas (ID: $kelasId)");
-                
-                return $kelasId;
-            } finally {
-                // Always restore validation state
-                $this->kelasModel->skipValidation(false);
-            }
-        } catch (\Exception $e) {
-            // Handle duplicate key error (race condition)
-            if (strpos($e->getMessage(), 'Duplicate entry') !== false || 
-                strpos($e->getMessage(), 'UNIQUE constraint') !== false) {
-                // Kelas was created by another thread, search again
-                $kelas = $this->kelasModel->where('nama_kelas', $namaKelas)->first();
+            $kelasId = $this->kelasModel->insert([
+                'nama_kelas'    => $namaKelas,
+                'tingkat'       => $tingkat,
+                'jurusan'       => $jurusan,
+                'tahun_ajaran'  => $tahunAjaran,
+                'wali_kelas_id' => null,
+            ]);
+
+            if (!$kelasId) {
+                // Race condition: another thread created it
+                $kelas = $this->kelasModel
+                    ->where('nama_kelas', $namaKelas)
+                    ->where('tahun_ajaran', $tahunAjaran)
+                    ->first();
                 if ($kelas) {
-                    // Cache the result
-                    $this->kelasCache[$namaKelas] = $kelas['id'];
+                    $this->kelasCache[$cacheKey] = $kelas['id'];
                     return $kelas['id'];
                 }
+                throw new \Exception("Gagal membuat kelas '$namaKelas'");
             }
-            
-            throw new \Exception("Gagal membuat kelas '$namaKelas': " . $e->getMessage());
+
+            $this->kelasCache[$cacheKey] = $kelasId;
+            $this->logInfo('getKelasIdByName', "Created new kelas: $namaKelas for $tahunAjaran (ID: $kelasId)");
+            return $kelasId;
+        } finally {
+            $this->kelasModel->skipValidation(false);
         }
     }
 

@@ -71,7 +71,7 @@ class DashboardController extends BaseController
         $statsWali = [];
         
         if ($isWaliKelas) {
-            $kelasWali = $this->kelasModel->getByWaliKelas($guruId);
+            $kelasWali = $this->kelasModel->getByWaliKelas($guruId, get_active_tahun_ajaran());
             if ($kelasWali) {
                 $siswaWali = $this->siswaModel->getByKelas($kelasWali['id']);
                 $statsWali = [
@@ -82,8 +82,8 @@ class DashboardController extends BaseController
         }
 
         // 3. Wakakur specific stats (overview of all school activities)
-        $totalKelas = $this->kelasModel->countAllResults();
-        $totalSiswa = $this->siswaModel->countAllResults();
+        $totalKelas = $this->kelasModel->where('tahun_ajaran', get_active_tahun_ajaran())->countAllResults();
+        $totalSiswa = $this->siswaModel->where('tahun_ajaran', get_active_tahun_ajaran())->countAllResults();
         $totalGuru = $this->guruModel->countAllResults();
         $totalMapel = $this->mapelModel->countAllResults();
 

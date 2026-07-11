@@ -45,14 +45,14 @@ class DashboardController extends BaseController
         $guruId = $guru['id'];
 
         // Get kelas data
-        $kelas = $this->kelasModel->getByWaliKelas($guru['id']);
+        $kelas = $this->kelasModel->getByWaliKelas($guru['id'], get_active_tahun_ajaran());
 
         if (!$kelas) {
             return redirect()->to('/access-denied')->with('error', 'Anda belum ditugaskan sebagai wali kelas');
         }
 
         // Get siswa di kelas
-        $siswa = $this->siswaModel->getByKelas($kelas['id']);
+        $siswa = $this->siswaModel->getByKelas($kelas['id'], get_active_tahun_ajaran());
         $totalSiswa = count($siswa);
 
         // Get statistik absensi kelas (bulan ini)
@@ -65,6 +65,7 @@ class DashboardController extends BaseController
         $stats = [
             'total_siswa' => $totalSiswa,
             'siswa_aktif' => $this->siswaModel->where('kelas_id', $kelas['id'])
+                ->where('tahun_ajaran', get_active_tahun_ajaran())
                 ->join('users', 'users.id = siswa.user_id')
                 ->where('users.is_active', 1)
                 ->countAllResults(),
@@ -81,7 +82,7 @@ class DashboardController extends BaseController
                 SUM(CASE WHEN status = "izin" THEN 1 ELSE 0 END) as izin,
                 SUM(CASE WHEN status = "alpa" THEN 1 ELSE 0 END) as alpa
             ')
-            ->join('siswa', 'siswa.id = absensi_detail.siswa_id')
+            ->join('siswa', 'siswa.id = absensi_detail.siswa_id AND siswa.deleted_at IS NULL')
             ->join('absensi', 'absensi.id = absensi_detail.absensi_id')
             ->where('siswa.kelas_id', $kelas['id'])
             ->where('absensi.tanggal >=', $startDate)
@@ -91,7 +92,7 @@ class DashboardController extends BaseController
         // Siswa dengan masalah kehadiran (alpa >= 3 bulan ini)
         $siswaAlpa = $this->absensiDetailModel
             ->select('siswa.nama_lengkap, siswa.nis, COUNT(*) as total_alpa')
-            ->join('siswa', 'siswa.id = absensi_detail.siswa_id')
+            ->join('siswa', 'siswa.id = absensi_detail.siswa_id AND siswa.deleted_at IS NULL')
             ->join('absensi', 'absensi.id = absensi_detail.absensi_id')
             ->where('siswa.kelas_id', $kelas['id'])
             ->where('absensi_detail.status', 'alpa')
@@ -140,7 +141,7 @@ class DashboardController extends BaseController
 
         // Get pending izin for these classes
         return $this->izinModel->select('izin_siswa.*, siswa.nama_lengkap, siswa.nis, kelas.nama_kelas')
-            ->join('siswa', 'siswa.id = izin_siswa.siswa_id')
+            ->join('siswa', 'siswa.id = izin_siswa.siswa_id AND siswa.deleted_at IS NULL')
             ->join('kelas', 'kelas.id = siswa.kelas_id')
             ->whereIn('siswa.kelas_id', $kelasIdArray)
             ->where('izin_siswa.status', 'pending')

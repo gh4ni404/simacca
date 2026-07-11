@@ -38,7 +38,7 @@ class IzinController extends BaseController
         }
 
         // Get kelas data
-        $kelas = $this->kelasModel->getByWaliKelas($guru['id']);
+        $kelas = $this->kelasModel->getByWaliKelas($guru['id'], get_active_tahun_ajaran());
 
         log_message('info', '[WALI KELAS IZIN] Kelas found: ' . ($kelas ? $kelas['id'] . ' - ' . $kelas['nama_kelas'] : 'none'));
 

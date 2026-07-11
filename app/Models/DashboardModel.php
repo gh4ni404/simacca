@@ -64,8 +64,8 @@ class DashboardModel extends Model
 
         $stats = [
             'total_guru' => $guruModel->countAll(),
-            'total_siswa' => $siswaModel->countAll(),
-            'total_kelas' => $kelasModel->countAll(),
+            'total_siswa' => $siswaModel->where('tahun_ajaran', get_active_tahun_ajaran())->countAllResults(),
+            'total_kelas' => $kelasModel->where('tahun_ajaran', get_active_tahun_ajaran())->countAllResults(),
             'total_mapel' => $mapelModel->countAll(),
 
             'absensi_hari_ini' => $absensiModel->where('tanggal', $today)->countAllResults(),
@@ -161,7 +161,7 @@ class DashboardModel extends Model
         $absensiDetailModel = new AbsensiDetailModel();
         $siswaModel = new SiswaModel();
 
-        $kelasList = $kelasModel->getAllKelas();
+        $kelasList = $kelasModel->getAllKelas(get_active_tahun_ajaran());
 
         $summary = [];
         $today = date('Y-m-d');
@@ -170,10 +170,10 @@ class DashboardModel extends Model
         foreach ($kelasList as $kelas) {
             // Hitung Jumlah siswa per kelas
             // $totalSiswa = $siswaModel->where('kelas_id', $kelas['id'])->countAllResults();
-            $totalSiswa = $siswaModel->getCountKelasById($kelas['id']);
+            $totalSiswa = $siswaModel->getCountKelasById($kelas['id'], 'active', get_active_tahun_ajaran());
 
             // Hitung kehadiran hari ini
-            $absensiHariIni = $absensiDetailModel->getAbsensiToday($today);
+            $absensiHariIni = $absensiDetailModel->getAbsensiToday($today, $kelas['id']);
 
             // Hitung kehadiran bulan ini
             $firstDayOfMonth = date('Y-m-01');
@@ -246,7 +246,7 @@ class DashboardModel extends Model
         }
 
         // Data siswa per kelas
-        $kelasWithSiswa = $kelasModel->getKelasWithJumlahSiswa();
+        $kelasWithSiswa = $kelasModel->getKelasWithJumlahSiswa(null, get_active_tahun_ajaran());
 
         $kelasLabels = [];
         $kelasData = [];

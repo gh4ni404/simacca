@@ -38,7 +38,7 @@ class KelasController extends BaseController
             'pageDescription' => 'Kelola data kelas dan wali kelas',
             'user' => $this->getUserData(),
             'kelas' => $result['success'] ? $result['data']['kelas'] : [],
-            'kelasTanpaWali' => [], // Will be shown in kelas list with conditional
+            'kelasTanpaWali' => $this->kelasService->getKelasWithoutWali(),
             'guruTersedia' => $this->guruModel->getGuruNonWali(),
             'jurusanList' => $this->getJurusanList(),
             'tingkatList' => $this->getTingkatList()
@@ -75,7 +75,8 @@ class KelasController extends BaseController
             'nama_kelas' => $this->request->getPost('nama_kelas'),
             'tingkat' => $this->request->getPost('tingkat'),
             'jurusan' => $this->request->getPost('jurusan'),
-            'wali_kelas_id' => $this->request->getPost('wali_kelas_id') ?: null
+            'wali_kelas_id' => $this->request->getPost('wali_kelas_id') ?: null,
+            'tahun_ajaran' => get_active_tahun_ajaran(),
         ];
 
         $result = $this->kelasService->createKelas($data);
@@ -468,8 +469,8 @@ class KelasController extends BaseController
             $sheet->setCellValue('D' . $row, $k['jurusan']);
             $sheet->setCellValue('E' . $row, $k['nama_wali_kelas'] ?? '-');
             
-            // Get jumlah siswa
-            $jumlahSiswa = $this->siswaModel->where('kelas_id', $k['id'])->countAllResults();
+            // Get jumlah siswa (filtered by tahun_ajaran active)
+            $jumlahSiswa = $this->siswaModel->getCountKelasById($k['id'], 'active', get_active_tahun_ajaran());
             $sheet->setCellValue('F' . $row, $jumlahSiswa);
 
             $row++;
@@ -556,8 +557,8 @@ class KelasController extends BaseController
             }
             $jurusanStats[$jurusan]['total_kelas']++;
             
-            // Get jumlah siswa per kelas
-            $jumlahSiswa = $this->siswaModel->where('kelas_id', $k['id'])->countAllResults();
+            // Get jumlah siswa per kelas (filtered by tahun_ajaran active)
+            $jumlahSiswa = $this->siswaModel->getCountKelasById($k['id'], 'active', get_active_tahun_ajaran());
             $jurusanStats[$jurusan]['total_siswa'] += $jumlahSiswa;
         }
 
@@ -584,8 +585,8 @@ class KelasController extends BaseController
             }
             $tingkatStats[$tingkat]['total_kelas']++;
             
-            // Get jumlah siswa per kelas
-            $jumlahSiswa = $this->siswaModel->where('kelas_id', $k['id'])->countAllResults();
+            // Get jumlah siswa per kelas (filtered by tahun_ajaran active)
+            $jumlahSiswa = $this->siswaModel->getCountKelasById($k['id'], 'active', get_active_tahun_ajaran());
             $tingkatStats[$tingkat]['total_siswa'] += $jumlahSiswa;
         }
 

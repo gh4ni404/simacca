@@ -99,12 +99,14 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('siswa/nonaktifkan/(:num)', 'Admin\SiswaController::changeStatus/$1', ['filter' => 'role:admin']);
     $routes->get('siswa/aktifkan/(:num)', 'Admin\SiswaController::changeStatus/$1', ['filter' => 'role:admin']);
     $routes->post('siswa/check-nis', 'Admin\SiswaController::checkNis', ['filter' => 'role:admin']);
+    $routes->get('siswa/check-nis-batch', 'Admin\SiswaController::checkNisBatch', ['filter' => 'role:admin']);
     $routes->post('siswa/check-username', 'Admin\SiswaController::checkUsername', ['filter' => 'role:admin']);
     $routes->get('siswa/export', 'Admin\SiswaController::export', ['filter' => 'role:admin']);
     $routes->get('siswa/import', 'Admin\SiswaController::import', ['filter' => 'role:admin']);
     $routes->post('siswa/process-import', 'Admin\SiswaController::processImport', ['filter' => 'role:admin']);
     $routes->get('siswa/download-template', 'Admin\SiswaController::downloadTemplate', ['filter' => 'role:admin']);
     $routes->post('siswa/bulk-action', 'Admin\SiswaController::bulkAction', ['filter' => 'role:admin']);
+    $routes->get('siswa/get-all-ids', 'Admin\SiswaController::getAllIds', ['filter' => 'role:admin']);
 
     // Kelas Management
     $routes->get('kelas', 'Admin\KelasController::index', ['filter' => 'role:admin']);

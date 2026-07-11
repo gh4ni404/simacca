@@ -52,7 +52,7 @@ class LaporanController extends BaseController
         $kelasId = $this->request->getGet('kelas_id');
 
         // Data filter & referensi
-        $kelasList = $this->kelasModel->getListKelas();
+        $kelasList = $this->kelasModel->getListKelas(get_active_tahun_ajaran());
 
         // Ambil data laporan per hari (1 tanggal saja)
         $laporanPerHari = $this->absensiModel->getLaporanAbsensiPerHari($tanggal, $tanggal, $kelasId ?? null);
@@ -118,7 +118,7 @@ class LaporanController extends BaseController
         $kelasId = $this->request->getGet('kelas_id');
 
         // Data filter & referensi
-        $kelasList = $this->kelasModel->getListKelas();
+        $kelasList = $this->kelasModel->getListKelas(get_active_tahun_ajaran());
 
         // Ambil data laporan per hari dengan semua jadwal
         $laporanPerHari = $this->absensiModel->getLaporanAbsensiPerHari($tanggal, $tanggal, $kelasId ?? null);

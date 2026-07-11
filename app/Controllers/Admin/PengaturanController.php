@@ -4,14 +4,18 @@ namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
 use App\Services\SiswaService;
+use App\Models\RolloverHistoryModel;
+use App\Models\RolloverBackupModel;
 
 class PengaturanController extends BaseController
 {
     protected $siswaService;
+    protected $rolloverHistoryModel;
 
     public function __construct()
     {
         $this->siswaService = new SiswaService();
+        $this->rolloverHistoryModel = new RolloverHistoryModel();
 
         if (!session()->get('isLoggedIn') || session()->get('role') !== 'admin') {
             return redirect()->to('/access-denied');
@@ -20,9 +24,11 @@ class PengaturanController extends BaseController
 
     public function index()
     {
-        $settingModel = new \App\Models\SettingModel();
-        $rolloverBackup = $settingModel->get('rollover_backup');
-        $rolloverBackupData = $rolloverBackup ? json_decode($rolloverBackup, true) : null;
+        $rolloverHistory = $this->rolloverHistoryModel->getAllHistory();
+        $latestActive = $this->rolloverHistoryModel->getLatestActive();
+
+        $rolloverBackupModel = new RolloverBackupModel();
+        $historyIdsWithBackup = $rolloverBackupModel->getHistoryIdsWithBackup();
 
         $data = [
             'title' => 'Pengaturan',
@@ -31,7 +37,9 @@ class PengaturanController extends BaseController
             'user' => $this->getUserData(),
             'activeTahunAjaran' => get_active_tahun_ajaran(),
             'tahunAjaranList' => get_tahun_ajaran_list(),
-            'rolloverBackup' => $rolloverBackupData,
+            'rolloverHistory' => $rolloverHistory,
+            'latestActiveRollover' => $latestActive,
+            'historyIdsWithBackup' => $historyIdsWithBackup,
             'jurnalPklStartDate' => get_jurnal_pkl_start_date(),
         ];
 
@@ -66,7 +74,16 @@ class PengaturanController extends BaseController
 
     public function rollover()
     {
-        $newTahunAjaran = $this->request->getPost('tahun_ajaran') ?? get_active_tahun_ajaran();
+        $activeTahunAjaran = get_active_tahun_ajaran();
+        $parts = explode('/', $activeTahunAjaran);
+        $nextTahunAjaran = ($parts[0] + 1) . '/' . ($parts[1] + 1);
+
+        $newTahunAjaran = $this->request->getPost('tahun_ajaran') ?? $nextTahunAjaran;
+
+        if ($newTahunAjaran !== $nextTahunAjaran) {
+            session()->setFlashdata('error', 'Tahun ajaran rollover harus tahun berikutnya dari tahun aktif (' . $nextTahunAjaran . ')');
+            return redirect()->to('/admin/pengaturan');
+        }
 
         $result = $this->siswaService->rolloverTahunAjaran($newTahunAjaran);
 
@@ -84,7 +101,14 @@ class PengaturanController extends BaseController
 
     public function revert()
     {
-        $result = $this->siswaService->revertRollover();
+        $historyId = (int) $this->request->getPost('history_id');
+
+        if (!$historyId) {
+            session()->setFlashdata('error', 'ID rollover tidak valid.');
+            return redirect()->to('/admin/pengaturan');
+        }
+
+        $result = $this->siswaService->revertRollover($historyId);
 
         if ($result['success']) {
             session()->setFlashdata('success', $result['data']['message']);

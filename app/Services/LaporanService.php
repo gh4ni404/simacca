@@ -143,7 +143,7 @@ class LaporanService extends BaseService
                          absensi.pertemuan_ke,
                          mata_pelajaran.nama_mapel,
                          guru.nama_lengkap as nama_guru')
-                ->join('siswa', 'siswa.id = absensi_detail.siswa_id')
+                ->join('siswa', 'siswa.id = absensi_detail.siswa_id AND siswa.deleted_at IS NULL')
                 ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
                 ->join('absensi', 'absensi.id = absensi_detail.absensi_id')
                 ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
@@ -470,7 +470,7 @@ class LaporanService extends BaseService
                          siswa.nis,
                          kelas.nama_kelas,
                          users.name as disetujui_oleh_nama')
-                ->join('siswa', 'siswa.id = izin_siswa.siswa_id')
+                ->join('siswa', 'siswa.id = izin_siswa.siswa_id AND siswa.deleted_at IS NULL')
                 ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
                 ->join('users', 'users.id = izin_siswa.disetujui_oleh', 'left');
 

@@ -93,35 +93,84 @@
                     </div>
                 </div>
 
-                <?php if ($rolloverBackup && !empty($rolloverBackup['changes'])): ?>
-                    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-3 md:p-5">
-                        <div class="flex items-start gap-2.5 md:gap-3">
-                            <div class="w-8 h-8 md:w-10 md:h-10 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-history text-yellow-600 text-sm md:text-base"></i>
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <p class="text-xs md:text-sm font-medium text-yellow-800 mb-0.5">Rollover Terakhir Tersimpan</p>
-                                <p class="text-[10px] md:text-xs text-yellow-700 mb-2.5 md:mb-3">
-                                    <?= esc($rolloverBackup['created_at'] ?? '') ?> &mdash;
-                                    <?= count($rolloverBackup['changes']) ?> siswa
-                                </p>
-                                <form action="<?= base_url('admin/pengaturan/revert') ?>" method="post" onsubmit="return confirm('Yakin akan revert rollover? Semua perubahan akan dikembalikan.')">
-                                    <?= csrf_field() ?>
-                                    <button type="submit" class="inline-flex items-center px-3 md:px-4 py-1.5 md:py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-xs md:text-sm font-medium">
-                                        <i class="fas fa-undo mr-1.5"></i> Revert
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
+                <!-- Tombol Rollover (selalu tampil) -->
+                <form action="<?= base_url('admin/pengaturan/rollover') ?>" method="post" onsubmit="return confirm('Yakin akan menjalankan rollover? Data kelas siswa akan berubah. Backup otomatis dibuat untuk revert.')">
+                    <?= csrf_field() ?>
+                    <?php
+                    $partsTA = explode('/', $activeTahunAjaran);
+                    $nextTahunAjaran = ($partsTA[0] + 1) . '/' . ($partsTA[1] + 1);
+                    ?>
+                    <input type="hidden" name="tahun_ajaran" value="<?= $nextTahunAjaran ?>">
+                    <button type="submit" class="inline-flex items-center px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors text-sm font-medium">
+                        <i class="fas fa-arrow-up mr-2"></i> Jalankan Rollover
+                    </button>
+                </form>
+
+                <!-- History Rollover -->
+                <?php if (!empty($rolloverHistory)): ?>
+                <div class="mt-5 md:mt-6">
+                    <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2.5">Riwayat Rollover</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs">
+                            <thead>
+                                <tr class="border-b border-gray-100">
+                                    <th class="text-left py-2 px-2 text-gray-500 font-medium">Waktu</th>
+                                    <th class="text-left py-2 px-2 text-gray-500 font-medium">Dari</th>
+                                    <th class="text-left py-2 px-2 text-gray-500 font-medium">Ke</th>
+                                    <th class="text-center py-2 px-2 text-gray-500 font-medium">Naik</th>
+                                    <th class="text-center py-2 px-2 text-gray-500 font-medium">Lulus</th>
+                                    <th class="text-center py-2 px-2 text-gray-500 font-medium">Status</th>
+                                    <th class="text-center py-2 px-2 text-gray-500 font-medium">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($rolloverHistory as $index => $history): ?>
+                                <tr class="border-b border-gray-50 <?= $history['reverted_at'] ? 'opacity-50' : '' ?>">
+                                    <td class="py-2 px-2 text-gray-600 whitespace-nowrap">
+                                        <?= date('d M Y H:i', strtotime($history['created_at'])) ?>
+                                    </td>
+                                    <td class="py-2 px-2 text-gray-700 font-medium"><?= esc($history['from_year']) ?></td>
+                                    <td class="py-2 px-2 text-gray-700 font-medium"><?= esc($history['to_year']) ?></td>
+                                    <td class="py-2 px-2 text-center">
+                                        <span class="inline-flex items-center justify-center w-6 h-6 bg-green-100 text-green-700 rounded-full text-[10px] font-bold">
+                                            <?= $history['naik_kelas'] ?>
+                                        </span>
+                                    </td>
+                                    <td class="py-2 px-2 text-center">
+                                        <span class="inline-flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-700 rounded-full text-[10px] font-bold">
+                                            <?= $history['lulus'] ?>
+                                        </span>
+                                    </td>
+                                    <td class="py-2 px-2 text-center">
+                                        <?php if ($history['reverted_at']): ?>
+                                            <span class="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-[10px] font-medium">
+                                                <i class="fas fa-undo mr-1"></i>Reverted
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-[10px] font-medium">
+                                                <i class="fas fa-check mr-1"></i>Aktif
+                                            </span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="py-2 px-2 text-center">
+                                        <?php if (!$history['reverted_at'] && in_array($history['id'], $historyIdsWithBackup)): ?>
+                                            <form action="<?= base_url('admin/pengaturan/revert') ?>" method="post" class="inline" onsubmit="return confirm('Yakin akan revert rollover dari <?= esc($history['from_year']) ?> ke <?= esc($history['to_year']) ?>? Semua perubahan akan dikembalikan.')">
+                                                <?= csrf_field() ?>
+                                                <input type="hidden" name="history_id" value="<?= $history['id'] ?>">
+                                                <button type="submit" class="inline-flex items-center px-2 py-1 bg-red-50 hover:bg-red-100 text-red-600 rounded text-[10px] font-medium transition-colors">
+                                                    <i class="fas fa-undo mr-1"></i>Revert
+                                                </button>
+                                            </form>
+                                        <?php else: ?>
+                                            <span class="text-gray-300 text-[10px]">—</span>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
                     </div>
-                <?php else: ?>
-                    <form action="<?= base_url('admin/pengaturan/rollover') ?>" method="post" onsubmit="return confirm('Yakin akan menjalankan rollover? Data kelas siswa akan berubah. Backup otomatis dibuat untuk revert.')">
-                        <?= csrf_field() ?>
-                        <input type="hidden" name="tahun_ajaran" value="<?= $activeTahunAjaran ?>">
-                        <button type="submit" class="inline-flex items-center px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors text-sm font-medium">
-                            <i class="fas fa-arrow-up mr-2"></i> Jalankan Rollover
-                        </button>
-                    </form>
+                </div>
                 <?php endif; ?>
             </div>
         </div>

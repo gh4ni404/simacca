@@ -10,7 +10,7 @@ class SiswaModel extends Model
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
-    protected $useSoftDeletes   = false;
+    protected $useSoftDeletes   = true;
     protected $protectFields    = true;
     protected $allowedFields    = [
         'user_id',
@@ -246,6 +246,40 @@ class SiswaModel extends Model
             $this->where('siswa.tahun_ajaran', $tahunAjaran);
         }
         return $this->countAllResults();
+    }
+
+    /**
+     * Get all siswa IDs matching filters (no pagination)
+     */
+    public function getAllSiswaIds($status = 'active', $kelasId = null, $tahunAjaran = null, $keyword = null)
+    {
+        $this->select('siswa.id')
+            ->join('users', 'users.id = siswa.user_id');
+
+        if ($status === 'active') {
+            $this->where('users.is_active', 1);
+        } elseif ($status === 'inactive') {
+            $this->where('users.is_active', 0);
+        }
+
+        if ($kelasId) {
+            $this->where('siswa.kelas_id', $kelasId);
+        }
+
+        if ($tahunAjaran) {
+            $this->where('siswa.tahun_ajaran', $tahunAjaran);
+        }
+
+        if ($keyword) {
+            $this->groupStart()
+                ->like('siswa.nama_lengkap', $keyword)
+                ->orLike('siswa.nis', $keyword)
+            ->groupEnd();
+        }
+
+        $this->orderBy('siswa.nama_lengkap', 'ASC');
+
+        return array_column($this->findAll(), 'id');
     }
 
     /**

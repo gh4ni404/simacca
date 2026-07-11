@@ -110,7 +110,7 @@ class AbsensiController extends BaseController
             'pageTitle' => 'Kelola Absensi',
             'pageDescription' => 'Kelola dan unlock absensi yang terkunci',
             'absensiList' => $absensiList,
-            'kelasList' => $this->kelasModel->orderBy('tingkat', 'ASC')->orderBy('nama_kelas', 'ASC')->findAll(),
+            'kelasList' => $this->kelasModel->where('tahun_ajaran', get_active_tahun_ajaran())->orderBy('tingkat', 'ASC')->orderBy('nama_kelas', 'ASC')->findAll(),
             'guruList' => $this->guruModel->orderBy('nama_lengkap', 'ASC')->findAll(),
             'mapelList' => $this->mataPelajaranModel->orderBy('nama_mapel', 'ASC')->findAll(),
             'filters' => [

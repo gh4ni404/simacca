@@ -10,7 +10,7 @@ class SiswaPklModel extends Model
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
-    protected $useSoftDeletes   = false;
+    protected $useSoftDeletes   = true;
     protected $protectFields    = true;
     protected $allowedFields    = [
         'siswa_id',
@@ -62,7 +62,7 @@ class SiswaPklModel extends Model
                 pembimbing_pkl.guru_id,
                 guru.nama_lengkap AS nama_pembimbing
             ')
-            ->join('siswa', 'siswa.id = siswa_pkl.siswa_id')
+            ->join('siswa', 'siswa.id = siswa_pkl.siswa_id AND siswa.deleted_at IS NULL')
             ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
             ->join('tempat_pkl', 'tempat_pkl.id = siswa_pkl.tempat_pkl_id')
             ->join('pembimbing_pkl', 'pembimbing_pkl.tempat_pkl_id = siswa_pkl.tempat_pkl_id AND pembimbing_pkl.tahun_ajaran = siswa_pkl.tahun_ajaran', 'left')

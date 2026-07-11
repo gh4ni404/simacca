@@ -45,7 +45,7 @@ class IzinSiswaService extends BaseService
                          siswa.nis,
                          kelas.nama_kelas,
                          users.username as disetujui_oleh_nama')
-                ->join('siswa', 'siswa.id = izin_siswa.siswa_id', 'left')
+                ->join('siswa', 'siswa.id = izin_siswa.siswa_id AND siswa.deleted_at IS NULL', 'left')
                 ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
                 ->join('users', 'users.id = izin_siswa.disetujui_oleh', 'left');
 
@@ -102,7 +102,7 @@ class IzinSiswaService extends BaseService
                          siswa.nis,
                          kelas.nama_kelas,
                          users.username as disetujui_oleh_nama')
-                ->join('siswa', 'siswa.id = izin_siswa.siswa_id', 'left')
+                ->join('siswa', 'siswa.id = izin_siswa.siswa_id AND siswa.deleted_at IS NULL', 'left')
                 ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
                 ->join('users', 'users.id = izin_siswa.disetujui_oleh', 'left')
                 ->where('izin_siswa.id', $id)
@@ -538,7 +538,7 @@ class IzinSiswaService extends BaseService
     {
         try {
             $builder = $this->db->table('izin_siswa')
-                ->join('siswa', 'siswa.id = izin_siswa.siswa_id');
+                ->join('siswa', 'siswa.id = izin_siswa.siswa_id AND siswa.deleted_at IS NULL');
 
             // Apply filters
             if (!empty($filters['siswa_id'])) {
@@ -564,7 +564,7 @@ class IzinSiswaService extends BaseService
             
             // Reset and count each status separately
             $baseBuilder = $this->db->table('izin_siswa')
-                ->join('siswa', 'siswa.id = izin_siswa.siswa_id');
+                ->join('siswa', 'siswa.id = izin_siswa.siswa_id AND siswa.deleted_at IS NULL');
             
             if (!empty($filters['siswa_id'])) {
                 $baseBuilder->where('izin_siswa.siswa_id', $filters['siswa_id']);
@@ -585,7 +585,7 @@ class IzinSiswaService extends BaseService
 
             // Reset builder for jenis_izin stats
             $builder = $this->db->table('izin_siswa')
-                ->join('siswa', 'siswa.id = izin_siswa.siswa_id');
+                ->join('siswa', 'siswa.id = izin_siswa.siswa_id AND siswa.deleted_at IS NULL');
 
             if (!empty($filters['siswa_id'])) {
                 $builder->where('izin_siswa.siswa_id', $filters['siswa_id']);

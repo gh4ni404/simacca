@@ -34,7 +34,7 @@ class AbsensiController extends BaseController
         }
 
         // Get kelas data
-        $kelas = $this->kelasModel->getByWaliKelas($guru['id']);
+        $kelas = $this->kelasModel->getByWaliKelas($guru['id'], get_active_tahun_ajaran());
 
         if (!$kelas) {
             return redirect()->to('/access-denied')->with('error', 'Anda belum ditugaskan sebagai wali kelas');

@@ -34,7 +34,7 @@ class LaporanController extends BaseController
         }
 
         // Get kelas data
-        $kelas = $this->kelasModel->getByWaliKelas($guru['id']);
+        $kelas = $this->kelasModel->getByWaliKelas($guru['id'], get_active_tahun_ajaran());
 
         if (!$kelas) {
             return redirect()->to('/access-denied')->with('error', 'Anda belum ditugaskan sebagai wali kelas');
@@ -60,7 +60,7 @@ class LaporanController extends BaseController
                     absensi_detail.status,
                     absensi_detail.keterangan
                 ')
-                ->join('siswa', 'siswa.id = absensi_detail.siswa_id')
+                ->join('siswa', 'siswa.id = absensi_detail.siswa_id AND siswa.deleted_at IS NULL')
                 ->join('absensi', 'absensi.id = absensi_detail.absensi_id')
                 ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
                 ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
@@ -97,7 +97,7 @@ class LaporanController extends BaseController
                     SUM(CASE WHEN absensi_detail.status = "izin" THEN 1 ELSE 0 END) as izin,
                     SUM(CASE WHEN absensi_detail.status = "alpa" THEN 1 ELSE 0 END) as alpa
                 ')
-                ->join('siswa', 'siswa.id = absensi_detail.siswa_id')
+                ->join('siswa', 'siswa.id = absensi_detail.siswa_id AND siswa.deleted_at IS NULL')
                 ->join('absensi', 'absensi.id = absensi_detail.absensi_id')
                 ->where('siswa.kelas_id', $kelas['id'])
                 ->where('absensi.tanggal >=', $startDate)

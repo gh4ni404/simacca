@@ -40,7 +40,7 @@ class SiswaController extends BaseController
         ]);
 
         $kelasModel = new \App\Models\KelasModel();
-        $allKelas = $kelasModel->findAll();
+        $allKelas = $kelasModel->where('tahun_ajaran', get_active_tahun_ajaran())->findAll();
 
         $data = [
             'title' => 'Manajemen Siswa',
@@ -255,6 +255,55 @@ class SiswaController extends BaseController
         return $this->response->setJSON([
             'available' => $result['data']['available'],
             'message' => $result['data']['message']
+        ]);
+    }
+
+    /**
+     * AJAX: Batch check NIS status for import preview
+     */
+    public function checkNisBatch()
+    {
+        if (!$this->request->isAJAX()) {
+            return redirect()->to('/admin/siswa');
+        }
+
+        $nisList = $this->request->getGet('nis_list');
+
+        if (!is_array($nisList)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Data NIS tidak valid'
+            ]);
+        }
+
+        $result = $this->siswaService->checkNisBatch($nisList);
+
+        return $this->response->setJSON($result);
+    }
+
+    /**
+     * AJAX: Get all siswa IDs matching current filters (for select-all across pages)
+     */
+    public function getAllIds()
+    {
+        if (!$this->request->isAJAX()) {
+            return redirect()->to('/admin/siswa');
+        }
+
+        $keyword = $this->request->getGet('search');
+        $status = $this->request->getGet('status') ?? 'active';
+        $kelasId = $this->request->getGet('kelas_id');
+
+        $result = $this->siswaService->getAllSiswaIds([
+            'search' => $keyword,
+            'status' => $status,
+            'kelas_id' => $kelasId,
+        ]);
+
+        return $this->response->setJSON([
+            'success' => $result['success'],
+            'ids' => $result['data']['ids'] ?? [],
+            'total' => $result['data']['total'] ?? 0,
         ]);
     }
 

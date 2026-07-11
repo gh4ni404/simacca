@@ -368,81 +368,141 @@ endif;
 </form>
 
 <script>
-    // Filters handled by server-side reload via onchange
+    // Track all selected IDs across pages
+    let allSelectedIds = new Set();
+    let isSelectAllMode = false;
 
-    // Bulk selection
+    function getCurrentFilters() {
+        const params = new URLSearchParams(window.location.search);
+        return {
+            search: params.get('search') || '',
+            status: params.get('status') || 'active',
+            kelas_id: params.get('kelas_id') || ''
+        };
+    }
+
+    // Select All - fetches ALL matching IDs via AJAX
     document.getElementById('selectAll').addEventListener('change', function() {
-        const checkboxes = document.querySelectorAll('.siswa-checkbox');
-        checkboxes.forEach(cb => cb.checked = this.checked);
-        updateBulkActions();
-    });
+        const self = this;
 
-    // Update bulk actions when checkboxes change
-    document.addEventListener('change', function(e) {
-        if (e.target.classList.contains('siswa-checkbox')) {
+        if (self.checked) {
+            const filters = getCurrentFilters();
+            const qs = new URLSearchParams(filters).toString();
+
+            fetch('<?= base_url('admin/siswa/get-all-ids') ?>?' + qs, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.ids) {
+                    isSelectAllMode = true;
+                    allSelectedIds = new Set(data.ids.map(String));
+
+                    // Check all visible checkboxes
+                    document.querySelectorAll('.siswa-checkbox').forEach(cb => cb.checked = true);
+
+                    updateBulkActions(data.total);
+                } else {
+                    self.checked = false;
+                }
+            })
+            .catch(() => {
+                self.checked = false;
+            });
+        } else {
+            isSelectAllMode = false;
+            allSelectedIds.clear();
+            document.querySelectorAll('.siswa-checkbox').forEach(cb => cb.checked = false);
             updateBulkActions();
         }
     });
 
-    function updateBulkActions() {
-        const selected = document.querySelectorAll('.siswa-checkbox:checked');
+    // Individual checkbox change
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('siswa-checkbox')) {
+            if (isSelectAllMode) {
+                // In select-all mode: individual uncheck removes from set
+                if (e.target.checked) {
+                    allSelectedIds.add(e.target.value);
+                } else {
+                    allSelectedIds.delete(e.target.value);
+                    document.getElementById('selectAll').checked = false;
+                }
+                updateBulkActions(allSelectedIds.size);
+            } else {
+                // Normal mode: add/remove from set
+                if (e.target.checked) {
+                    allSelectedIds.add(e.target.value);
+                } else {
+                    allSelectedIds.delete(e.target.value);
+                }
+                updateBulkActions();
+            }
+        }
+    });
+
+    function updateBulkActions(totalOverride) {
         const bulkActions = document.getElementById('bulkActions');
         const selectedCount = document.getElementById('selectedCount');
-        
-        if (selected.length > 0) {
+        const selectAll = document.getElementById('selectAll');
+        const count = totalOverride !== undefined ? totalOverride : allSelectedIds.size;
+
+        if (count > 0) {
             bulkActions.classList.remove('hidden');
-            selectedCount.textContent = `${selected.length} siswa terpilih`;
+            if (isSelectAllMode) {
+                selectedCount.textContent = `Semua ${count} siswa terpilih (lintas halaman)`;
+            } else {
+                selectedCount.textContent = `${count} siswa terpilih`;
+            }
         } else {
             bulkActions.classList.add('hidden');
         }
-        
-        // Update select all checkbox
+
+        // Sync selectAll checkbox state
         const allCheckboxes = document.querySelectorAll('.siswa-checkbox');
-        const selectAll = document.getElementById('selectAll');
-        selectAll.checked = selected.length === allCheckboxes.length;
+        if (!isSelectAllMode) {
+            selectAll.checked = allCheckboxes.length > 0 &&
+                document.querySelectorAll('.siswa-checkbox:checked').length === allCheckboxes.length;
+        }
     }
 
     function performBulkAction() {
         const action = document.getElementById('bulkActionSelect').value;
-        const selected = document.querySelectorAll('.siswa-checkbox:checked');
-        
+
         if (!action) {
             alert('Pilih aksi terlebih dahulu');
             return;
         }
-        
-        if (selected.length === 0) {
+
+        if (allSelectedIds.size === 0) {
             alert('Pilih minimal satu siswa');
             return;
         }
-        
-        // Confirm destructive actions
-        if (action === 'delete' && !confirm(`Apakah Anda yakin ingin menghapus ${selected.length} siswa?`)) {
+
+        const count = allSelectedIds.size;
+        if (action === 'delete' && !confirm(`Apakah Anda yakin ingin menghapus ${count} siswa?`)) {
             return;
         }
-        
-        // Collect IDs
-        const ids = Array.from(selected).map(cb => cb.value);
-        
-        // Set form values and submit
+
         document.getElementById('bulkActionInput').value = action;
         const container = document.getElementById('bulkIdsContainer');
         container.innerHTML = '';
-        
-        ids.forEach(id => {
+
+        allSelectedIds.forEach(id => {
             const input = document.createElement('input');
             input.type = 'hidden';
             input.name = 'ids[]';
             input.value = id;
             container.appendChild(input);
         });
-        
+
         document.getElementById('bulkActionForm').submit();
     }
 
     function cancelBulkSelection() {
-        const checkboxes = document.querySelectorAll('.siswa-checkbox');
-        checkboxes.forEach(cb => cb.checked = false);
+        isSelectAllMode = false;
+        allSelectedIds.clear();
+        document.querySelectorAll('.siswa-checkbox').forEach(cb => cb.checked = false);
         document.getElementById('selectAll').checked = false;
         document.getElementById('bulkActions').classList.add('hidden');
     }
@@ -458,7 +518,6 @@ endif;
         document.getElementById('deleteModal').classList.add('hidden');
     }
 
-    // Close modal when clicking outside
     window.onclick = function(event) {
         const modal = document.getElementById('deleteModal');
         if (event.target === modal) {

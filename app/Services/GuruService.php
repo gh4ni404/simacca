@@ -530,7 +530,7 @@ class GuruService extends BaseService
         try {
             $data = [
                 'mapelList' => $this->mapelModel->getListMapel(),
-                'kelasList' => $this->kelasModel->getListKelas()
+                'kelasList' => $this->kelasModel->getListKelas(get_active_tahun_ajaran())
             ];
 
             return $this->successResponse($data);

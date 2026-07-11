@@ -96,7 +96,9 @@ class Filters extends BaseFilters
                     'forgot-password/process',
                     'reset-password/process',
                     'files/*',  // Allow file serving without CSRF
-                    'admin/jadwal/checkConflict'  // AJAX endpoint - token sent in header
+                    'admin/jadwal/checkConflict',  // AJAX endpoint - token sent in header
+                    'admin/pembimbing-pkl/get-pembimbing-by-tempat-pkl',  // AJAX info only
+                    'admin/pembimbing-pkl/get-siswa-pkl-by-tempat-pkl',  // AJAX info only
                 ]
             ],
             // 'invalidchars',

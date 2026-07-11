@@ -1,47 +1,58 @@
 <?= $this->extend(get_device_layout()) ?>
 
 <?= $this->section('content') ?>
-<div class="bg-white rounded-xl shadow p-6">
+<div class="bg-white rounded-xl shadow p-4 md:p-6">
     <!-- Header -->
-    <div class="mb-6">
-        <h2 class="text-2xl font-bold text-gray-800"><?= $pageTitle ?></h2>
-        <p class="text-gray-600"><?= $pageDescription ?></p>
+    <div class="mb-4 md:mb-6">
+        <h2 class="text-xl md:text-2xl font-bold text-gray-800"><?= $pageTitle ?></h2>
+        <p class="text-sm md:text-base text-gray-600"><?= $pageDescription ?></p>
     </div>
 
-    <!-- Import Guide -->
-    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
-        <h3 class="text-lg font-semibold text-blue-800 mb-4 flex items-center">
+    <!-- Import Guide (Collapsible) -->
+    <details class="bg-blue-50 border border-blue-200 rounded-lg mb-4 md:mb-6" open>
+        <summary class="p-4 md:p-6 cursor-pointer text-blue-800 font-semibold flex items-center select-none">
             <i class="fas fa-info-circle mr-2"></i> Petunjuk Import
-        </h3>
-        <ul class="list-disc list-inside space-y-2 text-blue-700">
-            <li>Format file harus Excel (.xlsx atau .xls)</li>
-            <li>Pastikan format kolom sesuai template</li>
-            <li>Kolom wajib: NIP, Nama Lengkap, Jenis Kelamin, role</li>
-            <li>Kolom optional: Email, Mata Pelajaran</li>
-            <li>Jika username/password tidak diisi, akan digenerate otomatis</li>
-            <li>Download template untuk panduan format data</li>
+            <i class="fas fa-chevron-down ml-auto text-sm transition-transform details-open:rotate-180"></i>
+        </summary>
+        <div class="px-4 pb-4 md:px-6 md:pb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <h4 class="font-semibold text-blue-900 mb-2 text-sm">Format Data:</h4>
+                    <ul class="list-disc list-inside space-y-1.5 text-sm text-blue-700">
+                        <li>Format file harus Excel (.xlsx atau .xls)</li>
+                        <li>Pastikan format kolom sesuai template</li>
+                        <li>Kolom wajib: NIP, Nama Lengkap, Jenis Kelamin, Role</li>
+                        <li>Kolom optional: Email, Mata Pelajaran</li>
+                        <li>Jika username/password tidak diisi, akan digenerate otomatis</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-blue-900 mb-2 text-sm">Panduan Tambahan:</h4>
+                    <ul class="list-disc list-inside space-y-1.5 text-sm text-blue-700">
+                        <li>Jangan ubah nama kolom</li>
+                        <li>Jenis kelamin hanya <b>L</b> atau <b>P</b></li>
+                        <li>Role: <b>guru_mapel</b>, <b>wali_kelas</b>, atau <b>wakakur</b></li>
+                        <li>IS_WALI_KELAS: 1 (ya) / 0 (tidak)</li>
+                        <li>Kosongkan KELAS_ID jika bukan wali kelas</li>
+                    </ul>
+                </div>
+            </div>
 
-            <li>Jangan ubah nama kolom</li>
-            <li>Jenis kelamin hanya <b>L</b> atau <b>P</b></li>
-            <li>Role: <b>guru_mapel</b>, <b>wali_kelas</b>, atau <b>wakakur</b></li>
-            <li>IS_WALI_KELAS: 1 (ya) / 0 (tidak)</li>
-            <li>Kosongkan KELAS_ID jika bukan wali kelas</li>
-        </ul>
-
-        <div class="mt-4 flex space-x-3">
-            <a href="<?= base_url('admin/guru/download-template') ?>"
-                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center">
-                <i class="fas fa-download mr-2"></i> Download Template
-            </a>
-            <a href="<?= base_url('admin/guru') ?>"
-                class="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 flex items-center">
-                <i class="fas fa-arrow-left mr-2"></i> Kembali ke Daftar guru
-            </a>
+            <div class="mt-4 flex flex-col sm:flex-row gap-3">
+                <a href="<?= base_url('admin/guru/download-template') ?>"
+                   class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center text-sm">
+                    <i class="fas fa-download mr-2"></i> Download Template
+                </a>
+                <a href="<?= base_url('admin/guru') ?>"
+                   class="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 flex items-center justify-center text-sm">
+                    <i class="fas fa-arrow-left mr-2"></i> Kembali ke Daftar Guru
+                </a>
+            </div>
         </div>
-    </div>
+    </details>
 
     <!-- Import Form -->
-    <div class="border border-gray-200 rounded-lg p-6">
+    <div class="border border-gray-200 rounded-lg p-4 md:p-6">
         <form action="<?= base_url('admin/guru/process-import') ?>" method="POST" enctype="multipart/form-data" id="importForm">
             <?= csrf_field() ?>
 
@@ -49,9 +60,9 @@
                 <!-- File Upload -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Pilih File Excel *</label>
-                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-indigo-500 transition-colors">
+                    <div class="flex justify-center px-4 md:px-6 pt-4 md:pt-5 pb-4 md:pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-indigo-500 transition-colors">
                         <div class="space-y-1 text-center">
-                            <i class="fas fa-file-excel text-4xl text-green-500 mx-auto"></i>
+                            <i class="fas fa-file-excel text-3xl md:text-4xl text-green-500 mx-auto"></i>
                             <div class="flex text-sm text-gray-600 justify-center">
                                 <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500">
                                     <span>Upload file Excel</span>
@@ -59,7 +70,7 @@
                                 </label>
                             </div>
                             <p class="text-xs text-gray-500">.xlsx atau .xls</p>
-                            <p id="fileName" class="text-sm text-gray-900 mt-2"></p>
+                            <p id="fileName" class="text-sm text-gray-900 mt-2 font-medium break-all"></p>
                         </div>
                     </div>
                 </div>
@@ -68,17 +79,17 @@
                 <div class="border-t pt-4">
                     <h4 class="font-medium text-gray-700 mb-3">Opsi Import</h4>
                     <div class="space-y-3">
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" name="skip_duplicate" class="rounded text-indigo-600" checked>
-                            <span class="ml-2 text-gray-700">Lewati data duplikat (berdasarkan NIP)</span>
+                        <label class="inline-flex items-start">
+                            <input type="checkbox" name="skip_duplicate" class="rounded text-indigo-600 mt-0.5" checked>
+                            <span class="ml-2 text-sm md:text-base text-gray-700">Lewati data duplikat (berdasarkan NIP)</span>
                         </label>
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" name="generate_password" class="rounded text-indigo-600">
-                            <span class="ml-2 text-gray-700">Generate password otomatis untuk data tanpa password</span>
+                        <label class="inline-flex items-start">
+                            <input type="checkbox" name="generate_password" class="rounded text-indigo-600 mt-0.5">
+                            <span class="ml-2 text-sm md:text-base text-gray-700">Generate password otomatis untuk data tanpa password</span>
                         </label>
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" name="update_existing" class="rounded text-indigo-600">
-                            <span class="ml-2 text-gray-700">Update data yang sudah ada (berdasarkan NIP)</span>
+                        <label class="inline-flex items-start">
+                            <input type="checkbox" name="update_existing" class="rounded text-indigo-600 mt-0.5">
+                            <span class="ml-2 text-sm md:text-base text-gray-700">Update data yang sudah ada (berdasarkan NIP)</span>
                         </label>
                     </div>
                 </div>
@@ -86,15 +97,15 @@
                 <!-- Preview Table (hidden initially) -->
                 <div id="previewSection" class="hidden">
                     <h4 class="font-medium text-gray-700 mb-3">Preview Data</h4>
-                    <div class="overflow-x-auto">
+                    <div class="overflow-auto max-h-72 md:max-h-96 border border-gray-200 rounded-lg">
                         <table class="min-w-full divide-y divide-gray-200" id="previewTable">
-                            <thead class="bg-gray-50">
+                            <thead class="bg-gray-50 sticky top-0">
                                 <tr>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">NIP</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nama Guru</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Mata Pelajaran</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                    <th class="px-3 md:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">NIP</th>
+                                    <th class="px-3 md:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nama Guru</th>
+                                    <th class="px-3 md:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Mapel</th>
+                                    <th class="px-3 md:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+                                    <th class="px-3 md:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden md:table-cell">Status</th>
                                 </tr>
                             </thead>
                             <tbody id="previewBody" class="bg-white divide-y divide-gray-200">
@@ -102,17 +113,18 @@
                             </tbody>
                         </table>
                     </div>
+                    <p class="text-xs text-gray-400 mt-1.5 text-right">Geser ke samping untuk melihat semua kolom</p>
                 </div>
 
                 <!-- Form Actions -->
-                <div class="flex justify-end space-x-3 border-t pt-6">
+                <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 border-t pt-4 md:pt-6">
                     <a href="<?= base_url('admin/guru') ?>"
-                        class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                       class="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-center text-sm font-medium">
                         Batal
                     </a>
                     <button type="submit"
-                        class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center"
-                        id="submitBtn" disabled>
+                            class="px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center justify-center text-sm font-medium"
+                            id="submitBtn" disabled>
                         <i class="fas fa-upload mr-2"></i> Proses Import
                     </button>
                 </div>
@@ -121,8 +133,8 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
-    // File upload handler
     document.getElementById('file-upload').addEventListener('change', function(e) {
         const file = e.target.files[0];
         const fileName = document.getElementById('fileName');
@@ -133,7 +145,6 @@
             fileName.textContent = file.name;
             submitBtn.disabled = false;
 
-            // Simple file validation
             const extension = file.name.split('.').pop().toLowerCase();
             if (!['xlsx', 'xls'].includes(extension)) {
                 alert('Format file harus Excel (.xlsx atau .xls)');
@@ -141,23 +152,58 @@
                 return;
             }
 
-            // Show preview section
             previewSection.classList.remove('hidden');
 
-            // Preview data (simplified - in real app you might want to use SheetJS)
-            // For now, we'll just show a placeholder
             const previewBody = document.getElementById('previewBody');
-            previewBody.innerHTML = `
-                <tr>
-                    <td colspan="5" class="px-4 py-4 text-center text-gray-500">
-                        <i class="fas fa-spinner fa-spin mr-2"></i>
-                        Membaca data dari file...
-                    </td>
-                </tr>
-            `;
+            previewBody.innerHTML = '<tr><td colspan="5" class="px-4 py-4 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i> Membaca data dari file...</td></tr>';
 
-            // In a real application, you would parse the Excel file here
-            // using a library like SheetJS and populate the preview table
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const data = new Uint8Array(event.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                    const dataRows = jsonData.slice(1).filter(row => row.some(cell => cell !== undefined && cell !== ''));
+
+                    if (dataRows.length === 0) {
+                        previewBody.innerHTML = '<tr><td colspan="5" class="px-4 py-4 text-center text-gray-500"><i class="fas fa-exclamation-triangle mr-2"></i> Tidak ada data ditemukan dalam file</td></tr>';
+                        return;
+                    }
+
+                    function roleBadge(role) {
+                        var r = String(role).toLowerCase().trim();
+                        if (r === 'wali_kelas') return '<span class="badge badge-yellow">Wali Kelas</span>';
+                        if (r === 'wakakur') return '<span class="badge badge-red">Wakakur</span>';
+                        return '<span class="badge badge-green">Guru Mapel</span>';
+                    }
+
+                    let html = '';
+                    dataRows.forEach(function(row, index) {
+                        const nip = row[0] || '-';
+                        const nama = row[1] || '-';
+                        const role = row[6] || '-';
+                        const mapelId = row[7] || '-';
+
+                        html += '<tr class="' + (index % 2 === 0 ? 'bg-white' : 'bg-gray-50') + '">'
+                            + '<td class="px-3 md:px-4 py-2 text-xs md:text-sm text-gray-900">' + escapeHtml(String(nip)) + '</td>'
+                            + '<td class="px-3 md:px-4 py-2 text-xs md:text-sm text-gray-900">' + escapeHtml(String(nama)) + '</td>'
+                            + '<td class="px-3 md:px-4 py-2 text-xs md:text-sm text-gray-900 hidden sm:table-cell">' + escapeHtml(String(mapelId)) + '</td>'
+                            + '<td class="px-3 md:px-4 py-2 text-xs md:text-sm">' + roleBadge(role) + '</td>'
+                            + '<td class="px-3 md:px-4 py-2 text-xs md:text-sm text-green-600 hidden md:table-cell">Siap Import</td>'
+                            + '</tr>';
+                    });
+
+                    html += '<tr><td colspan="5" class="px-4 py-2 text-center text-xs md:text-sm text-gray-500 italic">Total ' + dataRows.length + ' baris data akan diimport</td></tr>';
+
+                    previewBody.innerHTML = html;
+                } catch (err) {
+                    previewBody.innerHTML = '<tr><td colspan="5" class="px-4 py-4 text-center text-red-500"><i class="fas fa-exclamation-circle mr-2"></i> Gagal membaca file: ' + escapeHtml(err.message) + '</td></tr>';
+                }
+            };
+            reader.readAsArrayBuffer(file);
 
         } else {
             fileName.textContent = '';
@@ -166,7 +212,12 @@
         }
     });
 
-    // Form submission with confirmation
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.appendChild(document.createTextNode(text));
+        return div.innerHTML;
+    }
+
     document.getElementById('importForm').addEventListener('submit', function(e) {
         if (!confirm('Apakah Anda yakin ingin melakukan import data? Pastikan data sudah benar.')) {
             e.preventDefault();
