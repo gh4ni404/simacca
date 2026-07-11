@@ -333,22 +333,12 @@ class PembimbingPklService extends BaseService
                 ->where('tahun_ajaran', $tahunAjaran)
                 ->findAll();
 
-            $placementMap = [];
-            foreach ($existingPlacements as $p) {
-                $placementMap[$p['siswa_id']] = $p['tempat_pkl_id'];
-            }
+            $placedSiswaIds = array_column($existingPlacements, 'siswa_id');
 
-            $tempatPklMap = [];
-            $allTempatPkl = $this->tempatPklModel->findAll();
-            foreach ($allTempatPkl as $t) {
-                $tempatPklMap[$t['id']] = $t['nama_perusahaan'];
-            }
-
-            foreach ($siswa as &$s) {
-                $s['status'] = isset($placementMap[$s['id']]) ? 'sudah' : 'belum';
-                $s['tempat_pkl_id'] = $placementMap[$s['id']] ?? null;
-                $s['nama_perusahaan'] = isset($placementMap[$s['id']]) ? ($tempatPklMap[$placementMap[$s['id']]] ?? '-') : '-';
-            }
+            $siswa = array_filter($siswa, function ($s) use ($placedSiswaIds) {
+                return !in_array($s['id'], $placedSiswaIds);
+            });
+            $siswa = array_values($siswa);
 
             return $this->successResponse($siswa);
         } catch (\Exception $e) {
@@ -464,6 +454,28 @@ class PembimbingPklService extends BaseService
         return $this->executeInTransaction(function () use ($id) {
             $this->siswaPklModel->delete($id);
             return $this->successResponse(['id' => $id], 'Penempatan siswa PKL berhasil dihapus');
+        });
+    }
+
+    public function bulkDeleteSiswaPkl(array $ids): array
+    {
+        if (empty($ids)) {
+            return $this->errorResponse('Tidak ada data yang dipilih untuk dihapus');
+        }
+
+        return $this->executeInTransaction(function () use ($ids) {
+            $deleted = 0;
+            foreach ($ids as $id) {
+                $existing = $this->siswaPklModel->find((int) $id);
+                if ($existing) {
+                    $this->siswaPklModel->delete((int) $id);
+                    $deleted++;
+                }
+            }
+            return $this->successResponse(
+                ['deleted' => $deleted],
+                $deleted . ' penempatan siswa PKL berhasil dihapus'
+            );
         });
     }
 

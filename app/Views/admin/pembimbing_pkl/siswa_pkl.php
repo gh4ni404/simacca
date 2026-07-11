@@ -5,6 +5,17 @@
     .badge-pkl { background-color: #DBEAFE; color: #1E40AF; }
     .badge-ditempatkan { background-color: #D1FAE5; color: #065F46; }
     .badge-belum { background-color: #FEF3C7; color: #92400E; }
+    .bulk-action-bar { transition: all 0.2s ease; }
+    .bulk-action-bar.hidden { opacity: 0; pointer-events: none; transform: translateY(-8px); }
+    .bulk-action-bar.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .batch-modal { transition: opacity 0.2s ease; }
+    .batch-modal.hidden { opacity: 0; pointer-events: none; }
+    .batch-modal.visible { opacity: 1; pointer-events: auto; }
+    .batch-modal .modal-panel { transition: transform 0.2s ease; }
+    .batch-modal.hidden .modal-panel { transform: translateY(16px); }
+    .batch-modal.visible .modal-panel { transform: translateY(0); }
+    .batch-table-scroll { overflow-y: auto; max-height: 320px; border-bottom: 1px solid #E5E7EB; }
+    .batch-table-scroll thead th { position: sticky; top: 0; z-index: 10; background: #F9FAFB; }
 </style>
 <?= $this->endSection() ?>
 
@@ -16,10 +27,10 @@
             <p class="text-gray-600"><?= $pageDescription; ?></p>
         </div>
         <div class="mt-4 md:mt-0 flex space-x-3">
-            <a href="<?= base_url('admin/pembimbing-pkl/siswa-pkl/batch'); ?>"
+            <button type="button" onclick="openBatchModal()"
                 class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center">
                 <i class="fas fa-users mr-2"></i> Tempatkan Batch
-            </a>
+            </button>
             <a href="<?= base_url('admin/pembimbing-pkl/siswa-pkl/tambah'); ?>"
                 class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center">
                 <i class="fas fa-plus mr-2"></i> Tempatkan Siswa
@@ -91,10 +102,49 @@
         </div>
     </div>
 
+    <!-- Bulk Action Bar -->
+    <div id="bulkActionBar" class="bulk-action-bar hidden mb-4 bg-indigo-50 border border-indigo-200 rounded-lg p-4 flex flex-col md:flex-row items-start md:items-center justify-between">
+        <div class="flex items-center space-x-4 mb-3 md:mb-0">
+            <span class="text-sm font-medium text-indigo-700">
+                <i class="fas fa-check-double mr-1"></i>
+                <span id="selectedCount">0</span> siswa dipilih
+            </span>
+            <div class="flex items-center space-x-2">
+                <select id="bulkAction"
+                    class="border border-indigo-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                    <option value="">-- Pilih Aksi --</option>
+                    <option value="delete">Hapus</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button type="button" id="btnApplyBulk"
+                onclick="confirmBulkAction()"
+                class="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled>
+                <i class="fas fa-paper-plane mr-1"></i> Terapkan
+            </button>
+            <button type="button" id="btnCancelBulk"
+                onclick="clearSelection()"
+                class="border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 px-4 py-1.5 rounded-lg text-sm font-medium">
+                <i class="fas fa-times mr-1"></i> Batal
+            </button>
+        </div>
+    </div>
+
+    <!-- Bulk Delete Form -->
+    <form id="bulkDeleteForm" method="POST" action="<?= base_url('admin/pembimbing-pkl/siswa-pkl/bulk-hapus') ?>" style="display:none;">
+        <?= csrf_field() ?>
+        <div id="bulkDeleteInputs"></div>
+    </form>
+
     <div class="table-responsive">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
+                        <input type="checkbox" id="selectAll" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer" onclick="toggleSelectAll(this)">
+                    </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Siswa</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIS</th>
@@ -109,7 +159,7 @@
             <tbody class="bg-white divide-y divide-gray-200">
                 <?php if (empty($siswaPkl)): ?>
                     <tr>
-                        <td colspan="9" class="px-6 py-8 text-center text-gray-500">
+                        <td colspan="10" class="px-6 py-8 text-center text-gray-500">
                             <i class="fas fa-user-graduate text-4xl text-gray-300 mb-4"></i>
                             <p>Belum ada penempatan siswa PKL</p>
                             <a href="<?= base_url('admin/pembimbing-pkl/siswa-pkl/tambah'); ?>" class="text-indigo-600 hover:text-indigo-800 mt-2 inline-block">Tempatkan siswa sekarang</a>
@@ -119,6 +169,11 @@
                     <?php $no = 1; ?>
                     <?php foreach ($siswaPkl as $sp): ?>
                         <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <input type="checkbox" name="ids[]" value="<?= $sp['id']; ?>"
+                                    class="row-checkbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                    onchange="onRowCheckboxChange()">
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= $no++; ?></td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900"><?= esc($sp['nama_siswa']); ?></div>
@@ -159,4 +214,377 @@
         </table>
     </div>
 </div>
+
+<!-- Bulk Delete Confirmation Modal -->
+<div id="bulkConfirmModal" class="fixed inset-0 z-50 hidden">
+    <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onclick="closeBulkModal()"></div>
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 relative z-10">
+            <div class="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mx-auto mb-4">
+                <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 text-center mb-2">Konfirmasi Hapus</h3>
+            <p class="text-gray-600 text-center mb-6" id="bulkConfirmMessage">
+                Apakah Anda yakin ingin menghapus data yang dipilih?
+            </p>
+            <div class="flex justify-center space-x-3">
+                <button type="button" onclick="closeBulkModal()"
+                    class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">
+                    Batal
+                </button>
+                <button type="button" onclick="executeBulkDelete()"
+                    class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium">
+                    <i class="fas fa-trash mr-1"></i> Ya, Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Batch Placement Modal -->
+<div id="batchModal" class="batch-modal hidden fixed inset-0 z-50">
+    <div class="fixed inset-0 bg-black bg-opacity-50" onclick="closeBatchModal()"></div>
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="modal-panel bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col relative z-10">
+
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">Batch Penempatan Siswa PKL</h3>
+                    <p class="text-sm text-gray-500">Pilih banyak siswa sekaligus untuk ditempatkan</p>
+                </div>
+                <button type="button" onclick="closeBatchModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="flex-1 overflow-y-auto px-6 py-4">
+
+                <!-- Tempat PKL Select -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tempat PKL *</label>
+                    <select id="batchTempatPkl" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <option value="">Pilih Tempat PKL</option>
+                        <?php foreach ($tempatPklList as $id => $nama): ?>
+                            <option value="<?= $id ?>"><?= esc($nama) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <!-- Info Pembimbing -->
+                <div id="batchPembimbingInfo" class="mb-4 hidden">
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <p class="text-sm text-blue-800">
+                            <i class="fas fa-chalkboard-teacher mr-1"></i>
+                            Pembimbing: <span id="batchPembimbingNama" class="font-semibold">-</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Toolbar: Select All + Search -->
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center space-x-3">
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" id="batchSelectAll"
+                                class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                            <span class="ml-2 text-sm font-medium text-gray-700">Pilih Semua</span>
+                        </label>
+                        <span class="text-sm text-gray-500" id="batchSelectedCount">0 dipilih</span>
+                    </div>
+                    <input type="text" id="batchSearch" placeholder="Cari nama / NIS..."
+                        class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm w-56 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <!-- Student Table -->
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="batch-table-scroll">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase w-10">
+                                        <input type="checkbox" id="batchSelectAllHeader"
+                                            class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">No</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">NIS</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Siswa</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kelas</th>
+                                </tr>
+                            </thead>
+                            <tbody id="batchStudentBody" class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td colspan="5" class="px-6 py-8 text-center text-gray-400">
+                                        <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                                        <p class="text-sm">Memuat data siswa...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex items-center justify-between px-6 py-4 border-t bg-gray-50 rounded-b-xl">
+                <p class="text-xs text-gray-400" id="batchEmptyMsg"></p>
+                <div class="flex space-x-3">
+                    <button type="button" onclick="closeBatchModal()"
+                        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm font-medium">
+                        Batal
+                    </button>
+                    <button type="button" id="btnBatchSubmit" onclick="submitBatchForm()"
+                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled>
+                        <i class="fas fa-save mr-1"></i> Simpan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<script>
+/* ===== MAIN TABLE: Bulk Action ===== */
+function toggleSelectAll(el) {
+    document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = el.checked);
+    updateBulkBar();
+}
+function onRowCheckboxChange() {
+    const cbs = document.querySelectorAll('.row-checkbox');
+    const sa = document.getElementById('selectAll');
+    const all = cbs.length > 0 && [...cbs].every(cb => cb.checked);
+    sa.checked = all;
+    sa.indeterminate = !all && [...cbs].some(cb => cb.checked);
+    updateBulkBar();
+}
+function updateBulkBar() {
+    const checked = document.querySelectorAll('.row-checkbox:checked');
+    const bar = document.getElementById('bulkActionBar');
+    document.getElementById('selectedCount').textContent = checked.length;
+    if (checked.length > 0) {
+        bar.classList.remove('hidden'); bar.classList.add('visible');
+    } else {
+        bar.classList.add('hidden'); bar.classList.remove('visible');
+        document.getElementById('bulkAction').value = '';
+        document.getElementById('btnApplyBulk').disabled = true;
+    }
+}
+document.getElementById('bulkAction').addEventListener('change', function() {
+    document.getElementById('btnApplyBulk').disabled = !this.value;
+});
+function clearSelection() {
+    document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
+    document.getElementById('selectAll').checked = false;
+    document.getElementById('selectAll').indeterminate = false;
+    document.getElementById('bulkAction').value = '';
+    document.getElementById('btnApplyBulk').disabled = true;
+    updateBulkBar();
+}
+function confirmBulkAction() {
+    const action = document.getElementById('bulkAction').value;
+    const checked = document.querySelectorAll('.row-checkbox:checked');
+    if (!action || checked.length === 0) return;
+    if (action === 'delete') {
+        document.getElementById('bulkConfirmMessage').textContent =
+            'Apakah Anda yakin ingin menghapus ' + checked.length + ' penempatan siswa PKL yang dipilih?';
+        document.getElementById('bulkConfirmModal').classList.remove('hidden');
+    }
+}
+function closeBulkModal() { document.getElementById('bulkConfirmModal').classList.add('hidden'); }
+function executeBulkDelete() {
+    const checked = document.querySelectorAll('.row-checkbox:checked');
+    const box = document.getElementById('bulkDeleteInputs');
+    box.innerHTML = '';
+    checked.forEach(cb => {
+        const inp = document.createElement('input');
+        inp.type = 'hidden'; inp.name = 'ids[]'; inp.value = cb.value;
+        box.appendChild(inp);
+    });
+    document.getElementById('bulkDeleteForm').submit();
+}
+
+/* ===== BATCH PLACEMENT MODAL ===== */
+let batchSiswaData = [];
+
+function openBatchModal() {
+    const modal = document.getElementById('batchModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('visible');
+    document.body.style.overflow = 'hidden';
+
+    document.getElementById('batchTempatPkl').value = '';
+    document.getElementById('batchPembimbingInfo').classList.add('hidden');
+    document.getElementById('batchSearch').value = '';
+    document.getElementById('batchSelectedCount').textContent = '0 dipilih';
+    document.getElementById('batchSelectAll').checked = false;
+    document.getElementById('batchSelectAllHeader').checked = false;
+    document.getElementById('btnBatchSubmit').disabled = true;
+    document.getElementById('batchEmptyMsg').textContent = '';
+
+    loadBatchStudents();
+}
+
+function closeBatchModal() {
+    const modal = document.getElementById('batchModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('visible');
+    document.body.style.overflow = '';
+}
+
+function loadBatchStudents() {
+    const tbody = document.getElementById('batchStudentBody');
+    tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-gray-400">' +
+        '<i class="fas fa-spinner fa-spin text-2xl mb-2"></i><p class="text-sm">Memuat data siswa...</p></td></tr>';
+
+    fetch('<?= base_url('admin/pembimbing-pkl/get-siswa-xii-unplaced') ?>', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': '<?= csrf_hash() ?>'
+        }
+    })
+    .then(r => r.json())
+    .then(result => {
+        batchSiswaData = result.data || [];
+        renderBatchTable(batchSiswaData);
+    })
+    .catch(() => {
+        tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-red-400">' +
+            '<i class="fas fa-exclamation-triangle text-2xl mb-2"></i><p class="text-sm">Gagal memuat data siswa</p></td></tr>';
+    });
+}
+
+function renderBatchTable(list) {
+    const tbody = document.getElementById('batchStudentBody');
+    if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-gray-400">' +
+            '<i class="fas fa-users text-4xl text-gray-300 mb-2"></i>' +
+            '<p class="text-sm">Tidak ada siswa kelas XII yang belum ditempatkan</p></td></tr>';
+        document.getElementById('batchEmptyMsg').textContent = 'Semua siswa sudah ditempatkan.';
+        return;
+    }
+    let html = '';
+    list.forEach((s, i) => {
+        html += '<tr class="hover:bg-gray-50 batch-row">' +
+            '<td class="px-4 py-3 whitespace-nowrap">' +
+                '<input type="checkbox" class="batch-checkbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" data-id="' + s.id + '" onchange="onBatchCheckboxChange()">' +
+            '</td>' +
+            '<td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">' + (i + 1) + '</td>' +
+            '<td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">' + escapeHtml(s.nis || '') + '</td>' +
+            '<td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">' + escapeHtml(s.nama_lengkap || '') + '</td>' +
+            '<td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">' + escapeHtml(s.nama_kelas || '-') + '</td>' +
+            '</tr>';
+    });
+    tbody.innerHTML = html;
+    document.getElementById('batchEmptyMsg').textContent = list.length + ' siswa tersedia.';
+}
+
+function escapeHtml(t) {
+    const d = document.createElement('div'); d.textContent = t; return d.innerHTML;
+}
+
+/* Batch select all */
+document.getElementById('batchSelectAll').addEventListener('change', function() {
+    const checked = this.checked;
+    document.querySelectorAll('.batch-checkbox').forEach(cb => cb.checked = checked);
+    document.getElementById('batchSelectAllHeader').checked = checked;
+    updateBatchCount();
+});
+document.getElementById('batchSelectAllHeader').addEventListener('change', function() {
+    const checked = this.checked;
+    document.querySelectorAll('.batch-checkbox').forEach(cb => cb.checked = checked);
+    document.getElementById('batchSelectAll').checked = checked;
+    updateBatchCount();
+});
+
+function onBatchCheckboxChange() {
+    const cbs = document.querySelectorAll('.batch-checkbox');
+    const all = cbs.length > 0 && [...cbs].every(cb => cb.checked);
+    document.getElementById('batchSelectAll').checked = all;
+    document.getElementById('batchSelectAllHeader').checked = all;
+    updateBatchCount();
+}
+
+function updateBatchCount() {
+    const n = document.querySelectorAll('.batch-checkbox:checked').length;
+    document.getElementById('batchSelectedCount').textContent = n + ' dipilih';
+    document.getElementById('btnBatchSubmit').disabled = n === 0 || !document.getElementById('batchTempatPkl').value;
+}
+
+/* Batch search */
+document.getElementById('batchSearch').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('.batch-row').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+});
+
+/* Pembimbing info */
+document.getElementById('batchTempatPkl').addEventListener('change', function() {
+    updateBatchCount();
+    const info = document.getElementById('batchPembimbingInfo');
+    const nameEl = document.getElementById('batchPembimbingNama');
+    if (!this.value) { info.classList.add('hidden'); return; }
+
+    fetch('<?= base_url('admin/pembimbing-pkl/get-pembimbing-by-tempat-pkl') ?>', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': '<?= csrf_hash() ?>'
+        },
+        body: JSON.stringify({ tempat_pkl_id: this.value, tahun_ajaran: '<?= get_active_tahun_ajaran() ?>' })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data && data.length > 0) {
+            nameEl.textContent = data.map(p => p.nama_guru).join(', ');
+        } else {
+            nameEl.textContent = 'Belum ada pembimbing';
+        }
+        info.classList.remove('hidden');
+    })
+    .catch(() => { nameEl.textContent = 'Gagal memuat'; info.classList.remove('hidden'); });
+});
+
+/* Submit batch form via AJAX */
+function submitBatchForm() {
+    const tempatPklId = document.getElementById('batchTempatPkl').value;
+    const checked = document.querySelectorAll('.batch-checkbox:checked');
+    if (!tempatPklId || checked.length === 0) return;
+
+    const siswaIds = [...checked].map(cb => cb.dataset.id);
+
+    const btn = document.getElementById('btnBatchSubmit');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Menyimpan...';
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '<?= base_url('admin/pembimbing-pkl/siswa-pkl/batch-simpan') ?>';
+
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden'; csrfInput.name = '<?= csrf_token() ?>'; csrfInput.value = '<?= csrf_hash() ?>';
+    form.appendChild(csrfInput);
+
+    const tpInput = document.createElement('input');
+    tpInput.type = 'hidden'; tpInput.name = 'tempat_pkl_id'; tpInput.value = tempatPklId;
+    form.appendChild(tpInput);
+
+    siswaIds.forEach(id => {
+        const inp = document.createElement('input');
+        inp.type = 'hidden'; inp.name = 'siswa_ids[]'; inp.value = id;
+        form.appendChild(inp);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
 <?= $this->endSection() ?>

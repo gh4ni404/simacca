@@ -99,6 +99,7 @@ class Filters extends BaseFilters
                     'admin/jadwal/checkConflict',  // AJAX endpoint - token sent in header
                     'admin/pembimbing-pkl/get-pembimbing-by-tempat-pkl',  // AJAX info only
                     'admin/pembimbing-pkl/get-siswa-pkl-by-tempat-pkl',  // AJAX info only
+                    'admin/pembimbing-pkl/get-siswa-xii-unplaced',       // AJAX info only
                 ]
             ],
             // 'invalidchars',

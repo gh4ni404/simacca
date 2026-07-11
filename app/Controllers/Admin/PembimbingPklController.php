@@ -199,6 +199,7 @@ class PembimbingPklController extends BaseController
         $tahunAjaran = $this->request->getGet('tahun_ajaran');
         $siswaPklResult = $this->pembimbingPklService->getAllSiswaPkl($tahunAjaran);
         $statsResult = $this->pembimbingPklService->getSiswaPklStats();
+        $formLists = $this->pembimbingPklService->getFormLists();
 
         $data = [
             'title'             => 'Penempatan Siswa PKL',
@@ -207,7 +208,8 @@ class PembimbingPklController extends BaseController
             'user'              => $this->getUserData(),
             'siswaPkl'          => $siswaPklResult['data'] ?? [],
             'stats'             => $statsResult['data'] ?? [],
-            'tahunAjaranList'   => $this->pembimbingPklService->getFormLists()['data']['tahunAjaranList'] ?? [],
+            'tahunAjaranList'   => $formLists['data']['tahunAjaranList'] ?? [],
+            'tempatPklList'     => $formLists['data']['tempatPklList'] ?? [],
             'selectedTahun'     => $tahunAjaran,
         ];
 
@@ -248,27 +250,6 @@ class PembimbingPklController extends BaseController
         return redirect()->to('/admin/pembimbing-pkl/siswa-pkl');
     }
 
-    public function siswaPklBatch()
-    {
-        $tahunAjaran = get_active_tahun_ajaran();
-        $tempatPklId = $this->request->getGet('tempat_pkl_id');
-
-        $siswaResult = $this->pembimbingPklService->getSiswaXIIWithPlacement($tahunAjaran);
-
-        $data = [
-            'title'             => 'Batch Penempatan Siswa PKL',
-            'pageTitle'         => 'Batch Penempatan Siswa PKL',
-            'pageDescription'   => 'Pilih banyak siswa sekaligus untuk ditempatkan ke tempat PKL',
-            'user'              => $this->getUserData(),
-            'siswaList'         => $siswaResult['data'] ?? [],
-            'tempatPklList'     => $this->pembimbingPklService->getFormLists()['data']['tempatPklList'] ?? [],
-            'selectedTempatPkl' => $tempatPklId,
-            'validation'        => \Config\Services::validation(),
-        ];
-
-        return view('admin/pembimbing_pkl/siswa_pkl_batch', $data);
-    }
-
     public function siswaPklBatchStore()
     {
         $siswaIds       = $this->request->getPost('siswa_ids');
@@ -301,6 +282,38 @@ class PembimbingPklController extends BaseController
         }
 
         return redirect()->to('/admin/pembimbing-pkl/siswa-pkl');
+    }
+
+    public function siswaPklBulkDelete()
+    {
+        $ids = $this->request->getPost('ids');
+
+        if (empty($ids) || !is_array($ids)) {
+            session()->setFlashdata('error', 'Tidak ada data yang dipilih');
+            return redirect()->to('/admin/pembimbing-pkl/siswa-pkl');
+        }
+
+        $result = $this->pembimbingPklService->bulkDeleteSiswaPkl($ids);
+
+        if (!$result['success']) {
+            session()->setFlashdata('error', $result['message']);
+        } else {
+            session()->setFlashdata('success', $result['message']);
+        }
+
+        return redirect()->to('/admin/pembimbing-pkl/siswa-pkl');
+    }
+
+    public function getSiswaXIIUnplaced()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON(['success' => false])->setStatusCode(403);
+        }
+
+        $tahunAjaran = get_active_tahun_ajaran();
+        $result = $this->pembimbingPklService->getSiswaXIIWithPlacement($tahunAjaran);
+
+        return $this->response->setJSON($result);
     }
 
     public function getPembimbingByTempatPkl()

@@ -174,12 +174,13 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('pembimbing-pkl/siswa-pkl/tambah', 'Admin\PembimbingPklController::siswaPklCreate', ['filter' => 'role:admin']);
     $routes->post('pembimbing-pkl/siswa-pkl/simpan', 'Admin\PembimbingPklController::siswaPklStore', ['filter' => 'role:admin']);
     $routes->get('pembimbing-pkl/siswa-pkl/hapus/(:num)', 'Admin\PembimbingPklController::siswaPklDelete/$1', ['filter' => 'role:admin']);
-    $routes->get('pembimbing-pkl/siswa-pkl/batch', 'Admin\PembimbingPklController::siswaPklBatch', ['filter' => 'role:admin']);
+    $routes->post('pembimbing-pkl/siswa-pkl/bulk-hapus', 'Admin\PembimbingPklController::siswaPklBulkDelete', ['filter' => 'role:admin']);
     $routes->post('pembimbing-pkl/siswa-pkl/batch-simpan', 'Admin\PembimbingPklController::siswaPklBatchStore', ['filter' => 'role:admin']);
 
     // AJAX
     $routes->post('pembimbing-pkl/get-pembimbing-by-tempat-pkl', 'Admin\PembimbingPklController::getPembimbingByTempatPkl', ['filter' => 'role:admin']);
     $routes->post('pembimbing-pkl/get-siswa-pkl-by-tempat-pkl', 'Admin\PembimbingPklController::getSiswaPklByTempatPkl', ['filter' => 'role:admin']);
+    $routes->post('pembimbing-pkl/get-siswa-xii-unplaced', 'Admin\PembimbingPklController::getSiswaXIIUnplaced', ['filter' => 'role:admin']);
 
     // Pengaturan
     $routes->get('pengaturan', 'Admin\PengaturanController::index', ['filter' => 'role:admin']);
