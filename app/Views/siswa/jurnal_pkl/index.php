@@ -91,6 +91,21 @@
         </div>
     </div>
 
+    <?php if ($pembimbing): ?>
+    <div class="bg-white rounded-lg shadow p-4 mb-6 flex items-center">
+        <div class="p-3 rounded-full bg-indigo-100 text-indigo-600 mr-4">
+            <i class="fas fa-user-tie text-xl"></i>
+        </div>
+        <div>
+            <p class="text-sm text-gray-500">Pembimbing PKL</p>
+            <p class="text-lg font-semibold text-gray-800"><?= esc($pembimbing['nama_guru']) ?></p>
+            <?php if (!empty($pembimbing['nip'])): ?>
+                <p class="text-xs text-gray-500">NIP: <?= esc($pembimbing['nip']) ?></p>
+            <?php endif; ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <?php if (empty($weeklyData)): ?>
     <div class="bg-white rounded-lg shadow p-8 text-center text-gray-500">
         <i class="fas fa-book-open text-6xl mb-4"></i>

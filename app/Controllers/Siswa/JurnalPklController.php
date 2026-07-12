@@ -42,11 +42,21 @@ class JurnalPklController extends BaseController
             'total' => 0, 'pending' => 0, 'disetujui' => 0, 'revisi' => 0, 'tinjau_ulang' => 0, 'ditolak' => 0
         ];
 
+        $siswaPklModel = new SiswaPklModel();
+        $pembimbingPklModel = new PembimbingPklModel();
+
+        $siswaPkl = $siswaPklModel->getBySiswaAndTahun($siswa['id'], $siswa['tahun_ajaran']);
+        $pembimbing = null;
+        if ($siswaPkl && !empty($siswaPkl['tempat_pkl_id'])) {
+            $pembimbing = $pembimbingPklModel->getByTempatPklAndTahun($siswaPkl['tempat_pkl_id'], $siswa['tahun_ajaran']);
+        }
+
         $data = [
             'title' => 'Jurnal PKL',
             'siswa' => $siswa,
             'weeklyData' => $weeklyData,
             'stats' => $stats,
+            'pembimbing' => $pembimbing,
             'status' => $status,
             'jurnalPklStartDate' => $jurnalPklStartDate,
         ];

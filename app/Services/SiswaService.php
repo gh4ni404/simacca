@@ -998,6 +998,7 @@ class SiswaService extends BaseService
             $errorCount = 0;
             $skippedCount = 0;
             $restoredCount = 0;
+            $updatedCount = 0;
             $errors = [];
             $createdClasses = []; // Track kelas baru yang dibuat
 
@@ -1079,7 +1080,8 @@ class SiswaService extends BaseService
                             // Restore user account (whether active or soft-deleted)
                             if ($existingUser) {
                                 $userUpdate = [
-                                    'password' => $password,
+                                    'password' => password_hash($password, PASSWORD_DEFAULT),
+                                    'password_plain' => $password,
                                     'is_active' => 1,
                                     'deleted_at' => null,
                                 ];
@@ -1117,14 +1119,35 @@ class SiswaService extends BaseService
                             }
 
                         } elseif ($existingUser && $existingUser['is_active'] == 1) {
-                            // ACTIVE student with same NIS → SKIP (no changes)
-                            $skippedCount++;
+                            // ACTIVE student with same NIS → UPDATE data
+                            $db->transStart();
+
+                            $kelasId = $this->getKelasIdByName($namaKelas);
+
+                            // Update siswa data
+                            $this->siswaModel->update($existingSiswa['id'], [
+                                'nama_lengkap' => $namaLengkap,
+                                'jenis_kelamin' => $jenisKelamin,
+                                'kelas_id' => $kelasId,
+                                'tahun_ajaran' => $tahunAjaran,
+                            ]);
+
+                            // Update user account (password + email)
+                            $userUpdate = [
+                                'password' => password_hash($password, PASSWORD_DEFAULT),
+                                'password_plain' => $password,
+                            ];
+                            if (!empty($email)) {
+                                $userUpdate['email'] = $email;
+                            }
+                            $this->userModel->update($existingUser['id'], $userUpdate);
+
+                            $db->transComplete();
+                            $updatedCount++;
 
                             if (!isset($createdClasses[$namaKelas])) {
                                 $createdClasses[$namaKelas] = true;
                             }
-
-                            continue;
                         } else {
                             // INACTIVE student → REACTIVATE and UPDATE
                             $db->transStart();
@@ -1238,15 +1261,17 @@ class SiswaService extends BaseService
                 : "";
 
             $restoredInfo = $restoredCount > 0 ? " Dipulihkan: $restoredCount," : "";
-            $message = "Import selesai. Berhasil: $successCount,$restoredInfo Dilewati (sudah aktif): $skippedCount, Gagal: $errorCount." . $kelasBaruInfo;
+            $updatedInfo = $updatedCount > 0 ? " Diperbarui: $updatedCount," : "";
+            $message = "Import selesai. Berhasil: $successCount,$restoredInfo$updatedInfo Dilewati: $skippedCount, Gagal: $errorCount." . $kelasBaruInfo;
 
-            $this->logInfo('processExcelImport', "Import completed - Success: $successCount, Restored: $restoredCount, Skipped (active): $skippedCount, Failed: $errorCount");
+            $this->logInfo('processExcelImport', "Import completed - Success: $successCount, Restored: $restoredCount, Updated: $updatedCount, Skipped: $skippedCount, Failed: $errorCount");
 
             return $this->successResponse([
                 'success_count' => $successCount,
                 'error_count' => $errorCount,
                 'skipped_count' => $skippedCount,
                 'restored_count' => $restoredCount,
+                'updated_count' => $updatedCount,
                 'errors' => $errors,
                 'created_classes' => array_keys($createdClasses),
                 'message' => $message

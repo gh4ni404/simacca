@@ -243,12 +243,6 @@
                                     }
 
                                     document.querySelector('#summaryRow td').innerHTML = summaryText;
-
-                                    // Disable submit only if ALL rows are active (no new/deleted/inactive)
-                                    if (activeCount > 0 && newCount === 0 && inactiveCount === 0 && deletedCount === 0) {
-                                        document.getElementById('submitBtn').disabled = true;
-                                        document.getElementById('submitBtn').title = 'Tidak ada data baru untuk diimport';
-                                    }
                                 }
                             })
                             .catch(function() {

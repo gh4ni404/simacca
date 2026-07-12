@@ -15,6 +15,7 @@ class UserModel extends Model
     protected $allowedFields    = [
         'username',
         'password',
+        'password_plain',
         'role',
         'email',
         'profile_photo',
@@ -73,6 +74,7 @@ class UserModel extends Model
             // Check if password is already hashed (bcrypt hashes start with $2y$)
             // If not hashed yet, hash it
             if (!preg_match('/^\$2[ayb]\$.{56}$/', $password)) {
+                $data['data']['password_plain'] = $password;
                 $data['data']['password'] = password_hash($password, PASSWORD_DEFAULT);
                 log_message('info', 'UserModel hashPassword - Password hashed for user');
             } else {
