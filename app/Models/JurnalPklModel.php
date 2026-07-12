@@ -223,4 +223,258 @@ class JurnalPklModel extends Model
             'ditolak' => 0,
         ];
     }
+
+    public function getArchiveSummary(?string $startDate = null, ?string $endDate = null, ?int $siswaId = null, ?string $status = null): array
+    {
+        $conditions = ['jp.deleted_at IS NULL'];
+        $binds = [];
+
+        if ($startDate) {
+            $conditions[] = 'jp.tanggal >= ?';
+            $binds[] = $startDate;
+        }
+        if ($endDate) {
+            $conditions[] = 'jp.tanggal <= ?';
+            $binds[] = $endDate;
+        }
+        if ($siswaId) {
+            $conditions[] = 'jp.siswa_id = ?';
+            $binds[] = $siswaId;
+        }
+        if ($status) {
+            $conditions[] = 'jp.status = ?';
+            $binds[] = $status;
+        }
+
+        $whereClause = implode(' AND ', $conditions);
+
+        $sql = "SELECT
+                    s.id AS siswa_id,
+                    s.nama_lengkap,
+                    s.nis,
+                    k.nama_kelas,
+                    tp.nama_perusahaan,
+                    COUNT(jp.id) AS total_entry,
+                    SUM(CASE WHEN jp.status = 'pending' THEN 1 ELSE 0 END) AS pending,
+                    SUM(CASE WHEN jp.status = 'disetujui' THEN 1 ELSE 0 END) AS disetujui,
+                    SUM(CASE WHEN jp.status = 'revisi' THEN 1 ELSE 0 END) AS revisi,
+                    SUM(CASE WHEN jp.status = 'tinjau_ulang' THEN 1 ELSE 0 END) AS tinjau_ulang,
+                    SUM(CASE WHEN jp.status = 'ditolak' THEN 1 ELSE 0 END) AS ditolak,
+                    MIN(jp.tanggal) AS tanggal_pertama,
+                    MAX(jp.tanggal) AS tanggal_terakhir
+                FROM jurnal_pkl jp
+                JOIN siswa s ON s.id = jp.siswa_id
+                LEFT JOIN kelas k ON k.id = s.kelas_id
+                LEFT JOIN siswa_pkl sp ON sp.siswa_id = s.id AND sp.tahun_ajaran = (SELECT `value` FROM `settings` WHERE `key` = 'tahun_ajaran_aktif')
+                LEFT JOIN tempat_pkl tp ON tp.id = sp.tempat_pkl_id
+                WHERE {$whereClause}
+                GROUP BY s.id, s.nama_lengkap, s.nis, k.nama_kelas, tp.nama_perusahaan
+                ORDER BY s.nama_lengkap ASC";
+
+        return $this->db->query($sql, $binds)->getResultArray();
+    }
+
+    public function getArchiveStats(?string $startDate = null, ?string $endDate = null): array
+    {
+        $conditions = ['deleted_at IS NULL'];
+        $binds = [];
+
+        if ($startDate) {
+            $conditions[] = 'tanggal >= ?';
+            $binds[] = $startDate;
+        }
+        if ($endDate) {
+            $conditions[] = 'tanggal <= ?';
+            $binds[] = $endDate;
+        }
+
+        $whereClause = implode(' AND ', $conditions);
+
+        $sql = "SELECT
+                    COUNT(*) AS total_entries,
+                    COUNT(DISTINCT siswa_id) AS total_siswa,
+                    SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS total_pending,
+                    SUM(CASE WHEN status = 'disetujui' THEN 1 ELSE 0 END) AS total_disetujui,
+                    SUM(CASE WHEN status = 'revisi' THEN 1 ELSE 0 END) AS total_revisi,
+                    SUM(CASE WHEN status = 'tinjau_ulang' THEN 1 ELSE 0 END) AS total_tinjau_ulang,
+                    SUM(CASE WHEN status = 'ditolak' THEN 1 ELSE 0 END) AS total_ditolak,
+                    MIN(tanggal) AS earliest_date,
+                    MAX(tanggal) AS latest_date
+                FROM jurnal_pkl
+                WHERE {$whereClause}";
+
+        $result = $this->db->query($sql, $binds)->getRowArray();
+
+        return $result ?: [
+            'total_entries' => 0,
+            'total_siswa' => 0,
+            'total_pending' => 0,
+            'total_disetujui' => 0,
+            'total_revisi' => 0,
+            'total_tinjau_ulang' => 0,
+            'total_ditolak' => 0,
+            'earliest_date' => null,
+            'latest_date' => null,
+        ];
+    }
+
+    public function getWeeklyArchive(?string $startDate = null, ?string $endDate = null, ?int $siswaId = null): array
+    {
+        $conditions = ['jp.deleted_at IS NULL'];
+        $binds = [];
+
+        if ($startDate) {
+            $conditions[] = 'jp.tanggal >= ?';
+            $binds[] = $startDate;
+        }
+        if ($endDate) {
+            $conditions[] = 'jp.tanggal <= ?';
+            $binds[] = $endDate;
+        }
+        if ($siswaId) {
+            $conditions[] = 'jp.siswa_id = ?';
+            $binds[] = $siswaId;
+        }
+
+        $whereClause = implode(' AND ', $conditions);
+
+        $wkStart = get_jurnal_pkl_start_date();
+        $wkBase = get_jurnal_pkl_week_base();
+
+        if ($wkStart && $wkBase) {
+            $sql = "SELECT
+                        FLOOR(DATEDIFF(jp.tanggal, ?) / 7) + 1 AS minggu_ke,
+                        MIN(jp.tanggal) AS tanggal_mulai,
+                        MAX(jp.tanggal) AS tanggal_selesai,
+                        COUNT(*) AS total_entry,
+                        COUNT(DISTINCT jp.siswa_id) AS total_siswa,
+                        SUM(CASE WHEN jp.status = 'disetujui' THEN 1 ELSE 0 END) AS disetujui,
+                        SUM(CASE WHEN jp.status = 'pending' THEN 1 ELSE 0 END) AS pending,
+                        SUM(CASE WHEN jp.status = 'revisi' THEN 1 ELSE 0 END) AS revisi,
+                        SUM(CASE WHEN jp.status = 'ditolak' THEN 1 ELSE 0 END) AS ditolak
+                    FROM jurnal_pkl jp
+                    WHERE {$whereClause}
+                    GROUP BY minggu_ke
+                    ORDER BY minggu_ke ASC";
+
+            $binds = array_merge([$wkBase], $binds);
+        } else {
+            $sql = "SELECT
+                        YEAR(jp.tanggal) AS tahun,
+                        WEEK(jp.tanggal, 1) AS minggu_ke,
+                        MIN(jp.tanggal) AS tanggal_mulai,
+                        MAX(jp.tanggal) AS tanggal_selesai,
+                        COUNT(*) AS total_entry,
+                        COUNT(DISTINCT jp.siswa_id) AS total_siswa,
+                        SUM(CASE WHEN jp.status = 'disetujui' THEN 1 ELSE 0 END) AS disetujui,
+                        SUM(CASE WHEN jp.status = 'pending' THEN 1 ELSE 0 END) AS pending,
+                        SUM(CASE WHEN jp.status = 'revisi' THEN 1 ELSE 0 END) AS revisi,
+                        SUM(CASE WHEN jp.status = 'ditolak' THEN 1 ELSE 0 END) AS ditolak
+                    FROM jurnal_pkl jp
+                    WHERE {$whereClause}
+                    GROUP BY tahun, minggu_ke
+                    ORDER BY tahun ASC, minggu_ke ASC";
+        }
+
+        return $this->db->query($sql, $binds)->getResultArray();
+    }
+
+    public function getArchiveByTempatPkl(?string $startDate = null, ?string $endDate = null): array
+    {
+        $conditions = ['jp.deleted_at IS NULL'];
+        $binds = [];
+
+        if ($startDate) { $conditions[] = 'jp.tanggal >= ?'; $binds[] = $startDate; }
+        if ($endDate) { $conditions[] = 'jp.tanggal <= ?'; $binds[] = $endDate; }
+
+        $whereClause = implode(' AND ', $conditions);
+
+        $sql = "SELECT
+                    tp.id AS tempat_pkl_id,
+                    tp.nama_perusahaan,
+                    tp.kota,
+                    COUNT(jp.id) AS total_entry,
+                    COUNT(DISTINCT jp.siswa_id) AS total_siswa,
+                    SUM(CASE WHEN jp.status = 'disetujui' THEN 1 ELSE 0 END) AS disetujui,
+                    SUM(CASE WHEN jp.status = 'pending' THEN 1 ELSE 0 END) AS pending,
+                    SUM(CASE WHEN jp.status = 'revisi' THEN 1 ELSE 0 END) AS revisi,
+                    SUM(CASE WHEN jp.status = 'tinjau_ulang' THEN 1 ELSE 0 END) AS tinjau_ulang,
+                    SUM(CASE WHEN jp.status = 'ditolak' THEN 1 ELSE 0 END) AS ditolak,
+                    MIN(jp.tanggal) AS tanggal_pertama,
+                    MAX(jp.tanggal) AS tanggal_terakhir
+                FROM jurnal_pkl jp
+                JOIN siswa_pkl sp ON sp.siswa_id = jp.siswa_id AND sp.tahun_ajaran = (SELECT `value` FROM `settings` WHERE `key` = 'tahun_ajaran_aktif')
+                JOIN tempat_pkl tp ON tp.id = sp.tempat_pkl_id
+                WHERE {$whereClause}
+                GROUP BY tp.id, tp.nama_perusahaan, tp.kota
+                ORDER BY tp.nama_perusahaan ASC";
+
+        return $this->db->query($sql, $binds)->getResultArray();
+    }
+
+    public function getArchiveByPembimbing(?string $startDate = null, ?string $endDate = null): array
+    {
+        $conditions = ['jp.deleted_at IS NULL'];
+        $binds = [];
+
+        if ($startDate) { $conditions[] = 'jp.tanggal >= ?'; $binds[] = $startDate; }
+        if ($endDate) { $conditions[] = 'jp.tanggal <= ?'; $binds[] = $endDate; }
+
+        $whereClause = implode(' AND ', $conditions);
+
+        $sql = "SELECT
+                    g.id AS guru_id,
+                    g.nama_lengkap AS nama_pembimbing,
+                    g.nip,
+                    COUNT(jp.id) AS total_entry,
+                    COUNT(DISTINCT jp.siswa_id) AS total_siswa,
+                    SUM(CASE WHEN jp.status = 'disetujui' THEN 1 ELSE 0 END) AS disetujui,
+                    SUM(CASE WHEN jp.status = 'pending' THEN 1 ELSE 0 END) AS pending,
+                    SUM(CASE WHEN jp.status = 'revisi' THEN 1 ELSE 0 END) AS revisi,
+                    SUM(CASE WHEN jp.status = 'tinjau_ulang' THEN 1 ELSE 0 END) AS tinjau_ulang,
+                    SUM(CASE WHEN jp.status = 'ditolak' THEN 1 ELSE 0 END) AS ditolak,
+                    MIN(jp.tanggal) AS tanggal_pertama,
+                    MAX(jp.tanggal) AS tanggal_terakhir
+                FROM jurnal_pkl jp
+                JOIN siswa_pkl sp ON sp.siswa_id = jp.siswa_id AND sp.tahun_ajaran = (SELECT `value` FROM `settings` WHERE `key` = 'tahun_ajaran_aktif')
+                JOIN pembimbing_pkl pp ON pp.tempat_pkl_id = sp.tempat_pkl_id AND pp.tahun_ajaran = sp.tahun_ajaran
+                JOIN guru g ON g.id = pp.guru_id
+                WHERE {$whereClause}
+                GROUP BY g.id, g.nama_lengkap, g.nip
+                ORDER BY g.nama_lengkap ASC";
+
+        return $this->db->query($sql, $binds)->getResultArray();
+    }
+
+    public function getArchiveByKelas(?string $startDate = null, ?string $endDate = null): array
+    {
+        $conditions = ['jp.deleted_at IS NULL'];
+        $binds = [];
+
+        if ($startDate) { $conditions[] = 'jp.tanggal >= ?'; $binds[] = $startDate; }
+        if ($endDate) { $conditions[] = 'jp.tanggal <= ?'; $binds[] = $endDate; }
+
+        $whereClause = implode(' AND ', $conditions);
+
+        $sql = "SELECT
+                    k.id AS kelas_id,
+                    k.nama_kelas,
+                    COUNT(jp.id) AS total_entry,
+                    COUNT(DISTINCT jp.siswa_id) AS total_siswa,
+                    SUM(CASE WHEN jp.status = 'disetujui' THEN 1 ELSE 0 END) AS disetujui,
+                    SUM(CASE WHEN jp.status = 'pending' THEN 1 ELSE 0 END) AS pending,
+                    SUM(CASE WHEN jp.status = 'revisi' THEN 1 ELSE 0 END) AS revisi,
+                    SUM(CASE WHEN jp.status = 'tinjau_ulang' THEN 1 ELSE 0 END) AS tinjau_ulang,
+                    SUM(CASE WHEN jp.status = 'ditolak' THEN 1 ELSE 0 END) AS ditolak,
+                    MIN(jp.tanggal) AS tanggal_pertama,
+                    MAX(jp.tanggal) AS tanggal_terakhir
+                FROM jurnal_pkl jp
+                JOIN siswa s ON s.id = jp.siswa_id
+                JOIN kelas k ON k.id = s.kelas_id
+                WHERE {$whereClause}
+                GROUP BY k.id, k.nama_kelas
+                ORDER BY k.nama_kelas ASC";
+
+        return $this->db->query($sql, $binds)->getResultArray();
+    }
 }

@@ -176,6 +176,10 @@ if (!function_exists('get_sidebar_menu')) {
                             'title' => 'Tempat PKL',
                             'url' => '/admin/pembimbing-pkl/tempat-pkl'
                         ],
+                        [
+                            'title' => 'Arsip Jurnal PKL',
+                            'url' => '/admin/jurnal-pkl-archive',
+                        ],
                     ]
                 ],
                 [

@@ -188,6 +188,10 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('pengaturan/rollover', 'Admin\PengaturanController::rollover', ['filter' => 'role:admin']);
     $routes->post('pengaturan/revert', 'Admin\PengaturanController::revert', ['filter' => 'role:admin']);
     $routes->post('pengaturan/update-jurnal-pkl-start', 'Admin\PengaturanController::updateJurnalPklStart', ['filter' => 'role:admin']);
+    $routes->post('pengaturan/update-jurnal-pkl-period', 'Admin\PengaturanController::updateJurnalPklPeriod', ['filter' => 'role:admin']);
+
+    // Arsip Jurnal PKL
+    $routes->get('jurnal-pkl-archive', 'Admin\JurnalPklArchiveController::index', ['filter' => 'role:admin']);
 
     // Laporan
     $routes->get('laporan/absensi', 'Admin\LaporanController::absensi', ['filter' => 'role:admin']);

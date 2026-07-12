@@ -41,6 +41,8 @@ class PengaturanController extends BaseController
             'latestActiveRollover' => $latestActive,
             'historyIdsWithBackup' => $historyIdsWithBackup,
             'jurnalPklStartDate' => get_jurnal_pkl_start_date(),
+            'jurnalPklEndDate' => get_jurnal_pkl_end_date(),
+            'jurnalPklDurationDays' => get_jurnal_pkl_duration_days(),
         ];
 
         return view('admin/pengaturan/index', $data);
@@ -116,6 +118,42 @@ class PengaturanController extends BaseController
             session()->setFlashdata('error', $result['message']);
         }
 
+        return redirect()->to('/admin/pengaturan');
+    }
+
+    public function updateJurnalPklPeriod()
+    {
+        $clear = $this->request->getPost('clear');
+        $startDate = $this->request->getPost('jurnal_pkl_start_date');
+        $endDate = $this->request->getPost('jurnal_pkl_end_date');
+
+        if ($clear) {
+            $settingModel = new \App\Models\SettingModel();
+            $settingModel->setSetting('jurnal_pkl_start_date', '');
+            $settingModel->setSetting('jurnal_pkl_end_date', '');
+            session()->setFlashdata('success', 'Pengaturan periode jurnal PKL berhasil direset.');
+            return redirect()->to('/admin/pengaturan');
+        }
+
+        if (!empty($startDate) && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $startDate)) {
+            session()->setFlashdata('error', 'Format tanggal mulai tidak valid.');
+            return redirect()->to('/admin/pengaturan');
+        }
+
+        if (!empty($endDate) && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $endDate)) {
+            session()->setFlashdata('error', 'Format tanggal akhir tidak valid.');
+            return redirect()->to('/admin/pengaturan');
+        }
+
+        if (!empty($startDate) && !empty($endDate) && strtotime($endDate) < strtotime($startDate)) {
+            session()->setFlashdata('error', 'Tanggal akhir tidak boleh sebelum tanggal mulai.');
+            return redirect()->to('/admin/pengaturan');
+        }
+
+        set_jurnal_pkl_start_date($startDate ?: '');
+        set_jurnal_pkl_end_date($endDate ?: '');
+
+        session()->setFlashdata('success', 'Pengaturan periode jurnal PKL berhasil disimpan.');
         return redirect()->to('/admin/pengaturan');
     }
 

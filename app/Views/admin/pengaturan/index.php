@@ -184,48 +184,89 @@
             </div>
             <div class="min-w-0">
                 <h3 class="font-semibold text-gray-800 text-sm md:text-base truncate">Pengaturan Jurnal PKL</h3>
-                <p class="text-xs text-gray-500 truncate">Atur penomoran minggu untuk jurnal PKL siswa</p>
+                <p class="text-xs text-gray-500 truncate">Atur periode dan penomoran minggu jurnal PKL siswa</p>
             </div>
         </div>
         <div class="p-4 md:p-6">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
-                <!-- Form -->
-                <div>
-                    <form action="<?= base_url('admin/pengaturan/update-jurnal-pkl-start') ?>" method="post">
-                        <?= csrf_field() ?>
-                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Tanggal Mulai Minggu ke-1</label>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-8">
+                <!-- Kiri: Form -->
+                <form action="<?= base_url('admin/pengaturan/update-jurnal-pkl-period') ?>" method="post" id="formJurnalPkl" class="flex flex-col">
+                    <?= csrf_field() ?>
+
+                    <!-- Tanggal Mulai -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Tanggal Mulai</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                                 <i class="fas fa-calendar-day fa-sm"></i>
                             </div>
                             <input type="date" name="jurnal_pkl_start_date" value="<?= old('jurnal_pkl_start_date', $jurnalPklStartDate ?? '') ?>"
-                                   class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                                   class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm">
                         </div>
                         <p class="text-xs text-gray-400 mt-1.5">
                             <?php if ($jurnalPklStartDate): ?>
-                                Saat ini: <strong><?= date('d M Y', strtotime($jurnalPklStartDate)) ?></strong>. Kosongkan + Simpan untuk menggunakan ISO week.
+                                Basis minggu ke-1. Kosongkan untuk ISO week.
                             <?php else: ?>
-                                Kosongkan untuk menggunakan ISO week number (Senin pekan pertama tahun).
+                                Basis penomoran minggu ke-1. Kosongkan = ISO week.
                             <?php endif; ?>
                         </p>
+                    </div>
 
-                        <div class="flex items-center gap-3 mt-4">
-                            <button type="submit" class="inline-flex items-center px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors text-sm font-medium">
-                                <i class="fas fa-save mr-2"></i> Simpan
-                            </button>
-                            <?php if ($jurnalPklStartDate): ?>
-                            <button type="submit" name="clear" value="1"
-                                    class="inline-flex items-center px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors text-sm font-medium border border-gray-200"
-                                    onclick="return confirm('Hapus pengaturan tanggal mulai minggu ke-1? Sistem akan kembali menggunakan ISO week number.')">
-                                <i class="fas fa-undo mr-2"></i> Reset
-                            </button>
-                            <?php endif; ?>
+                    <!-- Tanggal Akhir -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Tanggal Akhir <span class="text-gray-400 font-normal">(opsional)</span></label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <i class="fas fa-calendar-check fa-sm"></i>
+                            </div>
+                            <input type="date" name="jurnal_pkl_end_date" value="<?= old('jurnal_pkl_end_date', $jurnalPklEndDate ?? '') ?>"
+                                   min="<?= $jurnalPklStartDate ?? '' ?>"
+                                   class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm">
                         </div>
-                    </form>
-                </div>
+                        <p class="text-xs text-gray-400 mt-1.5">Batas akhir periode PKL untuk keperluan laporan.</p>
+                    </div>
 
-                <!-- Preview Kalender -->
-                <div id="calendarPreviewWrapper">
+                    <!-- Info Ringkas -->
+                    <?php if ($jurnalPklStartDate || $jurnalPklEndDate): ?>
+                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-gray-500 bg-gray-50 rounded-lg px-3.5 py-2.5 border border-gray-100 mb-5">
+                        <span class="flex items-center gap-1.5">
+                            <i class="fas fa-play-circle text-emerald-500"></i>
+                            Mulai: <strong class="text-gray-700"><?= $jurnalPklStartDate ? date('d M', strtotime($jurnalPklStartDate)) . ' ' . date('Y', strtotime($jurnalPklStartDate)) : '—' ?></strong>
+                        </span>
+                        <span class="flex items-center gap-1.5">
+                            <i class="fas fa-stop-circle text-rose-400"></i>
+                            Akhir: <strong class="text-gray-700"><?= $jurnalPklEndDate ? date('d M', strtotime($jurnalPklEndDate)) . ' ' . date('Y', strtotime($jurnalPklEndDate)) : '—' ?></strong>
+                        </span>
+                        <?php if ($jurnalPklDurationDays): ?>
+                        <span class="flex items-center gap-1.5">
+                            <i class="fas fa-hourglass-half text-amber-500"></i>
+                            <strong class="text-emerald-700"><?= $jurnalPklDurationDays ?> hari</strong> (<?= round($jurnalPklDurationDays / 7, 1) ?> mgg)
+                        </span>
+                        <?php endif; ?>
+                    </div>
+                    <?php endif; ?>
+
+                    <!-- Spacer -->
+                    <div class="flex-1"></div>
+
+                    <!-- Buttons -->
+                    <div class="flex items-center gap-3">
+                        <button type="submit" class="inline-flex items-center px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors text-sm font-medium shadow-sm">
+                            <i class="fas fa-save mr-2"></i> Simpan Periode
+                        </button>
+                        <?php if ($jurnalPklStartDate || $jurnalPklEndDate): ?>
+                        <button type="submit" name="clear" value="1"
+                                class="inline-flex items-center px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors text-sm font-medium border border-gray-200"
+                                onclick="return confirm('Reset semua pengaturan periode jurnal PKL?')">
+                            <i class="fas fa-undo mr-2"></i> Reset
+                        </button>
+                        <?php endif; ?>
+                    </div>
+                </form>
+
+                <!-- Kanan: Preview Kalender -->
+                <div class="flex flex-col">
+                    <div id="calendarPreviewWrapper" class="flex-1"></div>
                 </div>
             </div>
         </div>
@@ -236,6 +277,7 @@
         var today = '<?= date('Y-m-d') ?>';
         var weekDays = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
         var input = document.querySelector('input[name="jurnal_pkl_start_date"]');
+        var endDateInput = document.querySelector('input[name="jurnal_pkl_end_date"]');
         var wrapper = document.getElementById('calendarPreviewWrapper');
         var viewOffset = 0;
 
@@ -266,6 +308,7 @@
 
         function renderPreview() {
             var startDate = input.value || null;
+            var endDate = (endDateInput && endDateInput.value) || null;
             if (!startDate) {
                 wrapper.innerHTML = '<div class="h-full flex items-center justify-center">'
                     + '<div class="text-center text-gray-400 py-8">'
@@ -278,6 +321,7 @@
 
             var weekBase = toMonday(startDate);
             var startDt = new Date(startDate + 'T00:00:00');
+            var endDt = endDate ? new Date(endDate + 'T23:59:59') : null;
 
             var calStart = toMonday(today);
             calStart.setDate(calStart.getDate() + viewOffset * 7);
@@ -323,12 +367,15 @@
 
                     var isToday = (dayStr === today);
                     var isBeforePKL = (dayDt < startDt);
+                    var isAfterPKL = endDt && (dayDt > endDt);
 
                     var cls = 'relative px-0.5 md:px-1 py-1 md:py-1.5 rounded-lg text-[10px] md:text-xs font-medium cursor-pointer transition-colors ';
                     if (isToday) {
                         cls += 'bg-emerald-500 text-white shadow-sm';
                     } else if (isBeforePKL) {
                         cls += 'text-gray-300';
+                    } else if (isAfterPKL) {
+                        cls += 'text-gray-300 bg-gray-100/50';
                     } else {
                         cls += 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200';
                     }
@@ -350,8 +397,8 @@
 
             html += '<div class="flex flex-wrap items-center gap-x-4 md:gap-x-6 gap-y-1 mt-2.5 md:mt-3 text-[10px] md:text-xs text-gray-500">'
                 + '<span><span class="inline-block w-2.5 h-2.5 md:w-3 md:h-3 rounded bg-emerald-500 align-middle mr-1"></span> Hari ini</span>'
-                + '<span><span class="inline-block w-2.5 h-2.5 md:w-3 md:h-3 rounded bg-emerald-50 ring-1 ring-emerald-200 align-middle mr-1"></span> Minggu ini</span>'
-                + '<span><span class="inline-block w-2.5 h-2.5 md:w-3 md:h-3 rounded bg-gray-200 align-middle mr-1"></span> Sebelum PKL</span>';
+                + '<span><span class="inline-block w-2.5 h-2.5 md:w-3 md:h-3 rounded bg-emerald-50 ring-1 ring-emerald-200 align-middle mr-1"></span> Periode PKL</span>'
+                + '<span><span class="inline-block w-2.5 h-2.5 md:w-3 md:h-3 rounded bg-gray-200 align-middle mr-1"></span> Sebelum/Sesudah</span>';
 
             if (showTodayBtn) {
                 html += '<button onclick="goToToday()" class="ml-auto inline-flex items-center px-2 py-0.5 text-emerald-600 hover:text-emerald-700 font-medium transition-colors">'
@@ -377,6 +424,10 @@
 
         input.addEventListener('change', function () { viewOffset = 0; renderPreview(); });
         input.addEventListener('input', function () { viewOffset = 0; renderPreview(); });
+        if (endDateInput) {
+            endDateInput.addEventListener('change', function () { renderPreview(); });
+            endDateInput.addEventListener('input', function () { renderPreview(); });
+        }
 
         renderPreview();
     })();

@@ -64,6 +64,37 @@ if (!function_exists('set_jurnal_pkl_start_date')) {
     }
 }
 
+if (!function_exists('get_jurnal_pkl_end_date')) {
+    function get_jurnal_pkl_end_date(): ?string
+    {
+        $settingModel = model(SettingModel::class);
+        return $settingModel->get('jurnal_pkl_end_date') ?: null;
+    }
+}
+
+if (!function_exists('set_jurnal_pkl_end_date')) {
+    function set_jurnal_pkl_end_date(string $date): bool
+    {
+        $settingModel = model(SettingModel::class);
+        return $settingModel->setSetting('jurnal_pkl_end_date', $date);
+    }
+}
+
+if (!function_exists('get_jurnal_pkl_duration_days')) {
+    function get_jurnal_pkl_duration_days(): ?int
+    {
+        $startDate = get_jurnal_pkl_start_date();
+        $endDate = get_jurnal_pkl_end_date();
+        if (!$startDate || !$endDate) return null;
+
+        $start = new \DateTime($startDate);
+        $end = new \DateTime($endDate);
+        if ($end < $start) return null;
+
+        return (int) $start->diff($end)->days + 1;
+    }
+}
+
 if (!function_exists('get_jurnal_pkl_week_base')) {
     function get_jurnal_pkl_week_base(): ?string
     {
