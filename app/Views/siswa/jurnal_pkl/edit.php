@@ -170,6 +170,10 @@
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
                                     <i class="fas fa-edit mr-1"></i>Revisi
                                 </span>
+                            <?php elseif ($jurnal['status'] == 'tinjau_ulang'): ?>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                    <i class="fas fa-rotate mr-1"></i>Tinjau Ulang
+                                </span>
                             <?php elseif ($jurnal['status'] == 'disetujui'): ?>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                     <i class="fas fa-check-circle mr-1"></i>Disetujui

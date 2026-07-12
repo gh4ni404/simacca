@@ -22,7 +22,7 @@
 
     <?= view('components/alerts') ?>
 
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
         <div class="bg-white rounded-lg shadow p-4">
             <div class="flex items-center">
                 <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
@@ -69,6 +69,17 @@
         </div>
         <div class="bg-white rounded-lg shadow p-4">
             <div class="flex items-center">
+                <div class="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
+                    <i class="fas fa-rotate text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Tinjau Ulang</p>
+                    <p class="text-2xl font-bold"><?= $stats['tinjau_ulang']; ?></p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+            <div class="flex items-center">
                 <div class="p-3 rounded-full bg-red-100 text-red-600 mr-4">
                     <i class="fas fa-times-circle text-xl"></i>
                 </div>
@@ -110,8 +121,9 @@
                     $allDisetujui = ($week['total_entry'] == $week['disetujui']);
                     $hasRevisi = ($week['revisi'] > 0);
                     $hasPending = ($week['pending'] > 0);
+                    $hasTinjauUlang = ($week['tinjau_ulang'] > 0);
                     $canPrint = $allDisetujui && $week['total_entry'] > 0;
-                    $canEdit = $hasPending || $hasRevisi;
+                    $canEdit = $hasPending || $hasRevisi || $hasTinjauUlang;
                 ?>
                 <tr class="hover:bg-gray-50 transition-colors">
                     <td class="px-6 py-4 whitespace-nowrap">
@@ -131,15 +143,20 @@
                                 <i class="fas fa-check-circle mr-1"></i>
                                 Semua Disetujui
                             </span>
-                        <?php elseif ($hasRevisi): ?>
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                                <i class="fas fa-edit mr-1"></i>
-                                Ada Revisi
-                            </span>
                         <?php elseif ($hasPending): ?>
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                 <i class="fas fa-clock mr-1"></i>
                                 Menunggu
+                            </span>
+                        <?php elseif ($hasTinjauUlang): ?>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                <i class="fas fa-rotate mr-1"></i>
+                                Tinjau Ulang
+                            </span>
+                        <?php elseif ($hasRevisi): ?>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                <i class="fas fa-edit mr-1"></i>
+                                Ada Revisi
                             </span>
                         <?php else: ?>
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">

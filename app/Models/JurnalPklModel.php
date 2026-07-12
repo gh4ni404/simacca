@@ -75,6 +75,7 @@ class JurnalPklModel extends Model
                     WHERE siswa_id = ?
                     AND FLOOR(DATEDIFF(tanggal, ?) / 7) + 1 = ?
                     AND tanggal >= ?
+                    AND deleted_at IS NULL
                     ORDER BY tanggal ASC";
 
             return $this->db->query($sql, [$siswaId, $weekBase, $minggu, $startDate])->getResultArray();
@@ -84,6 +85,7 @@ class JurnalPklModel extends Model
             ->where('siswa_id', $siswaId)
             ->where('YEAR(tanggal)', $tahun)
             ->where('WEEK(tanggal, 1)', $minggu)
+            ->where('deleted_at', null)
             ->orderBy('tanggal', 'ASC');
 
         return $builder->get()->getResultArray();
@@ -101,9 +103,11 @@ class JurnalPklModel extends Model
                         SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending,
                         SUM(CASE WHEN status = 'disetujui' THEN 1 ELSE 0 END) AS disetujui,
                         SUM(CASE WHEN status = 'revisi' THEN 1 ELSE 0 END) AS revisi,
+                        SUM(CASE WHEN status = 'tinjau_ulang' THEN 1 ELSE 0 END) AS tinjau_ulang,
                         SUM(CASE WHEN status = 'ditolak' THEN 1 ELSE 0 END) AS ditolak
                     FROM jurnal_pkl
                     WHERE siswa_id = ? AND tanggal >= ?
+                    AND deleted_at IS NULL
                     GROUP BY minggu_ke
                     ORDER BY minggu_ke DESC";
 
@@ -119,9 +123,11 @@ class JurnalPklModel extends Model
                     SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending,
                     SUM(CASE WHEN status = 'disetujui' THEN 1 ELSE 0 END) AS disetujui,
                     SUM(CASE WHEN status = 'revisi' THEN 1 ELSE 0 END) AS revisi,
+                    SUM(CASE WHEN status = 'tinjau_ulang' THEN 1 ELSE 0 END) AS tinjau_ulang,
                     SUM(CASE WHEN status = 'ditolak' THEN 1 ELSE 0 END) AS ditolak
                 FROM jurnal_pkl
                 WHERE siswa_id = ?
+                AND deleted_at IS NULL
                 GROUP BY tahun, minggu_ke
                 ORDER BY tahun DESC, minggu_ke DESC";
 
@@ -148,6 +154,7 @@ class JurnalPklModel extends Model
                 JOIN siswa_pkl sp ON sp.siswa_id = s.id
                 JOIN pembimbing_pkl pp ON pp.tempat_pkl_id = sp.tempat_pkl_id AND pp.tahun_ajaran = sp.tahun_ajaran
                 WHERE pp.guru_id = ?
+                AND jp.deleted_at IS NULL
                 ORDER BY jp.tanggal DESC";
 
         return $this->db->query($sql, [$guruId])->getResultArray();
@@ -168,6 +175,7 @@ class JurnalPklModel extends Model
                     WHERE pp.guru_id = ?
                     AND FLOOR(DATEDIFF(jp.tanggal, ?) / 7) + 1 = ?
                     AND jp.tanggal >= ?
+                    AND jp.deleted_at IS NULL
                     ORDER BY s.nama_lengkap, jp.tanggal ASC";
 
             return $this->db->query($sql, [$guruId, $weekBase, $minggu, $startDate])->getResultArray();
@@ -185,6 +193,7 @@ class JurnalPklModel extends Model
                 WHERE pp.guru_id = ?
                 AND YEAR(jp.tanggal) = ?
                 AND WEEK(jp.tanggal, 1) = ?
+                AND jp.deleted_at IS NULL
                 ORDER BY s.nama_lengkap, jp.tanggal ASC";
 
         return $this->db->query($sql, [$guruId, $tahun, $minggu])->getResultArray();
@@ -197,9 +206,11 @@ class JurnalPklModel extends Model
                     SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending,
                     SUM(CASE WHEN status = 'disetujui' THEN 1 ELSE 0 END) AS disetujui,
                     SUM(CASE WHEN status = 'revisi' THEN 1 ELSE 0 END) AS revisi,
+                    SUM(CASE WHEN status = 'tinjau_ulang' THEN 1 ELSE 0 END) AS tinjau_ulang,
                     SUM(CASE WHEN status = 'ditolak' THEN 1 ELSE 0 END) AS ditolak
                 FROM jurnal_pkl
-                WHERE siswa_id = ?";
+                WHERE siswa_id = ?
+                AND deleted_at IS NULL";
 
         $result = $this->db->query($sql, [$siswaId])->getRowArray();
 
@@ -208,6 +219,7 @@ class JurnalPklModel extends Model
             'pending' => 0,
             'disetujui' => 0,
             'revisi' => 0,
+            'tinjau_ulang' => 0,
             'ditolak' => 0,
         ];
     }

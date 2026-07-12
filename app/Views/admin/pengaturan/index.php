@@ -225,85 +225,161 @@
                 </div>
 
                 <!-- Preview Kalender -->
-                <div>
-                    <?php if ($jurnalPklStartDate): ?>
-                    <?php
-                        $today = date('Y-m-d');
-                        $weekNumber = get_week_number($today, $jurnalPklStartDate);
-                        $weekBase = get_jurnal_pkl_week_base();
-                        $weekDays = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
-                    ?>
-                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2.5">Preview Penomoran Minggu</p>
-                    <div class="bg-gray-50 rounded-xl border border-gray-200 p-3 md:p-4">
-                        <div class="grid grid-cols-7 gap-1 md:gap-1.5 text-center">
-                            <?php foreach ($weekDays as $i => $day): ?>
-                                <div class="text-[10px] md:text-xs font-medium text-gray-400 py-1"><?= $day ?></div>
-                            <?php endforeach; ?>
-
-                            <?php
-                            $baseDt = new DateTime($weekBase);
-                            $startDt = new DateTime($jurnalPklStartDate);
-
-                            for ($w = 1; $w <= 4; $w++):
-                                $weekStart = clone $baseDt;
-                                $weekStart->modify('+' . (($w - 1) * 7) . ' days');
-                                $isFirstWeek = ($w === 1);
-
-                                for ($d = 0; $d < 7; $d++):
-                                    $dayDt = clone $weekStart;
-                                    $dayDt->modify('+' . $d . ' days');
-                                    $dayStr = $dayDt->format('Y-m-d');
-                                    $dayNum = $dayDt->format('j');
-
-                                    $isBeforeStart = $isFirstWeek && $dayDt < $startDt;
-                                    $isToday = ($dayStr === $today);
-                                    $isCurrentWeek = ($w === $weekNumber);
-                            ?>
-                                <div data-date="<?= $dayStr ?>" onclick="setJurnalPklDate(this)"
-                                     class="relative px-0.5 md:px-1 py-1 md:py-1.5 rounded-lg text-[10px] md:text-xs font-medium cursor-pointer transition-colors
-                                        <?= $isBeforeStart ? 'text-gray-300' : ($isToday ? 'bg-emerald-500 text-white shadow-sm' : ($isCurrentWeek ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : 'text-gray-600 hover:bg-emerald-100')) ?>">
-                                    <?= $dayNum ?>
-                                    <?php if ($d === 0 && !$isBeforeStart): ?>
-                                        <div class="absolute -top-2.5 md:-top-3 left-1/2 -translate-x-1/2 whitespace-nowrap">
-                                            <span class="text-[8px] md:text-[10px] font-semibold <?= $isCurrentWeek ? 'text-emerald-600' : 'text-gray-400' ?>">M-<?= $w ?></span>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                            <?php
-                                endfor;
-                            endfor;
-                            ?>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-wrap gap-x-4 md:gap-x-6 gap-y-1 mt-2.5 md:mt-3 text-[10px] md:text-xs text-gray-500">
-                        <span><span class="inline-block w-2.5 h-2.5 md:w-3 md:h-3 rounded bg-emerald-500 align-middle mr-1"></span> Hari ini</span>
-                        <span><span class="inline-block w-2.5 h-2.5 md:w-3 md:h-3 rounded bg-emerald-50 ring-1 ring-emerald-200 align-middle mr-1"></span> Minggu ini (M-<?= $weekNumber ?>)</span>
-                        <span><span class="inline-block w-2.5 h-2.5 md:w-3 md:h-3 rounded bg-gray-200 align-middle mr-1"></span> Sebelum PKL</span>
-                    </div>
-                    <?php else: ?>
-                    <div class="h-full flex items-center justify-center">
-                        <div class="text-center text-gray-400 py-8">
-                            <i class="fas fa-calendar-day text-3xl md:text-4xl mb-3"></i>
-                            <p class="text-sm font-medium">Preview Kalender</p>
-                            <p class="text-xs mt-1">Atur tanggal mulai untuk melihat preview</p>
-                        </div>
-                    </div>
-                    <?php endif; ?>
+                <div id="calendarPreviewWrapper">
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-    function setJurnalPklDate(el) {
-        const date = el.dataset.date;
-        if (!date) return;
-        document.querySelector('input[name="jurnal_pkl_start_date"]').value = date;
-        // Highlight clicked
-        document.querySelectorAll('[data-date]').forEach(d => d.classList.remove('ring-2', 'ring-emerald-400'));
-        el.classList.add('ring-2', 'ring-emerald-400');
-    }
+    (function () {
+        var today = '<?= date('Y-m-d') ?>';
+        var weekDays = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+        var input = document.querySelector('input[name="jurnal_pkl_start_date"]');
+        var wrapper = document.getElementById('calendarPreviewWrapper');
+        var viewOffset = 0;
+
+        function toMonday(dateStr) {
+            var dt = new Date(dateStr + 'T00:00:00');
+            var dow = dt.getDay();
+            if (dow === 0) dow = 7;
+            if (dow > 1) dt.setDate(dt.getDate() - (dow - 1));
+            return dt;
+        }
+
+        function fmt(d) {
+            var y = d.getFullYear();
+            var m = String(d.getMonth() + 1).padStart(2, '0');
+            var dd = String(d.getDate()).padStart(2, '0');
+            return y + '-' + m + '-' + dd;
+        }
+
+        function navigateWeeks(step) {
+            viewOffset += step;
+            renderPreview();
+        }
+
+        function goToToday() {
+            viewOffset = 0;
+            renderPreview();
+        }
+
+        function renderPreview() {
+            var startDate = input.value || null;
+            if (!startDate) {
+                wrapper.innerHTML = '<div class="h-full flex items-center justify-center">'
+                    + '<div class="text-center text-gray-400 py-8">'
+                    + '<i class="fas fa-calendar-day text-3xl md:text-4xl mb-3"></i>'
+                    + '<p class="text-sm font-medium">Preview Kalender</p>'
+                    + '<p class="text-xs mt-1">Atur tanggal mulai untuk melihat preview</p>'
+                    + '</div></div>';
+                return;
+            }
+
+            var weekBase = toMonday(startDate);
+            var startDt = new Date(startDate + 'T00:00:00');
+
+            var calStart = toMonday(today);
+            calStart.setDate(calStart.getDate() + viewOffset * 7);
+
+            var calStartStr = fmt(calStart);
+            var calEnd = new Date(calStart);
+            calEnd.setDate(calEnd.getDate() + 27);
+            var calEndStr = fmt(calEnd);
+
+            var showTodayBtn = viewOffset !== 0;
+
+            var html = '<p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2.5">Preview Penomoran Minggu</p>'
+                + '<div class="bg-gray-50 rounded-xl border border-gray-200 p-3 md:p-4">'
+
+                + '<div class="flex items-center justify-between mb-2">'
+                + '<button onclick="navigateWeeks(-4)" class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white border border-gray-200 text-gray-500 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-colors text-xs" title="4 minggu sebelumnya">'
+                + '<i class="fas fa-chevron-left"></i>'
+                + '</button>'
+                + '<span class="text-[10px] md:text-xs text-gray-400 font-medium">' + calStartStr + ' — ' + calEndStr + '</span>'
+                + '<button onclick="navigateWeeks(4)" class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-white border border-gray-200 text-gray-500 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition-colors text-xs" title="4 minggu selanjutnya">'
+                + '<i class="fas fa-chevron-right"></i>'
+                + '</button>'
+                + '</div>'
+
+                + '<div class="grid grid-cols-7 gap-1 md:gap-1.5 text-center">';
+
+            weekDays.forEach(function (day) {
+                html += '<div class="text-[10px] md:text-xs font-medium text-gray-400 py-1">' + day + '</div>';
+            });
+
+            for (var w = 0; w < 4; w++) {
+                var weekStart = new Date(calStart);
+                weekStart.setDate(weekStart.getDate() + w * 7);
+
+                var weekNum = Math.floor((weekStart - weekBase) / 604800000) + 1;
+                var isValidWeek = weekNum >= 1;
+
+                for (var d = 0; d < 7; d++) {
+                    var dayDt = new Date(weekStart);
+                    dayDt.setDate(weekStart.getDate() + d);
+                    var dayStr = fmt(dayDt);
+                    var dayNum = dayDt.getDate();
+
+                    var isToday = (dayStr === today);
+                    var isBeforePKL = (dayDt < startDt);
+
+                    var cls = 'relative px-0.5 md:px-1 py-1 md:py-1.5 rounded-lg text-[10px] md:text-xs font-medium cursor-pointer transition-colors ';
+                    if (isToday) {
+                        cls += 'bg-emerald-500 text-white shadow-sm';
+                    } else if (isBeforePKL) {
+                        cls += 'text-gray-300';
+                    } else {
+                        cls += 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200';
+                    }
+
+                    html += '<div data-date="' + dayStr + '" onclick="setJurnalPklDate(this)" class="' + cls + '">';
+                    html += dayNum;
+
+                    if (d === 0 && isValidWeek) {
+                        html += '<div class="absolute -top-2.5 md:-top-3 left-1/2 -translate-x-1/2 whitespace-nowrap">'
+                            + '<span class="text-[8px] md:text-[10px] font-semibold text-emerald-600">M-' + weekNum + '</span>'
+                            + '</div>';
+                    }
+
+                    html += '</div>';
+                }
+            }
+
+            html += '</div></div>';
+
+            html += '<div class="flex flex-wrap items-center gap-x-4 md:gap-x-6 gap-y-1 mt-2.5 md:mt-3 text-[10px] md:text-xs text-gray-500">'
+                + '<span><span class="inline-block w-2.5 h-2.5 md:w-3 md:h-3 rounded bg-emerald-500 align-middle mr-1"></span> Hari ini</span>'
+                + '<span><span class="inline-block w-2.5 h-2.5 md:w-3 md:h-3 rounded bg-emerald-50 ring-1 ring-emerald-200 align-middle mr-1"></span> Minggu ini</span>'
+                + '<span><span class="inline-block w-2.5 h-2.5 md:w-3 md:h-3 rounded bg-gray-200 align-middle mr-1"></span> Sebelum PKL</span>';
+
+            if (showTodayBtn) {
+                html += '<button onclick="goToToday()" class="ml-auto inline-flex items-center px-2 py-0.5 text-emerald-600 hover:text-emerald-700 font-medium transition-colors">'
+                    + '<i class="fas fa-crosshairs mr-1"></i> Hari ini'
+                    + '</button>';
+            }
+
+            html += '</div>';
+
+            wrapper.innerHTML = html;
+        }
+
+        window.setJurnalPklDate = function (el) {
+            var date = el.dataset.date;
+            if (!date) return;
+            input.value = date;
+            viewOffset = 0;
+            renderPreview();
+        };
+
+        window.navigateWeeks = navigateWeeks;
+        window.goToToday = goToToday;
+
+        input.addEventListener('change', function () { viewOffset = 0; renderPreview(); });
+        input.addEventListener('input', function () { viewOffset = 0; renderPreview(); });
+
+        renderPreview();
+    })();
     </script>
 
     <!-- Rollover Result -->

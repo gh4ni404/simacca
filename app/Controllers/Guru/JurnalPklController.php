@@ -94,4 +94,24 @@ class JurnalPklController extends BaseController
 
         return view('guru/jurnal_pkl/detail', $data);
     }
+
+    public function cancelVerification($id)
+    {
+        $userId = session()->get('user_id');
+        $guru = $this->guruModel->getByUserId($userId);
+
+        if (!$guru) {
+            return redirect()->to('/access-denied')->with('error', 'Data guru tidak ditemukan');
+        }
+
+        $result = $this->jurnalService->cancelVerification($id);
+
+        if ($result['success']) {
+            session()->setFlashdata('success', 'Verifikasi jurnal berhasil dibatalkan');
+        } else {
+            session()->setFlashdata('error', $result['message']);
+        }
+
+        return redirect()->to('/guru/jurnal-pkl');
+    }
 }

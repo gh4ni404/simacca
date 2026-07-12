@@ -79,29 +79,28 @@
                         <div class="mb-6">
                             <label for="foto" class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-camera mr-2 text-yellow-500"></i>
-                                Foto Dokumentasi (Opsional)
+                                Foto Dokumentasi <span class="text-red-500">*</span>
                             </label>
-                            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-blue-400 transition-colors">
-                                <div class="space-y-1 text-center">
+                            <div id="uploadArea" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer" onclick="document.getElementById('foto').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+                                <div class="space-y-1 text-center pointer-events-none">
                                     <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                                         <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
-                                    <div class="flex text-sm text-gray-600">
-                                        <label for="foto" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                                            <span>Upload foto</span>
-                                            <input id="foto"
-                                                   name="foto"
-                                                   type="file"
-                                                   accept=".jpg,.jpeg,.png,.webp"
-                                                   class="sr-only"
-                                                   onchange="previewImage(this)">
-                                        </label>
-                                        <p class="pl-1">atau drag and drop</p>
+                                    <div class="flex text-sm text-gray-600 justify-center">
+                                        <span class="font-medium text-blue-600">Klik untuk upload foto</span>
+                                        <span class="pl-1">atau drag and drop</span>
                                     </div>
                                     <p class="text-xs text-gray-500">JPG, JPEG, PNG atau WebP (Max. 5MB)</p>
-                                    <div id="previewContainer" class="mt-3 hidden">
+                                    <input id="foto"
+                                           name="foto"
+                                           type="file"
+                                           accept=".jpg,.jpeg,.png,.webp"
+                                           required
+                                           class="sr-only"
+                                           onchange="previewImage(this)">
+                                    <div id="previewContainer" class="mt-3 hidden pointer-events-auto">
                                         <img id="preview" class="mx-auto max-h-48 rounded-lg shadow">
-                                        <button type="button" onclick="removeImage()" class="mt-2 text-xs text-red-600 hover:text-red-800">
+                                        <button type="button" onclick="removeImage(); event.stopPropagation();" class="mt-2 text-xs text-red-600 hover:text-red-800 pointer-events-auto">
                                             <i class="fas fa-times mr-1"></i>Hapus foto
                                         </button>
                                     </div>
@@ -111,12 +110,12 @@
                         </div>
 
                         <div class="flex gap-3">
-                            <button type="submit"
-                                    class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                                <i class="fas fa-save mr-2"></i>
-                                Simpan Jurnal
+                            <button type="submit" id="submitBtn"
+                                    class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2">
+                                <i class="fas fa-save" id="submitIcon"></i>
+                                <span id="submitText">Simpan Jurnal</span>
                             </button>
-                            <a href="<?= base_url('siswa/jurnal-pkl'); ?>"
+                            <a href="<?= base_url('siswa/jurnal-pkl'); ?>" id="cancelLink"
                                class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium">
                                 <i class="fas fa-times mr-2"></i>
                                 Batal
@@ -156,7 +155,7 @@
                         <div class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3 mt-0.5">
                             <span class="text-xs font-bold">4</span>
                         </div>
-                        <p>Upload foto dokumentasi jika ada</p>
+                        <p>Upload foto dokumentasi kegiatan</p>
                     </div>
                     <div class="flex items-start">
                         <div class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mr-3 mt-0.5">
@@ -232,6 +231,7 @@ function previewImage(input) {
     const previewContainer = document.getElementById('previewContainer');
     const preview = document.getElementById('preview');
     const fileName = document.getElementById('fileName');
+    const uploadArea = document.getElementById('uploadArea');
 
     if (input.files && input.files[0]) {
         const file = input.files[0];
@@ -253,6 +253,8 @@ function previewImage(input) {
         reader.readAsDataURL(file);
 
         fileName.textContent = '✓ ' + file.name + ' (' + fileSize + ' MB)';
+        uploadArea.classList.add('border-green-400', 'bg-green-50/50');
+        uploadArea.classList.remove('border-gray-300');
     }
 }
 
@@ -260,9 +262,41 @@ function removeImage() {
     const input = document.getElementById('foto');
     const previewContainer = document.getElementById('previewContainer');
     const fileName = document.getElementById('fileName');
+    const uploadArea = document.getElementById('uploadArea');
     input.value = '';
     previewContainer.classList.add('hidden');
     fileName.textContent = '';
+    uploadArea.classList.remove('border-green-400', 'bg-green-50/50');
+    uploadArea.classList.add('border-gray-300');
+}
+
+function handleDragOver(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById('uploadArea').classList.add('border-blue-500', 'bg-blue-50');
+}
+
+function handleDragLeave(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById('uploadArea').classList.remove('border-blue-500', 'bg-blue-50');
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const uploadArea = document.getElementById('uploadArea');
+    uploadArea.classList.remove('border-blue-500', 'bg-blue-50');
+
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        const file = files[0];
+        if (file.type.startsWith('image/')) {
+            const input = document.getElementById('foto');
+            input.files = e.dataTransfer.files;
+            previewImage(input);
+        }
+    }
 }
 
 document.getElementById('jurnalForm').addEventListener('submit', function(e) {
@@ -277,6 +311,20 @@ document.getElementById('jurnalForm').addEventListener('submit', function(e) {
         e.preventDefault();
         return false;
     }
+
+    // Show loading state
+    const btn = document.getElementById('submitBtn');
+    const icon = document.getElementById('submitIcon');
+    const text = document.getElementById('submitText');
+    const cancelLink = document.getElementById('cancelLink');
+
+    btn.disabled = true;
+    btn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+    btn.classList.add('bg-blue-400', 'cursor-not-allowed');
+    icon.classList.remove('fa-save');
+    icon.classList.add('fa-spinner', 'fa-spin');
+    text.textContent = 'Menyimpan...';
+    cancelLink.classList.add('pointer-events-none', 'opacity-50');
 });
 </script>
 <?= $this->endSection() ?>

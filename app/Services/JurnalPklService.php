@@ -210,7 +210,7 @@ class JurnalPklService extends BaseService
                 return $this->error('Jurnal tidak ditemukan', 404);
             }
 
-            if ($jurnal['status'] !== 'pending') {
+            if ($jurnal['status'] !== 'pending' && $jurnal['status'] !== 'tinjau_ulang') {
                 return $this->error('Jurnal ini sudah diverifikasi sebelumnya');
             }
 
@@ -252,6 +252,50 @@ class JurnalPklService extends BaseService
             $this->db->transRollback();
             log_message('error', 'Error in JurnalPklService::verify: ' . $e->getMessage());
             return $this->error('Gagal memverifikasi jurnal: ' . $e->getMessage());
+        }
+    }
+
+    public function cancelVerification(int $id): array
+    {
+        try {
+            $this->db->transStart();
+
+            $jurnal = $this->jurnalModel->find($id);
+            if (!$jurnal) {
+                return $this->error('Jurnal tidak ditemukan', 404);
+            }
+
+            if ($jurnal['status'] === 'pending') {
+                return $this->error('Jurnal ini belum diverifikasi');
+            }
+
+            $data = [
+                'status' => 'pending',
+                'verified_by' => null,
+                'verified_at' => null,
+                'catatan_pembimbing' => null,
+            ];
+
+            $success = $this->jurnalModel->update($id, $data);
+            if (!$success) {
+                $this->db->transRollback();
+                return $this->error('Gagal membatalkan verifikasi');
+            }
+
+            $this->db->transComplete();
+
+            if ($this->db->transStatus() === false) {
+                return $this->error('Gagal membatalkan verifikasi');
+            }
+
+            return $this->success([
+                'id' => $id,
+                'message' => 'Verifikasi jurnal berhasil dibatalkan',
+            ]);
+        } catch (\Exception $e) {
+            $this->db->transRollback();
+            log_message('error', 'Error in JurnalPklService::cancelVerification: ' . $e->getMessage());
+            return $this->error('Gagal membatalkan verifikasi: ' . $e->getMessage());
         }
     }
 

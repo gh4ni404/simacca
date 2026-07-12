@@ -62,7 +62,7 @@
 
         <div class="mt-4 flex flex-wrap gap-2">
             <?php
-            $stats = ['disetujui' => 0, 'pending' => 0, 'revisi' => 0, 'ditolak' => 0];
+            $stats = ['disetujui' => 0, 'pending' => 0, 'revisi' => 0, 'ditolak' => 0, 'tinjau_ulang' => 0];
             foreach ($entries as $e) { $stats[$e['status']] = ($stats[$e['status']] ?? 0) + 1; }
             $progress = count($entries) > 0 ? round(($stats['disetujui'] / count($entries)) * 100) : 0;
             ?>
@@ -84,6 +84,9 @@
                 </span>
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-500/20 text-orange-200 text-sm">
                     <i class="fas fa-edit text-xs"></i> <?= $stats['revisi']; ?> Revisi
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-500/20 text-purple-200 text-sm">
+                    <i class="fas fa-rotate text-xs"></i> <?= $stats['tinjau_ulang']; ?> Tinjau Ulang
                 </span>
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/20 text-red-200 text-sm">
                     <i class="fas fa-times-circle text-xs"></i> <?= $stats['ditolak']; ?> Ditolak
@@ -124,6 +127,7 @@
                     'disetujui' => 'border-l-green-500',
                     'pending' => 'border-l-yellow-500',
                     'revisi' => 'border-l-orange-500',
+                    'tinjau_ulang' => 'border-l-purple-500',
                     'ditolak' => 'border-l-red-500',
                     default => 'border-l-gray-300'
                 };
@@ -134,6 +138,7 @@
                         'disetujui' => 'bg-green-500',
                         'pending' => 'bg-yellow-500',
                         'revisi' => 'bg-orange-500',
+                        'tinjau_ulang' => 'bg-purple-500',
                         'ditolak' => 'bg-red-500',
                         default => 'bg-gray-400'
                     }; ?>">
@@ -146,6 +151,7 @@
                                 'disetujui' => 'bg-green-500',
                                 'pending' => 'bg-yellow-500',
                                 'revisi' => 'bg-orange-500',
+                                'tinjau_ulang' => 'bg-purple-500',
                                 'ditolak' => 'bg-red-500',
                                 default => 'bg-gray-400'
                             }; ?>">
@@ -179,6 +185,10 @@
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
                                                 <i class="fas fa-edit mr-1"></i>Revisi
                                             </span>
+                                            <?php elseif ($entry['status'] == 'tinjau_ulang'): ?>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                                                <i class="fas fa-rotate mr-1"></i>Tinjau Ulang
+                                            </span>
                                             <?php else: ?>
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
                                                 <i class="fas fa-times-circle mr-1"></i>Ditolak
@@ -201,6 +211,10 @@
                                             <?php elseif ($entry['status'] == 'revisi'): ?>
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
                                                 <i class="fas fa-edit mr-1"></i>Revisi
+                                            </span>
+                                            <?php elseif ($entry['status'] == 'tinjau_ulang'): ?>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                                                <i class="fas fa-rotate mr-1"></i>Tinjau Ulang
                                             </span>
                                             <?php else: ?>
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">

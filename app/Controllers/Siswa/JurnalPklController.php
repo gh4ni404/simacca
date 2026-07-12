@@ -39,7 +39,7 @@ class JurnalPklController extends BaseController
 
         $statsResult = $this->jurnalService->getStatistics($siswa['id']);
         $stats = $statsResult['success'] ? $statsResult['data'] : [
-            'total' => 0, 'pending' => 0, 'disetujui' => 0, 'revisi' => 0, 'ditolak' => 0
+            'total' => 0, 'pending' => 0, 'disetujui' => 0, 'revisi' => 0, 'tinjau_ulang' => 0, 'ditolak' => 0
         ];
 
         $data = [
@@ -108,37 +108,40 @@ class JurnalPklController extends BaseController
         $foto = $this->request->getFile('foto');
         $fotoName = null;
 
-        if ($foto && $foto->isValid() && !$foto->hasMoved()) {
-            $allowedTypes = [
-                'image/jpeg',
-                'image/jpg',
-                'image/png',
-                'image/webp',
-            ];
+        if (!$foto || !$foto->isValid() || $foto->hasMoved()) {
+            session()->setFlashdata('error', 'Foto dokumentasi wajib diupload');
+            return redirect()->back()->withInput();
+        }
 
-            $validation = validate_file_upload($foto, $allowedTypes, 5242880);
+        $allowedTypes = [
+            'image/jpeg',
+            'image/jpg',
+            'image/png',
+            'image/webp',
+        ];
 
-            if (!$validation['valid']) {
-                session()->setFlashdata('error', '📁 ' . $validation['error']);
-                return redirect()->back()->withInput();
+        $validation = validate_file_upload($foto, $allowedTypes, 5242880);
+
+        if (!$validation['valid']) {
+            session()->setFlashdata('error', '📁 ' . $validation['error']);
+            return redirect()->back()->withInput();
+        }
+
+        try {
+            $fotoName = 'jurnal_pkl_' . time() . '_' . uniqid() . '.' . $foto->getExtension();
+            $foto->move($uploadPath, $fotoName);
+
+            helper('image');
+            $filePath = $uploadPath . '/' . $fotoName;
+            $optimized = optimize_jurnal_pkl_photo($filePath, $filePath);
+
+            if ($optimized) {
+                log_message('info', "[JURNAL PKL] Image optimized: {$fotoName}");
             }
-
-            try {
-                $fotoName = 'jurnal_pkl_' . time() . '_' . uniqid() . '.' . $foto->getExtension();
-                $foto->move($uploadPath, $fotoName);
-
-                helper('image');
-                $filePath = $uploadPath . '/' . $fotoName;
-                $optimized = optimize_jurnal_pkl_photo($filePath, $filePath);
-
-                if ($optimized) {
-                    log_message('info', "[JURNAL PKL] Image optimized: {$fotoName}");
-                }
-            } catch (\Exception $e) {
-                log_message('error', '[JURNAL PKL] File upload failed: ' . $e->getMessage());
-                session()->setFlashdata('error', 'Upload foto gagal');
-                return redirect()->back()->withInput();
-            }
+        } catch (\Exception $e) {
+            log_message('error', '[JURNAL PKL] File upload failed: ' . $e->getMessage());
+            session()->setFlashdata('error', 'Upload foto gagal');
+            return redirect()->back()->withInput();
         }
 
         $data = [
@@ -310,8 +313,8 @@ class JurnalPklController extends BaseController
             'foto' => $fotoName,
         ];
 
-        if ($jurnal['status'] === 'revisi') {
-            $data['status'] = 'pending';
+        if (in_array($jurnal['status'], ['revisi', 'ditolak'])) {
+            $data['status'] = 'tinjau_ulang';
             $data['verified_by'] = null;
             $data['verified_at'] = null;
             $data['catatan_pembimbing'] = null;

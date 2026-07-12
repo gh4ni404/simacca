@@ -236,6 +236,7 @@ $routes->group('guru', ['filter' => 'role:guru_mapel,wakakur'], function ($route
     // Jurnal PKL (Verifikasi Pembimbing)
     $routes->get('jurnal-pkl', 'Guru\JurnalPklController::index', ['as' => 'guru.jurnal_pkl']);
     $routes->post('jurnal-pkl/verify/(:num)', 'Guru\JurnalPklController::verify/$1');
+    $routes->post('jurnal-pkl/batal-verifikasi/(:num)', 'Guru\JurnalPklController::cancelVerification/$1');
     $routes->get('jurnal-pkl/detail/(:num)', 'Guru\JurnalPklController::detail/$1');
 
     // Absensi Guru (Self Check-in/Check-out)
