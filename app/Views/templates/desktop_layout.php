@@ -170,12 +170,13 @@
                         $isParentActive = false;
                         if (isset($item['active'])) {
                             foreach ($item['active'] as $a) {
-                                if (strpos($currentUrl, $a) !== false) { $isParentActive = true; break; }
+                                if ($currentUrl === $a || strpos($currentUrl, $a . '/') === 0) { $isParentActive = true; break; }
                             }
                         }
                         if (!$isParentActive) {
                             foreach ($item['submenu'] as $sub) {
-                                if (strpos($currentUrl, ltrim($sub['url'], '/')) !== false) {
+                                $subUrlCheck = ltrim($sub['url'], '/');
+                                if ($currentUrl === $subUrlCheck || strpos($currentUrl, $subUrlCheck . '/') === 0) {
                                     $isParentActive = true;
                                     break;
                                 }
@@ -208,10 +209,10 @@
                         $isActive = false;
                         if (isset($item['active'])) {
                             foreach ($item['active'] as $a) {
-                                if (strpos($currentUrl, $a) !== false) { $isActive = true; break; }
+                                if ($currentUrl === $a || strpos($currentUrl, $a . '/') === 0) { $isActive = true; break; }
                             }
                         } else {
-                            $isActive = strpos($currentUrl, $url) !== false;
+                            $isActive = ($currentUrl === $url || strpos($currentUrl, $url . '/') === 0);
                         }
                         ?>
                         <a href="<?= base_url($item['url']); ?>" class="sidebar-item <?= $isActive ? 'active' : '' ?>">

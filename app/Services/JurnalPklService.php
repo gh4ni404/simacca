@@ -322,4 +322,56 @@ class JurnalPklService extends BaseService
             return $this->error('Gagal mengambil data jurnal');
         }
     }
+
+    public function getGroupedBySiswaForPembimbing(int $guruId): array
+    {
+        try {
+            $rawData = $this->jurnalModel->getPendingByPembimbing($guruId);
+
+            $grouped = [];
+            $stats = [
+                'total_siswa' => 0,
+                'total_jurnal' => 0,
+                'pending' => 0,
+                'disetujui' => 0,
+                'revisi' => 0,
+                'ditolak' => 0,
+                'tinjau_ulang' => 0,
+            ];
+
+            foreach ($rawData as $row) {
+                $siswaId = $row['siswa_id'];
+                $stats['total_jurnal']++;
+                $stats[$row['status']] = ($stats[$row['status']] ?? 0) + 1;
+
+                if (!isset($grouped[$siswaId])) {
+                    $grouped[$siswaId] = [
+                        'siswa_id' => $siswaId,
+                        'nama_siswa' => $row['nama_siswa'],
+                        'nis' => $row['nis'],
+                        'nama_kelas' => $row['nama_kelas'],
+                        'jurnal' => [],
+                        'pending_count' => 0,
+                    ];
+                    $stats['total_siswa']++;
+                }
+
+                $grouped[$siswaId]['jurnal'][] = $row;
+
+                if ($row['status'] === 'pending') {
+                    $grouped[$siswaId]['pending_count']++;
+                }
+            }
+
+            uasort($grouped, fn($a, $b) => $b['pending_count'] <=> $a['pending_count']);
+
+            return $this->success([
+                'grouped' => array_values($grouped),
+                'stats' => $stats,
+            ]);
+        } catch (\Exception $e) {
+            log_message('error', 'Error in JurnalPklService::getGroupedBySiswaForPembimbing: ' . $e->getMessage());
+            return $this->error('Gagal mengambil data jurnal');
+        }
+    }
 }

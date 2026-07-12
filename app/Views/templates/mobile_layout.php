@@ -340,7 +340,7 @@
             }
             
             foreach ($bottomNavItems as $item):
-                $isActive = strpos($currentUrl, $item['url']) !== false;
+                $isActive = ($currentUrl === $item['url'] || strpos($currentUrl, $item['url'] . '/') === 0);
                 $activeClass = $isActive ? 'active' : '';
             ?>
                 <a href="<?= base_url($item['url']); ?>" class="bottom-nav-item <?= $activeClass ?>">

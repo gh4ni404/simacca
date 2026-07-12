@@ -26,13 +26,15 @@ class JurnalPklController extends BaseController
             return redirect()->to('/access-denied')->with('error', 'Data guru tidak ditemukan');
         }
 
-        $result = $this->jurnalService->getPendingByPembimbing($guru['id']);
-        $pendingData = $result['success'] ? $result['data'] : [];
+        $result = $this->jurnalService->getGroupedBySiswaForPembimbing($guru['id']);
+        $grouped = $result['success'] ? $result['data']['grouped'] : [];
+        $stats = $result['success'] ? $result['data']['stats'] : [];
 
         $data = [
             'title' => 'Verifikasi Jurnal PKL',
             'guru' => $guru,
-            'pendingData' => $pendingData,
+            'groupedData' => $grouped,
+            'stats' => $stats,
         ];
 
         return view('guru/jurnal_pkl/index', $data);
