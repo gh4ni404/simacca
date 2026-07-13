@@ -156,7 +156,7 @@
                             <i class="fas fa-calendar-alt text-white text-sm"></i>
                         </div>
                         <h3 class="text-lg font-bold text-gray-800"><?= $month ?></h3>
-                        <span class="bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full"><?= count($items) ?> hari</span>
+                        <span class="bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full"><?= count($items['items']) ?> hari</span>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">

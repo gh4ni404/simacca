@@ -83,7 +83,7 @@
                         <i class="fas fa-calendar-alt text-white text-xs"></i>
                     </div>
                     <h3 class="text-base font-bold text-gray-800"><?= $month ?></h3>
-                    <span class="bg-gray-100 text-gray-600 text-xs font-semibold px-2 py-0.5 rounded-full"><?= count($items) ?> hari</span>
+                    <span class="bg-gray-100 text-gray-600 text-xs font-semibold px-2 py-0.5 rounded-full"><?= count($items['items']) ?> hari</span>
                 </div>
 
                 <div class="space-y-3">
