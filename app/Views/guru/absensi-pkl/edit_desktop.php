@@ -205,7 +205,7 @@
                                             <button type="button"
                                                 class="status-btn px-3 py-1.5 border-2 rounded-lg font-semibold text-xs transition-all <?= $isSelected ? $statusStyles[$value]['active'] : $statusStyles[$value]['inactive'] ?>"
                                                 data-siswa-id="<?= $sid ?>" data-status="<?= $value ?>"
-                                                onclick="selectStatus(<?= $sid ?>, '<?= $value ?>')">
+                                                onclick="selectStatus('<?= $sid ?>', '<?= $value ?>')">
                                                 <i class="fas <?= $opt['icon'] ?> mr-1"></i><?= $opt['label'] ?>
                                             </button>
                                             <?php endforeach; ?>
@@ -243,6 +243,8 @@
 
 <?= $this->section('scripts') ?>
 <script>
+const EDIT_BTN_BASE = 'status-btn px-3 py-1.5 border-2 rounded-lg font-semibold text-xs transition-all';
+
 const statusStyles = {
     'hadir':  { active: 'bg-green-500 text-white border-green-600 shadow-md',  inactive: 'bg-white text-green-700 border-green-300 hover:bg-green-50', icon: 'fa-check-circle' },
     'izin':   { active: 'bg-blue-500 text-white border-blue-600 shadow-md',   inactive: 'bg-white text-blue-700 border-blue-300 hover:bg-blue-50',  icon: 'fa-file-alt' },
@@ -250,14 +252,6 @@ const statusStyles = {
     'alpa':   { active: 'bg-red-500 text-white border-red-600 shadow-md',     inactive: 'bg-white text-red-700 border-red-300 hover:bg-red-50',    icon: 'fa-times-circle' },
     'dispen': { active: 'bg-purple-500 text-white border-purple-600 shadow-md', inactive: 'bg-white text-purple-700 border-purple-300 hover:bg-purple-50', icon: 'fa-id-badge' }
 };
-
-const allColorClasses = [
-    'bg-green-500','bg-blue-500','bg-yellow-500','bg-red-500','bg-purple-500',
-    'bg-white','text-white','text-green-700','text-blue-700','text-yellow-700','text-red-700','text-purple-700',
-    'border-green-600','border-blue-600','border-yellow-600','border-red-600','border-purple-600',
-    'border-green-300','border-blue-300','border-yellow-300','border-red-300','border-purple-300',
-    'shadow-md','hover:bg-green-50','hover:bg-blue-50','hover:bg-yellow-50','hover:bg-red-50','hover:bg-purple-50'
-];
 
 function selectStatus(siswaId, status) {
     const hiddenInput = document.querySelector(`.status-input[data-siswa-id="${siswaId}"]`);
@@ -270,8 +264,7 @@ function selectStatus(siswaId, status) {
     buttons.forEach(btn => {
         const btnStatus = btn.getAttribute('data-status');
         const s = statusStyles[btnStatus];
-        btn.classList.remove(...allColorClasses);
-        btn.classList.add(...(btnStatus === status ? s.active : s.inactive));
+        btn.className = EDIT_BTN_BASE + ' ' + (btnStatus === status ? s.active : s.inactive);
     });
 
     updateProgress();

@@ -242,6 +242,14 @@ class AbsensiPklController extends BaseController
             'dispen' => ['label' => 'Dispen', 'color' => 'purple', 'icon' => 'fa-id-badge'],
         ];
 
+        $statusStyles = [
+            'hadir'  => ['active' => 'bg-green-500 text-white border-green-600 shadow-md',  'inactive' => 'bg-white text-green-700 border-green-300 hover:bg-green-50'],
+            'izin'   => ['active' => 'bg-blue-500 text-white border-blue-600 shadow-md',   'inactive' => 'bg-white text-blue-700 border-blue-300 hover:bg-blue-50'],
+            'sakit'  => ['active' => 'bg-yellow-500 text-white border-yellow-600 shadow-md', 'inactive' => 'bg-white text-yellow-700 border-yellow-300 hover:bg-yellow-50'],
+            'alpa'   => ['active' => 'bg-red-500 text-white border-red-600 shadow-md',     'inactive' => 'bg-white text-red-700 border-red-300 hover:bg-red-50'],
+            'dispen' => ['active' => 'bg-purple-500 text-white border-purple-600 shadow-md', 'inactive' => 'bg-white text-purple-700 border-purple-300 hover:bg-purple-50'],
+        ];
+
         $data = [
             'title'           => 'Edit Absensi PKL',
             'pageTitle'       => 'Edit Absensi PKL',
@@ -250,6 +258,7 @@ class AbsensiPklController extends BaseController
             'details'         => $details,
             'siswaList'       => $mergedSiswa,
             'statusOptions'   => $statusOptions,
+            'statusStyles'    => $statusStyles,
         ];
 
         return view('guru/absensi-pkl/edit', $data);
@@ -289,8 +298,7 @@ class AbsensiPklController extends BaseController
                 ->with('success', $result['message']);
         }
 
-        return redirect()->back()
-            ->withInput()
+        return redirect()->to('/guru/absensi-pkl/edit/' . $id)
             ->with('error', $result['message']);
     }
 

@@ -76,6 +76,9 @@ class AbsensiPklDetailModel extends Model
     {
         $batch = [];
         foreach ($dataSiswa as $siswaId => $data) {
+            if (empty($siswaId)) {
+                continue;
+            }
             $batch[] = [
                 'absensi_pkl_id' => $absensiPklId,
                 'siswa_id'       => $siswaId,
@@ -97,9 +100,15 @@ class AbsensiPklDetailModel extends Model
      */
     public function updateAbsensi(int $absensiPklId, int $siswaId, array $data): bool
     {
-        return $this->where('absensi_pkl_id', $absensiPklId)
+        $existing = $this->where('absensi_pkl_id', $absensiPklId)
             ->where('siswa_id', $siswaId)
-            ->update($data);
+            ->first();
+
+        if (!$existing) {
+            return false;
+        }
+
+        return $this->update($existing['id'], $data);
     }
 
     /**
@@ -112,12 +121,17 @@ class AbsensiPklDetailModel extends Model
             ->first();
 
         if ($existing) {
-            return $this->where('id', $existing['id'])->update($data);
+            return $this->update($existing['id'], $data);
         }
 
         $data['absensi_pkl_id'] = $absensiPklId;
         $data['siswa_id'] = $siswaId;
-        return $this->insert($data);
+        $insertResult = $this->insert($data);
+        if ($insertResult === false) {
+            $errors = $this->errors();
+            throw new \RuntimeException("upsertAbsensi insert failed for siswa_id=$siswaId. Errors=" . json_encode($errors));
+        }
+        return $insertResult;
     }
 
     /**

@@ -140,39 +140,37 @@ class AbsensiPklService extends BaseService
      */
     public function updateAbsensiPkl(int $id, array $data): array
     {
-        try {
-            $absensi = $this->absensiPklModel->find($id);
-            if (!$absensi) {
-                return $this->errorResponse('Data absensi PKL tidak ditemukan');
+        $absensi = $this->absensiPklModel->find($id);
+        if (!$absensi) {
+            return $this->errorResponse('Data absensi PKL tidak ditemukan');
+        }
+
+        return $this->executeInTransaction(function () use ($id, $data, $absensi) {
+            // Update header
+            $headerData = [
+                'tanggal'         => $data['tanggal'] ?? $absensi['tanggal'],
+                'keterangan_umum' => $data['keterangan_umum'] ?? $absensi['keterangan_umum'],
+                'updated_at'      => date('Y-m-d H:i:s'),
+            ];
+
+            $this->absensiPklModel->update($id, $headerData);
+
+            // Update details
+            if (!empty($data['siswa'])) {
+                foreach ($data['siswa'] as $siswaId => $siswaData) {
+                    if (empty($siswaId)) {
+                        continue;
+                    }
+                    $this->absensiPklDetailModel->upsertAbsensi($id, (int) $siswaId, [
+                        'status'     => $siswaData['status'] ?? 'alpa',
+                        'keterangan' => $siswaData['keterangan'] ?? null,
+                        'waktu_absen' => date('Y-m-d H:i:s'),
+                    ]);
+                }
             }
 
-            return $this->executeInTransaction(function () use ($id, $data) {
-                // Update header
-                $headerData = [
-                    'tanggal'         => $data['tanggal'] ?? $absensi['tanggal'],
-                    'keterangan_umum' => $data['keterangan_umum'] ?? $absensi['keterangan_umum'],
-                    'updated_at'      => date('Y-m-d H:i:s'),
-                ];
-
-                $this->absensiPklModel->update($id, $headerData);
-
-                // Update details
-                if (!empty($data['siswa'])) {
-                    foreach ($data['siswa'] as $siswaId => $siswaData) {
-                        $this->absensiPklDetailModel->upsertAbsensi($id, $siswaId, [
-                            'status'     => $siswaData['status'] ?? 'alpa',
-                            'keterangan' => $siswaData['keterangan'] ?? null,
-                            'waktu_absen' => date('Y-m-d H:i:s'),
-                        ]);
-                    }
-                }
-
-                return $this->successResponse(['absensi_pkl_id' => $id], 'Absensi PKL berhasil diperbarui');
-            });
-        } catch (\Exception $e) {
-            $this->log('error', 'Failed to update absensi pkl: ' . $e->getMessage());
-            return $this->errorResponse('Gagal memperbarui absensi PKL: ' . $e->getMessage());
-        }
+            return $this->successResponse(['absensi_pkl_id' => $id], 'Absensi PKL berhasil diperbarui');
+        });
     }
 
     /**

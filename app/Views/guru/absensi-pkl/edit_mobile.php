@@ -143,7 +143,7 @@
                                 <button type="button"
                                         class="status-btn flex flex-col items-center justify-center py-2.5 rounded-xl border-2 cursor-pointer transition-all active:scale-95 <?= $currentStatus === 'hadir' ? 'bg-green-500 text-white border-green-500' : 'bg-white text-gray-700 border-gray-300' ?>"
                                         data-siswa-id="<?= $sid ?>" data-status="hadir"
-                                        onclick="selectStatus(<?= $sid ?>, 'hadir')">
+                                        onclick="selectStatus('<?= $sid ?>', 'hadir')">
                                     <i class="fas fa-check-circle text-lg mb-1"></i>
                                     <span class="text-xs font-semibold">Hadir</span>
                                 </button>
@@ -152,7 +152,7 @@
                                 <button type="button"
                                         class="status-btn flex flex-col items-center justify-center py-2.5 rounded-xl border-2 cursor-pointer transition-all active:scale-95 <?= $currentStatus === 'izin' ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-gray-700 border-gray-300' ?>"
                                         data-siswa-id="<?= $sid ?>" data-status="izin"
-                                        onclick="selectStatus(<?= $sid ?>, 'izin')">
+                                        onclick="selectStatus('<?= $sid ?>', 'izin')">
                                     <i class="fas fa-file-alt text-lg mb-1"></i>
                                     <span class="text-xs font-semibold">Izin</span>
                                 </button>
@@ -161,7 +161,7 @@
                                 <button type="button"
                                         class="status-btn flex flex-col items-center justify-center py-2.5 rounded-xl border-2 cursor-pointer transition-all active:scale-95 <?= $currentStatus === 'sakit' ? 'bg-yellow-500 text-white border-yellow-500' : 'bg-white text-gray-700 border-gray-300' ?>"
                                         data-siswa-id="<?= $sid ?>" data-status="sakit"
-                                        onclick="selectStatus(<?= $sid ?>, 'sakit')">
+                                        onclick="selectStatus('<?= $sid ?>', 'sakit')">
                                     <i class="fas fa-medkit text-lg mb-1"></i>
                                     <span class="text-xs font-semibold">Sakit</span>
                                 </button>
@@ -170,7 +170,7 @@
                                 <button type="button"
                                         class="status-btn flex flex-col items-center justify-center py-2.5 rounded-xl border-2 cursor-pointer transition-all active:scale-95 <?= $currentStatus === 'alpa' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-700 border-gray-300' ?>"
                                         data-siswa-id="<?= $sid ?>" data-status="alpa"
-                                        onclick="selectStatus(<?= $sid ?>, 'alpa')">
+                                        onclick="selectStatus('<?= $sid ?>', 'alpa')">
                                     <i class="fas fa-times-circle text-lg mb-1"></i>
                                     <span class="text-xs font-semibold">Alpa</span>
                                 </button>
@@ -179,7 +179,7 @@
                                 <button type="button"
                                         class="status-btn flex flex-col items-center justify-center py-2.5 rounded-xl border-2 cursor-pointer transition-all active:scale-95 <?= $currentStatus === 'dispen' ? 'bg-purple-500 text-white border-purple-500' : 'bg-white text-gray-700 border-gray-300' ?>"
                                         data-siswa-id="<?= $sid ?>" data-status="dispen"
-                                        onclick="selectStatus(<?= $sid ?>, 'dispen')">
+                                        onclick="selectStatus('<?= $sid ?>', 'dispen')">
                                     <i class="fas fa-id-badge text-lg mb-1"></i>
                                     <span class="text-xs font-semibold">Dispen</span>
                                 </button>
