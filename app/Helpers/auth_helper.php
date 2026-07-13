@@ -153,8 +153,8 @@ if (!function_exists('get_sidebar_menu')) {
                     ]
                 ],
                 [
-                    'title' => 'Pembimbing PKL',
-                    'icon' => 'fas fa-user-graduate',
+                    'title' => 'Praktik Kerja Lapangan',
+                    'icon' => 'fas fa-building',
                     'url' => '#',
                     'submenu' => [
                         [
@@ -248,16 +248,19 @@ if (!function_exists('get_sidebar_menu')) {
                     'url' => '/guru/jurnal'
                 ],
                 [
-                    'title' => 'Verifikasi Jurnal PKL',
-                    'icon' => 'fas fa-check-double',
-                    'url' => '/guru/jurnal-pkl',
-                    'active' => ['guru/jurnal-pkl']
-                ],
-                [
-                    'title' => 'Absensi PKL',
-                    'icon' => 'fas fa-clipboard-check',
-                    'url' => '/guru/absensi-pkl',
-                    'active' => ['guru/absensi-pkl']
+                    'title' => 'Praktik Kerja Lapangan',
+                    'icon' => 'fas fa-building',
+                    'url' => '#',
+                    'submenu' => [
+                        [
+                            'title' => 'Verifikasi Jurnal PKL',
+                            'url' => '/guru/jurnal-pkl',
+                        ],
+                        [
+                            'title' => 'Absensi PKL',
+                            'url' => '/guru/absensi-pkl',
+                        ],
+                    ]
                 ],
                 [
                     'title' => 'Laporan',
@@ -363,16 +366,19 @@ if (!function_exists('get_sidebar_menu')) {
                     'url' => '/siswa/absensi'
                 ],
                 [
-                    'title' => 'Jurnal PKL',
-                    'icon' => 'fas fa-book',
-                    'url' => '/siswa/jurnal-pkl',
-                    'active' => ['siswa/jurnal-pkl']
-                ],
-                [
-                    'title' => 'Absensi PKL',
-                    'icon' => 'fas fa-calendar-check',
-                    'url' => '/siswa/absensi-pkl',
-                    'active' => ['siswa/absensi-pkl']
+                    'title' => 'Praktik Kerja Lapangan',
+                    'icon' => 'fas fa-building',
+                    'url' => '#',
+                    'submenu' => [
+                        [
+                            'title' => 'Jurnal PKL',
+                            'url' => '/siswa/jurnal-pkl',
+                        ],
+                        [
+                            'title' => 'Absensi PKL',
+                            'url' => '/siswa/absensi-pkl',
+                        ],
+                    ]
                 ],
                 [
                     'title' => 'Pengajuan Izin',
