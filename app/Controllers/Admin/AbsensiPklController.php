@@ -28,8 +28,8 @@ class AbsensiPklController extends BaseController
     public function index()
     {
         $pembimbingPklId = $this->request->getGet('pembimbing_id') ? (int) $this->request->getGet('pembimbing_id') : null;
-        $from = $this->request->getGet('from');
-        $to = $this->request->getGet('to');
+        $from = $this->request->getGet('date_from');
+        $to = $this->request->getGet('date_to');
 
         $result = $this->absensiPklService->getAdminDashboard($pembimbingPklId, $from, $to);
         $data = $result['data'] ?? [];
@@ -45,8 +45,8 @@ class AbsensiPklController extends BaseController
             'pembimbingOptions' => $data['pembimbingOptions'] ?? [],
             'filters'         => [
                 'pembimbing_id' => $pembimbingPklId,
-                'from'          => $from,
-                'to'            => $to,
+                'date_from'     => $from,
+                'date_to'       => $to,
             ],
         ];
 

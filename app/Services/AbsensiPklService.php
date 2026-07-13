@@ -272,7 +272,13 @@ class AbsensiPklService extends BaseService
             // Enrich rekap with detail stats
             foreach ($rekapPembimbing as &$item) {
                 $stats = $this->absensiPklDetailModel->getStatsByPembimbingPkl($item['pembimbing_pkl_id']);
-                $item['stats'] = $stats;
+                $item['hadir']            = $stats['hadir'] ?? 0;
+                $item['izin']             = $stats['izin'] ?? 0;
+                $item['sakit']            = $stats['sakit'] ?? 0;
+                $item['alpa']             = $stats['alpa'] ?? 0;
+                $item['dispen']           = $stats['dispen'] ?? 0;
+                $item['total']            = $stats['total'] ?? 0;
+                $item['persen_kehadiran'] = $stats['persen_kehadiran'] ?? 0;
             }
             unset($item);
 
