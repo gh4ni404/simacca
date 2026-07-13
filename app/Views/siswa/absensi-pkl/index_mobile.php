@@ -89,7 +89,7 @@
                 <div class="space-y-3">
                     <?php
                     $no = 1;
-                    foreach ($items as $item):
+                    foreach ($items['items'] as $item):
                         $badgeClass = '';
                         $icon = '';
                         switch($item['status']) {

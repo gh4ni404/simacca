@@ -177,7 +177,7 @@
                                 <p class="text-sm font-bold text-purple-600"><?= $rp['dispen'] ?? 0 ?></p>
                             </div>
                         </div>
-                        <a href="<?= base_url('admin/absensi-pkl/rekap/' . $rp['pembimbing_id']) ?>"
+                        <a href="<?= base_url('admin/absensi-pkl/rekap/' . $rp['pembimbing_pkl_id']) ?>"
                            class="flex items-center justify-center w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl active:scale-98 transition-all shadow-sm">
                             <i class="fas fa-eye mr-2"></i> Lihat Detail
                         </a>

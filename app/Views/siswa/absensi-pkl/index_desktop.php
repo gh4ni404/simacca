@@ -180,7 +180,7 @@
                                     'alpa'   => 'bg-red-100 text-red-800',
                                     'dispen' => 'bg-purple-100 text-purple-800',
                                 ];
-                                foreach ($items as $item):
+                                foreach ($items['items'] as $item):
                                 ?>
                                 <tr class="table-row-hover">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900"><?= $no++ ?></td>

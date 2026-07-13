@@ -268,7 +268,7 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                <a href="<?= base_url('admin/absensi-pkl/rekap/' . $rp['pembimbing_id']) ?>"
+                                <a href="<?= base_url('admin/absensi-pkl/rekap/' . $rp['pembimbing_pkl_id']) ?>"
                                    class="inline-flex items-center px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded-lg transition-all shadow-sm">
                                     <i class="fas fa-eye mr-1"></i> Detail
                                 </a>
