@@ -30,7 +30,7 @@ class ProfileCompletionFilter implements FilterInterface
         
         // Skip profile completion check for admin
         // Admin doesn't need to complete profile (no guru/siswa data required)
-        if ($userRole === 'admin') {
+        if ($userRole === 'admin' || $userRole === 'instruktur') {
             return $request;
         }
         

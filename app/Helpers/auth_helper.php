@@ -77,15 +77,8 @@ if (!function_exists('get_role_name')) {
         $session = \Config\Services::session();
         $role = $session->get('role');
 
-        $roleNames = [
-            'admin'         => 'Administrator',
-            'guru_mapel'    => 'Guru Mata Pelajaran',
-            'wali_kelas'    => 'Wali Kelas',
-            'wakakur'       => 'Wakil Kepala Kurikulum',
-            'siswa'         => 'Siswa'
-        ];
-
-        return $roleNames[$role] ?? 'Unknown';
+        $roleModel = new \App\Models\RoleModel();
+        return $roleModel->getDisplayName($role);
     }
 }
 
@@ -374,6 +367,14 @@ if (!function_exists('get_sidebar_menu')) {
                     'title' => 'Profil',
                     'icon' => 'fas fa-user',
                     'url' => '/siswa/profil'
+                ]
+            ],
+            'instruktur' => [
+                [
+                    'title' => 'Dashboard',
+                    'icon' => 'fas fa-th',
+                    'url' => '/instruktur/dashboard',
+                    'active' => ['instruktur/dashboard']
                 ]
             ]
         ];

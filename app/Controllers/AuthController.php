@@ -125,6 +125,15 @@ class AuthController extends BaseController
                 case 'admin':
                     $sessionData['nama_lengkap'] = 'Administrator';
                     break;
+
+                case 'instruktur':
+                    $instrukturModel = new \App\Models\InstrukturPklModel();
+                    $instruktur = $instrukturModel->where('user_id', $user['id'])->first();
+                    if ($instruktur) {
+                        $sessionData['instruktur_id'] = $instruktur['id'];
+                        $sessionData['nama_lengkap'] = $instruktur['nama_lengkap'];
+                    }
+                    break;
             }
 
             // Set session first
@@ -167,6 +176,8 @@ class AuthController extends BaseController
                 return redirect()->to('/wakakur/dashboard');
             case 'siswa':
                 return redirect()->to('/siswa/dashboard');
+            case 'instruktur':
+                return redirect()->to('/instruktur/dashboard');
             default:
                 return redirect()->to('/');
         }

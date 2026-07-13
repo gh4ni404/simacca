@@ -43,7 +43,7 @@ class UserModel extends Model
     protected $validationRules      = [
         'username'      => 'required|min_length[3]|max_length[50]|is_unique[users.username]',
         'password'      => 'required|min_length[6]',
-        'role'          => 'required|in_list[admin,guru_mapel,wali_kelas,wakakur,siswa]',
+        'role'          => 'required',
         'email'         => 'valid_email',
         'is_active'     => 'permit_empty|in_list[0,1]',
     ];
@@ -53,7 +53,7 @@ class UserModel extends Model
 
     // Callbacks
     protected $allowCallbacks = true;
-    protected $beforeInsert   = ['hashPassword'];
+    protected $beforeInsert   = ['hashPassword', 'ensureRole'];
     protected $afterInsert    = [];
     protected $beforeUpdate   = ['hashPassword'];
     protected $afterUpdate    = [];
@@ -80,6 +80,19 @@ class UserModel extends Model
             } else {
                 log_message('info', 'UserModel hashPassword - Password already hashed, skipping');
             }
+        }
+        return $data;
+    }
+
+    /**
+     * Pastikan role ada di tabel roles sebelum insert user.
+     * Jika belum ada, otomatis buat baru.
+     */
+    protected function ensureRole(array $data): array
+    {
+        if (isset($data['data']['role']) && !empty($data['data']['role'])) {
+            $roleModel = new RoleModel();
+            $roleModel->ensureRole($data['data']['role']);
         }
         return $data;
     }

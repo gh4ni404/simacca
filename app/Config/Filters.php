@@ -144,6 +144,7 @@ class Filters extends BaseFilters
                 'walikelas/*',
                 'wakakur/*',
                 'siswa/*',
+                'instruktur/*',
                 'dashboard/*',
                 'change-password/*',
                 'profile/*',

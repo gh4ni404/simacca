@@ -311,6 +311,11 @@ $routes->group('siswa', ['filter' => 'role:siswa'], function ($routes) {
     $routes->get('jurnal-pkl/cetak/(:num)/(:num)', 'Siswa\JurnalPklController::print/$1/$2');
 });
 
+// Instruktur PKL Routes
+$routes->group('instruktur', ['filter' => 'role:instruktur'], function ($routes) {
+    $routes->get('dashboard', 'Instruktur\DashboardController::index', ['as' => 'instruktur.dashboard']);
+});
+
 // Profile Routes (for all roles)
 $routes->group('profile', ['filter' => 'auth'], function ($routes) {
     $routes->get('/', 'ProfileController::index');

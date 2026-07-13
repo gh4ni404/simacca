@@ -124,7 +124,7 @@ class GuruService extends BaseService
             'username' => 'required|is_unique[users.username]',
             'password' => 'required|min_length[6]',
             'email' => 'permit_empty|valid_email',
-            'role' => 'required|in_list[guru_mapel,wali_kelas,wakakur]',
+            'role' => 'required',
             'mata_pelajaran_id' => 'permit_empty|integer',
             'kelas_id' => 'permit_empty|integer',
             'is_wali_kelas' => 'permit_empty|in_list[0,1]'
@@ -218,7 +218,7 @@ class GuruService extends BaseService
             'nama_lengkap' => 'required',
             'jenis_kelamin' => 'required|in_list[L,P]',
             'email' => 'permit_empty|valid_email',
-            'role' => 'required|in_list[guru_mapel,wali_kelas,wakakur]',
+            'role' => 'required',
             'mata_pelajaran_id' => 'permit_empty|integer',
             'kelas_id' => 'permit_empty|integer',
             'is_wali_kelas' => 'permit_empty|in_list[0,1]'

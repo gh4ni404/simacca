@@ -8,6 +8,8 @@ use App\Models\KelasModel;
 use App\Models\TempatPklModel;
 use App\Models\PembimbingPklModel;
 use App\Models\SiswaPklModel;
+use App\Models\InstrukturPklModel;
+use App\Models\UserModel;
 
 class PembimbingPklService extends BaseService
 {
@@ -17,6 +19,8 @@ class PembimbingPklService extends BaseService
     protected $tempatPklModel;
     protected $pembimbingPklModel;
     protected $siswaPklModel;
+    protected $instrukturPklModel;
+    protected $userModel;
 
     public function __construct()
     {
@@ -28,6 +32,8 @@ class PembimbingPklService extends BaseService
         $this->tempatPklModel = new TempatPklModel();
         $this->pembimbingPklModel = new PembimbingPklModel();
         $this->siswaPklModel = new SiswaPklModel();
+        $this->instrukturPklModel = new InstrukturPklModel();
+        $this->userModel = new UserModel();
     }
 
     public function getAllPembimbingPkl($tahunAjaran = null): array
@@ -186,7 +192,12 @@ class PembimbingPklService extends BaseService
     public function getAllTempatPkl(): array
     {
         try {
-            $data = $this->tempatPklModel->orderBy('nama_perusahaan', 'ASC')->findAll();
+            $data = $this->tempatPklModel
+                ->select('tempat_pkl.*, instruktur_pkl.id AS instruktur_id, instruktur_pkl.nama_lengkap AS nama_instruktur, instruktur_pkl.email AS email_instruktur, instruktur_pkl.telepon AS telepon_instruktur, users.username AS username_instruktur')
+                ->join('instruktur_pkl', 'instruktur_pkl.tempat_pkl_id = tempat_pkl.id AND instruktur_pkl.deleted_at IS NULL', 'left')
+                ->join('users', 'users.id = instruktur_pkl.user_id AND users.deleted_at IS NULL', 'left')
+                ->orderBy('tempat_pkl.nama_perusahaan', 'ASC')
+                ->findAll();
             return $this->successResponse($data);
         } catch (\Exception $e) {
             $this->log('error', 'Failed to get all tempat PKL: ' . $e->getMessage());
@@ -204,7 +215,22 @@ class PembimbingPklService extends BaseService
             return $this->errorResponse('Validasi gagal');
         }
 
-        return $this->executeInTransaction(function () use ($data) {
+        $hasInstruktur = !empty($data['instruktur_nama']);
+
+        if ($hasInstruktur) {
+            $instrukturRules = [
+                'instruktur_nama'    => 'required|min_length[3]',
+                'instruktur_email'   => 'required|valid_email|is_unique[users.email]',
+                'instruktur_username' => 'required|is_unique[users.username]',
+                'instruktur_password' => 'required|min_length[6]',
+            ];
+
+            if (!$this->validate($data, $instrukturRules)) {
+                return $this->errorResponse('Validasi data instruktur gagal');
+            }
+        }
+
+        return $this->executeInTransaction(function () use ($data, $hasInstruktur) {
             $insertData = [
                 'nama_perusahaan' => $data['nama_perusahaan'],
                 'alamat'          => $data['alamat'] ?? null,
@@ -220,8 +246,57 @@ class PembimbingPklService extends BaseService
                 throw new \Exception('Gagal menyimpan data tempat PKL');
             }
 
+            if ($hasInstruktur) {
+                $userId = $this->userModel->insert([
+                    'username'   => $data['instruktur_username'],
+                    'password'   => $data['instruktur_password'],
+                    'role'       => 'instruktur',
+                    'email'      => $data['instruktur_email'],
+                    'is_active'  => 1,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+
+                if (!$userId) {
+                    throw new \Exception('Gagal membuat akun instruktur');
+                }
+
+                $this->instrukturPklModel->insert([
+                    'tempat_pkl_id' => $id,
+                    'user_id'       => $userId,
+                    'nama_lengkap'  => $data['instruktur_nama'],
+                    'email'         => $data['instruktur_email'],
+                    'telepon'       => $data['instruktur_telepon'] ?? null,
+                    'created_at'    => date('Y-m-d H:i:s'),
+                ]);
+            }
+
             return $this->successResponse(['id' => $id], 'Tempat PKL berhasil ditambahkan');
         });
+    }
+
+    public function getTempatPklWithInstruktur(int $id): array
+    {
+        try {
+            $tempat = $this->tempatPklModel->find($id);
+
+            if (!$tempat) {
+                return $this->errorResponse('Tempat PKL tidak ditemukan');
+            }
+
+            $instruktur = $this->instrukturPklModel->getByTempatPkl($id);
+
+            if ($instruktur && !empty($instruktur['user_id'])) {
+                $user = $this->userModel->find($instruktur['user_id']);
+                $instruktur['username'] = $user['username'] ?? '';
+            }
+
+            $tempat['instruktur'] = $instruktur;
+
+            return $this->successResponse($tempat);
+        } catch (\Exception $e) {
+            $this->log('error', 'Failed to get tempat PKL with instruktur: ' . $e->getMessage());
+            return $this->errorResponse('Gagal mengambil data tempat PKL');
+        }
     }
 
     public function updateTempatPkl(int $id, array $data): array
@@ -250,6 +325,68 @@ class PembimbingPklService extends BaseService
             ];
 
             $this->tempatPklModel->update($id, $updateData);
+
+            $existingInstruktur = $this->instrukturPklModel->getByTempatPkl($id);
+            $hasInstrukturData = !empty($data['instruktur_nama']);
+
+            if ($hasInstrukturData) {
+                $instrukturRules = [
+                    'instruktur_nama'     => 'required|min_length[3]',
+                    'instruktur_email'    => 'required|valid_email',
+                    'instruktur_username' => 'required',
+                    'instruktur_password' => 'permit_empty|min_length[6]',
+                ];
+
+                if (!$this->validate($data, $instrukturRules)) {
+                    throw new \Exception('Validasi data instruktur gagal');
+                }
+
+                if ($existingInstruktur) {
+                    $this->userModel->update($existingInstruktur['user_id'], [
+                        'username' => $data['instruktur_username'],
+                        'email'    => $data['instruktur_email'],
+                    ]);
+
+                    if (!empty($data['instruktur_password'])) {
+                        $this->userModel->update($existingInstruktur['user_id'], [
+                            'password' => $data['instruktur_password'],
+                        ]);
+                    }
+
+                    $this->instrukturPklModel->update($existingInstruktur['id'], [
+                        'nama_lengkap' => $data['instruktur_nama'],
+                        'email'        => $data['instruktur_email'],
+                        'telepon'      => $data['instruktur_telepon'] ?? null,
+                    ]);
+                } else {
+                    $password = !empty($data['instruktur_password']) ? $data['instruktur_password'] : 'instruktur123';
+
+                    $userId = $this->userModel->insert([
+                        'username'   => $data['instruktur_username'],
+                        'password'   => $password,
+                        'role'       => 'instruktur',
+                        'email'      => $data['instruktur_email'],
+                        'is_active'  => 1,
+                        'created_at' => date('Y-m-d H:i:s'),
+                    ]);
+
+                    if (!$userId) {
+                        throw new \Exception('Gagal membuat akun instruktur');
+                    }
+
+                    $this->instrukturPklModel->insert([
+                        'tempat_pkl_id' => $id,
+                        'user_id'       => $userId,
+                        'nama_lengkap'  => $data['instruktur_nama'],
+                        'email'         => $data['instruktur_email'],
+                        'telepon'       => $data['instruktur_telepon'] ?? null,
+                        'created_at'    => date('Y-m-d H:i:s'),
+                    ]);
+                }
+            } elseif ($existingInstruktur && empty($data['instruktur_nama'])) {
+                $this->instrukturPklModel->delete($existingInstruktur['id']);
+                $this->userModel->delete($existingInstruktur['user_id']);
+            }
 
             return $this->successResponse(['id' => $id], 'Tempat PKL berhasil diperbarui');
         });

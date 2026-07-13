@@ -12,10 +12,6 @@ class PembimbingPklController extends BaseController
     public function __construct()
     {
         $this->pembimbingPklService = new PembimbingPklService();
-
-        if (!session()->get('isLoggedIn') || session()->get('role') !== 'admin') {
-            return redirect()->to('/access-denied');
-        }
     }
 
     public function index()
@@ -144,11 +140,16 @@ class PembimbingPklController extends BaseController
     public function storeTempatPkl()
     {
         $data = [
-            'nama_perusahaan' => $this->request->getPost('nama_perusahaan'),
-            'alamat'          => $this->request->getPost('alamat'),
-            'kota'            => $this->request->getPost('kota'),
-            'kontak'          => $this->request->getPost('kontak'),
-            'telepon'         => $this->request->getPost('telepon'),
+            'nama_perusahaan'       => $this->request->getPost('nama_perusahaan'),
+            'alamat'                => $this->request->getPost('alamat'),
+            'kota'                  => $this->request->getPost('kota'),
+            'kontak'                => $this->request->getPost('kontak'),
+            'telepon'               => $this->request->getPost('telepon'),
+            'instruktur_nama'       => $this->request->getPost('instruktur_nama'),
+            'instruktur_email'      => $this->request->getPost('instruktur_email'),
+            'instruktur_telepon'    => $this->request->getPost('instruktur_telepon'),
+            'instruktur_username'   => $this->request->getPost('instruktur_username'),
+            'instruktur_password'   => $this->request->getPost('instruktur_password'),
         ];
 
         $result = $this->pembimbingPklService->createTempatPkl($data);
@@ -157,18 +158,27 @@ class PembimbingPklController extends BaseController
             return redirect()->back()->withInput()->with('errors', $result['errors'] ?? []);
         }
 
-        session()->setFlashdata('success', 'Tempat PKL berhasil ditambahkan');
+        $msg = 'Tempat PKL berhasil ditambahkan';
+        if (!empty($data['instruktur_nama'])) {
+            $msg .= ' beserta akun instruktur';
+        }
+        session()->setFlashdata('success', $msg);
         return redirect()->to('/admin/pembimbing-pkl/tempat-pkl');
     }
 
     public function updateTempatPkl($id)
     {
         $data = [
-            'nama_perusahaan' => $this->request->getPost('nama_perusahaan'),
-            'alamat'          => $this->request->getPost('alamat'),
-            'kota'            => $this->request->getPost('kota'),
-            'kontak'          => $this->request->getPost('kontak'),
-            'telepon'         => $this->request->getPost('telepon'),
+            'nama_perusahaan'       => $this->request->getPost('nama_perusahaan'),
+            'alamat'                => $this->request->getPost('alamat'),
+            'kota'                  => $this->request->getPost('kota'),
+            'kontak'                => $this->request->getPost('kontak'),
+            'telepon'               => $this->request->getPost('telepon'),
+            'instruktur_nama'       => $this->request->getPost('instruktur_nama'),
+            'instruktur_email'      => $this->request->getPost('instruktur_email'),
+            'instruktur_telepon'    => $this->request->getPost('instruktur_telepon'),
+            'instruktur_username'   => $this->request->getPost('instruktur_username'),
+            'instruktur_password'   => $this->request->getPost('instruktur_password'),
         ];
 
         $result = $this->pembimbingPklService->updateTempatPkl($id, $data);

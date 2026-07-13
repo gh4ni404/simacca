@@ -32,6 +32,8 @@ class Home extends BaseController
                 return redirect()->to('/wakakur/dashboard');
             case 'siswa':
                 return redirect()->to('/siswa/dashboard');
+            case 'instruktur':
+                return redirect()->to('/instruktur/dashboard');
             default:
                 return redirect()->to('/login');
         }
