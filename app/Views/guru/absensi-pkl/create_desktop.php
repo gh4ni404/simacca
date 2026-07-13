@@ -286,5 +286,14 @@ function updateProgress() {
     inputs.forEach(i => { if (i.getAttribute('data-manually-set') === 'true') filled++; });
     document.getElementById('filledCount').textContent = filled;
 }
+
+// Auto-select pembimbing if only one
+(function() {
+    const sel = document.getElementById('pembimbing_pkl_id');
+    if (sel && sel.options.length === 2) {
+        sel.value = sel.options[1].value;
+        sel.dispatchEvent(new Event('change'));
+    }
+})();
 </script>
 <?= $this->endSection() ?>

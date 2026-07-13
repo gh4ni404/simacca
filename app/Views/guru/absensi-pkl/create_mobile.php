@@ -303,5 +303,14 @@ function showToast(message) {
         setTimeout(() => toast.remove(), 300);
     }, 2000);
 }
+
+// Auto-select pembimbing if only one
+(function() {
+    const sel = document.getElementById('pembimbing_pkl_id');
+    if (sel && sel.options.length === 2) {
+        sel.value = sel.options[1].value;
+        sel.dispatchEvent(new Event('change'));
+    }
+})();
 </script>
 <?= $this->endSection() ?>
