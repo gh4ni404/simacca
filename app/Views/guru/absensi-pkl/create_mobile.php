@@ -170,6 +170,8 @@ const statusStyles = {
     'dispen': { active: 'bg-purple-500 text-white border-purple-500', inactive: 'bg-white text-gray-700 border-gray-300', icon: 'fa-id-badge' }
 };
 
+const MOBILE_BTN_BASE = 'status-btn flex flex-col items-center justify-center py-2.5 border-2 rounded-xl transition-all active:scale-95';
+
 // On pembimbing change, filter siswa
 document.getElementById('pembimbing_pkl_id')?.addEventListener('change', function() {
     const selectedId = this.value;
@@ -222,9 +224,9 @@ function renderSiswaCards(siswaList) {
             const s = statusStyles[value];
             const isSelected = value === 'hadir';
             html += `<button type="button"
-                class="status-btn flex flex-col items-center justify-center py-2.5 border-2 rounded-xl transition-all active:scale-95 ${isSelected ? s.active : s.inactive}"
+                class="${MOBILE_BTN_BASE} ${isSelected ? s.active : s.inactive}"
                 data-siswa-id="${sid}" data-status="${value}"
-                onclick="selectStatus(${sid}, '${value}')">
+                onclick="selectStatus('${sid}', '${value}')">
                 <i class="fas ${s.icon} text-lg mb-1"></i>
                 <span class="text-xs font-semibold">${opt.label}</span>
             </button>`;
@@ -251,22 +253,10 @@ function selectStatus(siswaId, status) {
     hiddenInput.setAttribute('data-manually-set', 'true');
 
     const buttons = document.querySelectorAll(`.status-btn[data-siswa-id="${siswaId}"]`);
-    const allStatusClasses = [
-        'bg-green-500','bg-blue-500','bg-yellow-500','bg-red-500','bg-purple-500',
-        'bg-white','text-white','text-gray-700',
-        'border-green-500','border-blue-500','border-yellow-500','border-red-500','border-purple-500',
-        'border-gray-300'
-    ];
-
     buttons.forEach(btn => {
         const btnStatus = btn.getAttribute('data-status');
         const s = statusStyles[btnStatus];
-        btn.classList.remove(...allStatusClasses);
-        if (btnStatus === status) {
-            btn.classList.add(...s.active);
-        } else {
-            btn.classList.add(...s.inactive);
-        }
+        btn.className = MOBILE_BTN_BASE + ' ' + (btnStatus === status ? s.active : s.inactive);
     });
 
     // Visual feedback on card

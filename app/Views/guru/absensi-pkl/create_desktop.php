@@ -190,13 +190,7 @@ const statusStyles = {
     'dispen': { active: 'bg-purple-500 text-white border-purple-600 shadow-md', inactive: 'bg-white text-purple-700 border-purple-300 hover:bg-purple-50', icon: 'fa-id-badge' }
 };
 
-const allColorClasses = [
-    'bg-green-500','bg-blue-500','bg-yellow-500','bg-red-500','bg-purple-500',
-    'bg-white','text-white','text-green-700','text-blue-700','text-yellow-700','text-red-700','text-purple-700',
-    'border-green-600','border-blue-600','border-yellow-600','border-red-600','border-purple-600',
-    'border-green-300','border-blue-300','border-yellow-300','border-red-300','border-purple-300',
-    'shadow-md','hover:bg-green-50','hover:bg-blue-50','hover:bg-yellow-50','hover:bg-red-50','hover:bg-purple-50'
-];
+const DESKTOP_BTN_BASE = 'status-btn px-3 py-1.5 border-2 rounded-lg font-semibold text-xs transition-all';
 
 // On pembimbing change, filter siswa
 document.getElementById('pembimbing_pkl_id')?.addEventListener('change', function() {
@@ -230,15 +224,15 @@ function renderSiswaTable(siswaList) {
             <td class="px-4 py-4 text-sm text-gray-600">${siswa.nama_kelas || '-'}</td>
             <td class="px-4 py-4">
                 <input type="hidden" name="siswa[${sid}][status]" value="hadir" class="status-input" data-siswa-id="${sid}">
-                <div class="flex gap-1 flex-wrap" data-siswa-id="${sid}">`;
+                <div class="flex gap-1 flex-wrap">`;
 
         Object.entries(statusOptions).forEach(([value, opt]) => {
             const s = statusStyles[value];
             const isSelected = value === 'hadir';
             html += `<button type="button"
-                class="status-btn px-3 py-1.5 border-2 rounded-lg font-semibold text-xs transition-all ${isSelected ? s.active : s.inactive}"
+                class="${DESKTOP_BTN_BASE} ${isSelected ? s.active : s.inactive}"
                 data-siswa-id="${sid}" data-status="${value}"
-                onclick="selectStatus(${sid}, '${value}')">
+                onclick="selectStatus('${sid}', '${value}')">
                 <i class="fas ${s.icon} mr-1"></i>${opt.label}
             </button>`;
         });
@@ -266,8 +260,7 @@ function selectStatus(siswaId, status) {
     buttons.forEach(btn => {
         const btnStatus = btn.getAttribute('data-status');
         const s = statusStyles[btnStatus];
-        btn.classList.remove(...allColorClasses);
-        btn.classList.add(...(btnStatus === status ? s.active : s.inactive));
+        btn.className = DESKTOP_BTN_BASE + ' ' + (btnStatus === status ? s.active : s.inactive);
     });
 
     updateProgress();
