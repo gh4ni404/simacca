@@ -170,6 +170,10 @@ if (!function_exists('get_sidebar_menu')) {
                             'url' => '/admin/pembimbing-pkl/tempat-pkl'
                         ],
                         [
+                            'title' => 'Absensi PKL',
+                            'url' => '/admin/absensi-pkl',
+                        ],
+                        [
                             'title' => 'Arsip Jurnal PKL',
                             'url' => '/admin/jurnal-pkl-archive',
                         ],
@@ -248,6 +252,12 @@ if (!function_exists('get_sidebar_menu')) {
                     'icon' => 'fas fa-check-double',
                     'url' => '/guru/jurnal-pkl',
                     'active' => ['guru/jurnal-pkl']
+                ],
+                [
+                    'title' => 'Absensi PKL',
+                    'icon' => 'fas fa-clipboard-check',
+                    'url' => '/guru/absensi-pkl',
+                    'active' => ['guru/absensi-pkl']
                 ],
                 [
                     'title' => 'Laporan',
@@ -359,6 +369,12 @@ if (!function_exists('get_sidebar_menu')) {
                     'active' => ['siswa/jurnal-pkl']
                 ],
                 [
+                    'title' => 'Absensi PKL',
+                    'icon' => 'fas fa-calendar-check',
+                    'url' => '/siswa/absensi-pkl',
+                    'active' => ['siswa/absensi-pkl']
+                ],
+                [
                     'title' => 'Pengajuan Izin',
                     'icon' => 'fas fa-file-medical',
                     'url' => '/siswa/izin'
@@ -399,6 +415,7 @@ if (!function_exists('get_status_badge')) {
             'izin' => 'bg-blue-100 text-blue-800',
             'sakit' => 'bg-yellow-100 text-yellow-800',
             'alpa' => 'bg-red-100 text-red-800',
+            'dispen' => 'bg-purple-100 text-purple-800',
         ];
 
         $class = $badges[$status] ?? 'bg-gray-100 text-gray-800';

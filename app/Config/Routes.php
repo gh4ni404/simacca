@@ -193,6 +193,11 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     // Arsip Jurnal PKL
     $routes->get('jurnal-pkl-archive', 'Admin\JurnalPklArchiveController::index', ['filter' => 'role:admin']);
 
+    // Absensi PKL
+    $routes->get('absensi-pkl', 'Admin\AbsensiPklController::index', ['filter' => 'role:admin']);
+    $routes->get('absensi-pkl/detail/(:num)', 'Admin\AbsensiPklController::show/$1', ['filter' => 'role:admin']);
+    $routes->get('absensi-pkl/rekap/(:num)', 'Admin\AbsensiPklController::rekap/$1', ['filter' => 'role:admin']);
+
     // Laporan
     $routes->get('laporan/absensi', 'Admin\LaporanController::absensi', ['filter' => 'role:admin']);
     $routes->get('laporan/absensi-detail', 'Admin\LaporanController::absensiDetail', ['filter' => 'role:admin']);
@@ -242,6 +247,16 @@ $routes->group('guru', ['filter' => 'role:guru_mapel,wakakur'], function ($route
     $routes->post('jurnal-pkl/verify/(:num)', 'Guru\JurnalPklController::verify/$1');
     $routes->post('jurnal-pkl/batal-verifikasi/(:num)', 'Guru\JurnalPklController::cancelVerification/$1');
     $routes->get('jurnal-pkl/detail/(:num)', 'Guru\JurnalPklController::detail/$1');
+
+    // Absensi PKL (Pembimbing)
+    $routes->get('absensi-pkl', 'Guru\AbsensiPklController::index');
+    $routes->get('absensi-pkl/tambah', 'Guru\AbsensiPklController::create');
+    $routes->post('absensi-pkl/simpan', 'Guru\AbsensiPklController::store');
+    $routes->get('absensi-pkl/show/(:num)', 'Guru\AbsensiPklController::show/$1');
+    $routes->get('absensi-pkl/edit/(:num)', 'Guru\AbsensiPklController::edit/$1');
+    $routes->post('absensi-pkl/update/(:num)', 'Guru\AbsensiPklController::update/$1');
+    $routes->get('absensi-pkl/hapus/(:num)', 'Guru\AbsensiPklController::delete/$1');
+    $routes->get('absensi-pkl/get-siswa-by-pembimbing', 'Guru\AbsensiPklController::getSiswaByPembimbing');
 
     // Absensi Guru (Self Check-in/Check-out)
     $routes->get('absensi-guru', 'Guru\AbsensiGuruController::index', ['as' => 'guru.absensi_guru']);
@@ -309,6 +324,10 @@ $routes->group('siswa', ['filter' => 'role:siswa'], function ($routes) {
     $routes->get('jurnal-pkl/hapus/(:num)', 'Siswa\JurnalPklController::delete/$1');
     $routes->get('jurnal-pkl/detail/(:num)/(:num)', 'Siswa\JurnalPklController::detail/$1/$2');
     $routes->get('jurnal-pkl/cetak/(:num)/(:num)', 'Siswa\JurnalPklController::print/$1/$2');
+
+    // Absensi PKL (Siswa)
+    $routes->get('absensi-pkl', 'Siswa\AbsensiPklController::index');
+    $routes->get('absensi-pkl/detail/(:num)', 'Siswa\AbsensiPklController::detail/$1');
 });
 
 // Instruktur PKL Routes
