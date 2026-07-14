@@ -42,15 +42,13 @@ class PklProgressModel extends Model
 
     public function getByTanggal($siswaId, string $tanggal)
     {
-        $db = \Config\Database::connect();
-        $sql = "SELECT pp.*, pt.judul AS nama_task, pt.siswa_id,
-                       pc.nama AS kategori_nama
-                FROM pkl_progress pp
-                JOIN pkl_tasks pt ON pt.id = pp.task_id
-                LEFT JOIN pkl_categories pc ON pc.id = pt.kategori_id
-                WHERE pt.siswa_id = ? AND pp.tanggal = ? AND pp.deleted_at IS NULL AND pt.deleted_at IS NULL
-                ORDER BY pp.created_at ASC";
-        return $db->query($sql, [$siswaId, $tanggal])->getResultArray();
+        return $this->select('pkl_progress.*, pkl_tasks.judul AS nama_task, pkl_tasks.siswa_id, pkl_categories.nama AS kategori_nama')
+            ->join('pkl_tasks', 'pkl_tasks.id = pkl_progress.task_id')
+            ->join('pkl_categories', 'pkl_categories.id = pkl_tasks.kategori_id', 'left')
+            ->where('pkl_tasks.siswa_id', $siswaId)
+            ->where('pkl_progress.tanggal', $tanggal)
+            ->orderBy('pkl_progress.created_at', 'ASC')
+            ->findAll(); // Mengembalikan data dalam bentuk array (sesuai setelan returnType model)
     }
 
     public function getTodayProgress($siswaId)

@@ -60,6 +60,29 @@ class PklTaskModel extends Model
             ->findAll();
     }
 
+    public function getAllWithSiswa(?string $search = null, ?string $status = null): array
+    {
+        $this->select('pkl_tasks.*, s.nama_lengkap, s.nis, k.nama_kelas, pc.nama AS kategori_nama')
+            ->join('siswa s', 's.id = pkl_tasks.siswa_id')
+            ->join('kelas k', 'k.id = s.kelas_id', 'left')
+            ->join('pkl_categories pc', 'pc.id = pkl_tasks.kategori_id', 'left')
+            ->orderBy('pkl_tasks.created_at', 'DESC');
+
+        if ($search) {
+            $this->groupStart()
+                ->like('s.nama_lengkap', $search)
+                ->orLike('s.nis', $search)
+                ->orLike('pkl_tasks.judul', $search)
+                ->groupEnd();
+        }
+
+        if ($status) {
+            $this->where('pkl_tasks.status', $status);
+        }
+
+        return $this->findAll();
+    }
+
     public function countProgress($taskId)
     {
         $db = \Config\Database::connect();

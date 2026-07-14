@@ -171,6 +171,10 @@ class PklService extends BaseService
                 return $this->error('Progress tidak ditemukan', 404);
             }
 
+            if ($progress['status'] === 'approved') {
+                return $this->error('Progress yang sudah disetujui tidak dapat dihapus');
+            }
+
             if (!empty($progress['foto'])) {
                 $fotoPath = WRITEPATH . 'uploads/pkl_progress/' . $progress['foto'];
                 if (file_exists($fotoPath)) {

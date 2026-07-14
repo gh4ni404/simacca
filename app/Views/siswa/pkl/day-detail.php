@@ -105,6 +105,15 @@
                             <p class="text-sm text-purple-800 mt-1"><?= esc($p['catatan_instruktur']) ?></p>
                         </div>
                         <?php endif; ?>
+
+                        <?php if ($p['status'] !== 'approved'): ?>
+                        <div class="mt-3 flex gap-2">
+                            <a href="<?= base_url('siswa/jurnal-pkl/edit-progress/' . $p['id']); ?>"
+                               class="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-xs font-medium">
+                                <i class="fas fa-edit mr-1"></i>Edit
+                            </a>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>

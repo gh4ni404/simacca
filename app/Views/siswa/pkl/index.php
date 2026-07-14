@@ -171,12 +171,14 @@
                             </button>
                         </form>
                         <?php endif; ?>
+                        <?php if ($p['status'] !== 'approved'): ?>
                         <a href="<?= base_url('siswa/jurnal-pkl/hapus-progress/' . $p['id']); ?>"
                            onclick="return confirm('Yakin ingin menghapus progress ini?')"
                            title="Hapus"
                            class="px-2 py-1 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 text-xs transition-colors">
                             <i class="fas fa-trash"></i>
                         </a>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -304,7 +306,7 @@
                 Jurnal Kegiatan PKL
             </a>
             <?php if (!empty($tasks)): ?>
-            <a href="<?= base_url('siswa/jurnal-pkl/cetak-catatan/' . $tasks[0]['id']); ?>"
+            <a href="<?= base_url('siswa/jurnal-pkl/cetak-catatan/' . implode('-', array_column($tasks, 'id'))); ?>"
                target="_blank"
                class="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-sm font-medium">
                 <i class="fas fa-clipboard mr-2"></i>

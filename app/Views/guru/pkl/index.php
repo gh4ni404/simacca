@@ -121,7 +121,7 @@
             </button>
 
             <!-- Accordion Content -->
-            <div class="accordion-content border-t border-gray-100 hidden">
+            <div class="accordion-content border-t border-gray-100 <?= $defaultOpen === 'true' ? '' : 'hidden' ?>">
                 <div class="divide-y divide-gray-100">
                     <?php foreach ($student['progress'] as $p):
                         $dateObj = new DateTime($p['tanggal']);

@@ -193,6 +193,13 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     // Arsip Jurnal PKL (Task-Oriented)
     $routes->get('jurnal-pkl-archive', 'Admin\PklArchiveController::index', ['filter' => 'role:admin']);
 
+    // Master Task PKL
+    $routes->get('pkl-task', 'Admin\PklTaskController::index', ['filter' => 'role:admin']);
+    $routes->post('pkl-task/nonaktifkan/(:num)', 'Admin\PklTaskController::nonaktifkan/$1', ['filter' => 'role:admin']);
+    $routes->post('pkl-task/aktifkan/(:num)', 'Admin\PklTaskController::aktifkan/$1', ['filter' => 'role:admin']);
+    $routes->post('pkl-task/hapus/(:num)', 'Admin\PklTaskController::hapus/$1', ['filter' => 'role:admin']);
+    $routes->post('pkl-task/bulk-action', 'Admin\PklTaskController::bulkAction', ['filter' => 'role:admin']);
+
     // Kategori PKL
     $routes->get('pkl-categories', 'Admin\PklCategoryController::index', ['filter' => 'role:admin']);
     $routes->post('pkl-categories/simpan', 'Admin\PklCategoryController::store', ['filter' => 'role:admin']);
@@ -328,9 +335,11 @@ $routes->group('siswa', ['filter' => 'role:siswa'], function ($routes) {
     $routes->get('jurnal-pkl/task/(:num)', 'Siswa\PklController::taskDetail/$1');
     $routes->get('jurnal-pkl/hari/(:any)', 'Siswa\PklController::dayDetail/$1');
     $routes->post('jurnal-pkl/kirim/(:num)', 'Siswa\PklController::submitProgress/$1');
+    $routes->get('jurnal-pkl/edit-progress/(:num)', 'Siswa\PklController::editProgress/$1');
+    $routes->post('jurnal-pkl/update-progress/(:num)', 'Siswa\PklController::updateProgressData/$1');
     $routes->get('jurnal-pkl/hapus-progress/(:num)', 'Siswa\PklController::deleteProgress/$1');
     $routes->get('jurnal-pkl/cetak-jurnal/(:num)/(:num)', 'Siswa\PklController::printJurnal/$1/$2');
-    $routes->get('jurnal-pkl/cetak-catatan/(:num)', 'Siswa\PklController::printCatatan/$1');
+    $routes->get('jurnal-pkl/cetak-catatan/(:any)', 'Siswa\PklController::printCatatan/$1');
 
     // Absensi PKL (Siswa)
     $routes->get('absensi-pkl', 'Siswa\AbsensiPklController::index');

@@ -145,11 +145,13 @@
                                 </button>
                             </form>
                             <?php endif; ?>
+                            <?php if ($p['status'] !== 'approved'): ?>
                             <a href="<?= base_url('siswa/jurnal-pkl/hapus-progress/' . $p['id']); ?>"
                                onclick="return confirm('Yakin hapus?')"
                                class="inline-flex items-center px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 text-xs font-medium">
                                 <i class="fas fa-trash mr-1"></i>Hapus
                             </a>
+                            <?php endif; ?>
                         </div>
                         <?php endif; ?>
                     </div>

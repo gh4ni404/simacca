@@ -181,6 +181,10 @@ if (!function_exists('get_sidebar_menu')) {
                             'title' => 'Kategori PKL',
                             'url' => '/admin/pkl-categories',
                         ],
+                        [
+                            'title' => 'Master Task PKL',
+                            'url' => '/admin/pkl-task',
+                        ],
                     ]
                 ],
                 [
