@@ -1,0 +1,323 @@
+<?= $this->extend(get_device_layout()) ?>
+
+<?= $this->section('content') ?>
+<div class="p-4 md:p-6">
+    <div class="mb-6">
+        <div class="flex items-center">
+            <a href="<?= base_url('siswa/jurnal-pkl'); ?>" class="mr-4 text-gray-600 hover:text-gray-800">
+                <i class="fas fa-arrow-left text-xl"></i>
+            </a>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">
+                    <i class="fas fa-plus-circle mr-2 text-blue-600"></i>
+                    Tambah Aktivitas PKL
+                </h1>
+                <p class="text-gray-600 mt-1">Catat kegiatan PKL Anda hari ini</p>
+            </div>
+        </div>
+    </div>
+
+    <?= view('components/alerts') ?>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-lg shadow">
+                <div class="p-6">
+                    <form action="<?= base_url('siswa/jurnal-pkl/simpan'); ?>" method="POST" enctype="multipart/form-data" id="pklForm">
+                        <?= csrf_field(); ?>
+
+                        <!-- Tanggal -->
+                        <div class="mb-5">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-calendar-alt mr-2 text-blue-500"></i>
+                                Tanggal
+                            </label>
+                            <input type="date"
+                                   name="tanggal"
+                                   value="<?= old('tanggal', date('Y-m-d')); ?>"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50">
+                            <p class="text-xs text-gray-400 mt-1">Tanggal otomatis hari ini</p>
+                        </div>
+
+                        <!-- Pilih Task -->
+                        <div class="mb-5">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-tasks mr-2 text-purple-500"></i>
+                                Pilih Task <span class="text-red-500">*</span>
+                            </label>
+                            <div class="flex gap-2">
+                                <select name="task_id" id="taskSelect"
+                                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent <?= old('task_choice') === 'new' ? 'hidden' : '' ?>">
+                                    <option value="">-- Pilih Task --</option>
+                                    <?php if (!empty($tasks)): ?>
+                                    <optgroup label="Task Aktif">
+                                        <?php foreach ($tasks as $task): ?>
+                                        <option value="<?= $task['id'] ?>" <?= old('task_id') == $task['id'] ? 'selected' : '' ?>>
+                                            <?= esc($task['judul']) ?>
+                                        </option>
+                                        <?php endforeach; ?>
+                                    </optgroup>
+                                    <?php endif; ?>
+                                    <?php if (!empty($taskTemplates)): ?>
+                                    <optgroup label="Task Dari Instruktur">
+                                        <?php foreach ($taskTemplates as $tpl): ?>
+                                        <option value="tpl:<?= $tpl['id'] ?>" <?= old('task_id') == 'tpl:' . $tpl['id'] ? 'selected' : '' ?>>
+                                            <?= esc($tpl['judul']) ?><?= !empty($tpl['kategori_nama']) ? ' (' . esc($tpl['kategori_nama']) . ')' : '' ?>
+                                        </option>
+                                        <?php endforeach; ?>
+                                    </optgroup>
+                                    <?php endif; ?>
+                                </select>
+                            </div>
+                            <input type="hidden" name="task_choice" id="taskChoice" value="<?= old('task_choice', 'existing') ?>">
+                        </div>
+
+                        <!-- Task Baru (Hidden by default) -->
+                        <div id="newTaskSection" class="mb-5 <?= old('task_choice') === 'new' ? '' : 'hidden' ?>">
+                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                <h3 class="text-sm font-semibold text-gray-700 mb-3">
+                                    <i class="fas fa-plus-circle mr-1 text-green-500"></i>
+                                    Task Baru
+                                </h3>
+                                <div class="space-y-3">
+                                    <div>
+                                        <input type="text"
+                                               name="judul"
+                                               value="<?= old('judul'); ?>"
+                                               placeholder="Nama task (contoh: Desain Brosur)"
+                                               maxlength="255"
+                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                                    </div>
+                                    <div>
+                                        <select name="kategori_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                                            <option value="">-- Kategori (opsional) --</option>
+                                            <?php foreach ($categories as $cat): ?>
+                                            <option value="<?= $cat['id'] ?>" <?= old('kategori_id') == $cat['id'] ? 'selected' : '' ?>>
+                                                <?= esc($cat['nama']) ?>
+                                            </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <input type="text" name="estimasi"
+                                               value="<?= old('estimasi'); ?>"
+                                               placeholder="Contoh: 3 hari, 1 minggu"
+                                               maxlength="30"
+                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                                    </div>
+                                </div>
+                                <button type="button" onclick="switchToExisting()"
+                                        class="mt-3 text-xs text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-arrow-left mr-1"></i>Pilih task yang sudah ada
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Toggle New/Existing -->
+                        <div id="toggleSection" class="mb-5 <?= old('task_choice') === 'new' ? 'hidden' : '' ?>">
+                            <button type="button" onclick="switchToNew()"
+                                    class="inline-flex items-center px-3 py-1.5 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-xs font-medium">
+                                <i class="fas fa-plus mr-1"></i>
+                                Task Baru
+                            </button>
+                        </div>
+
+                        <!-- Deskripsi -->
+                        <div class="mb-5">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-align-left mr-2 text-green-500"></i>
+                                Aktivitas Hari Ini <span class="text-red-500">*</span>
+                            </label>
+                            <textarea name="deskripsi"
+                                      rows="4"
+                                      required
+                                      minlength="3"
+                                      placeholder="Hari ini saya..."
+                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"><?= old('deskripsi'); ?></textarea>
+                            <p class="text-xs text-gray-400 mt-1">Minimal 3 karakter</p>
+                        </div>
+
+                        <!-- Foto -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-camera mr-2 text-yellow-500"></i>
+                                Foto Dokumentasi <span class="text-gray-400 font-normal">(opsional)</span>
+                            </label>
+                            <div id="uploadArea"
+                                 class="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer"
+                                 onclick="document.getElementById('foto').click()">
+                                <div class="space-y-1 text-center pointer-events-none">
+                                    <svg class="mx-auto h-10 w-10 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <div class="flex text-sm text-gray-600 justify-center">
+                                        <span class="font-medium text-blue-600">Klik untuk upload foto</span>
+                                        <span class="pl-1">atau drag & drop</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500">JPG, JPEG, PNG atau WebP (Max. 5MB)</p>
+                                    <input id="foto" name="foto" type="file" accept=".jpg,.jpeg,.png,.webp" class="sr-only" onchange="previewImage(this)">
+                                    <div id="previewContainer" class="mt-3 hidden pointer-events-auto">
+                                        <img id="preview" class="mx-auto max-h-40 rounded-lg shadow">
+                                        <button type="button" onclick="removeImage(); event.stopPropagation();" class="mt-2 text-xs text-red-600 hover:text-red-800 pointer-events-auto">
+                                            <i class="fas fa-times mr-1"></i>Hapus foto
+                                        </button>
+                                    </div>
+                                    <p id="fileName" class="text-sm text-blue-600 font-medium mt-2"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="flex gap-3">
+                            <button type="submit" id="submitBtn"
+                                    class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2">
+                                <i class="fas fa-save" id="submitIcon"></i>
+                                <span id="submitText">Simpan</span>
+                            </button>
+                            <a href="<?= base_url('siswa/jurnal-pkl'); ?>"
+                               class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium">
+                                <i class="fas fa-times mr-2"></i>Batal
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow p-5 mb-4">
+                <h3 class="text-sm font-semibold text-gray-800 mb-3">
+                    <i class="fas fa-info-circle mr-2 text-blue-500"></i>
+                    Panduan
+                </h3>
+                <div class="space-y-2 text-xs text-gray-600">
+                    <div class="flex items-start gap-2">
+                        <span class="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">1</span>
+                        <p>Pilih task yang sedang dikerjakan</p>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">2</span>
+                        <p>Buat task baru jika belum ada</p>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">3</span>
+                        <p>Tuliskan aktivitas hari ini</p>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">4</span>
+                        <p>Upload foto (opsional)</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg shadow p-5 text-white">
+                <h3 class="text-sm font-semibold mb-2">
+                    <i class="fas fa-lightbulb mr-2"></i>Tips
+                </h3>
+                <ul class="text-xs space-y-1.5 opacity-90">
+                    <li><i class="fas fa-check mr-1"></i>Isi setiap hari setelah selesai kegiatan</li>
+                    <li><i class="fas fa-check mr-1"></i>Deskripsikan aktivitas dengan jelas</li>
+                    <li><i class="fas fa-check mr-1"></i>Anda bisa mengisi lebih dari 1 aktivitas per hari</li>
+                    <li><i class="fas fa-check mr-1"></i>1 task bisa berlangsung beberapa hari</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function switchToNew() {
+    document.getElementById('taskSelect').classList.add('hidden');
+    document.getElementById('toggleSection').classList.add('hidden');
+    document.getElementById('newTaskSection').classList.remove('hidden');
+    document.getElementById('taskChoice').value = 'new';
+}
+
+function switchToExisting() {
+    document.getElementById('newTaskSection').classList.add('hidden');
+    document.getElementById('taskSelect').classList.remove('hidden');
+    document.getElementById('toggleSection').classList.remove('hidden');
+    document.getElementById('taskChoice').value = 'existing';
+}
+
+// Handle template selection (tpl:ID)
+document.getElementById('taskSelect').addEventListener('change', function() {
+    const val = this.value;
+    if (val.startsWith('tpl:')) {
+        document.getElementById('taskChoice').value = 'template';
+    } else {
+        document.getElementById('taskChoice').value = 'existing';
+    }
+});
+
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+        if (fileSize > 5) {
+            alert('Ukuran file terlalu besar! Maksimal 5MB');
+            input.value = '';
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('preview').src = e.target.result;
+            document.getElementById('previewContainer').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+        document.getElementById('fileName').textContent = file.name + ' (' + fileSize + ' MB)';
+        document.getElementById('uploadArea').classList.add('border-green-400', 'bg-green-50/50');
+        document.getElementById('uploadArea').classList.remove('border-gray-300');
+    }
+}
+
+function removeImage() {
+    document.getElementById('foto').value = '';
+    document.getElementById('previewContainer').classList.add('hidden');
+    document.getElementById('fileName').textContent = '';
+    document.getElementById('uploadArea').classList.remove('border-green-400', 'bg-green-50/50');
+    document.getElementById('uploadArea').classList.add('border-gray-300');
+}
+
+document.getElementById('pklForm').addEventListener('submit', function(e) {
+    const choice = document.getElementById('taskChoice').value;
+    if (choice === 'new') {
+        const judul = document.querySelector('input[name="judul"]').value.trim();
+        if (judul.length < 3) {
+            e.preventDefault();
+            alert('Nama task harus minimal 3 karakter!');
+            return false;
+        }
+    } else if (choice === 'template') {
+        const val = document.getElementById('taskSelect').value;
+        if (!val.startsWith('tpl:')) {
+            e.preventDefault();
+            alert('Pilih template task terlebih dahulu!');
+            return false;
+        }
+    } else {
+        const taskId = document.getElementById('taskSelect').value;
+        if (!taskId) {
+            e.preventDefault();
+            alert('Pilih task terlebih dahulu!');
+            return false;
+        }
+    }
+    const deskripsi = document.querySelector('textarea[name="deskripsi"]').value.trim();
+    if (deskripsi.length < 3) {
+        e.preventDefault();
+        alert('Deskripsi harus minimal 3 karakter!');
+        return false;
+    }
+    if (!confirm('Simpan aktivitas ini?')) {
+        e.preventDefault();
+        return false;
+    }
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.classList.add('bg-blue-400', 'cursor-not-allowed');
+    document.getElementById('submitIcon').classList.add('fa-spinner', 'fa-spin');
+    document.getElementById('submitText').textContent = 'Menyimpan...';
+});
+</script>
+<?= $this->endSection() ?>

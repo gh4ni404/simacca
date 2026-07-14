@@ -1,0 +1,461 @@
+<?php
+
+namespace App\Controllers\Siswa;
+
+use App\Controllers\BaseController;
+use App\Services\PklService;
+use App\Models\SiswaModel;
+use App\Models\PklTaskTemplateModel;
+use App\Models\SiswaPklModel;
+
+class PklController extends BaseController
+{
+    protected $siswaModel;
+    protected $pklService;
+
+    public function __construct()
+    {
+        $this->siswaModel = new SiswaModel();
+        $this->pklService = new PklService();
+    }
+
+    private function getSiswa()
+    {
+        $userId = session()->get('user_id');
+        $siswa = $this->siswaModel->getByUserId($userId);
+        if (!$siswa) {
+            return null;
+        }
+        return $siswa;
+    }
+
+    public function index()
+    {
+        $siswa = $this->getSiswa();
+        if (!$siswa) {
+            return redirect()->to('/access-denied')->with('error', 'Data siswa tidak ditemukan');
+        }
+
+        $todayResult = $this->pklService->getTodayProgress($siswa['id']);
+        $todayProgress = $todayResult['success'] ? $todayResult['data'] : [];
+
+        $timelineResult = $this->pklService->getTimeline($siswa['id']);
+        $timeline = $timelineResult['success'] ? $timelineResult['data'] : [];
+
+        $statsResult = $this->pklService->getStatistics($siswa['id']);
+        $stats = $statsResult['success'] ? $statsResult['data'] : [
+            'total_tasks' => 0, 'total_progress' => 0,
+            'draft' => 0, 'submitted' => 0, 'approved' => 0, 'revision' => 0,
+        ];
+
+        $tasksResult = $this->pklService->getActiveTasksBySiswa($siswa['id']);
+        $tasks = $tasksResult['success'] ? $tasksResult['data'] : [];
+
+        $data = [
+            'title' => 'Jurnal PKL',
+            'siswa' => $siswa,
+            'todayProgress' => $todayProgress,
+            'timeline' => $timeline,
+            'stats' => $stats,
+            'tasks' => $tasks,
+        ];
+
+        return view('siswa/pkl/index', $data);
+    }
+
+    public function create()
+    {
+        $siswa = $this->getSiswa();
+        if (!$siswa) {
+            return redirect()->to('/access-denied')->with('error', 'Data siswa tidak ditemukan');
+        }
+
+        $tasksResult = $this->pklService->getActiveTasksBySiswa($siswa['id']);
+        $tasks = $tasksResult['success'] ? $tasksResult['data'] : [];
+
+        $categoriesResult = $this->pklService->getCategories();
+        $categories = $categoriesResult['success'] ? $categoriesResult['data'] : [];
+
+        // Fetch task templates from instruktur for this siswa's tempat_pkl
+        $taskTemplates = [];
+        $siswaPklModel = new SiswaPklModel();
+        $siswaPkl = $siswaPklModel->getBySiswaAndTahun($siswa['id'], $siswa['tahun_ajaran']);
+        if ($siswaPkl && !empty($siswaPkl['tempat_pkl_id'])) {
+            $templateModel = new PklTaskTemplateModel();
+            $taskTemplates = $templateModel->getByTempatPkl($siswaPkl['tempat_pkl_id']);
+        }
+
+        $data = [
+            'title' => 'Tambah Aktivitas PKL',
+            'siswa' => $siswa,
+            'tasks' => $tasks,
+            'categories' => $categories,
+            'taskTemplates' => $taskTemplates,
+        ];
+
+        return view('siswa/pkl/create', $data);
+    }
+
+    public function store()
+    {
+        helper('security');
+
+        $siswa = $this->getSiswa();
+        if (!$siswa) {
+            session()->setFlashdata('error', 'Data siswa tidak ditemukan');
+            return redirect()->back();
+        }
+
+        $taskChoice = $this->request->getPost('task_choice');
+
+        if ($taskChoice === 'new') {
+            $rules = [
+                'judul' => 'required|min_length[3]|max_length[255]',
+            ];
+            if (!$this->validate($rules)) {
+                $errors = $this->validator->getErrors();
+                $errorList = '<ul class="list-disc ml-4">';
+                foreach ($errors as $error) {
+                    $errorList .= '<li>' . $error . '</li>';
+                }
+                $errorList .= '</ul>';
+                session()->setFlashdata('error', 'Lengkapi datanya: ' . $errorList);
+                return redirect()->back()->withInput();
+            }
+
+            $taskResult = $this->pklService->createTask([
+                'siswa_id' => $siswa['id'],
+                'judul' => $this->request->getPost('judul'),
+                'kategori_id' => $this->request->getPost('kategori_id') ?: null,
+                'estimasi' => $this->request->getPost('estimasi') ?: null,
+                'status' => 'active',
+            ]);
+
+            if (!$taskResult['success']) {
+                session()->setFlashdata('error', $taskResult['message']);
+                return redirect()->back()->withInput();
+            }
+
+            $taskId = $taskResult['data']['id'];
+        } elseif ($taskChoice === 'template') {
+            $taskVal = $this->request->getPost('task_id');
+            if (!$taskVal || !str_starts_with($taskVal, 'tpl:')) {
+                session()->setFlashdata('error', 'Pilih template task terlebih dahulu');
+                return redirect()->back()->withInput();
+            }
+            $templateId = (int) substr($taskVal, 4);
+
+            // Verify template belongs to siswa's tempat_pkl
+            $templateModel = new PklTaskTemplateModel();
+            $template = $templateModel->find($templateId);
+            if (!$template) {
+                session()->setFlashdata('error', 'Template tidak valid');
+                return redirect()->back()->withInput();
+            }
+
+            $siswaPklModel = new SiswaPklModel();
+            $siswaPkl = $siswaPklModel->getBySiswaAndTahun($siswa['id'], $siswa['tahun_ajaran']);
+            if (!$siswaPkl || $siswaPkl['tempat_pkl_id'] != $template['tempat_pkl_id']) {
+                session()->setFlashdata('error', 'Template tidak valid untuk tempat PKL Anda');
+                return redirect()->back()->withInput();
+            }
+
+            $taskResult = $this->pklService->createTask([
+                'siswa_id' => $siswa['id'],
+                'judul' => $template['judul'],
+                'kategori_id' => $template['kategori_id'],
+                'estimasi' => $template['estimasi'],
+                'status' => 'active',
+            ]);
+
+            if (!$taskResult['success']) {
+                session()->setFlashdata('error', $taskResult['message']);
+                return redirect()->back()->withInput();
+            }
+
+            $taskId = $taskResult['data']['id'];
+        } else {
+            $taskId = (int) $this->request->getPost('task_id');
+            if (!$taskId) {
+                session()->setFlashdata('error', 'Pilih task terlebih dahulu');
+                return redirect()->back()->withInput();
+            }
+
+            $taskCheck = $this->pklService->getTaskById($taskId);
+            if (!$taskCheck['success'] || $taskCheck['data']['siswa_id'] != $siswa['id']) {
+                session()->setFlashdata('error', 'Task tidak valid');
+                return redirect()->back()->withInput();
+            }
+        }
+
+        $rules = [
+            'deskripsi' => 'required|min_length[3]',
+        ];
+        if (!$this->validate($rules)) {
+            $errors = $this->validator->getErrors();
+            $errorList = '<ul class="list-disc ml-4">';
+            foreach ($errors as $error) {
+                $errorList .= '<li>' . $error . '</li>';
+            }
+            $errorList .= '</ul>';
+            session()->setFlashdata('error', 'Lengkapi datanya: ' . $errorList);
+            return redirect()->back()->withInput();
+        }
+
+        $uploadPath = WRITEPATH . 'uploads/pkl_progress';
+        if (!is_dir($uploadPath)) {
+            mkdir($uploadPath, 0755, true);
+        }
+
+        $foto = $this->request->getFile('foto');
+        $fotoName = null;
+
+        if ($foto && $foto->isValid() && !$foto->hasMoved()) {
+            $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            $validation = validate_file_upload($foto, $allowedTypes, 5242880);
+
+            if (!$validation['valid']) {
+                session()->setFlashdata('error', $validation['error']);
+                return redirect()->back()->withInput();
+            }
+
+            try {
+                $fotoName = 'pkl_progress_' . time() . '_' . uniqid() . '.' . $foto->getExtension();
+                $foto->move($uploadPath, $fotoName);
+
+                helper('image');
+                $filePath = $uploadPath . '/' . $fotoName;
+                optimize_jurnal_pkl_photo($filePath, $filePath);
+            } catch (\Exception $e) {
+                log_message('error', '[PKL PROGRESS] File upload failed: ' . $e->getMessage());
+                session()->setFlashdata('error', 'Upload foto gagal');
+                return redirect()->back()->withInput();
+            }
+        }
+
+        $progressData = [
+            'task_id' => $taskId,
+            'tanggal' => $this->request->getPost('tanggal') ?: date('Y-m-d'),
+            'deskripsi' => $this->request->getPost('deskripsi'),
+            'foto' => $fotoName,
+            'status' => 'draft',
+        ];
+
+        $result = $this->pklService->createProgress($progressData);
+
+        if ($result['success']) {
+            session()->setFlashdata('success', 'Aktivitas berhasil dicatat');
+            return redirect()->to('/siswa/jurnal-pkl');
+        } else {
+            if ($fotoName && file_exists($uploadPath . '/' . $fotoName)) {
+                unlink($uploadPath . '/' . $fotoName);
+            }
+            session()->setFlashdata('error', $result['message']);
+            return redirect()->back()->withInput();
+        }
+    }
+
+    public function taskDetail($id)
+    {
+        $siswa = $this->getSiswa();
+        if (!$siswa) {
+            return redirect()->to('/access-denied')->with('error', 'Data siswa tidak ditemukan');
+        }
+
+        $taskResult = $this->pklService->getTaskById($id);
+        if (!$taskResult['success'] || $taskResult['data']['siswa_id'] != $siswa['id']) {
+            session()->setFlashdata('error', 'Task tidak ditemukan');
+            return redirect()->to('/siswa/jurnal-pkl');
+        }
+
+        $progressResult = $this->pklService->getProgressByTask($id);
+        $progress = $progressResult['success'] ? $progressResult['data'] : [];
+
+        $data = [
+            'title' => 'Detail Task',
+            'siswa' => $siswa,
+            'task' => $taskResult['data'],
+            'progress' => $progress,
+        ];
+
+        return view('siswa/pkl/task-detail', $data);
+    }
+
+    public function dayDetail($tanggal)
+    {
+        $siswa = $this->getSiswa();
+        if (!$siswa) {
+            return redirect()->to('/access-denied')->with('error', 'Data siswa tidak ditemukan');
+        }
+
+        $result = $this->pklService->getProgressByTanggal($siswa['id'], $tanggal);
+        $progress = $result['success'] ? $result['data'] : [];
+
+        $data = [
+            'title' => 'Detail Hari',
+            'siswa' => $siswa,
+            'tanggal' => $tanggal,
+            'progress' => $progress,
+        ];
+
+        return view('siswa/pkl/day-detail', $data);
+    }
+
+    public function submitProgress($id)
+    {
+        $siswa = $this->getSiswa();
+        if (!$siswa) {
+            session()->setFlashdata('error', 'Data siswa tidak ditemukan');
+            return redirect()->to('/siswa/jurnal-pkl');
+        }
+
+        $progressResult = $this->pklService->getProgressById($id);
+        if (!$progressResult['success'] || $progressResult['data']['siswa_id'] != $siswa['id']) {
+            session()->setFlashdata('error', 'Progress tidak ditemukan');
+            return redirect()->to('/siswa/jurnal-pkl');
+        }
+
+        if ($progressResult['data']['status'] !== 'draft') {
+            session()->setFlashdata('error', 'Hanya progress draft yang bisa dikirim');
+            return redirect()->to('/siswa/jurnal-pkl');
+        }
+
+        $result = $this->pklService->updateProgress($id, ['status' => 'submitted']);
+
+        if ($result['success']) {
+            session()->setFlashdata('success', 'Progress berhasil dikirim untuk diverifikasi');
+        } else {
+            session()->setFlashdata('error', $result['message']);
+        }
+
+        return redirect()->to('/siswa/jurnal-pkl');
+    }
+
+    public function deleteProgress($id)
+    {
+        $siswa = $this->getSiswa();
+        if (!$siswa) {
+            session()->setFlashdata('error', 'Data siswa tidak ditemukan');
+            return redirect()->to('/siswa/jurnal-pkl');
+        }
+
+        $progressResult = $this->pklService->getProgressById($id);
+        if (!$progressResult['success'] || $progressResult['data']['siswa_id'] != $siswa['id']) {
+            session()->setFlashdata('error', 'Progress tidak ditemukan');
+            return redirect()->to('/siswa/jurnal-pkl');
+        }
+
+        $result = $this->pklService->deleteProgress($id);
+
+        if ($result['success']) {
+            session()->setFlashdata('success', 'Progress berhasil dihapus');
+        } else {
+            session()->setFlashdata('error', $result['message']);
+        }
+
+        return redirect()->to('/siswa/jurnal-pkl');
+    }
+
+    public function printJurnal($tahun, $minggu)
+    {
+        $siswa = $this->getSiswa();
+        if (!$siswa) {
+            return redirect()->to('/access-denied')->with('error', 'Data siswa tidak ditemukan');
+        }
+
+        helper('setting');
+        $startDate = get_jurnal_pkl_start_date();
+        $weekBase = $startDate ? get_jurnal_pkl_week_base() : null;
+
+        if ($startDate && $weekBase) {
+            $range = get_week_range($startDate, $minggu);
+            $dateStart = $range['start'];
+            $dateEnd = $range['end'];
+        } else {
+            $d = new \DateTime();
+            $d->setISODate($tahun, $minggu);
+            $dateStart = $d->format('Y-m-d');
+            $d->modify('+6 days');
+            $dateEnd = $d->format('Y-m-d');
+        }
+
+        $jurnalResult = $this->pklService->getJurnalByTanggal($siswa['id'], $dateStart, $dateEnd);
+        $jurnalData = $jurnalResult['success'] ? $jurnalResult['data'] : [];
+
+        $siswaPklModel = new \App\Models\SiswaPklModel();
+        $tempatPklModel = new \App\Models\TempatPklModel();
+        $pembimbingPklModel = new \App\Models\PembimbingPklModel();
+        $instrukturModel = new \App\Models\InstrukturPklModel();
+
+        $siswaPkl = $siswaPklModel->getBySiswaAndTahun($siswa['id'], $siswa['tahun_ajaran']);
+        $tempatPkl = null;
+        $pembimbing = null;
+        $instruktur = null;
+        if ($siswaPkl && !empty($siswaPkl['tempat_pkl_id'])) {
+            $tempatPkl = $tempatPklModel->find($siswaPkl['tempat_pkl_id']);
+            $pembimbing = $pembimbingPklModel->getByTempatPklAndTahun($siswaPkl['tempat_pkl_id'], $siswaPkl['tahun_ajaran']);
+            $instruktur = $instrukturModel->getByTempatPkl($siswaPkl['tempat_pkl_id']);
+        }
+
+        $data = [
+            'title' => 'Cetak Jurnal Kegiatan PKL',
+            'siswa' => $siswa,
+            'jurnalData' => $jurnalData,
+            'tahun' => $tahun,
+            'minggu' => $minggu,
+            'dateStart' => $dateStart,
+            'dateEnd' => $dateEnd,
+            'tempatPkl' => $tempatPkl,
+            'siswaPkl' => $siswaPkl,
+            'pembimbing' => $pembimbing,
+            'instruktur' => $instruktur,
+        ];
+
+        return view('siswa/pkl/print-jurnal', $data);
+    }
+
+    public function printCatatan($taskId)
+    {
+        $siswa = $this->getSiswa();
+        if (!$siswa) {
+            return redirect()->to('/access-denied')->with('error', 'Data siswa tidak ditemukan');
+        }
+
+        $taskResult = $this->pklService->getTaskById($taskId);
+        if (!$taskResult['success'] || $taskResult['data']['siswa_id'] != $siswa['id']) {
+            session()->setFlashdata('error', 'Task tidak ditemukan');
+            return redirect()->to('/siswa/jurnal-pkl');
+        }
+
+        $progressResult = $this->pklService->getProgressByTask($taskId);
+        $progress = $progressResult['success'] ? $progressResult['data'] : [];
+
+        $siswaPklModel = new \App\Models\SiswaPklModel();
+        $tempatPklModel = new \App\Models\TempatPklModel();
+        $pembimbingPklModel = new \App\Models\PembimbingPklModel();
+        $instrukturModel = new \App\Models\InstrukturPklModel();
+
+        $siswaPkl = $siswaPklModel->getBySiswaAndTahun($siswa['id'], $siswa['tahun_ajaran']);
+        $tempatPkl = null;
+        $pembimbing = null;
+        $instruktur = null;
+        if ($siswaPkl && !empty($siswaPkl['tempat_pkl_id'])) {
+            $tempatPkl = $tempatPklModel->find($siswaPkl['tempat_pkl_id']);
+            $pembimbing = $pembimbingPklModel->getByTempatPklAndTahun($siswaPkl['tempat_pkl_id'], $siswaPkl['tahun_ajaran']);
+            $instruktur = $instrukturModel->getByTempatPkl($siswaPkl['tempat_pkl_id']);
+        }
+
+        $data = [
+            'title' => 'Cetak Catatan Kegiatan PKL',
+            'siswa' => $siswa,
+            'task' => $taskResult['data'],
+            'progress' => $progress,
+            'tempatPkl' => $tempatPkl,
+            'siswaPkl' => $siswaPkl,
+            'pembimbing' => $pembimbing,
+            'instruktur' => $instruktur,
+        ];
+
+        return view('siswa/pkl/print-catatan', $data);
+    }
+}

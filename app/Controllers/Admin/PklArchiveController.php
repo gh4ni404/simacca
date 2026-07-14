@@ -3,17 +3,17 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
-use App\Models\JurnalPklModel;
+use App\Models\PklTaskModel;
 use App\Models\SiswaModel;
 
-class JurnalPklArchiveController extends BaseController
+class PklArchiveController extends BaseController
 {
-    protected $jurnalModel;
+    protected $taskModel;
     protected $siswaModel;
 
     public function __construct()
     {
-        $this->jurnalModel = new JurnalPklModel();
+        $this->taskModel = new PklTaskModel();
         $this->siswaModel = new SiswaModel();
 
         if (!session()->get('isLoggedIn') || session()->get('role') !== 'admin') {
@@ -32,12 +32,11 @@ class JurnalPklArchiveController extends BaseController
             $siswaId = (int) $siswaId;
         }
 
-        $summary = $this->jurnalModel->getArchiveSummary($startDate, $endDate, $siswaId, $status);
-        $stats = $this->jurnalModel->getArchiveStats($startDate, $endDate);
-        $weeklyData = $this->jurnalModel->getWeeklyArchive($startDate, $endDate, $siswaId);
-        $byTempatPkl = $this->jurnalModel->getArchiveByTempatPkl($startDate, $endDate);
-        $byPembimbing = $this->jurnalModel->getArchiveByPembimbing($startDate, $endDate);
-        $byKelas = $this->jurnalModel->getArchiveByKelas($startDate, $endDate);
+        $summary = $this->taskModel->getArchiveSummary($startDate, $endDate, $siswaId, $status);
+        $stats = $this->taskModel->getArchiveStats($startDate, $endDate);
+        $byTempatPkl = $this->taskModel->getArchiveByTempatPkl($startDate, $endDate);
+        $byPembimbing = $this->taskModel->getArchiveByPembimbing($startDate, $endDate);
+        $byKelas = $this->taskModel->getArchiveByKelas($startDate, $endDate);
 
         $siswaList = $this->siswaModel
             ->select('siswa.id, siswa.nama_lengkap, siswa.nis, kelas.nama_kelas')
@@ -49,10 +48,8 @@ class JurnalPklArchiveController extends BaseController
             'title' => 'Arsip Jurnal PKL',
             'pageTitle' => 'Arsip Jurnal PKL',
             'pageDescription' => 'Rekapan dan riwayat jurnal PKL seluruh siswa',
-            'user' => $this->getUserData(),
             'summary' => $summary,
             'stats' => $stats,
-            'weeklyData' => $weeklyData,
             'byTempatPkl' => $byTempatPkl,
             'byPembimbing' => $byPembimbing,
             'byKelas' => $byKelas,

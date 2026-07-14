@@ -190,8 +190,14 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('pengaturan/update-jurnal-pkl-start', 'Admin\PengaturanController::updateJurnalPklStart', ['filter' => 'role:admin']);
     $routes->post('pengaturan/update-jurnal-pkl-period', 'Admin\PengaturanController::updateJurnalPklPeriod', ['filter' => 'role:admin']);
 
-    // Arsip Jurnal PKL
-    $routes->get('jurnal-pkl-archive', 'Admin\JurnalPklArchiveController::index', ['filter' => 'role:admin']);
+    // Arsip Jurnal PKL (Task-Oriented)
+    $routes->get('jurnal-pkl-archive', 'Admin\PklArchiveController::index', ['filter' => 'role:admin']);
+
+    // Kategori PKL
+    $routes->get('pkl-categories', 'Admin\PklCategoryController::index', ['filter' => 'role:admin']);
+    $routes->post('pkl-categories/simpan', 'Admin\PklCategoryController::store', ['filter' => 'role:admin']);
+    $routes->post('pkl-categories/update/(:num)', 'Admin\PklCategoryController::update/$1', ['filter' => 'role:admin']);
+    $routes->post('pkl-categories/hapus/(:num)', 'Admin\PklCategoryController::delete/$1', ['filter' => 'role:admin']);
 
     // Absensi PKL
     $routes->get('absensi-pkl', 'Admin\AbsensiPklController::index', ['filter' => 'role:admin']);
@@ -242,11 +248,11 @@ $routes->group('guru', ['filter' => 'role:guru_mapel,wakakur'], function ($route
     $routes->get('laporan', 'Guru\LaporanController::index', ['as' => 'guru.laporan']);
     $routes->get('laporan/print', 'Guru\LaporanController::print');
     
-    // Jurnal PKL (Verifikasi Pembimbing)
-    $routes->get('jurnal-pkl', 'Guru\JurnalPklController::index', ['as' => 'guru.jurnal_pkl']);
-    $routes->post('jurnal-pkl/verify/(:num)', 'Guru\JurnalPklController::verify/$1');
-    $routes->post('jurnal-pkl/batal-verifikasi/(:num)', 'Guru\JurnalPklController::cancelVerification/$1');
-    $routes->get('jurnal-pkl/detail/(:num)', 'Guru\JurnalPklController::detail/$1');
+    // Jurnal PKL (Verifikasi Pembimbing) - Task-Oriented
+    $routes->get('jurnal-pkl', 'Guru\PklController::index', ['as' => 'guru.jurnal_pkl']);
+    $routes->post('jurnal-pkl/verify/(:num)', 'Guru\PklController::verify/$1');
+    $routes->post('jurnal-pkl/batal-verifikasi/(:num)', 'Guru\PklController::cancelVerification/$1');
+    $routes->get('jurnal-pkl/detail/(:num)', 'Guru\PklController::detail/$1');
 
     // Absensi PKL (Pembimbing)
     $routes->get('absensi-pkl', 'Guru\AbsensiPklController::index');
@@ -315,15 +321,16 @@ $routes->group('siswa', ['filter' => 'role:siswa'], function ($routes) {
     $routes->post('profil/update', 'Siswa\ProfilController::update');
     $routes->post('profil/change-password', 'Siswa\ProfilController::changePassword');
 
-    // Jurnal PKL
-    $routes->get('jurnal-pkl', 'Siswa\JurnalPklController::index', ['as' => 'siswa.jurnal_pkl']);
-    $routes->get('jurnal-pkl/tambah', 'Siswa\JurnalPklController::create');
-    $routes->post('jurnal-pkl/simpan', 'Siswa\JurnalPklController::store');
-    $routes->get('jurnal-pkl/edit/(:num)', 'Siswa\JurnalPklController::edit/$1');
-    $routes->post('jurnal-pkl/update/(:num)', 'Siswa\JurnalPklController::update/$1');
-    $routes->get('jurnal-pkl/hapus/(:num)', 'Siswa\JurnalPklController::delete/$1');
-    $routes->get('jurnal-pkl/detail/(:num)/(:num)', 'Siswa\JurnalPklController::detail/$1/$2');
-    $routes->get('jurnal-pkl/cetak/(:num)/(:num)', 'Siswa\JurnalPklController::print/$1/$2');
+    // Jurnal PKL (Task-Oriented)
+    $routes->get('jurnal-pkl', 'Siswa\PklController::index', ['as' => 'siswa.jurnal_pkl']);
+    $routes->get('jurnal-pkl/tambah', 'Siswa\PklController::create');
+    $routes->post('jurnal-pkl/simpan', 'Siswa\PklController::store');
+    $routes->get('jurnal-pkl/task/(:num)', 'Siswa\PklController::taskDetail/$1');
+    $routes->get('jurnal-pkl/hari/(:any)', 'Siswa\PklController::dayDetail/$1');
+    $routes->post('jurnal-pkl/kirim/(:num)', 'Siswa\PklController::submitProgress/$1');
+    $routes->get('jurnal-pkl/hapus-progress/(:num)', 'Siswa\PklController::deleteProgress/$1');
+    $routes->get('jurnal-pkl/cetak-jurnal/(:num)/(:num)', 'Siswa\PklController::printJurnal/$1/$2');
+    $routes->get('jurnal-pkl/cetak-catatan/(:num)', 'Siswa\PklController::printCatatan/$1');
 
     // Absensi PKL (Siswa)
     $routes->get('absensi-pkl', 'Siswa\AbsensiPklController::index');
@@ -333,6 +340,16 @@ $routes->group('siswa', ['filter' => 'role:siswa'], function ($routes) {
 // Instruktur PKL Routes
 $routes->group('instruktur', ['filter' => 'role:instruktur'], function ($routes) {
     $routes->get('dashboard', 'Instruktur\DashboardController::index', ['as' => 'instruktur.dashboard']);
+    $routes->get('jurnal-pkl', 'Instruktur\JurnalPklController::index');
+    $routes->get('jurnal-pkl/siswa/(:num)', 'Instruktur\JurnalPklController::siswaDetail/$1');
+    $routes->get('jurnal-pkl/task/(:num)', 'Instruktur\JurnalPklController::taskDetail/$1');
+    $routes->post('jurnal-pkl/catatan/(:num)', 'Instruktur\JurnalPklController::addCatatan/$1');
+
+    // Task Template (Master Task)
+    $routes->get('task-template', 'Instruktur\TaskTemplateController::index');
+    $routes->post('task-template/simpan', 'Instruktur\TaskTemplateController::store');
+    $routes->post('task-template/update/(:num)', 'Instruktur\TaskTemplateController::update/$1');
+    $routes->get('task-template/hapus/(:num)', 'Instruktur\TaskTemplateController::delete/$1');
 });
 
 // Profile Routes (for all roles)
@@ -346,6 +363,7 @@ $routes->group('profile', ['filter' => 'auth'], function ($routes) {
 // File Routes (for serving uploaded files)
 $routes->get('files/jurnal/(:segment)', 'FileController::jurnalFoto/$1');
 $routes->get('files/jurnal-pkl/(:segment)', 'FileController::jurnalPklFoto/$1');
+$routes->get('files/pkl-progress/(:segment)', 'FileController::pklProgressFoto/$1');
 $routes->get('files/absensi-guru/(:segment)/(:segment)/(:segment)/(:segment)', 'FileController::absensiGuruFoto/$1/$2/$3/$4');
 $routes->get('profile-photo/(:segment)', 'FileController::profilePhoto/$1');
 

@@ -177,6 +177,10 @@ if (!function_exists('get_sidebar_menu')) {
                             'title' => 'Arsip Jurnal PKL',
                             'url' => '/admin/jurnal-pkl-archive',
                         ],
+                        [
+                            'title' => 'Kategori PKL',
+                            'url' => '/admin/pkl-categories',
+                        ],
                     ]
                 ],
                 [
@@ -397,7 +401,19 @@ if (!function_exists('get_sidebar_menu')) {
                     'icon' => 'fas fa-th',
                     'url' => '/instruktur/dashboard',
                     'active' => ['instruktur/dashboard']
-                ]
+                ],
+                [
+                    'title' => 'Jurnal PKL',
+                    'icon' => 'fas fa-book',
+                    'url' => '/instruktur/jurnal-pkl',
+                    'active' => ['instruktur/jurnal-pkl']
+                ],
+                [
+                    'title' => 'Master Task',
+                    'icon' => 'fas fa-list-check',
+                    'url' => '/instruktur/task-template',
+                    'active' => ['instruktur/task-template']
+                ],
             ]
         ];
 

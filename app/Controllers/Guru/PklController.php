@@ -3,18 +3,18 @@
 namespace App\Controllers\Guru;
 
 use App\Controllers\BaseController;
-use App\Services\JurnalPklService;
+use App\Services\PklService;
 use App\Models\GuruModel;
 
-class JurnalPklController extends BaseController
+class PklController extends BaseController
 {
     protected $guruModel;
-    protected $jurnalService;
+    protected $pklService;
 
     public function __construct()
     {
         $this->guruModel = new GuruModel();
-        $this->jurnalService = new JurnalPklService();
+        $this->pklService = new PklService();
     }
 
     public function index()
@@ -26,7 +26,7 @@ class JurnalPklController extends BaseController
             return redirect()->to('/access-denied')->with('error', 'Data guru tidak ditemukan');
         }
 
-        $result = $this->jurnalService->getGroupedBySiswaForPembimbing($guru['id']);
+        $result = $this->pklService->getGroupedBySiswaForPembimbing();
         $grouped = $result['success'] ? $result['data']['grouped'] : [];
         $stats = $result['success'] ? $result['data']['stats'] : [];
 
@@ -37,7 +37,7 @@ class JurnalPklController extends BaseController
             'stats' => $stats,
         ];
 
-        return view('guru/jurnal_pkl/index', $data);
+        return view('guru/pkl/index', $data);
     }
 
     public function verify($id)
@@ -52,18 +52,17 @@ class JurnalPklController extends BaseController
         $status = $this->request->getPost('status');
         $catatan = $this->request->getPost('catatan');
 
-        if (!in_array($status, ['disetujui', 'revisi', 'ditolak'])) {
+        if (!in_array($status, ['approved', 'revision'])) {
             session()->setFlashdata('error', 'Status verifikasi tidak valid');
             return redirect()->to('/guru/jurnal-pkl');
         }
 
-        $result = $this->jurnalService->verify($id, $userId, $status, $catatan);
+        $result = $this->pklService->verify($id, $userId, $status, $catatan);
 
         if ($result['success']) {
             $messages = [
-                'disetujui' => 'Jurnal berhasil disetujui ✅',
-                'revisi' => 'Jurnal direvisi ✏️',
-                'ditolak' => 'Jurnal ditolak ❌',
+                'approved' => 'Progress berhasil disetujui',
+                'revision' => 'Progress direvisi',
             ];
             session()->setFlashdata('success', $messages[$status]);
         } else {
@@ -82,19 +81,19 @@ class JurnalPklController extends BaseController
             return redirect()->to('/access-denied')->with('error', 'Data guru tidak ditemukan');
         }
 
-        $result = $this->jurnalService->getById($id);
+        $result = $this->pklService->getProgressById($id);
         if (!$result['success']) {
-            session()->setFlashdata('error', 'Jurnal tidak ditemukan');
+            session()->setFlashdata('error', 'Progress tidak ditemukan');
             return redirect()->to('/guru/jurnal-pkl');
         }
 
         $data = [
-            'title' => 'Detail Jurnal PKL',
+            'title' => 'Detail Progress PKL',
             'guru' => $guru,
-            'jurnal' => $result['data'],
+            'progress' => $result['data'],
         ];
 
-        return view('guru/jurnal_pkl/detail', $data);
+        return view('guru/pkl/detail', $data);
     }
 
     public function cancelVerification($id)
@@ -106,10 +105,10 @@ class JurnalPklController extends BaseController
             return redirect()->to('/access-denied')->with('error', 'Data guru tidak ditemukan');
         }
 
-        $result = $this->jurnalService->cancelVerification($id);
+        $result = $this->pklService->cancelVerification($id);
 
         if ($result['success']) {
-            session()->setFlashdata('success', 'Verifikasi jurnal berhasil dibatalkan');
+            session()->setFlashdata('success', 'Verifikasi progress berhasil dibatalkan');
         } else {
             session()->setFlashdata('error', $result['message']);
         }
