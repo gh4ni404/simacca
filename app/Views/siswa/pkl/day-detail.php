@@ -112,6 +112,13 @@
                                class="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-xs font-medium">
                                 <i class="fas fa-edit mr-1"></i>Edit
                             </a>
+                            <form action="<?= base_url('siswa/jurnal-pkl/hapus-progress/' . $p['id']); ?>" method="POST" class="inline">
+                                <?= csrf_field(); ?>
+                                <button type="submit" onclick="return confirm('Yakin hapus?')"
+                                        class="inline-flex items-center px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-xs font-medium">
+                                    <i class="fas fa-trash mr-1"></i>Hapus
+                                </button>
+                            </form>
                         </div>
                         <?php endif; ?>
                     </div>

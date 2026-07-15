@@ -172,12 +172,14 @@
                         </form>
                         <?php endif; ?>
                         <?php if ($p['status'] !== 'approved'): ?>
-                        <a href="<?= base_url('siswa/jurnal-pkl/hapus-progress/' . $p['id']); ?>"
-                           onclick="return confirm('Yakin ingin menghapus progress ini?')"
-                           title="Hapus"
-                           class="px-2 py-1 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 text-xs transition-colors">
-                            <i class="fas fa-trash"></i>
-                        </a>
+                        <form action="<?= base_url('siswa/jurnal-pkl/hapus-progress/' . $p['id']); ?>" method="POST" class="inline">
+                            <?= csrf_field(); ?>
+                            <button type="submit" onclick="return confirm('Yakin ingin menghapus progress ini?')"
+                                    title="Hapus"
+                                    class="px-2 py-1 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 text-xs transition-colors">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -248,16 +250,29 @@
 
     <!-- Tasks Aktif -->
     <?php if (!empty($tasks)): ?>
+    <?php
+        $totalTaskProgress = 0;
+        foreach ($tasks as $t) {
+            $totalTaskProgress += get_task_progress($t['status'])['percentage'];
+        }
+        $avgTaskProgress = count($tasks) > 0 ? round($totalTaskProgress / count($tasks)) : 0;
+    ?>
     <div class="mb-6">
-        <h2 class="text-lg font-semibold text-gray-800 mb-3">
-            <i class="fas fa-list-check mr-2 text-blue-600"></i>
-            Task Aktif
-        </h2>
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-semibold text-gray-800">
+                <i class="fas fa-list-check mr-2 text-blue-600"></i>
+                Task Aktif
+            </h2>
+            <span class="text-sm font-bold text-gray-600"><?= $avgTaskProgress ?>%</span>
+        </div>
+        <!-- Overall Progress Bar -->
+        <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+            <div class="bg-blue-500 h-2.5 rounded-full transition-all duration-500" style="width: <?= $avgTaskProgress ?>%"></div>
+        </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <?php foreach ($tasks as $task): ?>
             <?php
-                $progressSummary = (new \App\Models\PklTaskModel())->getProgressSummary($task['id']);
-                $progressPct = $progressSummary['total'] > 0 ? round(($progressSummary['approved'] / $progressSummary['total']) * 100) : 0;
+                $taskProg = get_task_progress($task['status']);
             ?>
             <a href="<?= base_url('siswa/jurnal-pkl/task/' . $task['id']); ?>"
                class="block bg-white rounded-lg shadow hover:shadow-md transition-shadow p-4">
@@ -277,13 +292,7 @@
                     </div>
                 </div>
                 <div class="mt-3">
-                    <div class="flex justify-between text-xs text-gray-500 mb-1">
-                        <span><?= $progressSummary['total'] ?> progress</span>
-                        <span><?= $progressPct ?>%</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-1.5">
-                        <div class="bg-green-500 h-1.5 rounded-full" style="width: <?= $progressPct ?>%"></div>
-                    </div>
+                    <?= render_task_progress_bar($task['status']) ?>
                 </div>
             </a>
             <?php endforeach; ?>
@@ -305,8 +314,8 @@
                 <i class="fas fa-calendar mr-2"></i>
                 Jurnal Kegiatan PKL
             </a>
-            <?php if (!empty($tasks)): ?>
-            <a href="<?= base_url('siswa/jurnal-pkl/cetak-catatan/' . implode('-', array_column($tasks, 'id'))); ?>"
+            <?php if (!empty($allTasks)): ?>
+            <a href="<?= base_url('siswa/jurnal-pkl/cetak-catatan/' . implode('-', array_column($allTasks, 'id'))); ?>"
                target="_blank"
                class="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-sm font-medium">
                 <i class="fas fa-clipboard mr-2"></i>

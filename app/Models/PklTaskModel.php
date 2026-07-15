@@ -12,7 +12,7 @@ class PklTaskModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = true;
     protected $protectFields    = true;
-    protected $allowedFields    = ['siswa_id', 'kategori_id', 'judul', 'status', 'estimasi', 'langkah_kerja'];
+    protected $allowedFields    = ['siswa_id', 'kategori_id', 'judul', 'status', 'estimasi', 'langkah_kerja', 'instruktur_verified_by', 'instruktur_verified_at', 'pembimbing_verified_by', 'pembimbing_verified_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = false;
@@ -60,6 +60,17 @@ class PklTaskModel extends Model
             ->findAll();
     }
 
+    public function getInactiveOrDeletedBySiswaAndKategori(int $siswaId, ?int $kategoriId): ?array
+    {
+        $db = \Config\Database::connect();
+        $sql = "SELECT * FROM pkl_tasks
+                WHERE siswa_id = ? AND kategori_id <=> ?
+                AND (status != 'active' OR deleted_at IS NOT NULL)
+                LIMIT 1";
+
+        return $db->query($sql, [$siswaId, $kategoriId])->getRowArray() ?: null;
+    }
+
     public function getAllWithSiswa(?string $search = null, ?string $status = null): array
     {
         $this->select('pkl_tasks.*, s.nama_lengkap, s.nis, k.nama_kelas, pc.nama AS kategori_nama')
@@ -81,20 +92,6 @@ class PklTaskModel extends Model
         }
 
         return $this->findAll();
-    }
-
-    public function countProgress($taskId)
-    {
-        $db = \Config\Database::connect();
-        $result = $db->table('pkl_progress')
-            ->where('task_id', $taskId)
-            ->where('deleted_at', null)
-            ->countAllResults(false);
-
-        $builder = $db->table('pkl_progress');
-        return $builder->where('task_id', $taskId)
-            ->where('deleted_at', null)
-            ->countAllResults();
     }
 
     public function getProgressSummary($taskId)

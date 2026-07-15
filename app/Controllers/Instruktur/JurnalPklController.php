@@ -141,11 +141,13 @@ class JurnalPklController extends BaseController
             FROM pkl_tasks pt
             LEFT JOIN pkl_categories pc ON pc.id = pt.kategori_id
             JOIN siswa s ON s.id = pt.siswa_id
+            JOIN siswa_pkl sp ON sp.siswa_id = s.id AND sp.tahun_ajaran = (SELECT `value` FROM `settings` WHERE `key` = 'tahun_ajaran_aktif')
             WHERE pt.id = ? AND pt.deleted_at IS NULL
-        ", [$taskId])->getRowArray();
+              AND sp.tempat_pkl_id = ?
+        ", [$taskId, $instruktur['tempat_pkl_id']])->getRowArray();
 
         if (!$task) {
-            session()->setFlashdata('error', 'Task tidak ditemukan');
+            session()->setFlashdata('error', 'Task tidak ditemukan atau bukan wilayah Anda');
             return redirect()->to('/instruktur/jurnal-pkl');
         }
 
@@ -181,11 +183,62 @@ class JurnalPklController extends BaseController
             return redirect()->to('/instruktur/jurnal-pkl');
         }
 
+        $db = \Config\Database::connect();
+        $authorized = $db->query("
+            SELECT 1 FROM pkl_tasks pt
+            JOIN siswa_pkl sp ON sp.siswa_id = pt.siswa_id AND sp.tahun_ajaran = (SELECT `value` FROM `settings` WHERE `key` = 'tahun_ajaran_aktif')
+            WHERE pt.id = ? AND sp.tempat_pkl_id = ? AND pt.deleted_at IS NULL
+        ", [$progress['task_id'], $instruktur['tempat_pkl_id']])->getRowArray();
+
+        if (!$authorized) {
+            session()->setFlashdata('error', 'Anda tidak memiliki akses');
+            return redirect()->to('/instruktur/jurnal-pkl');
+        }
+
         $this->progressModel->update($progressId, [
             'catatan_instruktur' => $catatan,
         ]);
 
         session()->setFlashdata('success', 'Catatan berhasil disimpan');
+        return redirect()->back();
+    }
+
+    public function verifikasiTask(int $taskId)
+    {
+        $instruktur = $this->getInstruktur();
+        if (!$instruktur) {
+            return redirect()->to('/login');
+        }
+
+        $db = \Config\Database::connect();
+
+        $task = $db->query("
+            SELECT pt.*
+            FROM pkl_tasks pt
+            JOIN siswa_pkl sp ON sp.siswa_id = pt.siswa_id AND sp.tahun_ajaran = (SELECT `value` FROM `settings` WHERE `key` = 'tahun_ajaran_aktif')
+            WHERE pt.id = ? AND sp.tempat_pkl_id = ? AND pt.deleted_at IS NULL
+        ", [$taskId, $instruktur['tempat_pkl_id']])->getRowArray();
+
+        if (!$task) {
+            session()->setFlashdata('error', 'Task tidak ditemukan atau bukan wilayah Anda');
+            return redirect()->to('/instruktur/jurnal-pkl');
+        }
+
+        if ($task['status'] !== 'completed') {
+            session()->setFlashdata('error', 'Hanya task completed yang bisa diverifikasi');
+            return redirect()->back();
+        }
+
+        $userId = session()->get('user_id');
+        $db->table('pkl_tasks')
+            ->where('id', $taskId)
+            ->update([
+                'status' => 'verified_by_instruktur',
+                'instruktur_verified_by' => $userId,
+                'instruktur_verified_at' => date('Y-m-d H:i:s'),
+            ]);
+
+        session()->setFlashdata('success', 'Task berhasil diverifikasi');
         return redirect()->back();
     }
 }

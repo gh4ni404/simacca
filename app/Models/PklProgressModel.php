@@ -74,43 +74,6 @@ class PklProgressModel extends Model
         return $db->query($sql, [$siswaId, $limit])->getResultArray();
     }
 
-    public function getByPembimbing(?string $startDate = null, ?string $endDate = null): array
-    {
-        $db = \Config\Database::connect();
-        $sql = "SELECT pp.*, pt.judul AS nama_task, pt.siswa_id,
-                       s.nama_lengkap AS nama_siswa, s.nis, k.nama_kelas,
-                       pc.nama AS kategori_nama
-                FROM pkl_progress pp
-                JOIN pkl_tasks pt ON pt.id = pp.task_id
-                JOIN siswa s ON s.id = pt.siswa_id
-                JOIN kelas k ON k.id = s.kelas_id
-                LEFT JOIN pkl_categories pc ON pc.id = pt.kategori_id
-                JOIN siswa_pkl sp ON sp.siswa_id = s.id
-                JOIN pembimbing_pkl pp2 ON pp2.tempat_pkl_id = sp.tempat_pkl_id AND pp2.tahun_ajaran = sp.tahun_ajaran
-                WHERE pp2.guru_id = ? AND pp.deleted_at IS NULL AND pt.deleted_at IS NULL";
-        $binds = [$this->getGuruId()];
-
-        if ($startDate) {
-            $sql .= ' AND pp.tanggal >= ?';
-            $binds[] = $startDate;
-        }
-        if ($endDate) {
-            $sql .= ' AND pp.tanggal <= ?';
-            $binds[] = $endDate;
-        }
-
-        $sql .= ' ORDER BY pp.tanggal DESC, pp.created_at DESC';
-        return $db->query($sql, $binds)->getResultArray();
-    }
-
-    private function getGuruId(): int
-    {
-        $userId = session()->get('user_id');
-        $guruModel = new \App\Models\GuruModel();
-        $guru = $guruModel->getByUserId($userId);
-        return $guru['id'] ?? 0;
-    }
-
     public function getGroupedBySiswaForPembimbing(): array
     {
         $db = \Config\Database::connect();

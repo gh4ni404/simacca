@@ -6,18 +6,21 @@ use App\Controllers\BaseController;
 use App\Models\InstrukturPklModel;
 use App\Models\PklTaskTemplateModel;
 use App\Models\PklCategoryModel;
+use App\Models\KategoriPklMappingModel;
 
 class TaskTemplateController extends BaseController
 {
     protected $instrukturPklModel;
     protected $templateModel;
     protected $categoryModel;
+    protected $kategoriMappingModel;
 
     public function __construct()
     {
         $this->instrukturPklModel = new InstrukturPklModel();
         $this->templateModel = new PklTaskTemplateModel();
         $this->categoryModel = new PklCategoryModel();
+        $this->kategoriMappingModel = new KategoriPklMappingModel();
     }
 
     private function getInstruktur()
@@ -34,12 +37,14 @@ class TaskTemplateController extends BaseController
         }
 
         $templates = $this->templateModel->getByTempatPkl($instruktur['tempat_pkl_id']);
+        $mappedCategories = $this->kategoriMappingModel->getByTempatPkl($instruktur['tempat_pkl_id']);
 
         $data = [
             'title'     => 'Master Task PKL',
             'pageTitle' => 'Master Task',
             'instruktur' => $instruktur,
             'templates' => $templates,
+            'mappedCategories' => $mappedCategories,
         ];
 
         return view('instruktur/task_template/index', $data);

@@ -302,3 +302,68 @@ if (defined('APPPATH')) {
         }
     }
 }
+
+if (!function_exists('get_task_progress')) {
+    /**
+     * Get task progress percentage and label based on status.
+     * Opsi 1: 0% (active) → 50% (completed) → 80% (verified_by_instruktur) → 100% (approved)
+     *
+     * @param string $status Task status
+     * @return array ['percentage' => int, 'label' => string, 'color' => string]
+     */
+    function get_task_progress(string $status): array
+    {
+        return match($status) {
+            'completed' => ['percentage' => 50, 'label' => 'Dikerjakan Siswa', 'color' => 'yellow'],
+            'verified_by_instruktur' => ['percentage' => 80, 'label' => 'Diverifikasi Instruktur', 'color' => 'blue'],
+            'approved' => ['percentage' => 100, 'label' => 'Disetujui Pembimbing', 'color' => 'green'],
+            default => ['percentage' => 0, 'label' => 'Dalam Pengerjaan', 'color' => 'gray'],
+        };
+    }
+}
+
+if (!function_exists('render_task_progress_bar')) {
+    /**
+     * Render a progress bar HTML for a task status.
+     *
+     * @param string $status Task status
+     * @param string $size 'sm' or 'lg'
+     * @return string HTML
+     */
+    function render_task_progress_bar(string $status, string $size = 'sm'): string
+    {
+        $progress = get_task_progress($status);
+        $pct = $progress['percentage'];
+        $color = $progress['color'];
+        $label = $progress['label'];
+
+        $barHeight = $size === 'lg' ? 'h-3' : 'h-2';
+        $textSize = $size === 'lg' ? 'text-sm' : 'text-xs';
+
+        $barColor = match($color) {
+            'yellow' => 'bg-yellow-500',
+            'blue' => 'bg-blue-500',
+            'green' => 'bg-green-500',
+            default => 'bg-gray-400',
+        };
+
+        $textColor = match($color) {
+            'yellow' => 'text-yellow-700',
+            'blue' => 'text-blue-700',
+            'green' => 'text-green-700',
+            default => 'text-gray-500',
+        };
+
+        $html = '<div class="w-full">';
+        $html .= '<div class="flex items-center justify-between mb-1">';
+        $html .= "<span class=\"{$textSize} font-medium {$textColor}\">{$label}</span>";
+        $html .= "<span class=\"{$textSize} font-bold {$textColor}\">{$pct}%</span>";
+        $html .= '</div>';
+        $html .= '<div class="w-full bg-gray-200 rounded-full ' . $barHeight . '">';
+        $html .= '<div class="' . $barColor . ' ' . $barHeight . ' rounded-full transition-all duration-500" style="width: ' . $pct . '%"></div>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+}

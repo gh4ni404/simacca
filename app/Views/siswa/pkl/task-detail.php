@@ -30,6 +30,19 @@
                 </div>
             </div>
             <div class="mt-4 md:mt-0 flex items-center gap-3">
+                <?php if ($task['status'] === 'completed'): ?>
+                <span class="inline-flex items-center px-4 py-2 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-medium">
+                    <i class="fas fa-clock mr-2"></i>Menunggu Verifikasi Instruktur
+                </span>
+                <?php elseif ($task['status'] === 'verified_by_instruktur'): ?>
+                <span class="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium">
+                    <i class="fas fa-user-check mr-2"></i>Menunggu Verifikasi Pembimbing
+                </span>
+                <?php elseif ($task['status'] === 'approved'): ?>
+                <span class="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium">
+                    <i class="fas fa-check-double mr-2"></i>Task Disetujui
+                </span>
+                <?php endif; ?>
                 <?php if (!empty($progress)): ?>
                 <a href="<?= base_url('siswa/jurnal-pkl/cetak-catatan/' . $task['id']); ?>"
                    target="_blank"
@@ -38,6 +51,10 @@
                 </a>
                 <?php endif; ?>
             </div>
+        </div>
+        <!-- Progress Bar -->
+        <div class="mt-4 bg-white/10 rounded-xl p-4">
+            <?= render_task_progress_bar($task['status'], 'lg') ?>
         </div>
     </div>
 
@@ -146,11 +163,13 @@
                             </form>
                             <?php endif; ?>
                             <?php if ($p['status'] !== 'approved'): ?>
-                            <a href="<?= base_url('siswa/jurnal-pkl/hapus-progress/' . $p['id']); ?>"
-                               onclick="return confirm('Yakin hapus?')"
-                               class="inline-flex items-center px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 text-xs font-medium">
-                                <i class="fas fa-trash mr-1"></i>Hapus
-                            </a>
+                            <form action="<?= base_url('siswa/jurnal-pkl/hapus-progress/' . $p['id']); ?>" method="POST" class="inline">
+                                <?= csrf_field(); ?>
+                                <button type="submit" onclick="return confirm('Yakin hapus?')"
+                                        class="inline-flex items-center px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 text-xs font-medium">
+                                    <i class="fas fa-trash mr-1"></i>Hapus
+                                </button>
+                            </form>
                             <?php endif; ?>
                         </div>
                         <?php endif; ?>

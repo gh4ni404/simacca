@@ -265,7 +265,7 @@ if (!function_exists('get_sidebar_menu')) {
                     'url' => '#',
                     'submenu' => [
                         [
-                            'title' => 'Verifikasi Jurnal PKL',
+                            'title' => 'Verifikasi Jurnal',
                             'url' => '/guru/jurnal-pkl',
                         ],
                         [

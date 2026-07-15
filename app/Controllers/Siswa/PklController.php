@@ -51,6 +51,9 @@ class PklController extends BaseController
         $tasksResult = $this->pklService->getActiveTasksBySiswa($siswa['id']);
         $tasks = $tasksResult['success'] ? $tasksResult['data'] : [];
 
+        $allTasksResult = $this->pklService->getAllTasksBySiswa($siswa['id']);
+        $allTasks = $allTasksResult['success'] ? $allTasksResult['data'] : [];
+
         $data = [
             'title' => 'Jurnal PKL',
             'siswa' => $siswa,
@@ -58,6 +61,7 @@ class PklController extends BaseController
             'timeline' => $timeline,
             'stats' => $stats,
             'tasks' => $tasks,
+            'allTasks' => $allTasks,
         ];
 
         return view('siswa/pkl/index', $data);
@@ -192,21 +196,50 @@ class PklController extends BaseController
                 }
             }
 
-            $taskResult = $this->pklService->createTask([
-                'siswa_id' => $siswa['id'],
-                'judul' => $this->request->getPost('judul'),
-                'kategori_id' => $this->request->getPost('kategori_id') ?: null,
-                'estimasi' => $this->request->getPost('estimasi') ?: null,
-                'langkah_kerja' => $taskLangkahKerja,
-                'status' => 'active',
-            ]);
+            $kategoriId = $this->request->getPost('kategori_id') ?: null;
+            $judul = $this->request->getPost('judul');
+            $estimasi = $this->request->getPost('estimasi') ?: null;
 
-            if (!$taskResult['success']) {
-                session()->setFlashdata('error', $taskResult['message']);
-                return redirect()->back()->withInput();
+            $pklTaskModel = new \App\Models\PklTaskModel();
+            $existingTask = $pklTaskModel->getInactiveOrDeletedBySiswaAndKategori($siswa['id'], $kategoriId);
+
+            if ($existingTask) {
+                $updateData = [
+                    'judul' => $judul,
+                    'kategori_id' => $kategoriId,
+                    'estimasi' => $estimasi,
+                    'langkah_kerja' => $taskLangkahKerja,
+                    'status' => 'active',
+                    'deleted_at' => null,
+                ];
+
+                $db = \Config\Database::connect();
+                $db->table('pkl_tasks')
+                    ->where('id', $existingTask['id'])
+                    ->update($updateData);
+
+                if ($db->affectedRows() === 0 && empty($db->error())) {
+                    session()->setFlashdata('error', 'Gagal mengaktifkan task');
+                    return redirect()->back()->withInput();
+                }
+                $taskId = $existingTask['id'];
+            } else {
+                $taskResult = $this->pklService->createTask([
+                    'siswa_id' => $siswa['id'],
+                    'judul' => $judul,
+                    'kategori_id' => $kategoriId,
+                    'estimasi' => $estimasi,
+                    'langkah_kerja' => $taskLangkahKerja,
+                    'status' => 'active',
+                ]);
+
+                if (!$taskResult['success']) {
+                    session()->setFlashdata('error', $taskResult['message']);
+                    return redirect()->back()->withInput();
+                }
+
+                $taskId = $taskResult['data']['id'];
             }
-
-            $taskId = $taskResult['data']['id'];
         } elseif ($taskChoice === 'template') {
             $taskVal = $this->request->getPost('task_id');
             if (!$taskVal || !str_starts_with($taskVal, 'tpl:')) {
@@ -412,11 +445,62 @@ class PklController extends BaseController
         $result = $this->pklService->updateProgress($id, ['status' => 'submitted']);
 
         if ($result['success']) {
+            $taskId = $progressResult['data']['task_id'];
+            $this->autoCompleteTaskIfDone($taskId);
             session()->setFlashdata('success', 'Progress berhasil dikirim untuk diverifikasi');
         } else {
             session()->setFlashdata('error', $result['message']);
         }
 
+        return redirect()->to('/siswa/jurnal-pkl');
+    }
+
+    private function autoCompleteTaskIfDone(int $taskId): void
+    {
+        $db = \Config\Database::connect();
+
+        $task = $db->table('pkl_tasks')->where('id', $taskId)->where('deleted_at IS NULL', null, false)->get()->getRowArray();
+        if (!$task || $task['status'] !== 'active') {
+            return;
+        }
+
+        $total = $db->table('pkl_progress')->where('task_id', $taskId)->where('deleted_at IS NULL', null, false)->countAllResults();
+        $nonDraft = $db->table('pkl_progress')
+            ->where('task_id', $taskId)
+            ->where('status !=', 'draft')
+            ->where('deleted_at IS NULL', null, false)
+            ->countAllResults();
+
+        if ($total > 0 && $total === $nonDraft) {
+            $db->table('pkl_tasks')->where('id', $taskId)->update(['status' => 'completed']);
+        }
+    }
+
+    public function selesaikanTask($id)
+    {
+        $siswa = $this->getSiswa();
+        if (!$siswa) {
+            session()->setFlashdata('error', 'Data siswa tidak ditemukan');
+            return redirect()->to('/siswa/jurnal-pkl');
+        }
+
+        $taskResult = $this->pklService->getTaskById($id);
+        if (!$taskResult['success'] || $taskResult['data']['siswa_id'] != $siswa['id']) {
+            session()->setFlashdata('error', 'Task tidak ditemukan');
+            return redirect()->to('/siswa/jurnal-pkl');
+        }
+
+        if ($taskResult['data']['status'] !== 'active') {
+            session()->setFlashdata('error', 'Hanya task aktif yang bisa diselesaikan');
+            return redirect()->back();
+        }
+
+        $db = \Config\Database::connect();
+        $db->table('pkl_tasks')
+            ->where('id', $id)
+            ->update(['status' => 'completed']);
+
+        session()->setFlashdata('success', 'Task berhasil diselesaikan. Menunggu verifikasi instruktur.');
         return redirect()->to('/siswa/jurnal-pkl');
     }
 
@@ -442,6 +526,7 @@ class PklController extends BaseController
         $result = $this->pklService->deleteProgress($id);
 
         if ($result['success']) {
+            $this->autoCompleteTaskIfDone($progressResult['data']['task_id']);
             session()->setFlashdata('success', 'Progress berhasil dihapus');
         } else {
             session()->setFlashdata('error', $result['message']);

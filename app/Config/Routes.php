@@ -274,6 +274,7 @@ $routes->group('guru', ['filter' => 'role:guru_mapel,wakakur'], function ($route
     $routes->post('jurnal-pkl/verify/(:num)', 'Guru\PklController::verify/$1');
     $routes->post('jurnal-pkl/batal-verifikasi/(:num)', 'Guru\PklController::cancelVerification/$1');
     $routes->get('jurnal-pkl/detail/(:num)', 'Guru\PklController::detail/$1');
+    $routes->post('jurnal-pkl/verifikasi-task/(:num)', 'Guru\PklController::verifikasiTaskPembimbing/$1');
 
     // Absensi PKL (Pembimbing)
     $routes->get('absensi-pkl', 'Guru\AbsensiPklController::index');
@@ -353,9 +354,10 @@ $routes->group('siswa', ['filter' => 'role:siswa'], function ($routes) {
     $routes->post('jurnal-pkl/kirim/(:num)', 'Siswa\PklController::submitProgress/$1');
     $routes->get('jurnal-pkl/edit-progress/(:num)', 'Siswa\PklController::editProgress/$1');
     $routes->post('jurnal-pkl/update-progress/(:num)', 'Siswa\PklController::updateProgressData/$1');
-    $routes->get('jurnal-pkl/hapus-progress/(:num)', 'Siswa\PklController::deleteProgress/$1');
+    $routes->post('jurnal-pkl/hapus-progress/(:num)', 'Siswa\PklController::deleteProgress/$1');
     $routes->get('jurnal-pkl/cetak-jurnal/(:num)/(:num)', 'Siswa\PklController::printJurnal/$1/$2');
     $routes->get('jurnal-pkl/cetak-catatan/(:any)', 'Siswa\PklController::printCatatan/$1');
+    $routes->post('jurnal-pkl/selesaikan-task/(:num)', 'Siswa\PklController::selesaikanTask/$1');
 
     // Absensi PKL (Siswa)
     $routes->get('absensi-pkl', 'Siswa\AbsensiPklController::index');
@@ -369,6 +371,7 @@ $routes->group('instruktur', ['filter' => 'role:instruktur'], function ($routes)
     $routes->get('jurnal-pkl/siswa/(:num)', 'Instruktur\JurnalPklController::siswaDetail/$1');
     $routes->get('jurnal-pkl/task/(:num)', 'Instruktur\JurnalPklController::taskDetail/$1');
     $routes->post('jurnal-pkl/catatan/(:num)', 'Instruktur\JurnalPklController::addCatatan/$1');
+    $routes->post('jurnal-pkl/verifikasi-task/(:num)', 'Instruktur\JurnalPklController::verifikasiTask/$1');
 
     // Task Template (Master Task)
     $routes->get('task-template', 'Instruktur\TaskTemplateController::index');

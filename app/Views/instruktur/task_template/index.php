@@ -46,9 +46,9 @@
                             <select name="kategori_id"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                 <option value="">-- Pilih Kategori --</option>
-                                <?php foreach ((new \App\Models\PklCategoryModel())->getDropdown() as $cat): ?>
-                                <option value="<?= $cat['id'] ?>" <?= old('kategori_id') == $cat['id'] ? 'selected' : '' ?>>
-                                    <?= esc($cat['nama']) ?>
+                                <?php foreach ($mappedCategories as $cat): ?>
+                                <option value="<?= $cat['kategori_id'] ?>" <?= old('kategori_id') == $cat['kategori_id'] ? 'selected' : '' ?>>
+                                    <?= esc($cat['kategori_nama']) ?>
                                 </option>
                                 <?php endforeach; ?>
                             </select>
@@ -211,8 +211,8 @@
                     <select name="kategori_id" id="edit_kategori"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="">-- Pilih Kategori --</option>
-                        <?php foreach ((new \App\Models\PklCategoryModel())->getDropdown() as $cat): ?>
-                        <option value="<?= $cat['id'] ?>"><?= esc($cat['nama']) ?></option>
+                        <?php foreach ($mappedCategories as $cat): ?>
+                        <option value="<?= $cat['kategori_id'] ?>"><?= esc($cat['kategori_nama']) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>

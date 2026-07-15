@@ -73,6 +73,17 @@ class PklService extends BaseService
         }
     }
 
+    public function getAllTasksBySiswa(int $siswaId): array
+    {
+        try {
+            $data = $this->taskModel->getBySiswaWithCategory($siswaId);
+            return $this->success($data);
+        } catch (\Exception $e) {
+            $this->logError('getAllTasksBySiswa', $e);
+            return $this->error('Gagal mengambil data task');
+        }
+    }
+
     public function getTaskById(int $id): array
     {
         try {

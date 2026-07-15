@@ -27,6 +27,7 @@
         <?php foreach ($tasks as $t):
             $progressCount = (int)$t['total_progress'];
             $approvedCount = (int)$t['approved_count'];
+            $taskProgress = get_task_progress($t['status']);
         ?>
         <a href="<?= base_url('instruktur/jurnal-pkl/task/' . $t['id']); ?>"
            class="block bg-white rounded-xl shadow-sm hover:shadow-md transition p-5 group">
@@ -45,7 +46,9 @@
                         <?php endif; ?>
                     </p>
                 </div>
-                <i class="fas fa-chevron-right text-gray-400 ml-3"></i>
+                <div class="flex-shrink-0 ml-3 w-24">
+                    <?= render_task_progress_bar($t['status']) ?>
+                </div>
             </div>
         </a>
         <?php endforeach; ?>
