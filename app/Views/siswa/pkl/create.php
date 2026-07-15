@@ -319,6 +319,7 @@ function switchToNew() {
     document.getElementById('toggleSection').classList.add('hidden');
     document.getElementById('newTaskSection').classList.remove('hidden');
     document.getElementById('taskChoice').value = 'new';
+    resetLangkahKerja();
 }
 
 function switchToExisting() {
@@ -328,15 +329,78 @@ function switchToExisting() {
     document.getElementById('taskChoice').value = 'existing';
 }
 
-// Handle template selection (tpl:ID)
+function resetLangkahKerja() {
+    const container = document.getElementById('langkahKerjaContainer');
+    container.innerHTML = `
+        <div class="flex items-center gap-2 langkah-row">
+            <span class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold langkah-num">1</span>
+            <input type="text" name="langkah_kerja[]" value=""
+                   placeholder="Langkah 1"
+                   class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+            <button type="button" onclick="removeLangkah(this)"
+                    class="flex-shrink-0 w-7 h-7 rounded-full bg-red-100 text-red-500 flex items-center justify-center hover:bg-red-200 transition-colors text-xs hidden remove-btn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+}
+
+// Handle template selection (tpl:ID) and task selection for langkah_kerja auto-fill
 document.getElementById('taskSelect').addEventListener('change', function() {
     const val = this.value;
     if (val.startsWith('tpl:')) {
         document.getElementById('taskChoice').value = 'template';
+        const templateId = val.replace('tpl:', '');
+        fetchLangkahKerja('template', templateId);
+    } else if (val) {
+        document.getElementById('taskChoice').value = 'existing';
+        fetchLangkahKerja('task', val);
     } else {
         document.getElementById('taskChoice').value = 'existing';
     }
 });
+
+function fetchLangkahKerja(type, id) {
+    const baseUrl = '<?= base_url('siswa/jurnal-pkl') ?>';
+    let url;
+    if (type === 'task') {
+        url = baseUrl + '/get-task-langkah-kerja?task_id=' + id;
+    } else {
+        url = baseUrl + '/get-template-langkah-kerja?template_id=' + id;
+    }
+
+    fetch(url)
+        .then(response => response.json())
+        .then(result => {
+            if (result.success && result.data && result.data.length > 0) {
+                populateLangkahKerja(result.data);
+            }
+        })
+        .catch(err => console.error('Gagal mengambil langkah kerja:', err));
+}
+
+function populateLangkahKerja(steps) {
+    const container = document.getElementById('langkahKerjaContainer');
+    container.innerHTML = '';
+
+    steps.forEach((step, i) => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center gap-2 langkah-row';
+        row.innerHTML = `
+            <span class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold langkah-num">${i + 1}</span>
+            <input type="text" name="langkah_kerja[]" value="${step.replace(/"/g, '&quot;')}"
+                   placeholder="Langkah ${i + 1}"
+                   class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+            <button type="button" onclick="removeLangkah(this)"
+                    class="flex-shrink-0 w-7 h-7 rounded-full bg-red-100 text-red-500 flex items-center justify-center hover:bg-red-200 transition-colors text-xs remove-btn">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        container.appendChild(row);
+    });
+
+    updateLangkahVisibility();
+}
 
 function previewImage(input) {
     if (input.files && input.files[0]) {

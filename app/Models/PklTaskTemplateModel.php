@@ -12,7 +12,7 @@ class PklTaskTemplateModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = true;
     protected $protectFields    = true;
-    protected $allowedFields    = ['tempat_pkl_id', 'judul', 'kategori_id', 'estimasi'];
+    protected $allowedFields    = ['tempat_pkl_id', 'judul', 'kategori_id', 'estimasi', 'langkah_kerja'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = false;

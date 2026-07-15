@@ -346,6 +346,8 @@ $routes->group('siswa', ['filter' => 'role:siswa'], function ($routes) {
     $routes->get('jurnal-pkl', 'Siswa\PklController::index', ['as' => 'siswa.jurnal_pkl']);
     $routes->get('jurnal-pkl/tambah', 'Siswa\PklController::create');
     $routes->post('jurnal-pkl/simpan', 'Siswa\PklController::store');
+    $routes->get('jurnal-pkl/get-task-langkah-kerja', 'Siswa\PklController::getTaskLangkahKerja');
+    $routes->get('jurnal-pkl/get-template-langkah-kerja', 'Siswa\PklController::getTemplateLangkahKerja');
     $routes->get('jurnal-pkl/task/(:num)', 'Siswa\PklController::taskDetail/$1');
     $routes->get('jurnal-pkl/hari/(:any)', 'Siswa\PklController::dayDetail/$1');
     $routes->post('jurnal-pkl/kirim/(:num)', 'Siswa\PklController::submitProgress/$1');

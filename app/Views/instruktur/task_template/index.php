@@ -63,6 +63,46 @@
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         </div>
 
+                        <div class="mb-5">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                Langkah Kerja <span class="text-gray-400 font-normal">(opsional)</span>
+                            </label>
+                            <div id="langkahKerjaContainer" class="space-y-2">
+                                <?php
+                                $langkah = old('langkah_kerja');
+                                if ($langkah && is_array($langkah)):
+                                    foreach ($langkah as $i => $val): ?>
+                                    <div class="flex items-center gap-2 langkah-row">
+                                        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold langkah-num"><?= ($i + 1) ?></span>
+                                        <input type="text" name="langkah_kerja[]" value="<?= esc($val) ?>"
+                                               placeholder="Langkah <?= ($i + 1) ?>"
+                                               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                        <button type="button" onclick="removeLangkah(this)"
+                                                class="flex-shrink-0 w-7 h-7 rounded-full bg-red-100 text-red-500 flex items-center justify-center hover:bg-red-200 transition-colors text-xs remove-btn">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <?php endforeach;
+                                else: ?>
+                                    <div class="flex items-center gap-2 langkah-row">
+                                        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold langkah-num">1</span>
+                                        <input type="text" name="langkah_kerja[]" value=""
+                                               placeholder="Langkah 1"
+                                               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                        <button type="button" onclick="removeLangkah(this)"
+                                                class="flex-shrink-0 w-7 h-7 rounded-full bg-red-100 text-red-500 flex items-center justify-center hover:bg-red-200 transition-colors text-xs hidden remove-btn">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <button type="button" onclick="addLangkah()"
+                                    class="mt-2 inline-flex items-center px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors text-xs font-medium">
+                                <i class="fas fa-plus mr-1"></i> Tambah Langkah
+                            </button>
+                            <p class="text-xs text-gray-400 mt-1">Langkah kerja akan otomatis terisi untuk siswa</p>
+                        </div>
+
                         <button type="submit"
                                 class="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm">
                             <i class="fas fa-save mr-2"></i>Simpan Template
@@ -110,10 +150,21 @@
                                     </span>
                                     <?php endif; ?>
                                 </div>
+                                <?php
+                                $tplLangkah = !empty($t['langkah_kerja']) ? json_decode($t['langkah_kerja'], true) : [];
+                                if (!empty($tplLangkah)): ?>
+                                <div class="mt-2 flex flex-wrap gap-1">
+                                    <?php foreach ($tplLangkah as $li => $step): ?>
+                                    <span class="inline-flex items-center text-xs bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full">
+                                        <?= ($li + 1) ?>. <?= esc($step) ?>
+                                    </span>
+                                    <?php endforeach; ?>
+                                </div>
+                                <?php endif; ?>
                             </div>
                             <div class="flex-shrink-0 flex items-center gap-1">
                                 <!-- Edit Button -->
-                                <button onclick="openEditModal(<?= $t['id'] ?>, '<?= esc($t['judul']) ?>', <?= $t['kategori_id'] ?? 'null' ?>, '<?= esc($t['estimasi'] ?? '') ?>')"
+                                <button onclick="openEditModal(<?= $t['id'] ?>, '<?= esc($t['judul']) ?>', <?= $t['kategori_id'] ?? 'null' ?>, '<?= esc($t['estimasi'] ?? '') ?>', '<?= esc($t['langkah_kerja'] ?? '') ?>')"
                                         class="px-2 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 text-xs transition-colors"
                                         title="Edit">
                                     <i class="fas fa-pen"></i>
@@ -172,6 +223,27 @@
                            maxlength="30"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Langkah Kerja <span class="text-gray-400 font-normal">(opsional)</span>
+                    </label>
+                    <div id="editLangkahKerjaContainer" class="space-y-2">
+                        <div class="flex items-center gap-2 langkah-row">
+                            <span class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold langkah-num">1</span>
+                            <input type="text" name="langkah_kerja[]" value=""
+                                   placeholder="Langkah 1"
+                                   class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                            <button type="button" onclick="removeLangkahEdit(this)"
+                                    class="flex-shrink-0 w-7 h-7 rounded-full bg-red-100 text-red-500 flex items-center justify-center hover:bg-red-200 transition-colors text-xs hidden remove-btn">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button" onclick="addLangkahEdit()"
+                            class="mt-2 inline-flex items-center px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors text-xs font-medium">
+                        <i class="fas fa-plus mr-1"></i> Tambah Langkah
+                    </button>
+                </div>
             </div>
             <div class="px-5 py-4 border-t border-gray-100 flex gap-3">
                 <button type="button" onclick="closeEditModal()"
@@ -188,11 +260,28 @@
 </div>
 
 <script>
-function openEditModal(id, judul, kategoriId, estimasi) {
+function openEditModal(id, judul, kategoriId, estimasi, langkahKerja) {
     document.getElementById('editForm').action = '<?= base_url('instruktur/task-template/update/') ?>' + id;
     document.getElementById('edit_judul').value = judul;
     document.getElementById('edit_kategori').value = kategoriId || '';
     document.getElementById('edit_estimasi').value = estimasi || '';
+
+    const container = document.getElementById('editLangkahKerjaContainer');
+    container.innerHTML = '';
+
+    let steps = [];
+    if (langkahKerja) {
+        try { steps = JSON.parse(langkahKerja); } catch(e) { steps = []; }
+    }
+
+    if (steps.length > 0) {
+        steps.forEach((step, i) => {
+            addLangkahEditWithValue(step, i);
+        });
+    } else {
+        addLangkahEdit();
+    }
+
     const modal = document.getElementById('editModal');
     modal.classList.remove('hidden');
     modal.classList.add('flex');
@@ -207,5 +296,100 @@ function closeEditModal() {
 document.getElementById('editModal').addEventListener('click', function(e) {
     if (e.target === this) closeEditModal();
 });
+
+function addLangkah() {
+    const container = document.getElementById('langkahKerjaContainer');
+    const count = container.querySelectorAll('.langkah-row').length + 1;
+    const row = document.createElement('div');
+    row.className = 'flex items-center gap-2 langkah-row';
+    row.innerHTML = `
+        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold langkah-num">${count}</span>
+        <input type="text" name="langkah_kerja[]" value=""
+               placeholder="Langkah ${count}"
+               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+        <button type="button" onclick="removeLangkah(this)"
+                class="flex-shrink-0 w-7 h-7 rounded-full bg-red-100 text-red-500 flex items-center justify-center hover:bg-red-200 transition-colors text-xs remove-btn">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    container.appendChild(row);
+    row.querySelector('input').focus();
+    updateLangkahVisibility(container);
+}
+
+function removeLangkah(btn) {
+    const row = btn.closest('.langkah-row');
+    const container = row.closest('.space-y-2');
+    row.remove();
+    updateLangkahNumbers(container);
+    updateLangkahVisibility(container);
+}
+
+function updateLangkahNumbers(container) {
+    const rows = container.querySelectorAll('.langkah-row');
+    rows.forEach((row, i) => {
+        row.querySelector('.langkah-num').textContent = i + 1;
+        row.querySelector('input').placeholder = 'Langkah ' + (i + 1);
+    });
+}
+
+function updateLangkahVisibility(container) {
+    const rows = container.querySelectorAll('.langkah-row');
+    const btns = container.querySelectorAll('.remove-btn');
+    btns.forEach(btn => {
+        if (rows.length <= 1) {
+            btn.classList.add('hidden');
+        } else {
+            btn.classList.remove('hidden');
+        }
+    });
+}
+
+function addLangkahEdit() {
+    const container = document.getElementById('editLangkahKerjaContainer');
+    const count = container.querySelectorAll('.langkah-row').length + 1;
+    const row = document.createElement('div');
+    row.className = 'flex items-center gap-2 langkah-row';
+    row.innerHTML = `
+        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold langkah-num">${count}</span>
+        <input type="text" name="langkah_kerja[]" value=""
+               placeholder="Langkah ${count}"
+               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+        <button type="button" onclick="removeLangkahEdit(this)"
+                class="flex-shrink-0 w-7 h-7 rounded-full bg-red-100 text-red-500 flex items-center justify-center hover:bg-red-200 transition-colors text-xs remove-btn">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    container.appendChild(row);
+    row.querySelector('input').focus();
+    updateLangkahVisibility(container);
+}
+
+function addLangkahEditWithValue(value, index) {
+    const container = document.getElementById('editLangkahKerjaContainer');
+    const count = container.querySelectorAll('.langkah-row').length + 1;
+    const row = document.createElement('div');
+    row.className = 'flex items-center gap-2 langkah-row';
+    row.innerHTML = `
+        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold langkah-num">${count}</span>
+        <input type="text" name="langkah_kerja[]" value="${value.replace(/"/g, '&quot;')}"
+               placeholder="Langkah ${count}"
+               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+        <button type="button" onclick="removeLangkahEdit(this)"
+                class="flex-shrink-0 w-7 h-7 rounded-full bg-red-100 text-red-500 flex items-center justify-center hover:bg-red-200 transition-colors text-xs remove-btn">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    container.appendChild(row);
+    updateLangkahVisibility(container);
+}
+
+function removeLangkahEdit(btn) {
+    const row = btn.closest('.langkah-row');
+    const container = row.closest('.space-y-2');
+    row.remove();
+    updateLangkahNumbers(container);
+    updateLangkahVisibility(container);
+}
 </script>
 <?= $this->endSection() ?>

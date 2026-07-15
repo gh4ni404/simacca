@@ -83,6 +83,13 @@ class PklController extends BaseController
         if ($siswaPkl && !empty($siswaPkl['tempat_pkl_id'])) {
             $templateModel = new PklTaskTemplateModel();
             $taskTemplates = $templateModel->getByTempatPkl($siswaPkl['tempat_pkl_id']);
+
+            $kategoriMappingModel = new \App\Models\KategoriPklMappingModel();
+            $mappedIds = $kategoriMappingModel->getMappedKategoriIds($siswaPkl['tempat_pkl_id']);
+            if (!empty($mappedIds)) {
+                $categories = array_filter($categories, fn($cat) => in_array($cat['id'], $mappedIds));
+                $categories = array_values($categories);
+            }
         }
 
         $data = [
@@ -94,6 +101,59 @@ class PklController extends BaseController
         ];
 
         return view('siswa/pkl/create', $data);
+    }
+
+    public function getTaskLangkahKerja()
+    {
+        $siswa = $this->getSiswa();
+        if (!$siswa) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
+        }
+
+        $taskId = (int) $this->request->getGet('task_id');
+        if (!$taskId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Task ID tidak valid']);
+        }
+
+        $taskResult = $this->pklService->getTaskById($taskId);
+        if (!$taskResult['success'] || $taskResult['data']['siswa_id'] != $siswa['id']) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Task tidak ditemukan']);
+        }
+
+        $langkahKerja = $taskResult['data']['langkah_kerja'] ?? null;
+        $steps = $langkahKerja ? json_decode($langkahKerja, true) : [];
+
+        return $this->response->setJSON(['success' => true, 'data' => $steps]);
+    }
+
+    public function getTemplateLangkahKerja()
+    {
+        $siswa = $this->getSiswa();
+        if (!$siswa) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
+        }
+
+        $templateId = (int) $this->request->getGet('template_id');
+        if (!$templateId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Template ID tidak valid']);
+        }
+
+        $templateModel = new PklTaskTemplateModel();
+        $template = $templateModel->find($templateId);
+        if (!$template) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Template tidak ditemukan']);
+        }
+
+        $siswaPklModel = new SiswaPklModel();
+        $siswaPkl = $siswaPklModel->getBySiswaAndTahun($siswa['id'], $siswa['tahun_ajaran']);
+        if (!$siswaPkl || $siswaPkl['tempat_pkl_id'] != $template['tempat_pkl_id']) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Template tidak valid']);
+        }
+
+        $langkahKerja = $template['langkah_kerja'] ?? null;
+        $steps = $langkahKerja ? json_decode($langkahKerja, true) : [];
+
+        return $this->response->setJSON(['success' => true, 'data' => $steps]);
     }
 
     public function store()
@@ -123,11 +183,21 @@ class PklController extends BaseController
                 return redirect()->back()->withInput();
             }
 
+            $taskLangkahKerja = null;
+            $langkahKerjaInput = $this->request->getPost('langkah_kerja');
+            if (is_array($langkahKerjaInput)) {
+                $filtered = array_values(array_filter(array_map('trim', $langkahKerjaInput)));
+                if (!empty($filtered)) {
+                    $taskLangkahKerja = json_encode($filtered, JSON_UNESCAPED_UNICODE);
+                }
+            }
+
             $taskResult = $this->pklService->createTask([
                 'siswa_id' => $siswa['id'],
                 'judul' => $this->request->getPost('judul'),
                 'kategori_id' => $this->request->getPost('kategori_id') ?: null,
                 'estimasi' => $this->request->getPost('estimasi') ?: null,
+                'langkah_kerja' => $taskLangkahKerja,
                 'status' => 'active',
             ]);
 
@@ -160,11 +230,21 @@ class PklController extends BaseController
                 return redirect()->back()->withInput();
             }
 
+            $taskLangkahKerja = null;
+            $langkahKerjaInput = $this->request->getPost('langkah_kerja');
+            if (is_array($langkahKerjaInput)) {
+                $filtered = array_values(array_filter(array_map('trim', $langkahKerjaInput)));
+                if (!empty($filtered)) {
+                    $taskLangkahKerja = json_encode($filtered, JSON_UNESCAPED_UNICODE);
+                }
+            }
+
             $taskResult = $this->pklService->createTask([
                 'siswa_id' => $siswa['id'],
                 'judul' => $template['judul'],
                 'kategori_id' => $template['kategori_id'],
                 'estimasi' => $template['estimasi'],
+                'langkah_kerja' => $taskLangkahKerja,
                 'status' => 'active',
             ]);
 

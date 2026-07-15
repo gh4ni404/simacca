@@ -66,11 +66,21 @@ class TaskTemplateController extends BaseController
             return redirect()->back()->withInput();
         }
 
+        $langkahKerja = null;
+        $langkahKerjaInput = $this->request->getPost('langkah_kerja');
+        if (is_array($langkahKerjaInput)) {
+            $filtered = array_values(array_filter(array_map('trim', $langkahKerjaInput)));
+            if (!empty($filtered)) {
+                $langkahKerja = json_encode($filtered, JSON_UNESCAPED_UNICODE);
+            }
+        }
+
         $result = $this->templateModel->insert([
             'tempat_pkl_id' => $instruktur['tempat_pkl_id'],
             'judul' => $this->request->getPost('judul'),
             'kategori_id' => $this->request->getPost('kategori_id') ?: null,
             'estimasi' => $this->request->getPost('estimasi') ?: null,
+            'langkah_kerja' => $langkahKerja,
         ]);
 
         if ($result) {
@@ -110,10 +120,20 @@ class TaskTemplateController extends BaseController
             return redirect()->back()->withInput();
         }
 
+        $langkahKerja = null;
+        $langkahKerjaInput = $this->request->getPost('langkah_kerja');
+        if (is_array($langkahKerjaInput)) {
+            $filtered = array_values(array_filter(array_map('trim', $langkahKerjaInput)));
+            if (!empty($filtered)) {
+                $langkahKerja = json_encode($filtered, JSON_UNESCAPED_UNICODE);
+            }
+        }
+
         $success = $this->templateModel->update($id, [
             'judul' => $this->request->getPost('judul'),
             'kategori_id' => $this->request->getPost('kategori_id') ?: null,
             'estimasi' => $this->request->getPost('estimasi') ?: null,
+            'langkah_kerja' => $langkahKerja,
         ]);
 
         if ($success) {
