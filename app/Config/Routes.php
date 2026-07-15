@@ -62,6 +62,14 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->get('change-password', 'AuthController::changePassword');
     $routes->post('change-password/process', 'AuthController::processChangePassword');
     $routes->get('access-denied', 'AuthController::accessDenied');
+
+    // CSRF Token endpoint for AJAX requests
+    $routes->get('csrf-token', static function () {
+        return service('response')->setJSON([
+            'tokenName'  => config('Security')->tokenName,
+            'tokenValue' => csrf_hash(),
+        ]);
+    });
 });
 
 // Admin Routes
@@ -205,6 +213,12 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('pkl-categories/simpan', 'Admin\PklCategoryController::store', ['filter' => 'role:admin']);
     $routes->post('pkl-categories/update/(:num)', 'Admin\PklCategoryController::update/$1', ['filter' => 'role:admin']);
     $routes->post('pkl-categories/hapus/(:num)', 'Admin\PklCategoryController::delete/$1', ['filter' => 'role:admin']);
+
+    // Mapping Kategori PKL
+    $routes->get('kategori-pkl-mapping', 'Admin\KategoriPklMappingController::index', ['filter' => 'role:admin']);
+    $routes->post('kategori-pkl-mapping/simpan', 'Admin\KategoriPklMappingController::store', ['filter' => 'role:admin']);
+    $routes->post('kategori-pkl-mapping/get-mapped', 'Admin\KategoriPklMappingController::getMappedKategori', ['filter' => 'role:admin']);
+    $routes->get('kategori-pkl-mapping/summary', 'Admin\KategoriPklMappingController::getMappingSummary', ['filter' => 'role:admin']);
 
     // Absensi PKL
     $routes->get('absensi-pkl', 'Admin\AbsensiPklController::index', ['filter' => 'role:admin']);

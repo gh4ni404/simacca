@@ -104,20 +104,21 @@
                         $activitiesHtml = esc($logs[0]['deskripsi']);
                         $catatanHtml = esc($logs[0]['catatan_instruktur'] ?? '');
                     } else {
-                        $activitiesHtml = '<ul style="list-style-type: disc; margin-left: 15px;">';
-                        $catatanHtml = '<ul style="list-style-type: disc; margin-left: 15px;">';
+                        $activitiesArray = [];
+                        $catatanArray = [];
+
                         foreach ($logs as $log) {
-                            $activitiesHtml .= '<li>' . esc($log['deskripsi']) . '</li>';
+                            if (!empty($log['deskripsi'])) {
+                                $activitiesArray[] = esc($log['deskripsi']);
+                            }
                             if (!empty($log['catatan_instruktur'])) {
-                                $catatanHtml .= '<li>' . esc($log['catatan_instruktur']) . '</li>';
+                                $catatanArray[] = esc($log['catatan_instruktur']);
                             }
                         }
-                        $activitiesHtml .= '</ul>';
-                        $catatanHtml .= '</ul>';
-                        
-                        if ($catatanHtml === '<ul style="list-style-type: disc; margin-left: 15px;"></ul>') {
-                            $catatanHtml = '';
-                        }
+
+                        // Menggabungkan array menjadi satu kalimat dipisahkan dengan koma
+                        $activitiesHtml = !empty($activitiesArray) ? implode(', ', $activitiesArray) . '.' : '';
+                        $catatanHtml = !empty($catatanArray) ? implode(', ', $catatanArray) . '.' : '';
                     }
             ?>
             <tr>
@@ -149,7 +150,7 @@
         <p>*) Catatan diberikan oleh pembimbing dunia kerja pada setiap kegiatan atau waktu tertentu.</p>
     </div>
 
-    <table class="footer-signatures">
+    <table class="footer-signatures" style="display: none;">
         <tr>
             <td>
                 <p>Mengetahui,</p>
