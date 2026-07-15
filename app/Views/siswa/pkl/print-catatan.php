@@ -219,9 +219,26 @@
                     <?= !empty($task['estimasi']) ? '(Estimasi: ' . esc($task['estimasi']) . ')' : '' ?></p>
                 <p style="margin-top: 8px; font-weight: bold;">Dokumen Perencanaan & Persiapan:</p>
                 <div class="planning-lines">
-                    <div class="planning-line">1. </div>
-                    <div class="planning-line">2. </div>
-                    <div class="planning-line">3. </div>
+                    <?php
+                    $langkahKerja = [];
+                    if (!empty($progress)) {
+                        $firstProgress = $progress[0];
+                        if (!empty($firstProgress['langkah_kerja'])) {
+                            $decoded = json_decode($firstProgress['langkah_kerja'], true);
+                            if (is_array($decoded)) {
+                                $langkahKerja = $decoded;
+                            }
+                        }
+                    }
+                    if (!empty($langkahKerja)):
+                        foreach ($langkahKerja as $i => $step): ?>
+                            <div class="planning-line"><?= ($i + 1) . '. ' . esc($step) ?></div>
+                        <?php endforeach;
+                    else:
+                        for ($i = 1; $i <= 3; $i++): ?>
+                            <div class="planning-line"><?= $i . '. ' ?></div>
+                        <?php endfor;
+                    endif; ?>
                 </div>
             </div>
 

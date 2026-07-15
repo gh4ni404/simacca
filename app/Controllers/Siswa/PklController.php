@@ -237,9 +237,18 @@ class PklController extends BaseController
             'task_id' => $taskId,
             'tanggal' => $this->request->getPost('tanggal') ?: date('Y-m-d'),
             'deskripsi' => $this->request->getPost('deskripsi'),
+            'langkah_kerja' => null,
             'foto' => $fotoName,
             'status' => 'draft',
         ];
+
+        $langkahKerja = $this->request->getPost('langkah_kerja');
+        if (is_array($langkahKerja)) {
+            $filtered = array_values(array_filter(array_map('trim', $langkahKerja)));
+            if (!empty($filtered)) {
+                $progressData['langkah_kerja'] = json_encode($filtered, JSON_UNESCAPED_UNICODE);
+            }
+        }
 
         $result = $this->pklService->createProgress($progressData);
 
@@ -471,8 +480,18 @@ class PklController extends BaseController
             }
         }
 
+        $langkahKerja = $this->request->getPost('langkah_kerja');
+        $langkahKerjaJson = null;
+        if (is_array($langkahKerja)) {
+            $filtered = array_values(array_filter(array_map('trim', $langkahKerja)));
+            if (!empty($filtered)) {
+                $langkahKerjaJson = json_encode($filtered, JSON_UNESCAPED_UNICODE);
+            }
+        }
+
         $updateData = [
             'deskripsi' => $this->request->getPost('deskripsi'),
+            'langkah_kerja' => $langkahKerjaJson,
             'foto' => $fotoName,
         ];
 

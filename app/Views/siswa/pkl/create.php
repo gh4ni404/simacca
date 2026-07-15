@@ -122,6 +122,48 @@
                             </button>
                         </div>
 
+                        <!-- Langkah Kerja (Perencanaan & Persiapan) -->
+                        <div class="mb-5">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-list-ol mr-2 text-indigo-500"></i>
+                                Langkah Kerja <span class="text-gray-400 font-normal">(Perencanaan & Persiapan)</span>
+                            </label>
+                            <div id="langkahKerjaContainer" class="space-y-2">
+                                <?php
+                                $langkah = old('langkah_kerja');
+                                if ($langkah && is_array($langkah)):
+                                    foreach ($langkah as $i => $val): ?>
+                                    <div class="flex items-center gap-2 langkah-row">
+                                        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold langkah-num"><?= ($i + 1) ?></span>
+                                        <input type="text" name="langkah_kerja[]" value="<?= esc($val) ?>"
+                                               placeholder="Langkah <?= ($i + 1) ?>"
+                                               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+                                        <button type="button" onclick="removeLangkah(this)"
+                                                class="flex-shrink-0 w-7 h-7 rounded-full bg-red-100 text-red-500 flex items-center justify-center hover:bg-red-200 transition-colors text-xs <?= count($langkah) <= 1 ? 'hidden' : '' ?> remove-btn">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    <?php endforeach;
+                                else: ?>
+                                    <div class="flex items-center gap-2 langkah-row">
+                                        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold langkah-num">1</span>
+                                        <input type="text" name="langkah_kerja[]" value=""
+                                               placeholder="Langkah 1"
+                                               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+                                        <button type="button" onclick="removeLangkah(this)"
+                                                class="flex-shrink-0 w-7 h-7 rounded-full bg-red-100 text-red-500 flex items-center justify-center hover:bg-red-200 transition-colors text-xs hidden remove-btn">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <button type="button" onclick="addLangkah()"
+                                    class="mt-2 inline-flex items-center px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors text-xs font-medium">
+                                <i class="fas fa-plus mr-1"></i> Tambah Langkah
+                            </button>
+                            <p class="text-xs text-gray-400 mt-1">Isi langkah persiapan sebelum mengerjakan</p>
+                        </div>
+
                         <!-- Deskripsi -->
                         <div class="mb-5">
                             <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -226,6 +268,52 @@
 </div>
 
 <script>
+function addLangkah() {
+    const container = document.getElementById('langkahKerjaContainer');
+    const count = container.querySelectorAll('.langkah-row').length + 1;
+    const row = document.createElement('div');
+    row.className = 'flex items-center gap-2 langkah-row';
+    row.innerHTML = `
+        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold langkah-num">${count}</span>
+        <input type="text" name="langkah_kerja[]" value=""
+               placeholder="Langkah ${count}"
+               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+        <button type="button" onclick="removeLangkah(this)"
+                class="flex-shrink-0 w-7 h-7 rounded-full bg-red-100 text-red-500 flex items-center justify-center hover:bg-red-200 transition-colors text-xs remove-btn">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    container.appendChild(row);
+    row.querySelector('input').focus();
+    updateLangkahVisibility();
+}
+
+function removeLangkah(btn) {
+    const row = btn.closest('.langkah-row');
+    row.remove();
+    updateLangkahNumbers();
+    updateLangkahVisibility();
+}
+
+function updateLangkahNumbers() {
+    const rows = document.querySelectorAll('#langkahKerjaContainer .langkah-row');
+    rows.forEach((row, i) => {
+        row.querySelector('.langkah-num').textContent = i + 1;
+        row.querySelector('input').placeholder = 'Langkah ' + (i + 1);
+    });
+}
+
+function updateLangkahVisibility() {
+    const rows = document.querySelectorAll('#langkahKerjaContainer .langkah-row');
+    const btns = document.querySelectorAll('#langkahKerjaContainer .remove-btn');
+    btns.forEach(btn => {
+        if (rows.length <= 1) {
+            btn.classList.add('hidden');
+        } else {
+            btn.classList.remove('hidden');
+        }
+    });
+}
 function switchToNew() {
     document.getElementById('taskSelect').classList.add('hidden');
     document.getElementById('toggleSection').classList.add('hidden');
@@ -307,6 +395,16 @@ document.getElementById('pklForm').addEventListener('submit', function(e) {
     if (deskripsi.length < 3) {
         e.preventDefault();
         alert('Deskripsi harus minimal 3 karakter!');
+        return false;
+    }
+    const langkahInputs = document.querySelectorAll('input[name="langkah_kerja[]"]');
+    let hasLangkah = false;
+    langkahInputs.forEach(inp => {
+        if (inp.value.trim().length > 0) hasLangkah = true;
+    });
+    if (!hasLangkah) {
+        e.preventDefault();
+        alert('Minimal isi 1 langkah kerja!');
         return false;
     }
     if (!confirm('Simpan aktivitas ini?')) {

@@ -13,7 +13,7 @@ class PklProgressModel extends Model
     protected $useSoftDeletes   = true;
     protected $protectFields    = true;
     protected $allowedFields    = [
-        'task_id', 'tanggal', 'deskripsi', 'foto', 'status',
+        'task_id', 'tanggal', 'deskripsi', 'langkah_kerja', 'foto', 'status',
         'catatan_pembimbing', 'catatan_instruktur',
         'verified_by', 'verified_at',
     ];
