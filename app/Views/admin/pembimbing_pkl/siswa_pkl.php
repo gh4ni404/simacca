@@ -273,12 +273,21 @@
                     </select>
                 </div>
 
-                <!-- Info Pembimbing -->
+                <!-- Pembimbing Select Dropdown -->
+                <div id="batchPembimbingContainer" class="mb-4 hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Pembimbing PKL *</label>
+                    <select id="batchPembimbingSelect" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <option value="">Pilih Pembimbing PKL</option>
+                    </select>
+                </div>
+
+                <!-- Info Pembimbing (Fallback / Warning) -->
                 <div id="batchPembimbingInfo" class="mb-4 hidden">
-                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                        <p class="text-sm text-blue-800">
-                            <i class="fas fa-chalkboard-teacher mr-1"></i>
-                            Pembimbing: <span id="batchPembimbingNama" class="font-semibold">-</span>
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+                        <p class="text-sm text-red-800 font-semibold">
+                            <i class="fas fa-exclamation-circle mr-1"></i>
+                            <span id="batchPembimbingNama">Belum ada pembimbing</span>
                         </p>
                     </div>
                 </div>
@@ -514,7 +523,18 @@ function onBatchCheckboxChange() {
 function updateBatchCount() {
     const n = document.querySelectorAll('.batch-checkbox:checked').length;
     document.getElementById('batchSelectedCount').textContent = n + ' dipilih';
-    document.getElementById('btnBatchSubmit').disabled = n === 0 || !document.getElementById('batchTempatPkl').value;
+    
+    const tempatPklSelect = document.getElementById('batchTempatPkl');
+    const pembimbingSelect = document.getElementById('batchPembimbingSelect');
+    
+    // Enabled submit only if:
+    // 1. At least 1 student is selected
+    // 2. A place is selected
+    // 3. A mentor is selected AND the mentor dropdown is not hidden or is required
+    const isPembimbingRequired = pembimbingSelect.hasAttribute('required');
+    const isPembimbingSelected = !isPembimbingRequired || pembimbingSelect.value !== "";
+    
+    document.getElementById('btnBatchSubmit').disabled = n === 0 || !tempatPklSelect.value || !isPembimbingSelected;
 }
 
 /* Batch search */
@@ -525,12 +545,26 @@ document.getElementById('batchSearch').addEventListener('input', function() {
     });
 });
 
-/* Pembimbing info */
-document.getElementById('batchTempatPkl').addEventListener('change', function() {
+/* Listen to pembimbing selection change to re-evaluate submit eligibility */
+document.getElementById('batchPembimbingSelect').addEventListener('change', function() {
     updateBatchCount();
+});
+
+/* Pembimbing info & dropdown */
+document.getElementById('batchTempatPkl').addEventListener('change', function() {
+    const select = document.getElementById('batchPembimbingSelect');
+    const container = document.getElementById('batchPembimbingContainer');
     const info = document.getElementById('batchPembimbingInfo');
     const nameEl = document.getElementById('batchPembimbingNama');
-    if (!this.value) { info.classList.add('hidden'); return; }
+    
+    select.innerHTML = '<option value="">Pilih Pembimbing PKL</option>';
+    
+    if (!this.value) { 
+        container.classList.add('hidden'); 
+        info.classList.add('hidden'); 
+        updateBatchCount();
+        return; 
+    }
 
     fetch('<?= base_url('admin/pembimbing-pkl/get-pembimbing-by-tempat-pkl') ?>', {
         method: 'POST',
@@ -544,20 +578,38 @@ document.getElementById('batchTempatPkl').addEventListener('change', function() 
     .then(r => r.json())
     .then(data => {
         if (data && data.length > 0) {
-            nameEl.textContent = data.map(p => p.nama_guru).join(', ');
+            data.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.textContent = p.nama_guru + ' (' + p.nip + ')';
+                select.appendChild(opt);
+            });
+            container.classList.remove('hidden');
+            info.classList.add('hidden');
+            select.setAttribute('required', 'required');
         } else {
-            nameEl.textContent = 'Belum ada pembimbing';
+            container.classList.add('hidden');
+            nameEl.textContent = 'Belum ada pembimbing untuk tempat PKL ini. Silakan tambahkan pembimbing PKL terlebih dahulu.';
+            info.classList.remove('hidden');
+            select.removeAttribute('required');
+            alert('Peringatan: Tidak dapat menempatkan siswa karena belum ada pembimbing PKL yang ditugaskan ke lokasi ini.');
         }
-        info.classList.remove('hidden');
+        updateBatchCount();
     })
-    .catch(() => { nameEl.textContent = 'Gagal memuat'; info.classList.remove('hidden'); });
+    .catch(() => { 
+        container.classList.add('hidden');
+        nameEl.textContent = 'Gagal memuat pembimbing'; 
+        info.classList.remove('hidden');
+        updateBatchCount();
+    });
 });
 
 /* Submit batch form via AJAX */
 function submitBatchForm() {
     const tempatPklId = document.getElementById('batchTempatPkl').value;
+    const pembimbingPklId = document.getElementById('batchPembimbingSelect').value;
     const checked = document.querySelectorAll('.batch-checkbox:checked');
-    if (!tempatPklId || checked.length === 0) return;
+    if (!tempatPklId || !pembimbingPklId || checked.length === 0) return;
 
     const siswaIds = [...checked].map(cb => cb.dataset.id);
 
@@ -576,6 +628,10 @@ function submitBatchForm() {
     const tpInput = document.createElement('input');
     tpInput.type = 'hidden'; tpInput.name = 'tempat_pkl_id'; tpInput.value = tempatPklId;
     form.appendChild(tpInput);
+
+    const pmInput = document.createElement('input');
+    pmInput.type = 'hidden'; pmInput.name = 'pembimbing_pkl_id'; pmInput.value = pembimbingPklId;
+    form.appendChild(pmInput);
 
     siswaIds.forEach(id => {
         const inp = document.createElement('input');

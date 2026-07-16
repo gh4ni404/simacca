@@ -246,8 +246,9 @@ class PembimbingPklController extends BaseController
     public function siswaPklStore()
     {
         $data = [
-            'siswa_id'      => $this->request->getPost('siswa_id'),
-            'tempat_pkl_id' => $this->request->getPost('tempat_pkl_id'),
+            'siswa_id'          => $this->request->getPost('siswa_id'),
+            'tempat_pkl_id'     => $this->request->getPost('tempat_pkl_id'),
+            'pembimbing_pkl_id' => $this->request->getPost('pembimbing_pkl_id'),
         ];
 
         $result = $this->pembimbingPklService->createSiswaPkl($data);
@@ -256,21 +257,22 @@ class PembimbingPklController extends BaseController
             return redirect()->back()->withInput()->with('errors', $result['errors'] ?? []);
         }
 
-        session()->setFlashdata('success', 'Siswa berhasil ditempatkan di tempat PKL. Pembimbing otomatis mengikuti tempat PKL.');
+        session()->setFlashdata('success', 'Siswa berhasil ditempatkan di tempat PKL.');
         return redirect()->to('/admin/pembimbing-pkl/siswa-pkl');
     }
 
     public function siswaPklBatchStore()
     {
-        $siswaIds       = $this->request->getPost('siswa_ids');
-        $tempatPklId    = $this->request->getPost('tempat_pkl_id');
+        $siswaIds        = $this->request->getPost('siswa_ids');
+        $tempatPklId     = $this->request->getPost('tempat_pkl_id');
+        $pembimbingPklId = $this->request->getPost('pembimbing_pkl_id');
 
         if (empty($siswaIds) || !is_array($siswaIds)) {
             session()->setFlashdata('error', 'Pilih minimal satu siswa');
             return redirect()->back()->withInput();
         }
 
-        $result = $this->pembimbingPklService->createSiswaPklBatch($siswaIds, $tempatPklId);
+        $result = $this->pembimbingPklService->createSiswaPklBatch($siswaIds, $tempatPklId, $pembimbingPklId);
 
         if (!$result['success']) {
             session()->setFlashdata('error', $result['message']);

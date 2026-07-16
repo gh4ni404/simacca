@@ -51,6 +51,17 @@
                         <?php endif; ?>
                     </div>
 
+                    <div id="pembimbingSelectContainer" class="hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Pembimbing PKL *</label>
+                        <select name="pembimbing_pkl_id" id="pembimbingPklSelect" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="">Pilih Pembimbing PKL</option>
+                        </select>
+                        <?php if ($validation->hasError('pembimbing_pkl_id')): ?>
+                            <p class="text-red-600 text-xs mt-1"><?= $validation->getError('pembimbing_pkl_id') ?></p>
+                        <?php endif; ?>
+                    </div>
+
                 </div>
             </div>
 
@@ -71,7 +82,7 @@
                     </div>
                     <div class="mt-4 bg-green-50 border border-green-200 rounded-lg p-4">
                         <p class="text-sm text-green-800">
-                            <i class="fas fa-check-circle mr-2"></i> Pembimbing otomatis menyesuaikan dengan tempat PKL yang dipilih.
+                            <i class="fas fa-check-circle mr-2"></i> Pilih salah satu pembimbing di atas untuk mengaitkan siswa dengan pembimbing tersebut.
                         </p>
                     </div>
                 </div>
@@ -83,7 +94,7 @@
                 class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
                 Batal
             </a>
-            <button type="submit"
+            <button type="submit" id="btnSubmit"
                 class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center">
                 <i class="fas fa-save mr-2"></i> Simpan Penempatan
             </button>
@@ -95,12 +106,18 @@
     document.addEventListener('DOMContentLoaded', function() {
         const tahunAjaran = '<?= get_active_tahun_ajaran() ?>';
         const tempatPklSelect = document.getElementById('tempatPklSelect');
+        const pembimbingPklSelect = document.getElementById('pembimbingPklSelect');
+        const pembimbingSelectContainer = document.getElementById('pembimbingSelectContainer');
+        const btnSubmit = document.getElementById('btnSubmit');
 
         function loadPembimbing() {
             const tempatPklId = tempatPklSelect.value;
 
             if (!tempatPklId) {
                 document.getElementById('pembimbingResult').classList.add('hidden');
+                pembimbingSelectContainer.classList.add('hidden');
+                pembimbingPklSelect.innerHTML = '<option value="">Pilih Pembimbing PKL</option>';
+                pembimbingPklSelect.removeAttribute('required');
                 return;
             }
 
@@ -121,6 +138,7 @@
                 const list = document.getElementById('pembimbingList');
                 const container = document.getElementById('pembimbingResult');
                 list.innerHTML = '';
+                pembimbingPklSelect.innerHTML = '<option value="">Pilih Pembimbing PKL</option>';
 
                 if (data && data.length > 0) {
                     data.forEach(function(p) {
@@ -128,14 +146,26 @@
                         li.className = 'text-blue-700';
                         li.textContent = p.nama_guru + ' (' + p.nip + ')';
                         list.appendChild(li);
+
+                        const opt = document.createElement('option');
+                        opt.value = p.id;
+                        opt.textContent = p.nama_guru + ' (' + p.nip + ')';
+                        pembimbingPklSelect.appendChild(opt);
                     });
                     container.classList.remove('hidden');
+                    pembimbingSelectContainer.classList.remove('hidden');
+                    pembimbingPklSelect.setAttribute('required', 'required');
+                    btnSubmit.disabled = false;
                 } else {
                     const li = document.createElement('li');
-                    li.className = 'text-yellow-600';
-                    li.textContent = 'Belum ada pembimbing untuk tempat PKL ini di tahun ajaran tersebut.';
+                    li.className = 'text-red-600 font-semibold';
+                    li.textContent = 'Belum ada pembimbing untuk tempat PKL ini. Silakan tambahkan pembimbing PKL terlebih dahulu.';
                     list.appendChild(li);
                     container.classList.remove('hidden');
+                    pembimbingSelectContainer.classList.add('hidden');
+                    pembimbingPklSelect.removeAttribute('required');
+                    btnSubmit.disabled = true;
+                    alert('Peringatan: Tidak dapat menempatkan siswa karena belum ada pembimbing PKL yang ditugaskan ke lokasi ini.');
                 }
             })
             .catch(error => {

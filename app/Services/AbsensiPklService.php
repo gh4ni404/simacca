@@ -211,7 +211,13 @@ class AbsensiPklService extends BaseService
 
             $siswa = [];
             foreach ($pembimbingList as $pembimbing) {
-                $siswaList = $this->siswaPklModel->select('
+                // Check if there are any students assigned specifically to this pembimbing
+                $hasPembimbingFilter = $this->siswaPklModel
+                    ->where('pembimbing_pkl_id', $pembimbing['id'])
+                    ->where('tahun_ajaran', $tahunAjaran)
+                    ->countAllResults() > 0;
+
+                $siswaQuery = $this->siswaPklModel->select('
                         siswa_pkl.*,
                         siswa.nama_lengkap,
                         siswa.nis,
@@ -221,10 +227,21 @@ class AbsensiPklService extends BaseService
                     ->join('siswa', 'siswa.id = siswa_pkl.siswa_id')
                     ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
                     ->join('tempat_pkl', 'tempat_pkl.id = siswa_pkl.tempat_pkl_id')
-                    ->where('siswa_pkl.tempat_pkl_id', $pembimbing['tempat_pkl_id'])
                     ->where('siswa_pkl.tahun_ajaran', $tahunAjaran)
-                    ->orderBy('siswa.nama_lengkap', 'ASC')
-                    ->findAll();
+                    ->orderBy('siswa.nama_lengkap', 'ASC');
+
+                if ($hasPembimbingFilter) {
+                    $siswaQuery->where('siswa_pkl.pembimbing_pkl_id', $pembimbing['id']);
+                } else {
+                    // Fallback for legacy data: filter by tempat_pkl_id but exclude students explicitly assigned to others
+                    $siswaQuery->where('siswa_pkl.tempat_pkl_id', $pembimbing['tempat_pkl_id'])
+                        ->groupStart()
+                            ->where('siswa_pkl.pembimbing_pkl_id IS NULL', null, false)
+                            ->orWhere('siswa_pkl.pembimbing_pkl_id', $pembimbing['id'])
+                        ->groupEnd();
+                }
+
+                $siswaList = $siswaQuery->findAll();
 
                 foreach ($siswaList as $s) {
                     $s['pembimbing_pkl_id'] = $pembimbing['id'];

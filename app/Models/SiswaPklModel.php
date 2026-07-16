@@ -65,7 +65,7 @@ class SiswaPklModel extends Model
             ->join('siswa', 'siswa.id = siswa_pkl.siswa_id AND siswa.deleted_at IS NULL')
             ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
             ->join('tempat_pkl', 'tempat_pkl.id = siswa_pkl.tempat_pkl_id')
-            ->join('pembimbing_pkl', 'pembimbing_pkl.tempat_pkl_id = siswa_pkl.tempat_pkl_id AND pembimbing_pkl.tahun_ajaran = siswa_pkl.tahun_ajaran', 'left')
+            ->join('pembimbing_pkl', 'pembimbing_pkl.id = siswa_pkl.pembimbing_pkl_id', 'left')
             ->join('guru', 'guru.id = pembimbing_pkl.guru_id', 'left')
             ->orderBy('kelas.nama_kelas', 'ASC')
             ->orderBy('siswa.nama_lengkap', 'ASC');

@@ -519,7 +519,7 @@ class PembimbingPklService extends BaseService
         });
     }
 
-    public function createSiswaPklBatch(array $siswaIds, int $tempatPklId): array
+    public function createSiswaPklBatch(array $siswaIds, int $tempatPklId, ?int $pembimbingPklId = null): array
     {
         if (empty($siswaIds)) {
             return $this->errorResponse('Tidak ada siswa yang dipilih');
@@ -527,7 +527,16 @@ class PembimbingPklService extends BaseService
 
         $tahunAjaran = get_active_tahun_ajaran();
 
-        return $this->executeInTransaction(function () use ($siswaIds, $tempatPklId, $tahunAjaran) {
+        // Otomatis cari pembimbing_pkl_id dari tempat PKL jika tidak dikirim
+        if (empty($pembimbingPklId)) {
+            $pembimbing = $this->pembimbingPklModel
+                ->where('tempat_pkl_id', $tempatPklId)
+                ->where('tahun_ajaran', $tahunAjaran)
+                ->first();
+            $pembimbingPklId = $pembimbing['id'] ?? null;
+        }
+
+        return $this->executeInTransaction(function () use ($siswaIds, $tempatPklId, $pembimbingPklId, $tahunAjaran) {
             $success = 0;
             $skipped = 0;
 
@@ -541,12 +550,13 @@ class PembimbingPklService extends BaseService
 
                 if ($existing) {
                     if (!is_null($existing['deleted_at'])) {
-                        // Restore soft-deleted record
+                        // Restore soft-deleted record dan update pembimbing_pkl_id
                         $this->db->table('siswa_pkl')
                             ->where('id', $existing['id'])
                             ->update([
-                                'tempat_pkl_id' => $tempatPklId,
-                                'deleted_at' => null,
+                                'tempat_pkl_id'     => $tempatPklId,
+                                'pembimbing_pkl_id' => $pembimbingPklId,
+                                'deleted_at'        => null,
                             ]);
                         $success++;
                     } else {
@@ -556,10 +566,11 @@ class PembimbingPklService extends BaseService
                 }
 
                 $insertData = [
-                    'siswa_id'      => $siswaId,
-                    'tempat_pkl_id' => $tempatPklId,
-                    'tahun_ajaran'  => $tahunAjaran,
-                    'created_at'    => date('Y-m-d H:i:s'),
+                    'siswa_id'          => $siswaId,
+                    'tempat_pkl_id'     => $tempatPklId,
+                    'pembimbing_pkl_id' => $pembimbingPklId,
+                    'tahun_ajaran'      => $tahunAjaran,
+                    'created_at'        => date('Y-m-d H:i:s'),
                 ];
 
                 $id = $this->siswaPklModel->insert($insertData);
