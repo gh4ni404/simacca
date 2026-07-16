@@ -758,7 +758,7 @@ class PklController extends BaseController
         return view('siswa/pkl/print-jurnal', $data);
     }
 
-    public function printCatatan($taskIds)
+    public function printCatatan($taskIds, $minggu = null)
     {
         $siswa = $this->getSiswa();
         if (!$siswa) {
@@ -771,6 +771,19 @@ class PklController extends BaseController
             return redirect()->to('/siswa/jurnal-pkl');
         }
 
+        helper('setting');
+        $weekStart = null;
+        $weekEnd = null;
+        if ($minggu !== null && is_numeric($minggu)) {
+            $startDate = get_jurnal_pkl_start_date();
+            $weekBase = $startDate ? get_jurnal_pkl_week_base() : null;
+            if ($weekBase) {
+                $range = get_week_range($startDate, (int) $minggu);
+                $weekStart = $range['start'];
+                $weekEnd = $range['end'];
+            }
+        }
+
         $tasksData = [];
         foreach ($ids as $taskId) {
             $taskResult = $this->pklService->getTaskById($taskId);
@@ -780,6 +793,12 @@ class PklController extends BaseController
 
             $progressResult = $this->pklService->getProgressByTask($taskId);
             $progress = $progressResult['success'] ? $progressResult['data'] : [];
+
+            if ($weekStart && $weekEnd && !empty($progress)) {
+                $progress = array_values(array_filter($progress, function($p) use ($weekStart, $weekEnd) {
+                    return $p['tanggal'] >= $weekStart && $p['tanggal'] <= $weekEnd;
+                }));
+            }
 
             if (empty($progress)) {
                 continue;

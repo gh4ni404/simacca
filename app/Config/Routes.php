@@ -355,6 +355,7 @@ $routes->group('siswa', ['filter' => 'role:siswa'], function ($routes) {
     $routes->post('jurnal-pkl/update-progress/(:num)', 'Siswa\PklController::updateProgressData/$1');
     $routes->post('jurnal-pkl/hapus-progress/(:num)', 'Siswa\PklController::deleteProgress/$1');
     $routes->get('jurnal-pkl/cetak-jurnal/(:num)/(:num)', 'Siswa\PklController::printJurnal/$1/$2');
+    $routes->get('jurnal-pkl/cetak-catatan/(:any)/(:num)', 'Siswa\PklController::printCatatan/$1/$2');
     $routes->get('jurnal-pkl/cetak-catatan/(:any)', 'Siswa\PklController::printCatatan/$1');
     $routes->post('jurnal-pkl/selesaikan-task/(:num)', 'Siswa\PklController::selesaikanTask/$1');
 

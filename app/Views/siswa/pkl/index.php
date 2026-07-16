@@ -1,413 +1,705 @@
 <?= $this->extend(get_device_layout()) ?>
 
+<?= $this->section('styles') ?>
+<link rel="stylesheet" href="<?= base_url('css/pkl-jurnal.css') ?>">
+<style>
+    .pkl-timeline-line {
+        left: 19px !important;
+    }
+    .pkl-timeline-dot {
+        left: 14px !important;
+    }
+    .tl-card { transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s; }
+    .tl-card:active { transform: scale(0.99); }
+    .tl-card.open { border-color: rgba(59,130,246,0.4); background-color: rgba(59,130,246,0.02); }
+    .tl-chevron { transition: transform 0.3s ease; }
+    .tl-chevron.open { transform: rotate(90deg); }
+    .tl-panel { transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease; }
+    .stat-grid-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .stat-grid-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .progress-fill-anim {
+        transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+</style>
+<?= $this->endSection() ?>
+
 <?= $this->section('content') ?>
 <?php
 $bulanIndo = [
-    1 => 'Januari',
-    'Februari',
-    'Maret',
-    'April',
-    'Mei',
-    'Juni',
-    'Juli',
-    'Agustus',
-    'September',
-    'Oktober',
-    'November',
-    'Desember'
+    1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
 ];
 $hariIndo = [
-    'Sunday' => 'Minggu',
-    'Monday' => 'Senin',
-    'Tuesday' => 'Selasa',
-    'Wednesday' => 'Rabu',
-    'Thursday' => 'Kamis',
-    'Friday' => 'Jumat',
-    'Saturday' => 'Sabtu'
+    'Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa',
+    'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'
+];
+$hariSingkat = [
+    'Sunday' => 'Min', 'Monday' => 'Sen', 'Tuesday' => 'Sel',
+    'Wednesday' => 'Rab', 'Thursday' => 'Kam', 'Friday' => 'Jum', 'Saturday' => 'Sab'
+];
+
+$statusIconMap = [
+    'approved' => ['icon' => 'fa-circle-check', 'color' => 'text-green-500', 'bg' => 'bg-green-100'],
+    'verified_by_instruktur' => ['icon' => 'fa-circle-check', 'color' => 'text-blue-500', 'bg' => 'bg-blue-100'],
+    'submitted' => ['icon' => 'fa-clock', 'color' => 'text-yellow-500', 'bg' => 'bg-yellow-100'],
+    'revision' => ['icon' => 'fa-pen-to-square', 'color' => 'text-red-500', 'bg' => 'bg-red-100'],
+    'draft' => ['icon' => 'fa-pen', 'color' => 'text-gray-500', 'bg' => 'bg-gray-100'],
+];
+
+$statusLabel = [
+    'approved' => 'Disetujui',
+    'verified_by_instruktur' => 'Diverifikasi Instruktur',
+    'submitted' => 'Menunggu',
+    'revision' => 'Revisi',
+    'draft' => 'Draft',
+];
+
+$kategoriBadge = [
+    'Desain' => 'bg-purple-100 text-purple-700',
+    'Programming' => 'bg-blue-100 text-blue-700',
+    'Administrasi' => 'bg-green-100 text-green-700',
+    'Marketing' => 'bg-orange-100 text-orange-700',
 ];
 ?>
 
-<div class="mb-6">
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800">
-                <i class="fas fa-book mr-2 text-blue-600"></i>
-                Jurnal PKL
-            </h1>
-            <p class="text-gray-600 mt-1">Catat kegiatan PKL harian Anda</p>
-        </div>
-        <div class="mt-4 md:mt-0">
-            <a href="<?= base_url('siswa/jurnal-pkl/tambah'); ?>"
-                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                <i class="fas fa-plus mr-2"></i>
-                Tambah Aktivitas
-            </a>
-        </div>
-    </div>
-</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-<?= view('components/alerts') ?>
+    <!-- ========== LEFT & CENTER: Main Activity Feed ========== -->
+    <div class="lg:col-span-8 space-y-6">
 
-<!-- Stats -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-    <div class="bg-white rounded-lg shadow p-4">
-        <div class="flex items-center">
-            <div class="p-2 rounded-lg bg-blue-100 text-blue-600 mr-3">
-                <i class="fas fa-tasks text-lg"></i>
-            </div>
-            <div>
-                <p class="text-xs text-gray-500">Task</p>
-                <p class="text-xl font-bold"><?= $stats['total_tasks'] ?? 0 ?></p>
-            </div>
-        </div>
-    </div>
-    <div class="bg-white rounded-lg shadow p-4">
-        <div class="flex items-center">
-            <div class="p-2 rounded-lg bg-green-100 text-green-600 mr-3">
-                <i class="fas fa-check-circle text-lg"></i>
-            </div>
-            <div>
-                <p class="text-xs text-gray-500">Disetujui</p>
-                <p class="text-xl font-bold"><?= $stats['approved'] ?? 0 ?></p>
-            </div>
-        </div>
-    </div>
-    <div class="bg-white rounded-lg shadow p-4">
-        <div class="flex items-center">
-            <div class="p-2 rounded-lg bg-yellow-100 text-yellow-600 mr-3">
-                <i class="fas fa-clock text-lg"></i>
-            </div>
-            <div>
-                <p class="text-xs text-gray-500">Menunggu</p>
-                <p class="text-xl font-bold"><?= ($stats['submitted'] ?? 0) + ($stats['draft'] ?? 0) + ($stats['verified_by_instruktur'] ?? 0) ?></p>
-            </div>
-        </div>
-    </div>
-    <div class="bg-white rounded-lg shadow p-4">
-        <div class="flex items-center">
-            <div class="p-2 rounded-lg bg-orange-100 text-orange-600 mr-3">
-                <i class="fas fa-edit text-lg"></i>
-            </div>
-            <div>
-                <p class="text-xs text-gray-500">Revisi</p>
-                <p class="text-xl font-bold"><?= $stats['revision'] ?? 0 ?></p>
-            </div>
-        </div>
-    </div>
-</div>
+        <!-- Flash Messages -->
+        <?= view('components/alerts') ?>
 
-<!-- Tasks Aktif -->
-<?php if (!empty($tasks)): ?>
-    <div class="mb-6">
-        <h2 class="text-lg font-semibold text-gray-800 mb-3">
-            <i class="fas fa-list-check mr-2 text-blue-600"></i>
-            Task Aktif
-        </h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <?php foreach ($tasks as $task): ?>
-                <?php
-                $progressSummary = (new \App\Models\PklTaskModel())->getProgressSummary($task['id']);
-                $total = $progressSummary['total'];
-                if ($total > 0) {
-                    $weightedSum = ($progressSummary['submitted'] * 50) + ($progressSummary['verified_by_instruktur'] * 80) + ($progressSummary['approved'] * 100);
-                    $progressPct = round($weightedSum / $total);
-                } else {
-                    $progressPct = 0;
-                }
-
-                if ($progressPct >= 100) {
-                    $barColor = 'bg-green-500';
-                } elseif ($progressPct >= 80) {
-                    $barColor = 'bg-blue-500';
-                } elseif ($progressPct >= 50) {
-                    $barColor = 'bg-yellow-500';
-                } else {
-                    $barColor = 'bg-gray-400';
-                }
-
-                $remaining = $total - $progressSummary['approved'];
-                ?>
-                <a href="<?= base_url('siswa/jurnal-pkl/task/' . $task['id']); ?>"
-                    class="block bg-white rounded-lg shadow hover:shadow-md transition-shadow p-4">
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1 min-w-0">
-                            <h3 class="text-sm font-semibold text-gray-800 truncate"><?= esc($task['judul']) ?></h3>
-                            <?php if (!empty($task['kategori_nama'])): ?>
-                                <span class="inline-block mt-1 text-xs px-2 py-0.5 rounded-full
-                        <?= match ($task['kategori_nama']) {
-                            'Desain' => 'bg-purple-100 text-purple-700',
-                            'Programming' => 'bg-blue-100 text-blue-700',
-                            'Administrasi' => 'bg-green-100 text-green-700',
-                            'Marketing' => 'bg-orange-100 text-orange-700',
-                            default => 'bg-gray-100 text-gray-600'
-                        } ?>"><?= esc($task['kategori_nama']) ?></span>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                    <div class="mt-3">
-                        <div class="flex justify-between text-xs text-gray-500 mb-1">
-                            <span><?= $remaining ?> progress tersisa</span>
-                            <span><?= $progressPct ?>%</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-1.5">
-                            <div class="<?= $barColor ?> h-1.5 rounded-full" style="width: <?= $progressPct ?>%"></div>
-                        </div>
-                    </div>
+        <!-- Hari Ini Section -->
+        <section class="space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-day text-primary"></i>
+                        Hari Ini
+                    </h2>
+                    <span class="px-3 py-1 bg-blue-50 rounded-full text-xs font-semibold text-gray-600">
+                        <?= $hariIndo[date('l')] . ', ' . date('d') . ' ' . $bulanIndo[(int) date('m')] . ' ' . date('Y') ?>
+                    </span>
+                </div>
+                <a href="<?= base_url('siswa/jurnal-pkl/tambah'); ?>"
+                   class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-xl font-semibold text-sm shadow-md hover:bg-blue-600 active:scale-95 transition-all flex-shrink-0">
+                    <i class="fa-solid fa-plus text-xs"></i>
+                    Tambah Aktivitas
                 </a>
-            <?php endforeach; ?>
-        </div>
-    </div>
-<?php endif; ?>
-
-<!-- Tasks Selesai -->
-<?php
-$completedTasks = array_filter($allTasks ?? [], fn($t) => $t['status'] === 'completed');
-?>
-<?php if (!empty($completedTasks)): ?>
-    <div class="mb-6">
-        <h2 class="text-lg font-semibold text-gray-800 mb-3">
-            <i class="fas fa-check-circle mr-2 text-green-600"></i>
-            Task Selesai
-        </h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <?php foreach ($completedTasks as $task): ?>
-                <?php
-                $progressSummary = (new \App\Models\PklTaskModel())->getProgressSummary($task['id']);
-                $total = $progressSummary['total'];
-                $approved = $progressSummary['approved'];
-                $progressPct = $total > 0 ? round(($approved / $total) * 100) : 100;
-                ?>
-                <a href="<?= base_url('siswa/jurnal-pkl/task/' . $task['id']); ?>"
-                    class="block bg-white rounded-lg shadow hover:shadow-md transition-shadow p-4 border-l-4 border-green-500">
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1 min-w-0">
-                            <h3 class="text-sm font-semibold text-gray-800 truncate"><?= esc($task['judul']) ?></h3>
-                            <?php if (!empty($task['kategori_nama'])): ?>
-                                <span class="inline-block mt-1 text-xs px-2 py-0.5 rounded-full
-                            <?= match ($task['kategori_nama']) {
-                                'Desain' => 'bg-purple-100 text-purple-700',
-                                'Programming' => 'bg-blue-100 text-blue-700',
-                                'Administrasi' => 'bg-green-100 text-green-700',
-                                'Marketing' => 'bg-orange-100 text-orange-700',
-                                default => 'bg-gray-100 text-gray-600'
-                            } ?>"><?= esc($task['kategori_nama']) ?></span>
-                            <?php endif; ?>
-                        </div>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                            <i class="fas fa-check mr-1"></i>Selesai
-                        </span>
-                    </div>
-                    <div class="mt-3">
-                        <div class="flex justify-between text-xs text-gray-500 mb-1">
-                            <span><?= $approved ?>/<?= $total ?> disetujui</span>
-                            <span><?= $progressPct ?>%</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-1.5">
-                            <div class="bg-green-500 h-1.5 rounded-full" style="width: <?= $progressPct ?>%"></div>
-                        </div>
-                    </div>
-                </a>
-            <?php endforeach; ?>
-        </div>
-    </div>
-<?php endif; ?>
-
-
-<!-- Print Section -->
-<div class="bg-white rounded-lg shadow p-5 mb-6">
-    <h2 class="text-lg font-semibold text-gray-800 mb-3">
-        <i class="fas fa-print mr-2 text-blue-600"></i>
-        Cetak Laporan
-    </h2>
-    <p class="text-sm text-gray-500 mb-4">Cetak Jurnal Kegiatan PKL atau Catatan Kegiatan PKL</p>
-    <div class="flex flex-col sm:flex-row gap-3">
-        <a href="<?= base_url('siswa/jurnal-pkl/cetak-jurnal/' . date('Y') . '/1'); ?>" target="_blank"
-            class="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium">
-            <i class="fas fa-calendar mr-2"></i>
-            Jurnal Kegiatan PKL
-        </a>
-        <?php if (!empty($tasks)): ?>
-            <a href="<?= base_url('siswa/jurnal-pkl/cetak-catatan/' . implode('-', array_column($tasks, 'id'))); ?>"
-                target="_blank"
-                class="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-sm font-medium">
-                <i class="fas fa-clipboard mr-2"></i>
-                Catatan Kegiatan PKL
-            </a>
-        <?php endif; ?>
-    </div>
-</div>
-
-<!-- Hari Ini -->
-<div class="bg-white rounded-lg shadow overflow-hidden mb-6">
-    <div class="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-500 to-blue-600">
-        <h2 class="text-lg font-semibold text-white">
-            <i class="fas fa-calendar-day mr-2"></i>
-            Hari Ini
-        </h2>
-        <p class="text-blue-100 text-sm">
-            <?= date('d') . ' ' . $bulanIndo[(int) date('m')] . ' ' . date('Y') . ' &mdash; ' . $hariIndo[date('l')] ?>
-        </p>
-    </div>
-
-    <?php if (empty($todayProgress)): ?>
-        <div class="p-8 text-center">
-            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-                <i class="fas fa-clipboard-list text-3xl text-gray-400"></i>
             </div>
-            <p class="text-gray-600 font-medium">Belum ada aktivitas hari ini</p>
-            <p class="text-gray-400 text-sm mt-1">Mulai catat kegiatan PKL Anda</p>
-            <a href="<?= base_url('siswa/jurnal-pkl/tambah'); ?>"
-                class="inline-flex items-center mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
-                <i class="fas fa-plus mr-2"></i>
-                Tambah Aktivitas
-            </a>
-        </div>
-    <?php else: ?>
-        <div class="divide-y divide-gray-100">
-            <?php foreach ($todayProgress as $p): ?>
-                <div class="px-5 py-4 hover:bg-gray-50 transition-colors">
-                    <div class="flex items-start gap-3">
-                        <div class="flex-shrink-0 mt-1">
-                            <?php if ($p['status'] === 'approved'): ?>
-                                <span
-                                    class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-600">
-                                    <i class="fas fa-check text-sm"></i>
-                                </span>
-                            <?php elseif ($p['status'] === 'verified_by_instruktur'): ?>
-                                <span
-                                    class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600">
-                                    <i class="fas fa-check-double text-sm"></i>
-                                </span>
-                            <?php elseif ($p['status'] === 'submitted'): ?>
-                                <span
-                                    class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-yellow-100 text-yellow-600">
-                                    <i class="fas fa-clock text-sm"></i>
-                                </span>
-                            <?php elseif ($p['status'] === 'revision'): ?>
-                                <span
-                                    class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-orange-100 text-orange-600">
-                                    <i class="fas fa-edit text-sm"></i>
-                                </span>
-                            <?php else: ?>
-                                <span
-                                    class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-500">
-                                    <i class="fas fa-pen text-sm"></i>
-                                </span>
-                            <?php endif; ?>
+
+            <div class="rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="bg-white divide-y divide-gray-100 overflow-y-auto max-h-80 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-track]:rounded [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:hover:bg-gray-400 [&::-webkit-scrollbar-button]:hidden [&::-webkit-scrollbar-button]:h-0 [&::-webkit-scrollbar-button]:w-0">
+                <?php if (empty($todayProgress)): ?>
+                    <div class="p-8 text-center">
+                        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center pkl-empty-icon">
+                            <i class="fa-solid fa-clipboard-list text-3xl text-gray-400"></i>
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs px-2 py-0.5 rounded-full
-                            <?= match ($p['kategori_nama'] ?? '') {
-                                'Desain' => 'bg-purple-100 text-purple-700',
-                                'Programming' => 'bg-blue-100 text-blue-700',
-                                'Administrasi' => 'bg-green-100 text-green-700',
-                                'Marketing' => 'bg-orange-100 text-orange-700',
-                                default => 'bg-gray-100 text-gray-600'
-                            } ?>"><?= esc($p['kategori_nama'] ?? 'Lainnya') ?></span>
-                                <span class="text-xs text-gray-400">/</span>
-                                <span class="text-xs font-medium text-gray-700"><?= esc($p['nama_task']) ?></span>
+                        <p class="text-gray-700 font-medium">Belum ada aktivitas hari ini</p>
+                        <p class="text-gray-400 text-sm mt-1">Mulai catat kegiatan PKL Anda</p>
+                        <a href="<?= base_url('siswa/jurnal-pkl/tambah'); ?>"
+                           class="inline-flex items-center mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors text-sm">
+                            <i class="fa-solid fa-plus mr-2"></i>
+                            Tambah Aktivitas
+                        </a>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($todayProgress as $p): ?>
+                        <?php $sInfo = $statusIconMap[$p['status']] ?? $statusIconMap['draft']; ?>
+                        <div class="p-4 flex items-center gap-2 hover:bg-gray-50 transition-colors">
+                            <div class="flex-shrink-0 w-12 h-12 rounded-xl <?= $sInfo['bg'] ?> <?= $sInfo['color'] ?> flex items-center justify-center">
+                                <i class="fa-solid <?= $sInfo['icon'] ?> text-lg"></i>
                             </div>
-                            <p class="text-sm text-gray-600 mt-1 line-clamp-2"><?= esc($p['deskripsi']) ?></p>
-                            <div class="flex items-center gap-3 mt-2">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider <?= $kategoriBadge[$p['kategori_nama'] ?? ''] ?? 'bg-gray-100 text-gray-600' ?>">
+                                        <?= esc($p['kategori_nama'] ?? 'Lainnya') ?>
+                                    </span>
+                                    <span class="text-xs text-gray-400">/</span>
+                                    <span class="text-xs font-medium text-gray-500"><?= esc($p['nama_task']) ?></span>
+                                </div>
+                                <p class="text-sm text-gray-700 line-clamp-2"><?= esc($p['deskripsi']) ?></p>
+                            </div>
+                            <div class="flex items-center gap-1.5 flex-shrink-0">
                                 <?php if ($p['foto']): ?>
-                                    <span class="text-xs text-blue-500"><i class="fas fa-camera mr-1"></i>Foto</span>
+                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded bg-gray-100 text-gray-400" title="Ada foto"><i class="fa-solid fa-image text-[9px]"></i></span>
                                 <?php endif; ?>
                                 <?php if ($p['catatan_pembimbing']): ?>
-                                    <span class="text-xs text-orange-500"><i class="fas fa-comment mr-1"></i>Catatan</span>
+                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded bg-orange-50 text-orange-400" title="Ada catatan"><i class="fa-solid fa-comment text-[9px]"></i></span>
                                 <?php endif; ?>
-                                <span class="text-xs text-gray-400">
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold
                                     <?= match ($p['status']) {
-                                        'approved' => 'Disetujui',
-                                        'verified_by_instruktur' => 'Diverifikasi Instruktur',
-                                        'submitted' => 'Menunggu',
-                                        'revision' => 'Revisi',
-                                        default => 'Draft'
-                                    } ?>
+                                        'approved' => 'bg-green-100 text-green-700',
+                                        'verified_by_instruktur' => 'bg-blue-100 text-blue-700',
+                                        'submitted' => 'bg-yellow-100 text-yellow-700',
+                                        'revision' => 'bg-red-100 text-red-700',
+                                        default => 'bg-gray-100 text-gray-600'
+                                    } ?>">
+                                    <?= $statusLabel[$p['status']] ?? 'Draft' ?>
                                 </span>
                             </div>
-                        </div>
-                        <div class="flex-shrink-0 flex items-center gap-1">
                             <?php if ($p['status'] !== 'approved'): ?>
-                                <form action="<?= base_url('siswa/jurnal-pkl/hapus-progress/' . $p['id']); ?>" method="POST" class="inline">
+                                <form action="<?= base_url('siswa/jurnal-pkl/hapus-progress/' . $p['id']); ?>" method="POST" class="inline flex-shrink-0">
                                     <?= csrf_field(); ?>
                                     <button type="submit" onclick="return confirm('Yakin ingin menghapus progress ini?')" title="Hapus"
-                                        class="px-2 py-1 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 text-xs transition-colors">
-                                        <i class="fas fa-trash"></i>
+                                        class="text-gray-400 hover:text-red-500 transition-colors p-2">
+                                        <i class="fa-solid fa-trash"></i>
                                     </button>
                                 </form>
                             <?php endif; ?>
                         </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+            </div>
+        </section>
+
+        <!-- Riwayat Kegiatan (Timeline) -->
+        <section class="space-y-3">
+            <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-primary"></i>
+                Riwayat Kegiatan
+            </h2>
+
+            <?php if (empty($timeline)): ?>
+                <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center pkl-empty-icon">
+                        <i class="fa-solid fa-clock-rotate-left text-3xl text-gray-400"></i>
                     </div>
+                    <p class="text-gray-600 font-medium">Belum ada riwayat aktivitas</p>
                 </div>
-            <?php endforeach; ?>
-        </div>
-    <?php endif; ?>
-</div>
+            <?php else: ?>
+                <div class="rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                <div class="pkl-timeline-container overflow-y-auto max-h-96 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-track]:rounded [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:hover:bg-gray-400 [&::-webkit-scrollbar-button]:hidden [&::-webkit-scrollbar-button]:h-0 [&::-webkit-scrollbar-button]:w-0">
+                    <div class="pkl-timeline-line"></div>
+                    <?php foreach ($timeline as $day): ?>
+                        <?php
+                        $dateObj = new DateTime($day['tanggal']);
+                        $dayShort = $hariSingkat[$dateObj->format('l')];
+                        $dateDay = $dateObj->format('d');
+                        $isToday = $day['tanggal'] === date('Y-m-d');
 
-<!-- Timeline -->
-<div class="mb-6">
-    <h2 class="text-lg font-semibold text-gray-800 mb-3">
-        <i class="fas fa-clock mr-2 text-blue-600"></i>
-        Timeline
-    </h2>
+                        $allApproved = ($day['total_aktivitas'] == $day['approved']);
+                        $hasRevision = ($day['revision'] > 0);
 
-    <?php if (empty($timeline)): ?>
-        <div class="bg-white rounded-lg shadow p-8 text-center">
-            <p class="text-gray-500">Belum ada riwayat aktivitas</p>
-        </div>
-    <?php else: ?>
-        <div class="space-y-3">
-            <?php foreach ($timeline as $day): ?>
-                <?php
-                $dateObj = new DateTime($day['tanggal']);
-                $dayName = $hariIndo[$dateObj->format('l')];
-                $dateStr = $dateObj->format('d') . ' ' . $bulanIndo[(int) $dateObj->format('m')] . ' ' . $dateObj->format('Y');
-                $isToday = $day['tanggal'] === date('Y-m-d');
+                        $dotColor = $isToday ? 'dot-blue' : 'dot-gray';
+                        $dotActive = $isToday ? 'pkl-timeline-dot-active' : '';
 
-                $allApproved = ($day['total_aktivitas'] == $day['approved']);
-                $hasRevision = ($day['revision'] > 0);
-                ?>
-                <a href="<?= base_url('siswa/jurnal-pkl/hari/' . $day['tanggal']); ?>"
-                    class="block bg-white rounded-lg shadow hover:shadow-md transition-shadow overflow-hidden">
-                    <div
-                        class="px-5 py-4 flex items-center gap-4 <?= $isToday ? 'bg-blue-50 border-l-4 border-blue-500' : '' ?>">
-                        <div class="flex-shrink-0 w-14 text-center">
-                            <p class="text-xs text-gray-500"><?= $dayName ?></p>
-                            <p class="text-2xl font-bold <?= $isToday ? 'text-blue-600' : 'text-gray-800' ?>">
-                                <?= $dateObj->format('d') ?>
-                            </p>
-                            <p class="text-xs text-gray-400"><?= $bulanIndo[(int) $dateObj->format('m')] ?></p>
-                        </div>
-                        <div class="flex-1">
-                            <div class="flex items-center gap-2">
-                                <span class="text-sm font-medium text-gray-800"><?= $day['total_aktivitas'] ?>
-                                    aktivitas</span>
-                                <?php if ($allApproved): ?>
-                                    <span
-                                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                                        <i class="fas fa-check-circle mr-1"></i>Disetujui
-                                    </span>
-                                <?php elseif ($hasRevision): ?>
-                                    <span
-                                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700">
-                                        <i class="fas fa-edit mr-1"></i>Revisi
-                                    </span>
-                                <?php else: ?>
-                                    <span
-                                        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
-                                        <i class="fas fa-clock mr-1"></i>Menunggu
-                                    </span>
-                                <?php endif; ?>
+                        $cardBorder = $isToday ? 'border-l-4 border-l-primary' : '';
+                        if ($allApproved) {
+                            $statusBadge = 'Disetujui';
+                            $statusIcon = 'fa-circle-check text-green-500';
+                        } elseif ($hasRevision) {
+                            $statusBadge = 'Revisi';
+                            $statusIcon = 'fa-flag text-red-500';
+                        } else {
+                            $statusBadge = 'Menunggu';
+                            $statusIcon = 'fa-clock text-yellow-500';
+                        }
+                        ?>
+                        <div class="relative pl-12 tl-day mb-1" data-date="<?= $day['tanggal'] ?>">
+                            <div class="pkl-timeline-dot <?= $dotColor ?> <?= $dotActive ?>"></div>
+
+                            <!-- Day Card (accordion trigger) -->
+                            <div class="tl-card bg-white p-5 rounded-2xl border border-gray-200 shadow-sm <?= $cardBorder ?> flex items-center justify-between group hover:border-primary/50 transition-all cursor-pointer select-none"
+                                 onclick="toggleDayAccordion(this)">
+                                <div class="flex items-center gap-5">
+                                    <div class="text-center w-12 pr-5 border-r border-gray-200">
+                                        <p class="text-[11px] font-semibold text-gray-500 uppercase"><?= $dayShort ?></p>
+                                        <p class="text-2xl font-bold leading-none <?= $isToday ? 'text-primary' : 'text-gray-900' ?>"><?= $dateDay ?></p>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-800 mb-1"><?= $day['total_aktivitas'] ?> Aktivitas Tercatat</p>
+                                        <div class="flex items-center gap-1.5 text-sm <?= $hasRevision ? 'text-red-600' : 'text-gray-500' ?>">
+                                            <i class="fa-solid <?= $statusIcon ?> text-xs"></i>
+                                            <span>Status: <?= $statusBadge ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <i class="fa-solid fa-chevron-right text-gray-400 tl-chevron transition-transform duration-300"></i>
+                            </div>
+
+                            <!-- Accordion Panel -->
+                            <div class="tl-panel overflow-hidden transition-all duration-300 ease-in-out" style="max-height: 0; opacity: 0;">
+                                <div class="mt-2 bg-white rounded-2xl border border-gray-200 shadow-sm px-4 py-2">
+                                    <div class="tl-panel-body text-center">
+                                        <div class="inline-flex items-center gap-2 text-gray-400 text-sm">
+                                            <i class="fa-solid fa-spinner fa-spin text-xs"></i>
+                                            <span class="text-xs">Memuat...</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="flex-shrink-0">
-                            <i class="fas fa-chevron-right text-gray-400"></i>
-                        </div>
+                    <?php endforeach; ?>
+                </div>
+                </div>
+            <?php endif; ?>
+        </section>
+
+    </div>
+
+    <!-- ========== RIGHT SIDEBAR: Stats & Reports ========== -->
+    <aside class="lg:col-span-4 space-y-6">
+
+        <!-- Statistik Tugas -->
+        <section class="space-y-4">
+            <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Statistik Tugas</h4>
+            <div class="grid grid-cols-2 gap-3">
+                <!-- Total -->
+                <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200 stat-grid-card">
+                    <p class="text-[11px] font-bold text-gray-500 uppercase mb-1">Total</p>
+                    <div class="flex items-end justify-between">
+                        <span class="text-2xl font-bold text-gray-900 leading-none pkl-stat-number"><?= str_pad($stats['total_tasks'] ?? 0, 2, '0', STR_PAD_LEFT) ?></span>
+                        <i class="fa-solid fa-clipboard-question text-gray-300"></i>
                     </div>
-                </a>
-            <?php endforeach; ?>
-        </div>
-    <?php endif; ?>
+                </div>
+                <!-- Selesai -->
+                <div class="bg-green-50 p-4 rounded-2xl border border-green-200 stat-grid-card">
+                    <p class="text-[11px] font-bold text-green-700 uppercase mb-1">Selesai</p>
+                    <div class="flex items-end justify-between">
+                        <span class="text-2xl font-bold text-green-600 leading-none pkl-stat-number"><?= str_pad($stats['approved'] ?? 0, 2, '0', STR_PAD_LEFT) ?></span>
+                        <i class="fa-solid fa-circle-check text-green-300"></i>
+                    </div>
+                </div>
+                <!-- Antrean -->
+                <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200 stat-grid-card">
+                    <p class="text-[11px] font-bold text-gray-500 uppercase mb-1">Antrean</p>
+                    <div class="flex items-end justify-between">
+                        <span class="text-2xl font-bold text-gray-900 leading-none pkl-stat-number"><?= str_pad(($stats['submitted'] ?? 0) + ($stats['draft'] ?? 0) + ($stats['verified_by_instruktur'] ?? 0), 2, '0', STR_PAD_LEFT) ?></span>
+                        <i class="fa-solid fa-clock text-gray-300"></i>
+                    </div>
+                </div>
+                <!-- Revisi -->
+                <div class="bg-red-50 p-4 rounded-2xl border border-red-200 stat-grid-card">
+                    <p class="text-[11px] font-bold text-red-600 uppercase mb-1">Revisi</p>
+                    <div class="flex items-end justify-between">
+                        <span class="text-2xl font-bold text-red-500 leading-none pkl-stat-number"><?= str_pad($stats['revision'] ?? 0, 2, '0', STR_PAD_LEFT) ?></span>
+                        <i class="fa-solid fa-pen-to-square text-red-300"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tugas Berjalan -->
+        <?php if (!empty($tasks)): ?>
+            <section class="space-y-4">
+                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Tugas Berjalan</h4>
+                <div class="rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                <div class="grid grid-cols-2 gap-3 overflow-y-auto max-h-80 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-track]:rounded [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:hover:bg-gray-400 [&::-webkit-scrollbar-button]:hidden [&::-webkit-scrollbar-button]:h-0 [&::-webkit-scrollbar-button]:w-0">
+                    <?php foreach ($tasks as $task): ?>
+                        <?php
+                        $progressSummary = (new \App\Models\PklTaskModel())->getProgressSummary($task['id']);
+                        $total = $progressSummary['total'];
+                        if ($total > 0) {
+                            $weightedSum = ($progressSummary['submitted'] * 50) + ($progressSummary['verified_by_instruktur'] * 80) + ($progressSummary['approved'] * 100);
+                            $progressPct = round($weightedSum / $total);
+                        } else {
+                            $progressPct = 0;
+                        }
+                        $remaining = $total - $progressSummary['approved'];
+                        ?>
+                        <a href="<?= base_url('siswa/jurnal-pkl/task/' . $task['id']); ?>"
+                           class="block bg-white p-5 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                            <div class="flex justify-between items-center mb-3">
+                                <h4 class="font-bold text-gray-800 text-sm truncate flex-1 mr-2"><?= esc($task['judul']) ?></h4>
+                                <span class="text-primary font-bold text-xs bg-primary/10 px-2 py-0.5 rounded flex-shrink-0"><?= $progressPct ?>%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 h-1.5 rounded-full mb-2">
+                                <div class="bg-primary h-full rounded-full progress-fill-anim" style="width: <?= $progressPct ?>%"></div>
+                            </div>
+                            <p class="text-gray-500 text-[11px]"><?= $remaining ?> progress tersisa</p>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+                </div>
+            </section>
+        <?php endif; ?>
+
+        <!-- Cetak Laporan -->
+        <section class="space-y-4">
+            <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Cetak Laporan</h4>
+            <div class="bg-blue-50/50 p-5 rounded-2xl border border-blue-100 flex flex-col gap-3">
+                <button onclick="openCetakModal('jurnal')"
+                   class="w-full py-3 px-4 bg-primary text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow-sm hover:bg-blue-600 transition-all cursor-pointer">
+                    <i class="fa-solid fa-file-lines"></i>
+                    Jurnal Kegiatan PKL
+                </button>
+                <?php if (!empty($tasks)): ?>
+                <button onclick="openCetakModal('catatan', '<?= implode('-', array_column($tasks, 'id')) ?>')"
+                   class="w-full py-3 px-4 bg-white text-gray-600 border border-gray-200 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 hover:bg-gray-50 transition-all cursor-pointer">
+                    <i class="fa-solid fa-list-check"></i>
+                    Catatan Kegiatan PKL
+                </button>
+                <?php endif; ?>
+            </div>
+        </section>
+
+        <!-- Tasks Selesai (compact list in sidebar) -->
+        <?php
+        $completedTasks = array_filter($allTasks ?? [], fn($t) => $t['status'] === 'completed');
+        ?>
+        <?php if (!empty($completedTasks)): ?>
+            <section class="space-y-4">
+                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Task Selesai</h4>
+                <div class="space-y-2">
+                    <?php foreach ($completedTasks as $task): ?>
+                        <?php
+                        $progressSummary = (new \App\Models\PklTaskModel())->getProgressSummary($task['id']);
+                        $total = $progressSummary['total'];
+                        $approved = $progressSummary['approved'];
+                        $progressPct = $total > 0 ? round(($approved / $total) * 100) : 100;
+                        ?>
+                        <a href="<?= base_url('siswa/jurnal-pkl/task/' . $task['id']); ?>"
+                           class="block bg-white p-4 rounded-2xl border border-gray-200 shadow-sm border-l-4 border-l-green-500 hover:shadow-md transition-shadow">
+                            <div class="flex items-center gap-3 mb-2">
+                                <i class="fa-solid fa-circle-check text-green-500 flex-shrink-0"></i>
+                                <h4 class="font-semibold text-gray-800 text-sm truncate flex-1"><?= esc($task['judul']) ?></h4>
+                                <span class="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded flex-shrink-0">Selesai</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="flex-1 bg-gray-200 h-1.5 rounded-full">
+                                    <div class="bg-green-500 h-full rounded-full" style="width: <?= $progressPct ?>%"></div>
+                                </div>
+                                <span class="text-[11px] text-gray-500 flex-shrink-0"><?= $approved ?>/<?= $total ?></span>
+                            </div>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </section>
+        <?php endif; ?>
+
+    </aside>
 </div>
+
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+
+<!-- Modal Cetak Jurnal -->
+<div id="modalCetakJurnal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onclick="if(event.target===this)this.classList.add('hidden')">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 overflow-hidden">
+        <div class="px-5 pt-5 pb-4 border-b border-gray-100">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-bold text-gray-900">Pilih Minggu</h3>
+                <button onclick="document.getElementById('modalCetakJurnal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p class="text-xs text-gray-500 mt-1"><?= get_jurnal_pkl_start_date() ? date('d M Y', strtotime(get_jurnal_pkl_start_date())) . ' – ' . (get_jurnal_pkl_end_date() ? date('d M Y', strtotime(get_jurnal_pkl_end_date())) : '...') : 'Belum diatur' ?></p>
+        </div>
+        <div id="weekList" class="p-4 space-y-2 max-h-80 overflow-y-auto"></div>
+    </div>
+</div>
+
+<script>
+    var TIMELINE_DAY_URL = '<?= base_url('siswa/jurnal-pkl/hari/') ?>';
+    var PKL_START_DATE = '<?= get_jurnal_pkl_start_date() ?? '' ?>';
+    var PKL_END_DATE = '<?= get_jurnal_pkl_end_date() ?? '' ?>';
+    var CURRENT_DATE = '<?= date('Y-m-d') ?>';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.progress-fill-anim').forEach(bar => {
+            const w = bar.style.width;
+            bar.style.width = '0%';
+            setTimeout(() => { bar.style.width = w; }, 300);
+        });
+
+        var today = '<?= date('Y-m-d') ?>';
+        var todayItem = document.querySelector('.tl-day[data-date="' + today + '"]');
+        if (todayItem) {
+            var card = todayItem.querySelector('.tl-card');
+            if (card && !card.classList.contains('open')) {
+                toggleDayAccordion(card);
+            }
+        }
+    });
+
+    function toggleDayAccordion(card) {
+        const dayItem = card.closest('.tl-day');
+        const panel = dayItem.querySelector('.tl-panel');
+        const chevron = card.querySelector('.tl-chevron');
+        const isOpen = card.classList.contains('open');
+
+        if (isOpen) {
+            panel.style.maxHeight = '0';
+            panel.style.opacity = '0';
+            card.classList.remove('open');
+            chevron.classList.remove('open');
+        } else {
+            card.classList.add('open');
+            chevron.classList.add('open');
+
+            const body = panel.querySelector('.tl-panel-body');
+            if (body.getAttribute('data-loaded') !== '1') {
+                fetchDayActivities(dayItem.getAttribute('data-date'), body);
+            }
+
+            panel.style.maxHeight = '600px';
+            panel.style.opacity = '1';
+
+            setTimeout(() => {
+                if (card.classList.contains('open')) {
+                    panel.style.maxHeight = panel.scrollHeight + 'px';
+                }
+            }, 400);
+        }
+    }
+
+    function fetchDayActivities(date, container) {
+        fetch(TIMELINE_DAY_URL + date)
+        .then(function(r) { return r.text(); })
+        .then(function(html) {
+            var doc = new DOMParser().parseFromString(html, 'text/html');
+            var rows = doc.querySelectorAll('.divide-y > div');
+            var dayUrl = TIMELINE_DAY_URL + date;
+
+            if (rows.length === 0) {
+                container.innerHTML =
+                    '<div class="text-center py-5">' +
+                        '<div class="w-10 h-10 mx-auto mb-2 rounded-full bg-gray-100 flex items-center justify-center">' +
+                            '<i class="fa-solid fa-clipboard-list text-gray-400"></i>' +
+                        '</div>' +
+                        '<p class="text-sm text-gray-500">Belum ada aktivitas</p>' +
+                        '<a href="' + dayUrl + '" class="text-xs font-semibold text-primary hover:underline mt-2 inline-block">Lihat Halaman →</a>' +
+                    '</div>';
+                markLoaded(container);
+                return;
+            }
+
+            var out = '<div class="divide-y divide-gray-100 -my-1">';
+
+            var MAX_VISIBLE = 2;
+            var visibleCount = Math.min(rows.length, MAX_VISIBLE);
+
+            for (var i = 0; i < visibleCount; i++) {
+                var row = rows[i];
+                var icon = row.querySelector('.fa-check, .fa-check-double, .fa-clock, .fa-edit, .fa-pen');
+                var taskEl = row.querySelector('.rounded-full.bg-blue-100');
+                var descEl = row.querySelector('.text-sm.text-gray-700');
+                var img = row.querySelector('img[src*="pkl-progress"]');
+                var noteO = row.querySelector('.bg-orange-50');
+                var noteP = row.querySelector('.bg-purple-50');
+                var editLink = row.querySelector('a[href*="edit-progress"]');
+
+                var sColor = 'text-gray-400';
+                var sBg = 'bg-gray-100 text-gray-500';
+                var sLabel = 'Draft';
+                if (icon) {
+                    if (icon.classList.contains('fa-check-double'))      { sColor = 'text-blue-500'; sBg = 'bg-blue-100 text-blue-600'; sLabel = 'Verifikasi'; }
+                    else if (icon.classList.contains('fa-check'))        { sColor = 'text-green-500'; sBg = 'bg-green-100 text-green-600'; sLabel = 'Disetujui'; }
+                    else if (icon.classList.contains('fa-clock'))        { sColor = 'text-yellow-500'; sBg = 'bg-yellow-100 text-yellow-600'; sLabel = 'Menunggu'; }
+                    else if (icon.classList.contains('fa-edit'))         { sColor = 'text-red-500'; sBg = 'bg-red-100 text-red-600'; sLabel = 'Revisi'; }
+                }
+
+                var taskName = taskEl ? taskEl.textContent.trim() : 'Aktivitas';
+                var deskripsi = descEl ? descEl.textContent.trim() : '';
+
+                var item = '<a href="' + (editLink ? editLink.getAttribute('href') : dayUrl) + '" class="block p-3 -mx-3 rounded-xl hover:bg-gray-50 transition-colors group">' +
+                    '<div class="flex items-center gap-3">' +
+                        '<span class="flex-shrink-0 mt-0.5"><i class="fa-solid fa-circle ' + sColor + ' text-[8px]"></i></span>' +
+                        '<div class="flex-1 min-w-0">' +
+                            '<p class="text-sm font-semibold text-gray-800 truncate group-hover:text-primary transition-colors">' + taskName + '</p>' +
+                            (deskripsi ? '<p class="text-xs text-gray-500 mt-0.5 truncate">' + deskripsi + '</p>' : '') +
+                        '</div>' +
+                        '<div class="flex items-center gap-1.5 flex-shrink-0">';
+
+                if (img) {
+                    item += '<span class="inline-flex items-center justify-center w-6 h-6 rounded bg-gray-100 text-gray-400" title="Ada foto"><i class="fa-solid fa-image text-[9px]"></i></span>';
+                }
+                if (noteO) {
+                    item += '<span class="inline-flex items-center justify-center w-6 h-6 rounded bg-orange-50 text-orange-400" title="Ada catatan"><i class="fa-solid fa-comment text-[9px]"></i></span>';
+                }
+                if (noteP) {
+                    item += '<span class="inline-flex items-center justify-center w-6 h-6 rounded bg-purple-50 text-purple-400" title="Catatan instruktur"><i class="fa-solid fa-comment-dots text-[9px]"></i></span>';
+                }
+
+                item += '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ' + sBg + '">' + sLabel + '</span>' +
+                    '</div>' +
+                '</div></a>';
+
+                out += item;
+            }
+
+            out += '</div>';
+
+            var remaining = rows.length - MAX_VISIBLE;
+            if (remaining > 0) {
+                out += '<div class="mt-3 pt-3 border-t border-gray-100 text-center">' +
+                    '<a href="' + dayUrl + '" class="text-xs font-semibold text-primary hover:underline">Lihat Semua (' + remaining + ')</a>' +
+                    '</div>';
+            }
+
+            container.innerHTML = out;
+            container.classList.remove('text-center', 'py-6');
+            markLoaded(container);
+        })
+        .catch(function() {
+            container.innerHTML =
+                '<div class="text-center py-4">' +
+                    '<i class="fa-solid fa-triangle-exclamation text-red-400 mb-1"></i>' +
+                    '<p class="text-sm text-red-400">Gagal memuat aktivitas</p>' +
+                '</div>';
+            markLoaded(container);
+        });
+    }
+
+    function markLoaded(el) {
+        el.setAttribute('data-loaded', '1');
+        var panel = el.closest('.tl-panel');
+        if (panel && panel.style.maxHeight !== '0') {
+            setTimeout(function() { panel.style.maxHeight = panel.scrollHeight + 'px'; }, 50);
+        }
+    }
+
+    var selectedWeek = null;
+    var cetakType = 'jurnal';
+    var catatanTaskIds = '';
+
+    function openCetakModal(type, taskIds) {
+        cetakType = type;
+        catatanTaskIds = taskIds || '';
+        document.getElementById('modalCetakJurnal').classList.remove('hidden');
+    }
+
+    function printCetak(url, weekNum) {
+        selectedWeek = weekNum;
+        document.getElementById('modalCetakJurnal').classList.add('hidden');
+        var iframe = document.getElementById('printFrame');
+        if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.id = 'printFrame';
+            iframe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:0;border:none;opacity:0';
+            document.body.appendChild(iframe);
+        }
+        iframe.onload = function() {
+            iframe.onload = null;
+            setTimeout(function() {
+                var win = iframe.contentWindow;
+                var done = false;
+                function onDone() {
+                    if (done) return;
+                    done = true;
+                    onPrintDialogClose();
+                }
+                try {
+                    win.addEventListener('afterprint', onDone);
+                } catch(e) {}
+                var mql = win.matchMedia('print');
+                if (mql.addEventListener) {
+                    mql.addEventListener('change', function(e) {
+                        if (!e.matches) onDone();
+                    });
+                } else if (mql.addListener) {
+                    mql.addListener(function(e) {
+                        if (!e.matches) onDone();
+                    });
+                }
+                win.print();
+            }, 300);
+        };
+        iframe.src = url;
+    }
+
+    function buildCetakUrl(weekNum, year) {
+        var url;
+        if (cetakType === 'catatan') {
+            url = '<?= base_url('siswa/jurnal-pkl/cetak-catatan/') ?>' + catatanTaskIds + '/' + weekNum;
+        } else {
+            url = '<?= base_url('siswa/jurnal-pkl/cetak-jurnal/') ?>' + year + '/' + weekNum;
+        }
+        printCetak(url, weekNum);
+    }
+
+    function onPrintDialogClose() {
+        var modal = document.getElementById('modalCetakJurnal');
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        if (selectedWeek) {
+            var items = document.querySelectorAll('#weekList a');
+            items.forEach(function(item) {
+                item.classList.remove('border-primary', 'bg-primary/5');
+                item.classList.add('border-gray-200');
+            });
+            var active = document.querySelector('#weekList a[data-week="' + selectedWeek + '"]');
+            if (active) {
+                active.classList.remove('border-gray-200');
+                active.classList.add('border-primary', 'bg-primary/5');
+                active.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            }
+        }
+    }
+
+    // Week picker for cetak jurnal
+    document.addEventListener('DOMContentLoaded', function() {
+        var container = document.getElementById('weekList');
+        if (!container) return;
+
+        if (!PKL_START_DATE) {
+            container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">Belum ada pengaturan tanggal PKL</p>';
+            return;
+        }
+
+        var start = new Date(PKL_START_DATE + 'T00:00:00');
+        var today = new Date(CURRENT_DATE + 'T00:00:00');
+        var end = PKL_END_DATE ? new Date(PKL_END_DATE + 'T00:00:00') : new Date(start);
+        if (end < start) end = new Date(start);
+
+        // Calculate weekBase (Monday of the week containing start date)
+        var weekBase = new Date(start);
+        var dow = weekBase.getDay();
+        if (dow === 0) dow = 7;
+        if (dow > 1) weekBase.setDate(weekBase.getDate() - (dow - 1));
+
+        // Total days from weekBase to end
+        var totalDays = Math.floor((end - weekBase) / (1000 * 60 * 60 * 24));
+        var totalWeeks = Math.floor(totalDays / 7) + 1;
+
+        var bulanIndo = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+        var opts = { day: 'numeric', month: 'short' };
+
+        var html = '<p class="text-xs text-gray-500 mb-2">Minggu ke-1: ' + start.toLocaleDateString('id-ID', opts) + ' – ...</p>';
+
+        for (var w = 1; w <= totalWeeks; w++) {
+            var wStart = new Date(weekBase);
+            wStart.setDate(wStart.getDate() + (w - 1) * 7);
+            var wEnd = new Date(wStart);
+            wEnd.setDate(wEnd.getDate() + 6);
+
+            // Clamp week 1 start to PKL start date
+            if (w === 1 && wStart < start) wStart = new Date(start);
+            // Clamp last week end to PKL end date
+            if (w === totalWeeks && wEnd > end) wEnd = new Date(end);
+
+            var isCurrentWeek = (today >= wStart && today <= wEnd);
+            var labelStart = wStart.toLocaleDateString('id-ID', opts);
+            var labelEnd = wEnd.toLocaleDateString('id-ID', opts);
+
+            html += '<a href="javascript:void(0)" data-week="' + w + '" onclick="buildCetakUrl(' + w + ', \'' + wStart.getFullYear() + '\')" ' +
+                'class="block p-3 rounded-xl border transition-all ' +
+                (isCurrentWeek
+                    ? 'border-primary bg-primary/5 hover:bg-primary/10'
+                    : 'border-gray-200 hover:border-primary/50 hover:bg-gray-50') +
+                '">' +
+                '<div class="flex items-center justify-between">' +
+                    '<div>' +
+                        '<p class="text-sm font-semibold text-gray-800">Minggu ' + w + '</p>' +
+                        '<p class="text-xs text-gray-500">' + labelStart + ' – ' + labelEnd + '</p>' +
+                    '</div>' +
+                    (isCurrentWeek
+                        ? '<span class="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Minggu Ini</span>'
+                        : '<i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>') +
+                '</div>' +
+            '</a>';
+        }
+
+        container.innerHTML = html;
+    });
+</script>
 <?= $this->endSection() ?>
