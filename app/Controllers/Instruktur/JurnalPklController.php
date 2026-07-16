@@ -205,45 +205,6 @@ class JurnalPklController extends BaseController
         return redirect()->back();
     }
 
-    public function verifikasiTask(int $taskId)
-    {
-        $instruktur = $this->getInstruktur();
-        if (!$instruktur) {
-            return redirect()->to('/login');
-        }
-
-        $db = \Config\Database::connect();
-
-        $task = $db->query("
-            SELECT pt.*
-            FROM pkl_tasks pt
-            JOIN siswa_pkl sp ON sp.siswa_id = pt.siswa_id AND sp.tahun_ajaran = (SELECT `value` FROM `settings` WHERE `key` = 'tahun_ajaran_aktif')
-            WHERE pt.id = ? AND sp.tempat_pkl_id = ? AND pt.deleted_at IS NULL
-        ", [$taskId, $instruktur['tempat_pkl_id']])->getRowArray();
-
-        if (!$task) {
-            session()->setFlashdata('error', 'Task tidak ditemukan atau bukan wilayah Anda');
-            return redirect()->to('/instruktur/jurnal-pkl');
-        }
-
-        if ($task['status'] !== 'completed') {
-            session()->setFlashdata('error', 'Hanya task completed yang bisa diverifikasi');
-            return redirect()->back();
-        }
-
-        $userId = session()->get('user_id');
-        $db->table('pkl_tasks')
-            ->where('id', $taskId)
-            ->update([
-                'status' => 'verified_by_instruktur',
-                'instruktur_verified_by' => $userId,
-                'instruktur_verified_at' => date('Y-m-d H:i:s'),
-            ]);
-
-        session()->setFlashdata('success', 'Task berhasil diverifikasi');
-        return redirect()->back();
-    }
-
     public function verifyProgress(int $progressId)
     {
         $instruktur = $this->getInstruktur();
@@ -289,6 +250,13 @@ class JurnalPklController extends BaseController
             'instruktur_verified_at' => date('Y-m-d H:i:s'),
             'catatan_instruktur' => $catatan,
         ]);
+
+        if ($status === 'revision') {
+            $task = $db->table('pkl_tasks')->where('id', $progress['task_id'])->where('deleted_at IS NULL', null, false)->get()->getRowArray();
+            if ($task && $task['status'] === 'completed') {
+                $db->table('pkl_tasks')->where('id', $progress['task_id'])->update(['status' => 'active']);
+            }
+        }
 
         $messages = [
             'verified_by_instruktur' => 'Progress berhasil diverifikasi',

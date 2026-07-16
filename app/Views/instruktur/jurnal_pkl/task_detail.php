@@ -31,21 +31,13 @@
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <?php if ($task['status'] === 'completed'): ?>
-                <form action="<?= base_url('instruktur/jurnal-pkl/verifikasi-task/' . $task['id']); ?>" method="POST" class="inline">
-                    <?= csrf_field(); ?>
-                    <button type="submit" onclick="return confirm('Yakin ingin memverifikasi task ini?')"
-                            class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
-                        <i class="fas fa-check-circle mr-2"></i>Verifikasi Task
-                    </button>
-                </form>
-                <?php elseif ($task['status'] === 'verified_by_instruktur'): ?>
-                <span class="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium">
-                    <i class="fas fa-check-double mr-2"></i>Telah Diverifikasi
+                <?php if ($task['status'] === 'active'): ?>
+                <span class="inline-flex items-center px-4 py-2 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-medium">
+                    <i class="fas fa-spinner mr-2"></i>Sedang Dikerjakan
                 </span>
-                <?php elseif ($task['status'] === 'approved'): ?>
+                <?php elseif ($task['status'] === 'completed'): ?>
                 <span class="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium">
-                    <i class="fas fa-check-double mr-2"></i>Disetujui Pembimbing
+                    <i class="fas fa-check-circle mr-2"></i>Selesai
                 </span>
                 <?php endif; ?>
             </div>

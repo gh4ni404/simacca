@@ -159,6 +159,59 @@ $hariIndo = [
     </div>
 <?php endif; ?>
 
+<!-- Tasks Selesai -->
+<?php
+$completedTasks = array_filter($allTasks ?? [], fn($t) => $t['status'] === 'completed');
+?>
+<?php if (!empty($completedTasks)): ?>
+    <div class="mb-6">
+        <h2 class="text-lg font-semibold text-gray-800 mb-3">
+            <i class="fas fa-check-circle mr-2 text-green-600"></i>
+            Task Selesai
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <?php foreach ($completedTasks as $task): ?>
+                <?php
+                $progressSummary = (new \App\Models\PklTaskModel())->getProgressSummary($task['id']);
+                $total = $progressSummary['total'];
+                $approved = $progressSummary['approved'];
+                $progressPct = $total > 0 ? round(($approved / $total) * 100) : 100;
+                ?>
+                <a href="<?= base_url('siswa/jurnal-pkl/task/' . $task['id']); ?>"
+                    class="block bg-white rounded-lg shadow hover:shadow-md transition-shadow p-4 border-l-4 border-green-500">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-sm font-semibold text-gray-800 truncate"><?= esc($task['judul']) ?></h3>
+                            <?php if (!empty($task['kategori_nama'])): ?>
+                                <span class="inline-block mt-1 text-xs px-2 py-0.5 rounded-full
+                            <?= match ($task['kategori_nama']) {
+                                'Desain' => 'bg-purple-100 text-purple-700',
+                                'Programming' => 'bg-blue-100 text-blue-700',
+                                'Administrasi' => 'bg-green-100 text-green-700',
+                                'Marketing' => 'bg-orange-100 text-orange-700',
+                                default => 'bg-gray-100 text-gray-600'
+                            } ?>"><?= esc($task['kategori_nama']) ?></span>
+                            <?php endif; ?>
+                        </div>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                            <i class="fas fa-check mr-1"></i>Selesai
+                        </span>
+                    </div>
+                    <div class="mt-3">
+                        <div class="flex justify-between text-xs text-gray-500 mb-1">
+                            <span><?= $approved ?>/<?= $total ?> disetujui</span>
+                            <span><?= $progressPct ?>%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-1.5">
+                            <div class="bg-green-500 h-1.5 rounded-full" style="width: <?= $progressPct ?>%"></div>
+                        </div>
+                    </div>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+<?php endif; ?>
+
 
 <!-- Print Section -->
 <div class="bg-white rounded-lg shadow p-5 mb-6">

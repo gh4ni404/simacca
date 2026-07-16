@@ -359,6 +359,13 @@ class PklService extends BaseService
                 return $this->error('Gagal memverifikasi progress');
             }
 
+            if ($status === 'revision') {
+                $task = $this->db->table('pkl_tasks')->where('id', $progress['task_id'])->where('deleted_at IS NULL', null, false)->get()->getRowArray();
+                if ($task && $task['status'] === 'completed') {
+                    $this->db->table('pkl_tasks')->where('id', $progress['task_id'])->update(['status' => 'active']);
+                }
+            }
+
             $this->db->transComplete();
             if ($this->db->transStatus() === false) {
                 return $this->error('Gagal memverifikasi progress');

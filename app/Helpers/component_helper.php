@@ -306,7 +306,7 @@ if (defined('APPPATH')) {
 if (!function_exists('get_task_progress')) {
     /**
      * Get task progress percentage and label based on status.
-     * Opsi 1: 0% (active) → 50% (completed) → 80% (verified_by_instruktur) → 100% (approved)
+     * Flow: active (0%) → completed (100%)
      *
      * @param string $status Task status
      * @return array ['percentage' => int, 'label' => string, 'color' => string]
@@ -314,9 +314,7 @@ if (!function_exists('get_task_progress')) {
     function get_task_progress(string $status): array
     {
         return match($status) {
-            'completed' => ['percentage' => 50, 'label' => 'Dikerjakan Siswa', 'color' => 'yellow'],
-            'verified_by_instruktur' => ['percentage' => 80, 'label' => 'Diverifikasi Instruktur', 'color' => 'blue'],
-            'approved' => ['percentage' => 100, 'label' => 'Disetujui Pembimbing', 'color' => 'green'],
+            'completed' => ['percentage' => 100, 'label' => 'Selesai', 'color' => 'green'],
             default => ['percentage' => 0, 'label' => 'Dalam Pengerjaan', 'color' => 'gray'],
         };
     }

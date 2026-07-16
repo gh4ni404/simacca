@@ -19,6 +19,35 @@
 
     <?= view('components/alerts') ?>
 
+    <?php if (!empty($tasks)): ?>
+    <!-- Quick Task Cards -->
+    <div class="mb-6">
+        <h2 class="text-sm font-semibold text-gray-700 mb-3">
+            <i class="fas fa-bolt mr-1 text-yellow-500"></i>
+            Pilih Task Aktif
+        </h2>
+        <div class="flex gap-3 overflow-x-auto pb-2">
+            <?php foreach ($tasks as $task): ?>
+            <button type="button" onclick="selectTask(<?= $task['id'] ?>)"
+                    class="flex-shrink-0 bg-white rounded-lg shadow hover:shadow-md border-2 border-transparent hover:border-blue-400 transition-all p-4 text-left min-w-[200px] task-card"
+                    data-task-id="<?= $task['id'] ?>">
+                <h3 class="text-sm font-semibold text-gray-800 truncate"><?= esc($task['judul']) ?></h3>
+                <?php if (!empty($task['kategori_nama'])): ?>
+                <span class="inline-block mt-1 text-xs px-2 py-0.5 rounded-full
+                    <?= match ($task['kategori_nama']) {
+                        'Desain' => 'bg-purple-100 text-purple-700',
+                        'Programming' => 'bg-blue-100 text-blue-700',
+                        'Administrasi' => 'bg-green-100 text-green-700',
+                        'Marketing' => 'bg-orange-100 text-orange-700',
+                        default => 'bg-gray-100 text-gray-600'
+                    } ?>"><?= esc($task['kategori_nama']) ?></span>
+                <?php endif; ?>
+            </button>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2">
             <div class="bg-white rounded-lg shadow">
@@ -268,6 +297,22 @@
 </div>
 
 <script>
+function selectTask(taskId) {
+    const select = document.getElementById('taskSelect');
+    select.value = taskId;
+    select.dispatchEvent(new Event('change'));
+
+    document.querySelectorAll('.task-card').forEach(card => {
+        card.classList.remove('border-blue-500', 'bg-blue-50');
+        card.classList.add('border-transparent');
+    });
+    const selectedCard = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
+    if (selectedCard) {
+        selectedCard.classList.add('border-blue-500', 'bg-blue-50');
+        selectedCard.classList.remove('border-transparent');
+    }
+}
+
 function addLangkah() {
     const container = document.getElementById('langkahKerjaContainer');
     const count = container.querySelectorAll('.langkah-row').length + 1;

@@ -274,7 +274,6 @@ $routes->group('guru', ['filter' => 'role:guru_mapel,wakakur'], function ($route
     $routes->post('jurnal-pkl/verify/(:num)', 'Guru\PklController::verify/$1');
     $routes->post('jurnal-pkl/batal-verifikasi/(:num)', 'Guru\PklController::cancelVerification/$1');
     $routes->get('jurnal-pkl/detail/(:num)', 'Guru\PklController::detail/$1');
-    $routes->post('jurnal-pkl/verifikasi-task/(:num)', 'Guru\PklController::verifikasiTaskPembimbing/$1');
 
     // Absensi PKL (Pembimbing)
     $routes->get('absensi-pkl', 'Guru\AbsensiPklController::index');
@@ -371,7 +370,6 @@ $routes->group('instruktur', ['filter' => 'role:instruktur'], function ($routes)
     $routes->get('jurnal-pkl/siswa/(:num)', 'Instruktur\JurnalPklController::siswaDetail/$1');
     $routes->get('jurnal-pkl/task/(:num)', 'Instruktur\JurnalPklController::taskDetail/$1');
     $routes->post('jurnal-pkl/catatan/(:num)', 'Instruktur\JurnalPklController::addCatatan/$1');
-    $routes->post('jurnal-pkl/verifikasi-task/(:num)', 'Instruktur\JurnalPklController::verifikasiTask/$1');
     $routes->post('jurnal-pkl/verifikasi-progress/(:num)', 'Instruktur\JurnalPklController::verifyProgress/$1');
     $routes->post('jurnal-pkl/batal-verifikasi-progress/(:num)', 'Instruktur\JurnalPklController::cancelVerifikasiProgress/$1');
 
