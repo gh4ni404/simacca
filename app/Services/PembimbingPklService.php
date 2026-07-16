@@ -503,10 +503,11 @@ class PembimbingPklService extends BaseService
 
         return $this->executeInTransaction(function () use ($data, $tahunAjaran) {
             $insertData = [
-                'siswa_id'      => $data['siswa_id'],
-                'tempat_pkl_id' => $data['tempat_pkl_id'],
-                'tahun_ajaran'  => $tahunAjaran,
-                'created_at'    => date('Y-m-d H:i:s'),
+                'siswa_id'          => $data['siswa_id'],
+                'tempat_pkl_id'     => $data['tempat_pkl_id'],
+                'pembimbing_pkl_id' => $data['pembimbing_pkl_id'] ?? null,
+                'tahun_ajaran'      => $tahunAjaran,
+                'created_at'        => date('Y-m-d H:i:s'),
             ];
 
             $id = $this->siswaPklModel->insert($insertData);

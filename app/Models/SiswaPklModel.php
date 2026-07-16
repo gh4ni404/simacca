@@ -15,6 +15,7 @@ class SiswaPklModel extends Model
     protected $allowedFields    = [
         'siswa_id',
         'tempat_pkl_id',
+        'pembimbing_pkl_id',
         'tahun_ajaran',
         'created_at',
     ];
@@ -32,9 +33,10 @@ class SiswaPklModel extends Model
     protected $deletedField  = 'deleted_at';
 
     protected $validationRules      = [
-        'siswa_id'      => 'required|numeric',
-        'tempat_pkl_id' => 'required|numeric',
-        'tahun_ajaran'  => 'required|regex_match[/\d{4}\/\d{4}/]',
+        'siswa_id'          => 'required|numeric',
+        'tempat_pkl_id'     => 'required|numeric',
+        'pembimbing_pkl_id' => 'permit_empty|numeric',
+        'tahun_ajaran'      => 'required|regex_match[/\d{4}\/\d{4}/]',
     ];
     protected $validationMessages   = [];
     protected $skipValidation       = false;
