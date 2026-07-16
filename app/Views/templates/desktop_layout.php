@@ -58,9 +58,28 @@
         /* Sidebar — clean, minimal design */
         .sidebar {
             width: 260px;
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
+        }
+        /* Custom slim scrollbar for sidebar nav */
+        .sidebar-nav-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: #CBD5E1 transparent;
+        }
+        .sidebar-nav-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar-nav-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .sidebar-nav-scroll::-webkit-scrollbar-thumb {
+            background-color: #CBD5E1;
+            border-radius: 9999px;
+        }
+        .sidebar-nav-scroll:hover::-webkit-scrollbar-thumb {
+            background-color: #94A3B8;
         }
         .sidebar-item {
             display: flex;
@@ -161,7 +180,7 @@
             </div>
 
             <!-- Navigation -->
-            <nav class="flex-1 overflow-y-auto px-3 py-4">
+            <nav class="flex-1 overflow-y-auto px-3 py-4 sidebar-nav-scroll">
                 <?php $menu = get_sidebar_menu(); ?>
                 <?php $currentUrl = uri_string(); ?>
                 <?php foreach ($menu as $item): ?>
