@@ -131,7 +131,10 @@ $kategoriBadge = [
                                     <span class="inline-flex items-center justify-center w-7 h-7 rounded bg-gray-100 text-gray-400" title="Ada foto"><i class="fa-solid fa-image text-[9px]"></i></span>
                                 <?php endif; ?>
                                 <?php if ($p['catatan_pembimbing']): ?>
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded bg-orange-50 text-orange-400" title="Ada catatan"><i class="fa-solid fa-comment text-[9px]"></i></span>
+                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded bg-orange-50 text-orange-400" title="Catatan Pembimbing"><i class="fa-solid fa-comment text-[9px]"></i></span>
+                                <?php endif; ?>
+                                <?php if (!empty($p['catatan_instruktur'])): ?>
+                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded bg-purple-50 text-purple-400" title="Catatan Instruktur"><i class="fa-solid fa-comment-dots text-[9px]"></i></span>
                                 <?php endif; ?>
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold
                                     <?= match ($p['status']) {
@@ -145,6 +148,10 @@ $kategoriBadge = [
                                 </span>
                             </div>
                             <?php if ($p['status'] !== 'approved'): ?>
+                                <a href="<?= base_url('siswa/jurnal-pkl/edit-progress/' . $p['id']); ?>" title="Edit"
+                                   class="text-gray-400 hover:text-blue-500 transition-colors p-2">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
                                 <form action="<?= base_url('siswa/jurnal-pkl/hapus-progress/' . $p['id']); ?>" method="POST" class="inline flex-shrink-0">
                                     <?= csrf_field(); ?>
                                     <button type="submit" onclick="return confirm('Yakin ingin menghapus progress ini?')" title="Hapus"
