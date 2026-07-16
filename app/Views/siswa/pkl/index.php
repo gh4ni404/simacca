@@ -128,9 +128,9 @@ $kategoriBadge = [
                             </div>
                             <div class="flex items-center gap-1.5 flex-shrink-0">
                                 <?php if ($p['foto']): ?>
-                                    <a href="<?= base_url('files/pkl-progress/' . $p['foto']); ?>" target="_blank" title="Lihat Foto" class="block flex-shrink-0">
-                                        <img src="<?= base_url('files/pkl-progress/' . $p['foto']); ?>" class="w-9 h-9 rounded-lg object-cover border border-gray-200 shadow-sm hover:scale-105 transition-transform" loading="lazy" alt="Foto aktivitas">
-                                    </a>
+                                    <button type="button" onclick="openLightbox('<?= base_url('files/pkl-progress/' . $p['foto']); ?>')" title="Lihat Foto" class="block flex-shrink-0 cursor-zoom-in">
+                                        <img src="<?= base_url('files/pkl-progress/' . $p['foto']); ?>" class="w-9 h-9 rounded-lg object-cover border border-gray-200 shadow-sm hover:scale-110 transition-transform" loading="lazy" alt="Foto aktivitas">
+                                    </button>
                                 <?php endif; ?>
                                 <?php if ($p['catatan_pembimbing']): ?>
                                     <span class="hidden sm:flex items-center gap-1 max-w-[120px] bg-orange-50 border border-orange-100 text-orange-700 text-[10px] font-medium px-1.5 py-0.5 rounded-lg truncate" title="<?= esc($p['catatan_pembimbing']) ?>">
@@ -399,6 +399,14 @@ $kategoriBadge = [
 
 <?= $this->section('scripts') ?>
 
+<!-- Lightbox -->
+<div id="lightbox" class="fixed inset-0 z-[9999] bg-black/90 hidden items-center justify-center p-4" onclick="closeLightbox(event)">
+    <button onclick="closeLightbox()" class="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white text-lg transition-colors">
+        <i class="fa-solid fa-xmark"></i>
+    </button>
+    <img id="lightboxImg" class="max-w-full max-h-[90vh] rounded-2xl shadow-2xl object-contain" src="">
+</div>
+
 <!-- Modal Cetak Jurnal -->
 <div id="modalCetakJurnal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onclick="if(event.target===this)this.classList.add('hidden')">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 overflow-hidden">
@@ -529,9 +537,7 @@ $kategoriBadge = [
 
                 if (img) {
                     var imgSrc = img.getAttribute('src');
-                    item += '<a href="' + imgSrc + '" target="_blank" title="Lihat Foto" class="flex-shrink-0">' +
-                        '<img src="' + imgSrc + '" class="w-8 h-8 rounded-lg object-cover border border-gray-200 shadow-sm" loading="lazy" alt="Foto">' +
-                    '</a>';
+                    item += '<img src="' + imgSrc + '" class="w-8 h-8 rounded-lg object-cover border border-gray-200 shadow-sm flex-shrink-0" loading="lazy" alt="Foto">';
                 }
                 if (noteO) {
                     var noteOText = noteO.querySelector('p.text-sm') ? noteO.querySelector('p.text-sm').textContent.trim() : (noteO.textContent.trim());
@@ -732,6 +738,27 @@ $kategoriBadge = [
         }
 
         container.innerHTML = html;
+    });
+
+    function openLightbox(src) {
+        var lb = document.getElementById('lightbox');
+        document.getElementById('lightboxImg').src = src;
+        lb.classList.remove('hidden');
+        lb.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox(e) {
+        if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('fa-xmark') && e.target.id !== 'lightbox') return;
+        var lb = document.getElementById('lightbox');
+        lb.classList.add('hidden');
+        lb.classList.remove('flex');
+        document.body.style.overflow = '';
+        document.getElementById('lightboxImg').src = '';
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeLightbox({ target: document.getElementById('lightbox') });
     });
 </script>
 <?= $this->endSection() ?>
