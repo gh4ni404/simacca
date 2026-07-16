@@ -74,13 +74,32 @@ class JurnalPklController extends BaseController
             foreach ($rows as $row) {
                 $siswaStats[$row['siswa_id']] = $row;
             }
+
+            // Fetch all pending review progress entries across all students
+            $pendingProgress = $db->query("
+                SELECT pp.*, pt.judul AS task_judul, s.nama_lengkap AS nama_siswa, s.nis, k.nama_kelas, users.profile_photo
+                FROM pkl_progress pp
+                JOIN pkl_tasks pt ON pt.id = pp.task_id
+                JOIN siswa s ON s.id = pt.siswa_id
+                JOIN siswa_pkl sp ON sp.siswa_id = s.id AND sp.tahun_ajaran = ?
+                LEFT JOIN kelas k ON k.id = s.kelas_id
+                LEFT JOIN users ON users.id = s.user_id
+                WHERE sp.tempat_pkl_id = ?
+                  AND pp.status = 'submitted'
+                  AND pp.deleted_at IS NULL
+                  AND pt.deleted_at IS NULL
+                ORDER BY pp.tanggal ASC
+            ", [$tahunAjaran, $instruktur['tempat_pkl_id']])->getResultArray();
+        } else {
+            $pendingProgress = [];
         }
 
         $data = [
-            'title'       => 'Jurnal PKL - Instruktur',
-            'pageTitle'   => 'Jurnal PKL',
-            'siswaList'   => $siswaList,
-            'siswaStats'  => $siswaStats,
+            'title'           => 'Jurnal PKL - Instruktur',
+            'pageTitle'       => 'Jurnal PKL',
+            'siswaList'       => $siswaList,
+            'siswaStats'      => $siswaStats,
+            'pendingProgress' => $pendingProgress,
         ];
 
         return view('instruktur/jurnal_pkl/index', $data);
