@@ -54,12 +54,12 @@
                         </label>
                         <select id="pembimbing_pkl_id" name="pembimbing_pkl_id" required
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-                            <option value="">Pilih Tempat PKL</option>
-                            <?php foreach ($pembimbingList as $p): ?>
-                                <option value="<?= $p['id'] ?>" data-tempat="<?= esc($p['tempat_pkl_id']) ?>">
-                                    <?= esc($p['nama_perusahaan'] ?? 'Tempat PKL') ?> (ID: <?= $p['id'] ?>)
-                                </option>
-                            <?php endforeach; ?>
+        <option value="">Pilih Tempat PKL</option>
+        <?php foreach ($pembimbingList as $p): ?>
+        <option value="<?= $p['id'] ?>" data-tempat="<?= esc($p['tempat_pkl_id']) ?>">
+            <?= esc($p['nama_perusahaan'] ?? 'Tempat PKL') ?>
+        </option>
+        <?php endforeach; ?>
                         </select>
                     </div>
                     <div>

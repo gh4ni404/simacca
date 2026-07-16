@@ -53,7 +53,7 @@
                                 <option value="">Pilih Tempat PKL</option>
                                 <?php foreach ($pembimbingList as $p): ?>
                                     <option value="<?= $p['id'] ?>" data-tempat="<?= esc($p['tempat_pkl_id']) ?>">
-                                        <?= esc($p['nama_perusahaan'] ?? 'Tempat PKL') ?> (ID: <?= $p['id'] ?>)
+                                        <?= esc($p['nama_perusahaan'] ?? 'Tempat PKL') ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>

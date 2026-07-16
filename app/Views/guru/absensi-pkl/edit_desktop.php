@@ -96,7 +96,7 @@
                             <label class="block text-xs font-semibold text-gray-500 mb-1">
                                 <i class="fas fa-user-tie mr-1"></i> Pembimbing PKL
                             </label>
-                            <p class="text-sm font-bold text-gray-800"><?= esc($absensi['nama_pembimbing'] ?? '-') ?> (ID: <?= $absensi['pembimbing_pkl_id'] ?>)</p>
+                            <p class="text-sm font-bold text-gray-800"><?= esc($absensi['nama_pembimbing'] ?? '-') ?></p>
                         </div>
                     </div>
                 </div>

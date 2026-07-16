@@ -201,8 +201,11 @@ class AbsensiPklService extends BaseService
         try {
             $tahunAjaran = get_active_tahun_ajaran();
 
-            // Get all pembimbing_pkl for this guru
-            $pembimbingList = $this->pembimbingPklModel->where('guru_id', $guruId)
+            // Get all pembimbing_pkl for this guru with nama_perusahaan
+            $pembimbingList = $this->pembimbingPklModel
+                ->select('pembimbing_pkl.*, tempat_pkl.nama_perusahaan')
+                ->join('tempat_pkl', 'tempat_pkl.id = pembimbing_pkl.tempat_pkl_id')
+                ->where('guru_id', $guruId)
                 ->where('tahun_ajaran', $tahunAjaran)
                 ->findAll();
 
