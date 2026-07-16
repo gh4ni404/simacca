@@ -372,6 +372,8 @@ $routes->group('instruktur', ['filter' => 'role:instruktur'], function ($routes)
     $routes->get('jurnal-pkl/task/(:num)', 'Instruktur\JurnalPklController::taskDetail/$1');
     $routes->post('jurnal-pkl/catatan/(:num)', 'Instruktur\JurnalPklController::addCatatan/$1');
     $routes->post('jurnal-pkl/verifikasi-task/(:num)', 'Instruktur\JurnalPklController::verifikasiTask/$1');
+    $routes->post('jurnal-pkl/verifikasi-progress/(:num)', 'Instruktur\JurnalPklController::verifyProgress/$1');
+    $routes->post('jurnal-pkl/batal-verifikasi-progress/(:num)', 'Instruktur\JurnalPklController::cancelVerifikasiProgress/$1');
 
     // Task Template (Master Task)
     $routes->get('task-template', 'Instruktur\TaskTemplateController::index');

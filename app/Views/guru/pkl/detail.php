@@ -82,6 +82,13 @@
                 </div>
                 <?php endif; ?>
 
+                <?php if (!empty($progress['catatan_instruktur'])): ?>
+                <div class="mt-4 bg-purple-50 border-l-4 border-purple-400 rounded-r-lg p-4">
+                    <p class="text-xs font-semibold text-purple-700 uppercase">Catatan Instruktur</p>
+                    <p class="text-sm text-purple-800 mt-1"><?= esc($progress['catatan_instruktur']) ?></p>
+                </div>
+                <?php endif; ?>
+
                 <?php if (!empty($progress['catatan_pembimbing']) && $progress['status'] === 'revision'): ?>
                 <div class="mt-4 bg-orange-50 border-l-4 border-orange-400 rounded-r-lg p-4">
                     <p class="text-xs font-semibold text-orange-700 uppercase">Catatan Revisi Sebelumnya</p>

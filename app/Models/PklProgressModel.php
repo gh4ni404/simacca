@@ -16,6 +16,7 @@ class PklProgressModel extends Model
         'task_id', 'tanggal', 'deskripsi', 'langkah_kerja', 'foto', 'status',
         'catatan_pembimbing', 'catatan_instruktur',
         'verified_by', 'verified_at',
+        'instruktur_verified_by', 'instruktur_verified_at',
     ];
 
     protected bool $allowEmptyInserts = false;

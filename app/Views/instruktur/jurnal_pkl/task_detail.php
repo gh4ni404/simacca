@@ -136,8 +136,50 @@
                         </div>
                         <?php endif; ?>
 
-                        <!-- Form Catatan Instruktur -->
+                        <!-- Aksi Instruktur -->
                         <div class="mt-3 pt-3 border-t border-gray-100">
+                            <?php if ($p['status'] === 'submitted'): ?>
+                            <div class="flex flex-col gap-2">
+                                <form action="<?= base_url('instruktur/jurnal-pkl/verifikasi-progress/' . $p['id']); ?>" method="POST" class="flex items-center gap-2">
+                                    <?= csrf_field(); ?>
+                                    <input type="text" name="catatan_instruktur"
+                                           value="<?= esc($p['catatan_instruktur'] ?? ''); ?>"
+                                           placeholder="Catatan (opsional)..."
+                                           class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                    <input type="hidden" name="status" value="approved">
+                                    <button type="submit"
+                                            class="inline-flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm transition-colors">
+                                        <i class="fas fa-check mr-1"></i>Setujui
+                                    </button>
+                                </form>
+                                <form action="<?= base_url('instruktur/jurnal-pkl/verifikasi-progress/' . $p['id']); ?>" method="POST" class="flex items-center gap-2">
+                                    <?= csrf_field(); ?>
+                                    <input type="text" name="catatan_instruktur"
+                                           value="<?= esc($p['catatan_instruktur'] ?? ''); ?>"
+                                           placeholder="Catatan revisi..."
+                                           class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                                    <input type="hidden" name="status" value="revision">
+                                    <button type="submit" onclick="return confirm('Minta revisi progress ini?')"
+                                            class="inline-flex items-center px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 text-sm transition-colors">
+                                        <i class="fas fa-edit mr-1"></i>Revisi
+                                    </button>
+                                </form>
+                            </div>
+                            <?php elseif (in_array($p['status'], ['approved', 'revision'])): ?>
+                            <div class="flex items-center justify-between">
+                                <?php if ($p['catatan_instruktur']): ?>
+                                <span class="text-xs text-gray-500"><i class="fas fa-comment mr-1"></i><?= esc($p['catatan_instruktur']) ?></span>
+                                <?php endif; ?>
+                                <form action="<?= base_url('instruktur/jurnal-pkl/batal-verifikasi-progress/' . $p['id']); ?>" method="POST" class="inline">
+                                    <?= csrf_field(); ?>
+                                    <button type="submit" onclick="return confirm('Batalkan verifikasi progress ini?')"
+                                            class="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 text-xs transition-colors">
+                                        <i class="fas fa-undo mr-1"></i>Batalkan
+                                    </button>
+                                </form>
+                            </div>
+                            <?php else: ?>
+                            <!-- Draft: hanya form catatan -->
                             <form action="<?= base_url('instruktur/jurnal-pkl/catatan/' . $p['id']); ?>" method="POST">
                                 <?= csrf_field(); ?>
                                 <div class="flex gap-2">
@@ -151,6 +193,7 @@
                                     </button>
                                 </div>
                             </form>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>

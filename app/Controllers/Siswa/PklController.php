@@ -272,21 +272,46 @@ class PklController extends BaseController
                 }
             }
 
-            $taskResult = $this->pklService->createTask([
-                'siswa_id' => $siswa['id'],
-                'judul' => $template['judul'],
-                'kategori_id' => $template['kategori_id'],
-                'estimasi' => $template['estimasi'],
-                'langkah_kerja' => $taskLangkahKerja,
-                'status' => 'active',
-            ]);
+            $pklTaskModel = new \App\Models\PklTaskModel();
+            $existingTask = $pklTaskModel->getInactiveOrDeletedBySiswaAndKategori($siswa['id'], $template['kategori_id']);
 
-            if (!$taskResult['success']) {
-                session()->setFlashdata('error', $taskResult['message']);
-                return redirect()->back()->withInput();
+            if ($existingTask) {
+                $updateData = [
+                    'judul' => $template['judul'],
+                    'kategori_id' => $template['kategori_id'],
+                    'estimasi' => $template['estimasi'],
+                    'langkah_kerja' => $taskLangkahKerja,
+                    'status' => 'active',
+                    'deleted_at' => null,
+                ];
+
+                $db = \Config\Database::connect();
+                $db->table('pkl_tasks')
+                    ->where('id', $existingTask['id'])
+                    ->update($updateData);
+
+                if ($db->affectedRows() === 0 && empty($db->error())) {
+                    session()->setFlashdata('error', 'Gagal mengaktifkan task');
+                    return redirect()->back()->withInput();
+                }
+                $taskId = $existingTask['id'];
+            } else {
+                $taskResult = $this->pklService->createTask([
+                    'siswa_id' => $siswa['id'],
+                    'judul' => $template['judul'],
+                    'kategori_id' => $template['kategori_id'],
+                    'estimasi' => $template['estimasi'],
+                    'langkah_kerja' => $taskLangkahKerja,
+                    'status' => 'active',
+                ]);
+
+                if (!$taskResult['success']) {
+                    session()->setFlashdata('error', $taskResult['message']);
+                    return redirect()->back()->withInput();
+                }
+
+                $taskId = $taskResult['data']['id'];
             }
-
-            $taskId = $taskResult['data']['id'];
         } else {
             $taskId = (int) $this->request->getPost('task_id');
             if (!$taskId) {
@@ -352,7 +377,7 @@ class PklController extends BaseController
             'deskripsi' => $this->request->getPost('deskripsi'),
             'langkah_kerja' => null,
             'foto' => $fotoName,
-            'status' => 'draft',
+            'status' => 'submitted',
         ];
 
         $langkahKerja = $this->request->getPost('langkah_kerja');
@@ -661,7 +686,7 @@ class PklController extends BaseController
         ];
 
         if ($progressResult['data']['status'] === 'revision') {
-            $updateData['status'] = 'draft';
+            $updateData['status'] = 'submitted';
         }
 
         $result = $this->pklService->updateProgress($id, $updateData);

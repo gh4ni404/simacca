@@ -196,7 +196,7 @@
                     <?php if ($progress['status'] === 'revision'): ?>
                     <div class="flex items-start gap-2">
                         <span class="flex-shrink-0 w-5 h-5 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold">!</span>
-                        <p class="text-orange-700">Aktivitas ini statusnya revisi. Setelah diedit akan kembali ke status draft.</p>
+                        <p class="text-orange-700">Aktivitas ini statusnya revisi. Setelah diedit akan kembali ke status submitted (menunggu verifikasi).</p>
                     </div>
                     <?php endif; ?>
                 </div>

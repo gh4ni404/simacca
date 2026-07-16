@@ -374,9 +374,14 @@ function fetchLangkahKerja(type, id) {
         .then(result => {
             if (result.success && result.data && result.data.length > 0) {
                 populateLangkahKerja(result.data);
+            } else {
+                resetLangkahKerja();
             }
         })
-        .catch(err => console.error('Gagal mengambil langkah kerja:', err));
+        .catch(err => {
+            console.error('Gagal mengambil langkah kerja:', err);
+            resetLangkahKerja();
+        });
 }
 
 function populateLangkahKerja(steps) {

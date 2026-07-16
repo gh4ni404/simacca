@@ -241,4 +241,99 @@ class JurnalPklController extends BaseController
         session()->setFlashdata('success', 'Task berhasil diverifikasi');
         return redirect()->back();
     }
+
+    public function verifyProgress(int $progressId)
+    {
+        $instruktur = $this->getInstruktur();
+        if (!$instruktur) {
+            return redirect()->to('/login');
+        }
+
+        $status = $this->request->getPost('status');
+        $catatan = $this->request->getPost('catatan_instruktur');
+
+        if (!in_array($status, ['approved', 'revision'])) {
+            session()->setFlashdata('error', 'Status verifikasi tidak valid');
+            return redirect()->back();
+        }
+
+        $progress = $this->progressModel->find($progressId);
+        if (!$progress) {
+            session()->setFlashdata('error', 'Progress tidak ditemukan');
+            return redirect()->to('/instruktur/jurnal-pkl');
+        }
+
+        $db = \Config\Database::connect();
+        $authorized = $db->query("
+            SELECT 1 FROM pkl_tasks pt
+            JOIN siswa_pkl sp ON sp.siswa_id = pt.siswa_id AND sp.tahun_ajaran = (SELECT `value` FROM `settings` WHERE `key` = 'tahun_ajaran_aktif')
+            WHERE pt.id = ? AND sp.tempat_pkl_id = ? AND pt.deleted_at IS NULL
+        ", [$progress['task_id'], $instruktur['tempat_pkl_id']])->getRowArray();
+
+        if (!$authorized) {
+            session()->setFlashdata('error', 'Anda tidak memiliki akses');
+            return redirect()->to('/instruktur/jurnal-pkl');
+        }
+
+        if ($progress['status'] !== 'submitted') {
+            session()->setFlashdata('error', 'Progress ini sudah diverifikasi sebelumnya');
+            return redirect()->back();
+        }
+
+        $userId = session()->get('user_id');
+        $this->progressModel->update($progressId, [
+            'status' => $status,
+            'instruktur_verified_by' => $userId,
+            'instruktur_verified_at' => date('Y-m-d H:i:s'),
+            'catatan_instruktur' => $catatan,
+        ]);
+
+        $messages = [
+            'approved' => 'Progress berhasil disetujui',
+            'revision' => 'Progress direvisi',
+        ];
+        session()->setFlashdata('success', $messages[$status]);
+        return redirect()->back();
+    }
+
+    public function cancelVerifikasiProgress(int $progressId)
+    {
+        $instruktur = $this->getInstruktur();
+        if (!$instruktur) {
+            return redirect()->to('/login');
+        }
+
+        $progress = $this->progressModel->find($progressId);
+        if (!$progress) {
+            session()->setFlashdata('error', 'Progress tidak ditemukan');
+            return redirect()->to('/instruktur/jurnal-pkl');
+        }
+
+        $db = \Config\Database::connect();
+        $authorized = $db->query("
+            SELECT 1 FROM pkl_tasks pt
+            JOIN siswa_pkl sp ON sp.siswa_id = pt.siswa_id AND sp.tahun_ajaran = (SELECT `value` FROM `settings` WHERE `key` = 'tahun_ajaran_aktif')
+            WHERE pt.id = ? AND sp.tempat_pkl_id = ? AND pt.deleted_at IS NULL
+        ", [$progress['task_id'], $instruktur['tempat_pkl_id']])->getRowArray();
+
+        if (!$authorized) {
+            session()->setFlashdata('error', 'Anda tidak memiliki akses');
+            return redirect()->to('/instruktur/jurnal-pkl');
+        }
+
+        if (!in_array($progress['status'], ['approved', 'revision'])) {
+            session()->setFlashdata('error', 'Progress ini belum diverifikasi');
+            return redirect()->back();
+        }
+
+        $this->progressModel->update($progressId, [
+            'status' => 'submitted',
+            'instruktur_verified_by' => null,
+            'instruktur_verified_at' => null,
+            'catatan_instruktur' => null,
+        ]);
+
+        session()->setFlashdata('success', 'Verifikasi progress berhasil dibatalkan');
+        return redirect()->back();
+    }
 }

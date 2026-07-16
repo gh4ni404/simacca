@@ -115,7 +115,7 @@ class PklService extends BaseService
             }
 
             if (!isset($data['status'])) {
-                $data['status'] = 'draft';
+                $data['status'] = 'submitted';
             }
 
             $id = $this->progressModel->insert($data);

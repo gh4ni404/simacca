@@ -29,78 +29,6 @@
 
     <?= view('components/alerts') ?>
 
-    <!-- Task Verification Section -->
-    <?php if (!empty($tasks)): ?>
-    <div class="mb-6">
-        <div class="flex items-center justify-between mb-3">
-            <h2 class="text-lg font-semibold text-gray-800">
-                <i class="fas fa-clipboard-check mr-2 text-indigo-600"></i>
-                Task Menunggu Persetujuan
-            </h2>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700">
-                <?= count($tasks) ?> task
-            </span>
-        </div>
-        <div class="space-y-3">
-            <?php foreach ($tasks as $t):
-                $verifiedDate = $t['instruktur_verified_at'] ? (new DateTime($t['instruktur_verified_at'])) : null;
-            ?>
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
-                <div class="p-5">
-                    <div class="flex items-start justify-between gap-4">
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <h3 class="text-sm font-semibold text-gray-800"><?= esc($t['judul']) ?></h3>
-                                <?php if (!empty($t['kategori_nama'])): ?>
-                                <span class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700"><?= esc($t['kategori_nama']) ?></span>
-                                <?php endif; ?>
-                            </div>
-                            <div class="flex items-center gap-3 mt-2 text-xs text-gray-500">
-                                <span><i class="fas fa-user mr-1"></i><?= esc($t['nama_siswa']) ?></span>
-                                <span><i class="fas fa-id-card mr-1"></i>NIS: <?= esc($t['nis'] ?? '-') ?></span>
-                                <span><i class="fas fa-building mr-1"></i><?= esc($t['nama_perusahaan'] ?? '-') ?></span>
-                            </div>
-                            <?php if ($verifiedDate): ?>
-                            <p class="text-xs text-gray-400 mt-1">
-                                <i class="fas fa-clock mr-1"></i>Diverifikasi instruktur: <?= $verifiedDate->format('d/m/Y H:i') ?>
-                                <?php if (!empty($t['nama_instruktur'])): ?>
-                                oleh <?= esc($t['nama_instruktur']) ?>
-                                <?php endif; ?>
-                            </p>
-                            <?php endif; ?>
-
-                            <?php
-                            $langkahKerja = !empty($t['langkah_kerja']) ? json_decode($t['langkah_kerja'], true) : [];
-                            if (!empty($langkahKerja)): ?>
-                            <div class="mt-3 flex flex-wrap gap-1">
-                                <?php foreach ($langkahKerja as $li => $step): ?>
-                                <span class="inline-flex items-center text-xs bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full">
-                                    <?= ($li + 1) ?>. <?= esc($step) ?>
-                                </span>
-                                <?php endforeach; ?>
-                            </div>
-                            <?php endif; ?>
-                        </div>
-                        <div class="flex-shrink-0 flex flex-col items-end gap-2">
-                            <div class="w-32">
-                                <?= render_task_progress_bar($t['status']) ?>
-                            </div>
-                            <form action="<?= base_url('guru/jurnal-pkl/verifikasi-task/' . $t['id']); ?>" method="POST" class="inline">
-                                <?= csrf_field(); ?>
-                                <button type="submit" onclick="return confirm('Setujui task ini?')"
-                                        class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
-                                    <i class="fas fa-check mr-2"></i>Setujui
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-    <?php endif; ?>
-
     <!-- Progress Verification Section -->
     <?php if (!empty($stats) && $stats['total_siswa'] > 0): ?>
     <!-- Stats -->
@@ -235,6 +163,11 @@
                                 </a>
                                 <?php endif; ?>
 
+                                <?php if (!empty($p['catatan_instruktur'])): ?>
+                                <div class="mt-2 bg-purple-50 border-l-2 border-purple-400 rounded-r px-2 py-1">
+                                    <p class="text-xs text-purple-700"><span class="font-medium">Instruktur:</span> <?= esc($p['catatan_instruktur']) ?></p>
+                                </div>
+                                <?php endif; ?>
                                 <?php if (!empty($p['catatan_pembimbing'])): ?>
                                 <div class="mt-2 bg-orange-50 border-l-2 border-orange-400 rounded-r px-2 py-1">
                                     <p class="text-xs text-orange-700"><?= esc($p['catatan_pembimbing']) ?></p>

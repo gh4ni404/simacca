@@ -154,14 +154,6 @@
 
                         <?php if ($p['status'] !== 'approved'): ?>
                         <div class="mt-3 pt-3 border-t border-gray-100 flex items-center gap-2">
-                            <?php if ($p['status'] === 'draft'): ?>
-                            <form action="<?= base_url('siswa/jurnal-pkl/kirim/' . $p['id']); ?>" method="POST" class="inline">
-                                <?= csrf_field(); ?>
-                                <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 text-xs font-medium">
-                                    <i class="fas fa-paper-plane mr-1"></i>Kirim
-                                </button>
-                            </form>
-                            <?php endif; ?>
                             <?php if ($p['status'] !== 'approved'): ?>
                             <form action="<?= base_url('siswa/jurnal-pkl/hapus-progress/' . $p['id']); ?>" method="POST" class="inline">
                                 <?= csrf_field(); ?>
