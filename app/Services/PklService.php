@@ -342,7 +342,7 @@ class PklService extends BaseService
                 return $this->error('Progress tidak ditemukan', 404);
             }
 
-            if ($progress['status'] !== 'submitted' && $progress['status'] !== 'draft') {
+            if ($progress['status'] !== 'submitted' && $progress['status'] !== 'draft' && $progress['status'] !== 'verified_by_instruktur') {
                 return $this->error('Progress ini sudah diverifikasi sebelumnya');
             }
 
@@ -387,7 +387,7 @@ class PklService extends BaseService
             }
 
             $data = [
-                'status' => 'submitted',
+                'status' => $progress['instruktur_verified_by'] ? 'verified_by_instruktur' : 'submitted',
                 'verified_by' => null,
                 'verified_at' => null,
                 'catatan_pembimbing' => null,
@@ -449,6 +449,7 @@ class PklService extends BaseService
                         COUNT(pp.id) AS total_progress,
                         SUM(CASE WHEN pp.status = 'draft' THEN 1 ELSE 0 END) AS draft,
                         SUM(CASE WHEN pp.status = 'submitted' THEN 1 ELSE 0 END) AS submitted,
+                        SUM(CASE WHEN pp.status = 'verified_by_instruktur' THEN 1 ELSE 0 END) AS verified_by_instruktur,
                         SUM(CASE WHEN pp.status = 'approved' THEN 1 ELSE 0 END) AS approved,
                         SUM(CASE WHEN pp.status = 'revision' THEN 1 ELSE 0 END) AS revision
                     FROM pkl_tasks pt
@@ -458,7 +459,7 @@ class PklService extends BaseService
             $result = $db->query($sql, [$siswaId])->getRowArray();
             return $this->success($result ?: [
                 'total_tasks' => 0, 'total_progress' => 0,
-                'draft' => 0, 'submitted' => 0, 'approved' => 0, 'revision' => 0,
+                'draft' => 0, 'submitted' => 0, 'verified_by_instruktur' => 0, 'approved' => 0, 'revision' => 0,
             ]);
         } catch (\Exception $e) {
             $this->logError('getStatistics', $e);

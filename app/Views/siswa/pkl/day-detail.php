@@ -58,6 +58,10 @@
                         <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-600">
                             <i class="fas fa-check text-sm"></i>
                         </span>
+                        <?php elseif ($p['status'] === 'verified_by_instruktur'): ?>
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600">
+                            <i class="fas fa-check-double text-sm"></i>
+                        </span>
                         <?php elseif ($p['status'] === 'submitted'): ?>
                         <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-yellow-100 text-yellow-600">
                             <i class="fas fa-clock text-sm"></i>

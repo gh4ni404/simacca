@@ -79,7 +79,7 @@ $hariIndo = [
             </div>
             <div>
                 <p class="text-xs text-gray-500">Menunggu</p>
-                <p class="text-xl font-bold"><?= ($stats['submitted'] ?? 0) + ($stats['draft'] ?? 0) ?></p>
+                <p class="text-xl font-bold"><?= ($stats['submitted'] ?? 0) + ($stats['draft'] ?? 0) + ($stats['verified_by_instruktur'] ?? 0) ?></p>
             </div>
         </div>
     </div>
@@ -107,7 +107,25 @@ $hariIndo = [
             <?php foreach ($tasks as $task): ?>
                 <?php
                 $progressSummary = (new \App\Models\PklTaskModel())->getProgressSummary($task['id']);
-                $progressPct = $progressSummary['total'] > 0 ? round(($progressSummary['approved'] / $progressSummary['total']) * 100) : 0;
+                $total = $progressSummary['total'];
+                if ($total > 0) {
+                    $weightedSum = ($progressSummary['submitted'] * 50) + ($progressSummary['verified_by_instruktur'] * 80) + ($progressSummary['approved'] * 100);
+                    $progressPct = round($weightedSum / $total);
+                } else {
+                    $progressPct = 0;
+                }
+
+                if ($progressPct >= 100) {
+                    $barColor = 'bg-green-500';
+                } elseif ($progressPct >= 80) {
+                    $barColor = 'bg-blue-500';
+                } elseif ($progressPct >= 50) {
+                    $barColor = 'bg-yellow-500';
+                } else {
+                    $barColor = 'bg-gray-400';
+                }
+
+                $remaining = $total - $progressSummary['approved'];
                 ?>
                 <a href="<?= base_url('siswa/jurnal-pkl/task/' . $task['id']); ?>"
                     class="block bg-white rounded-lg shadow hover:shadow-md transition-shadow p-4">
@@ -128,11 +146,11 @@ $hariIndo = [
                     </div>
                     <div class="mt-3">
                         <div class="flex justify-between text-xs text-gray-500 mb-1">
-                            <span><?= $progressSummary['total'] - $progressSummary['approved'] ?> progress</span>
+                            <span><?= $remaining ?> progress tersisa</span>
                             <span><?= $progressPct ?>%</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-1.5">
-                            <div class="bg-green-500 h-1.5 rounded-full" style="width: <?= $progressPct ?>%"></div>
+                            <div class="<?= $barColor ?> h-1.5 rounded-full" style="width: <?= $progressPct ?>%"></div>
                         </div>
                     </div>
                 </a>
@@ -202,6 +220,11 @@ $hariIndo = [
                                     class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-600">
                                     <i class="fas fa-check text-sm"></i>
                                 </span>
+                            <?php elseif ($p['status'] === 'verified_by_instruktur'): ?>
+                                <span
+                                    class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600">
+                                    <i class="fas fa-check-double text-sm"></i>
+                                </span>
                             <?php elseif ($p['status'] === 'submitted'): ?>
                                 <span
                                     class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-yellow-100 text-yellow-600">
@@ -243,6 +266,7 @@ $hariIndo = [
                                 <span class="text-xs text-gray-400">
                                     <?= match ($p['status']) {
                                         'approved' => 'Disetujui',
+                                        'verified_by_instruktur' => 'Diverifikasi Instruktur',
                                         'submitted' => 'Menunggu',
                                         'revision' => 'Revisi',
                                         default => 'Draft'

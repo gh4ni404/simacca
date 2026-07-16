@@ -59,6 +59,7 @@ class JurnalPklController extends BaseController
                        COUNT(DISTINCT pt.id) AS total_tasks,
                        COUNT(pp.id) AS total_progress,
                        SUM(CASE WHEN pp.status = 'submitted' THEN 1 ELSE 0 END) AS submitted,
+                       SUM(CASE WHEN pp.status = 'verified_by_instruktur' THEN 1 ELSE 0 END) AS verified_by_instruktur,
                        SUM(CASE WHEN pp.status = 'approved' THEN 1 ELSE 0 END) AS approved,
                        SUM(CASE WHEN pp.status = 'revision' THEN 1 ELSE 0 END) AS revision,
                        MAX(pp.tanggal) AS last_activity
@@ -108,7 +109,8 @@ class JurnalPklController extends BaseController
         $tasks = $db->query("
             SELECT pt.*, pc.nama AS kategori_nama,
                    COUNT(pp.id) AS total_progress,
-                   SUM(CASE WHEN pp.status = 'approved' THEN 1 ELSE 0 END) AS approved_count
+                   SUM(CASE WHEN pp.status = 'approved' THEN 1 ELSE 0 END) AS approved_count,
+                   SUM(CASE WHEN pp.status = 'verified_by_instruktur' THEN 1 ELSE 0 END) AS verified_count
             FROM pkl_tasks pt
             LEFT JOIN pkl_categories pc ON pc.id = pt.kategori_id
             LEFT JOIN pkl_progress pp ON pp.task_id = pt.id AND pp.deleted_at IS NULL
@@ -252,7 +254,7 @@ class JurnalPklController extends BaseController
         $status = $this->request->getPost('status');
         $catatan = $this->request->getPost('catatan_instruktur');
 
-        if (!in_array($status, ['approved', 'revision'])) {
+        if (!in_array($status, ['verified_by_instruktur', 'revision'])) {
             session()->setFlashdata('error', 'Status verifikasi tidak valid');
             return redirect()->back();
         }
@@ -289,7 +291,7 @@ class JurnalPklController extends BaseController
         ]);
 
         $messages = [
-            'approved' => 'Progress berhasil disetujui',
+            'verified_by_instruktur' => 'Progress berhasil diverifikasi',
             'revision' => 'Progress direvisi',
         ];
         session()->setFlashdata('success', $messages[$status]);
@@ -321,7 +323,7 @@ class JurnalPklController extends BaseController
             return redirect()->to('/instruktur/jurnal-pkl');
         }
 
-        if (!in_array($progress['status'], ['approved', 'revision'])) {
+        if (!in_array($progress['status'], ['verified_by_instruktur', 'revision'])) {
             session()->setFlashdata('error', 'Progress ini belum diverifikasi');
             return redirect()->back();
         }

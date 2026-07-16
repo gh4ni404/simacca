@@ -76,6 +76,7 @@
 
                 $borderClass = match($p['status']) {
                     'approved' => 'border-l-green-500',
+                    'verified_by_instruktur' => 'border-l-blue-500',
                     'submitted' => 'border-l-yellow-500',
                     'revision' => 'border-l-orange-500',
                     default => 'border-l-gray-300'
@@ -85,6 +86,7 @@
                 <div class="hidden md:flex absolute left-4 -top-1 w-4 h-4 rounded-full border-4 border-white shadow z-10
                     <?= match($p['status']) {
                         'approved' => 'bg-green-500',
+                        'verified_by_instruktur' => 'bg-blue-500',
                         'submitted' => 'bg-yellow-500',
                         'revision' => 'bg-orange-500',
                         default => 'bg-gray-400'
@@ -98,12 +100,14 @@
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                 <?= match($p['status']) {
                                     'approved' => 'bg-green-100 text-green-700',
+                                    'verified_by_instruktur' => 'bg-blue-100 text-blue-700',
                                     'submitted' => 'bg-yellow-100 text-yellow-700',
                                     'revision' => 'bg-orange-100 text-orange-700',
                                     default => 'bg-gray-100 text-gray-600'
                                 } ?>">
                                 <?= match($p['status']) {
-                                    'approved' => '<i class="fas fa-check-circle mr-1"></i>Disetujui',
+                                    'approved' => '<i class="fas fa-check-circle mr-1"></i>Disetujui Pembimbing',
+                                    'verified_by_instruktur' => '<i class="fas fa-check-double mr-1"></i>Diverifikasi',
                                     'submitted' => '<i class="fas fa-clock mr-1"></i>Menunggu',
                                     'revision' => '<i class="fas fa-edit mr-1"></i>Revisi',
                                     default => '<i class="fas fa-pen mr-1"></i>Draft'
@@ -146,7 +150,7 @@
                                            value="<?= esc($p['catatan_instruktur'] ?? ''); ?>"
                                            placeholder="Catatan (opsional)..."
                                            class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                                    <input type="hidden" name="status" value="approved">
+                                    <input type="hidden" name="status" value="verified_by_instruktur">
                                     <button type="submit"
                                             class="inline-flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm transition-colors">
                                         <i class="fas fa-check mr-1"></i>Setujui
@@ -165,7 +169,7 @@
                                     </button>
                                 </form>
                             </div>
-                            <?php elseif (in_array($p['status'], ['approved', 'revision'])): ?>
+                            <?php elseif (in_array($p['status'], ['verified_by_instruktur', 'revision'])): ?>
                             <div class="flex items-center justify-between">
                                 <?php if ($p['catatan_instruktur']): ?>
                                 <span class="text-xs text-gray-500"><i class="fas fa-comment mr-1"></i><?= esc($p['catatan_instruktur']) ?></span>

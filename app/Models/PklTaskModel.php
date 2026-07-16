@@ -101,13 +101,14 @@ class PklTaskModel extends Model
                     COUNT(*) AS total,
                     SUM(CASE WHEN status = 'draft' THEN 1 ELSE 0 END) AS draft,
                     SUM(CASE WHEN status = 'submitted' THEN 1 ELSE 0 END) AS submitted,
+                    SUM(CASE WHEN status = 'verified_by_instruktur' THEN 1 ELSE 0 END) AS verified_by_instruktur,
                     SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) AS approved,
                     SUM(CASE WHEN status = 'revision' THEN 1 ELSE 0 END) AS revision
                 FROM pkl_progress
                 WHERE task_id = ? AND deleted_at IS NULL";
 
         $result = $db->query($sql, [$taskId])->getRowArray();
-        return $result ?: ['total' => 0, 'draft' => 0, 'submitted' => 0, 'approved' => 0, 'revision' => 0];
+        return $result ?: ['total' => 0, 'draft' => 0, 'submitted' => 0, 'verified_by_instruktur' => 0, 'approved' => 0, 'revision' => 0];
     }
 
     public function getArchiveSummary(?string $startDate = null, ?string $endDate = null, ?int $siswaId = null, ?string $status = null): array

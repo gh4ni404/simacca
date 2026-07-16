@@ -32,7 +32,7 @@
     <!-- Progress Verification Section -->
     <?php if (!empty($stats) && $stats['total_siswa'] > 0): ?>
     <!-- Stats -->
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+    <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
         <div class="bg-white rounded-xl shadow-sm p-4 text-center">
             <div class="text-2xl font-bold text-gray-800"><?= $stats['total_siswa'] ?></div>
             <div class="text-xs text-gray-500 mt-1">Siswa</div>
@@ -44,6 +44,10 @@
         <div class="bg-white rounded-xl shadow-sm p-4 text-center border-l-4 border-yellow-400">
             <div class="text-2xl font-bold text-yellow-600"><?= $stats['submitted'] ?></div>
             <div class="text-xs text-gray-500 mt-1">Menunggu</div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-4 text-center border-l-4 border-blue-400">
+            <div class="text-2xl font-bold text-blue-600"><?= $stats['verified_by_instruktur'] ?? 0 ?></div>
+            <div class="text-xs text-gray-500 mt-1">Verified Instruktur</div>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-4 text-center border-l-4 border-green-400">
             <div class="text-2xl font-bold text-green-600"><?= $stats['approved'] ?></div>
@@ -128,6 +132,7 @@
                         $dateObj = new DateTime($p['tanggal']);
                         $statusColor = match($p['status']) {
                             'approved' => 'bg-green-100 text-green-700',
+                            'verified_by_instruktur' => 'bg-blue-100 text-blue-700',
                             'submitted' => 'bg-yellow-100 text-yellow-700',
                             'revision' => 'bg-orange-100 text-orange-700',
                             default => 'bg-gray-100 text-gray-600'
@@ -138,6 +143,8 @@
                             <div class="flex-shrink-0 mt-0.5">
                                 <?php if ($p['status'] === 'approved'): ?>
                                 <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-100 text-green-600 text-xs"><i class="fas fa-check"></i></span>
+                                <?php elseif ($p['status'] === 'verified_by_instruktur'): ?>
+                                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-xs"><i class="fas fa-check-double"></i></span>
                                 <?php elseif ($p['status'] === 'submitted'): ?>
                                 <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-yellow-100 text-yellow-600 text-xs"><i class="fas fa-clock"></i></span>
                                 <?php elseif ($p['status'] === 'revision'): ?>

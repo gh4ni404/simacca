@@ -63,6 +63,7 @@ class PklProgressModel extends Model
         $sql = "SELECT pp.tanggal,
                        COUNT(*) AS total_aktivitas,
                        SUM(CASE WHEN pp.status = 'approved' THEN 1 ELSE 0 END) AS approved,
+                       SUM(CASE WHEN pp.status = 'verified_by_instruktur' THEN 1 ELSE 0 END) AS verified_by_instruktur,
                        SUM(CASE WHEN pp.status = 'submitted' THEN 1 ELSE 0 END) AS submitted,
                        SUM(CASE WHEN pp.status = 'revision' THEN 1 ELSE 0 END) AS revision,
                        SUM(CASE WHEN pp.status = 'draft' THEN 1 ELSE 0 END) AS draft
@@ -104,6 +105,7 @@ class PklProgressModel extends Model
             'total_progress' => 0,
             'draft' => 0,
             'submitted' => 0,
+            'verified_by_instruktur' => 0,
             'approved' => 0,
             'revision' => 0,
         ];
@@ -127,7 +129,7 @@ class PklProgressModel extends Model
 
             $grouped[$siswaId]['progress'][] = $row;
 
-            if ($row['status'] === 'submitted' || $row['status'] === 'draft') {
+            if ($row['status'] === 'submitted' || $row['status'] === 'draft' || $row['status'] === 'verified_by_instruktur') {
                 $grouped[$siswaId]['pending_count']++;
             }
         }

@@ -27,6 +27,7 @@
         <?php foreach ($tasks as $t):
             $progressCount = (int)$t['total_progress'];
             $approvedCount = (int)$t['approved_count'];
+            $verifiedCount = (int)$t['verified_count'];
             $taskProgress = get_task_progress($t['status']);
         ?>
         <a href="<?= base_url('instruktur/jurnal-pkl/task/' . $t['id']); ?>"
@@ -42,6 +43,7 @@
                     <p class="text-xs text-gray-500 mt-1">
                         <?= $progressCount ?> progress
                         <?php if ($progressCount > 0): ?>
+                        &middot; <?= $verifiedCount ?> diverifikasi
                         &middot; <?= $approvedCount ?> disetujui
                         <?php endif; ?>
                     </p>

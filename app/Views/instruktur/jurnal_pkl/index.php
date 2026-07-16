@@ -23,6 +23,7 @@
             $stats = $siswaStats[$s['siswa_id']] ?? null;
             $totalProgress = $stats ? (int)$stats['total_progress'] : 0;
             $approvedCount = $stats ? (int)$stats['approved'] : 0;
+            $verifiedCount = $stats ? (int)$stats['verified_by_instruktur'] : 0;
             $submittedCount = $stats ? (int)$stats['submitted'] : 0;
             $revisionCount = $stats ? (int)$stats['revision'] : 0;
             $lastActivity = $stats ? $stats['last_activity'] : null;
@@ -45,7 +46,10 @@
                 <div class="flex items-center gap-3">
                     <?php if ($totalProgress > 0): ?>
                     <div class="hidden sm:flex items-center gap-2 text-xs">
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-green-100 text-green-700" title="Disetujui">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-700" title="Diverifikasi">
+                            <i class="fas fa-check-double mr-1"></i><?= $verifiedCount ?>
+                        </span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-green-100 text-green-700" title="Disetujui Pembimbing">
                             <i class="fas fa-check mr-1"></i><?= $approvedCount ?>
                         </span>
                         <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700" title="Menunggu">
