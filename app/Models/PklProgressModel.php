@@ -97,7 +97,9 @@ class PklProgressModel extends Model
                 LEFT JOIN tempat_pkl tp ON tp.id = sp.tempat_pkl_id
                 JOIN pembimbing_pkl pp2 ON pp2.tempat_pkl_id = sp.tempat_pkl_id AND pp2.tahun_ajaran = sp.tahun_ajaran
                 WHERE pp2.guru_id = ? AND pp.deleted_at IS NULL AND pt.deleted_at IS NULL
-                ORDER BY s.nama_lengkap, pp.tanggal DESC";
+                ORDER BY s.nama_lengkap, 
+                         FIELD(pp.status, 'revision', 'submitted', 'verified_by_instruktur', 'draft', 'approved'),
+                         pp.tanggal DESC";
 
         $rawData = $db->query($sql, [$guruId])->getResultArray();
 
