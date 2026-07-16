@@ -86,13 +86,15 @@ class PklProgressModel extends Model
 
         $sql = "SELECT pp.*, pt.judul AS nama_task, pt.siswa_id,
                        s.nama_lengkap AS nama_siswa, s.nis, k.nama_kelas,
-                       pc.nama AS kategori_nama
+                       pc.nama AS kategori_nama, u.profile_photo, tp.nama_perusahaan
                 FROM pkl_progress pp
                 JOIN pkl_tasks pt ON pt.id = pp.task_id
                 JOIN siswa s ON s.id = pt.siswa_id
+                LEFT JOIN users u ON u.id = s.user_id
                 JOIN kelas k ON k.id = s.kelas_id
                 LEFT JOIN pkl_categories pc ON pc.id = pt.kategori_id
                 JOIN siswa_pkl sp ON sp.siswa_id = s.id
+                LEFT JOIN tempat_pkl tp ON tp.id = sp.tempat_pkl_id
                 JOIN pembimbing_pkl pp2 ON pp2.tempat_pkl_id = sp.tempat_pkl_id AND pp2.tahun_ajaran = sp.tahun_ajaran
                 WHERE pp2.guru_id = ? AND pp.deleted_at IS NULL AND pt.deleted_at IS NULL
                 ORDER BY s.nama_lengkap, pp.tanggal DESC";
@@ -121,6 +123,8 @@ class PklProgressModel extends Model
                     'nama_siswa' => $row['nama_siswa'],
                     'nis' => $row['nis'],
                     'nama_kelas' => $row['nama_kelas'],
+                    'profile_photo' => $row['profile_photo'],
+                    'nama_perusahaan' => $row['nama_perusahaan'],
                     'progress' => [],
                     'pending_count' => 0,
                 ];
