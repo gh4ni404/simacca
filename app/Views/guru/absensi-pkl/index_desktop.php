@@ -177,6 +177,13 @@
                                         <i class="fas fa-edit mr-1"></i> Edit
                                     </a>
                                     <?php endif; ?>
+                                    <?php if ($item['can_delete']): ?>
+                                    <button onclick="confirmDelete(<?= $item['id'] ?>)"
+                                            class="inline-flex items-center px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold rounded-lg transition-all shadow-sm"
+                                            title="Hapus">
+                                        <i class="fas fa-trash-alt mr-1"></i> Hapus
+                                    </button>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>

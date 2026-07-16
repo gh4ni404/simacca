@@ -96,28 +96,49 @@ class AbsensiPklService extends BaseService
                 return $this->errorResponse('Data tidak lengkap. Pastikan tanggal dan data siswa terisi.');
             }
 
-            // Check for duplicate
-            if ($this->absensiPklModel->isAlreadyAbsen($data['pembimbing_pkl_id'], $data['tanggal'])) {
-                return $this->errorResponse('Absensi untuk tanggal ini sudah dibuat sebelumnya');
-            }
+            // Check for existing record (including soft-deleted)
+            $existing = $this->absensiPklModel->onlyDeleted()
+                ->where('pembimbing_pkl_id', $data['pembimbing_pkl_id'])
+                ->where('tanggal', $data['tanggal'])
+                ->first();
 
-            return $this->executeInTransaction(function () use ($data) {
-                // Insert header
-                $headerData = [
-                    'pembimbing_pkl_id' => $data['pembimbing_pkl_id'],
-                    'tanggal'           => $data['tanggal'],
-                    'keterangan_umum'   => $data['keterangan_umum'] ?? null,
-                    'created_by'        => $data['created_by'],
-                    'created_at'        => date('Y-m-d H:i:s'),
-                ];
+            return $this->executeInTransaction(function () use ($data, $existing) {
+                // If exists and deleted, restore it
+                if ($existing) {
+                    $absensiPklId = $existing['id'];
+                    // Restore the soft-deleted header by clearing deleted_at
+                    $this->absensiPklModel->db->table('absensi_pkl')
+                        ->where('id', $absensiPklId)
+                        ->update([
+                            'deleted_at'      => null,
+                            'keterangan_umum' => $data['keterangan_umum'] ?? null,
+                            'updated_at'      => date('Y-m-d H:i:s'),
+                        ]);
+                    // Remove old detail records before re-inserting
+                    $this->absensiPklDetailModel->where('absensi_pkl_id', $absensiPklId)->delete();
+                } else {
+                    // Check for active record duplicate
+                    if ($this->absensiPklModel->isAlreadyAbsen($data['pembimbing_pkl_id'], $data['tanggal'])) {
+                        throw new \Exception('Absensi untuk tanggal ini sudah dibuat sebelumnya');
+                    }
 
-                $absensiPklId = $this->absensiPklModel->insert($headerData);
+                    // Insert header
+                    $headerData = [
+                        'pembimbing_pkl_id' => $data['pembimbing_pkl_id'],
+                        'tanggal'           => $data['tanggal'],
+                        'keterangan_umum'   => $data['keterangan_umum'] ?? null,
+                        'created_by'        => $data['created_by'],
+                        'created_at'        => date('Y-m-d H:i:s'),
+                    ];
+
+                    $absensiPklId = $this->absensiPklModel->insert($headerData);
+                }
 
                 if (!$absensiPklId) {
                     throw new \RuntimeException('Gagal menyimpan absensi PKL header');
                 }
 
-                // Insert detail
+                // Insert/Update detail
                 $inserted = $this->absensiPklDetailModel->insertBatchAbsensi($absensiPklId, $data['siswa']);
 
                 if (!$inserted) {
@@ -131,7 +152,7 @@ class AbsensiPklService extends BaseService
             });
         } catch (\Exception $e) {
             $this->log('error', 'Failed to create absensi pkl: ' . $e->getMessage());
-            return $this->errorResponse('Gagal menyimpan absensi PKL: ' . $e->getMessage());
+            return $this->errorResponse($e->getMessage());
         }
     }
 

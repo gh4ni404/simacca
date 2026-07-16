@@ -54,12 +54,27 @@ class AbsensiPklModel extends Model
 
     /**
      * Check if absensi already exists for this pembimbing on this date
+     * Includes soft-deleted records to avoid unique constraint violations
      */
     public function isAlreadyAbsen(int $pembimbingPklId, string $tanggal): bool
     {
-        return $this->where('pembimbing_pkl_id', $pembimbingPklId)
+        // Must also check soft-deleted records because the DB unique constraint
+        // still applies to all rows (including deleted_at IS NOT NULL)
+        return $this->withDeleted()
+            ->where('pembimbing_pkl_id', $pembimbingPklId)
             ->where('tanggal', $tanggal)
             ->countAllResults() > 0;
+    }
+
+    /**
+     * Find a soft-deleted absensi for a given pembimbing + tanggal (to restore it)
+     */
+    public function findTrashed(int $pembimbingPklId, string $tanggal): ?array
+    {
+        return $this->onlyDeleted()
+            ->where('pembimbing_pkl_id', $pembimbingPklId)
+            ->where('tanggal', $tanggal)
+            ->first();
     }
 
     /**

@@ -163,6 +163,13 @@
                                 <span>Edit</span>
                             </a>
                             <?php endif; ?>
+                            <?php if ($item['can_delete']): ?>
+                            <button onclick="confirmDelete(<?= $item['id'] ?>)"
+                                class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-xl active:scale-95 transition-all shadow-sm">
+                                <i class="fas fa-trash-alt"></i>
+                                <span>Hapus</span>
+                            </button>
+                            <?php endif; ?>
                         </div>
                     </div>
                 <?php endforeach; ?>
