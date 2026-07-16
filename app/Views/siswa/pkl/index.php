@@ -128,13 +128,23 @@ $kategoriBadge = [
                             </div>
                             <div class="flex items-center gap-1.5 flex-shrink-0">
                                 <?php if ($p['foto']): ?>
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded bg-gray-100 text-gray-400" title="Ada foto"><i class="fa-solid fa-image text-[9px]"></i></span>
+                                    <a href="<?= base_url('files/pkl-progress/' . $p['foto']); ?>" target="_blank" title="Lihat Foto" class="block flex-shrink-0">
+                                        <img src="<?= base_url('files/pkl-progress/' . $p['foto']); ?>" class="w-9 h-9 rounded-lg object-cover border border-gray-200 shadow-sm hover:scale-105 transition-transform" loading="lazy" alt="Foto aktivitas">
+                                    </a>
                                 <?php endif; ?>
                                 <?php if ($p['catatan_pembimbing']): ?>
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded bg-orange-50 text-orange-400" title="Catatan Pembimbing"><i class="fa-solid fa-comment text-[9px]"></i></span>
+                                    <span class="hidden sm:flex items-center gap-1 max-w-[120px] bg-orange-50 border border-orange-100 text-orange-700 text-[10px] font-medium px-1.5 py-0.5 rounded-lg truncate" title="<?= esc($p['catatan_pembimbing']) ?>">
+                                        <i class="fa-solid fa-comment text-orange-400 flex-shrink-0 text-[8px]"></i>
+                                        <span class="truncate"><?= esc(mb_substr($p['catatan_pembimbing'], 0, 30)) . (mb_strlen($p['catatan_pembimbing']) > 30 ? '…' : '') ?></span>
+                                    </span>
+                                    <span class="sm:hidden inline-flex items-center justify-center w-7 h-7 rounded bg-orange-50 text-orange-400" title="<?= esc($p['catatan_pembimbing']) ?>"><i class="fa-solid fa-comment text-[9px]"></i></span>
                                 <?php endif; ?>
                                 <?php if (!empty($p['catatan_instruktur'])): ?>
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded bg-purple-50 text-purple-400" title="Catatan Instruktur"><i class="fa-solid fa-comment-dots text-[9px]"></i></span>
+                                    <span class="hidden sm:flex items-center gap-1 max-w-[120px] bg-purple-50 border border-purple-100 text-purple-700 text-[10px] font-medium px-1.5 py-0.5 rounded-lg truncate" title="<?= esc($p['catatan_instruktur']) ?>">
+                                        <i class="fa-solid fa-comment-dots text-purple-400 flex-shrink-0 text-[8px]"></i>
+                                        <span class="truncate"><?= esc(mb_substr($p['catatan_instruktur'], 0, 30)) . (mb_strlen($p['catatan_instruktur']) > 30 ? '…' : '') ?></span>
+                                    </span>
+                                    <span class="sm:hidden inline-flex items-center justify-center w-7 h-7 rounded bg-purple-50 text-purple-400" title="<?= esc($p['catatan_instruktur']) ?>"><i class="fa-solid fa-comment-dots text-[9px]"></i></span>
                                 <?php endif; ?>
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-bold
                                     <?= match ($p['status']) {
@@ -518,13 +528,28 @@ $kategoriBadge = [
                         '<div class="flex items-center gap-1.5 flex-shrink-0">';
 
                 if (img) {
-                    item += '<span class="inline-flex items-center justify-center w-6 h-6 rounded bg-gray-100 text-gray-400" title="Ada foto"><i class="fa-solid fa-image text-[9px]"></i></span>';
+                    var imgSrc = img.getAttribute('src');
+                    item += '<a href="' + imgSrc + '" target="_blank" title="Lihat Foto" class="flex-shrink-0">' +
+                        '<img src="' + imgSrc + '" class="w-8 h-8 rounded-lg object-cover border border-gray-200 shadow-sm" loading="lazy" alt="Foto">' +
+                    '</a>';
                 }
                 if (noteO) {
-                    item += '<span class="inline-flex items-center justify-center w-6 h-6 rounded bg-orange-50 text-orange-400" title="Ada catatan"><i class="fa-solid fa-comment text-[9px]"></i></span>';
+                    var noteOText = noteO.querySelector('p.text-sm') ? noteO.querySelector('p.text-sm').textContent.trim() : (noteO.textContent.trim());
+                    var noteOShort = noteOText.length > 24 ? noteOText.substring(0, 24) + '…' : noteOText;
+                    item += '<span class="hidden sm:flex items-center gap-1 max-w-[100px] bg-orange-50 border border-orange-100 text-orange-700 text-[10px] font-medium px-1.5 py-0.5 rounded-lg" title="' + noteOText.replace(/"/g, '&quot;') + '">' +
+                        '<i class="fa-solid fa-comment text-orange-400 flex-shrink-0 text-[8px]"></i>' +
+                        '<span class="truncate">' + noteOShort + '</span>' +
+                    '</span>' +
+                    '<span class="sm:hidden inline-flex items-center justify-center w-6 h-6 rounded bg-orange-50 text-orange-400"><i class="fa-solid fa-comment text-[9px]"></i></span>';
                 }
                 if (noteP) {
-                    item += '<span class="inline-flex items-center justify-center w-6 h-6 rounded bg-purple-50 text-purple-400" title="Catatan instruktur"><i class="fa-solid fa-comment-dots text-[9px]"></i></span>';
+                    var notePText = noteP.querySelector('p.text-sm') ? noteP.querySelector('p.text-sm').textContent.trim() : (noteP.textContent.trim());
+                    var notePShort = notePText.length > 24 ? notePText.substring(0, 24) + '…' : notePText;
+                    item += '<span class="hidden sm:flex items-center gap-1 max-w-[100px] bg-purple-50 border border-purple-100 text-purple-700 text-[10px] font-medium px-1.5 py-0.5 rounded-lg" title="' + notePText.replace(/"/g, '&quot;') + '">' +
+                        '<i class="fa-solid fa-comment-dots text-purple-400 flex-shrink-0 text-[8px]"></i>' +
+                        '<span class="truncate">' + notePShort + '</span>' +
+                    '</span>' +
+                    '<span class="sm:hidden inline-flex items-center justify-center w-6 h-6 rounded bg-purple-50 text-purple-400"><i class="fa-solid fa-comment-dots text-[9px]"></i></span>';
                 }
 
                 item += '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ' + sBg + '">' + sLabel + '</span>' +
