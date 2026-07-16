@@ -36,14 +36,15 @@ class JurnalPklController extends BaseController
     {
         $instruktur = $this->getInstruktur();
         if (!$instruktur) {
-            return redirect()->to('/login');
+            return redirect()->to('/login')->with('error', 'Sesi Anda telah habis atau data instruktur tidak ditemukan.');
         }
 
         $tahunAjaran = get_active_tahun_ajaran();
         $siswaList = $this->siswaPklModel
-            ->select('siswa_pkl.*, siswa.nama_lengkap, siswa.nis, kelas.nama_kelas')
+            ->select('siswa_pkl.*, siswa.nama_lengkap, siswa.nis, kelas.nama_kelas, users.profile_photo')
             ->join('siswa', 'siswa.id = siswa_pkl.siswa_id AND siswa.deleted_at IS NULL', 'left')
             ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
+            ->join('users', 'users.id = siswa.user_id', 'left')
             ->where('siswa_pkl.tempat_pkl_id', $instruktur['tempat_pkl_id'])
             ->where('siswa_pkl.tahun_ajaran', $tahunAjaran)
             ->orderBy('siswa.nama_lengkap', 'ASC')
@@ -89,7 +90,7 @@ class JurnalPklController extends BaseController
     {
         $instruktur = $this->getInstruktur();
         if (!$instruktur) {
-            return redirect()->to('/login');
+            return redirect()->to('/login')->with('error', 'Sesi Anda telah habis atau data instruktur tidak ditemukan.');
         }
 
         $db = \Config\Database::connect();
@@ -133,7 +134,7 @@ class JurnalPklController extends BaseController
     {
         $instruktur = $this->getInstruktur();
         if (!$instruktur) {
-            return redirect()->to('/login');
+            return redirect()->to('/login')->with('error', 'Sesi Anda telah habis atau data instruktur tidak ditemukan.');
         }
 
         $db = \Config\Database::connect();
@@ -174,7 +175,7 @@ class JurnalPklController extends BaseController
     {
         $instruktur = $this->getInstruktur();
         if (!$instruktur) {
-            return redirect()->to('/login');
+            return redirect()->to('/login')->with('error', 'Sesi Anda telah habis atau data instruktur tidak ditemukan.');
         }
 
         $catatan = $this->request->getPost('catatan_instruktur');

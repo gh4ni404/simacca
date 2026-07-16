@@ -257,7 +257,9 @@ class PembimbingPklService extends BaseService
                 ]);
 
                 if (!$userId) {
-                    throw new \Exception('Gagal membuat akun instruktur');
+                    $errors = $this->userModel->errors();
+                    $errorStr = !empty($errors) ? implode(', ', $errors) : 'Kesalahan tidak diketahui';
+                    throw new \Exception('Gagal membuat akun instruktur: ' . $errorStr);
                 }
 
                 $this->instrukturPklModel->insert([
@@ -371,7 +373,9 @@ class PembimbingPklService extends BaseService
                     ]);
 
                     if (!$userId) {
-                        throw new \Exception('Gagal membuat akun instruktur');
+                        $errors = $this->userModel->errors();
+                        $errorStr = !empty($errors) ? implode(', ', $errors) : 'Kesalahan tidak diketahui';
+                        throw new \Exception('Gagal membuat akun instruktur: ' . $errorStr);
                     }
 
                     $this->instrukturPklModel->insert([

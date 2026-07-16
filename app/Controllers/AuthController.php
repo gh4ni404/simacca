@@ -39,6 +39,12 @@ class AuthController extends BaseController
     {
         // jika sudah login, redirect ke dashboard sesuai role
         if (session()->get('isLoggedIn')) {
+            $error = session()->getFlashdata('error');
+            if ($error) {
+                // Clear session to prevent redirect loop
+                session()->destroy();
+                return redirect()->to('/login')->with('error', $error);
+            }
             return $this->redirectToDashboard();
         }
 

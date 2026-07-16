@@ -37,8 +37,7 @@ class DashboardController extends BaseController
         $instruktur = $this->instrukturPklModel->find($instrukturId);
 
         if (!$instruktur) {
-            session()->setFlashdata('error', 'Data instruktur tidak ditemukan');
-            return redirect()->to('/login');
+            return redirect()->to('/login')->with('error', 'Data instruktur tidak ditemukan.');
         }
 
         $tempatPkl = $this->tempatPklModel->find($instruktur['tempat_pkl_id']);
