@@ -700,8 +700,8 @@ $kategoriBadge = [
 
             // Clamp week 1 start to PKL start date
             if (w === 1 && wStart < start) wStart = new Date(start);
-            // Clamp last week end to PKL end date
-            if (w === totalWeeks && wEnd > end) wEnd = new Date(end);
+            // Clamp last week end to PKL end date (only when end date is explicitly set)
+            if (w === totalWeeks && PKL_END_DATE && wEnd > end) wEnd = new Date(end);
 
             var isCurrentWeek = (today >= wStart && today <= wEnd);
             var labelStart = wStart.toLocaleDateString('id-ID', opts);
