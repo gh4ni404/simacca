@@ -467,7 +467,7 @@ if (!function_exists('get_dashboard_url')) {
             'admin' => '/admin/dashboard',
             'guru_mapel' => '/guru/dashboard',
             'wali_kelas' => '/walikelas/dashboard',
-            'siswa' => '/siswa/dashboard'
+            'siswa' => '/siswa/jurnal-pkl'
         ];
 
         return $dashboards[$role] ?? '/';

@@ -41,7 +41,7 @@ class GuestFilter implements FilterInterface
                 case 'wali_kelas':
                     return redirect()->to('/walikelas/dashboard');
                 case 'siswa':
-                    return redirect()->to('/siswa/dashboard');
+                    return redirect()->to('/siswa/jurnal-pkl');
                 
                 default:
                     return redirect()->to('/');

@@ -44,6 +44,7 @@ class Filters extends BaseFilters
         'guest'         => \App\Filters\GuestFilter::class,
         'keepalive'     => \App\Filters\KeepAliveFilter::class,  // ✅ Prevent ERR_CONNECTION_RESET
         'profile_completion' => \App\Filters\ProfileCompletionFilter::class,  // ✅ Check profile completion
+        'kelas12'       => \App\Filters\Kelas12Filter::class,
     ];
 
     /**

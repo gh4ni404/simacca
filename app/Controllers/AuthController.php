@@ -181,7 +181,7 @@ class AuthController extends BaseController
             case 'wakakur':
                 return redirect()->to('/wakakur/dashboard');
             case 'siswa':
-                return redirect()->to('/siswa/dashboard');
+                return redirect()->to('/siswa/jurnal-pkl');
             case 'instruktur':
                 return redirect()->to('/instruktur/dashboard');
             default:

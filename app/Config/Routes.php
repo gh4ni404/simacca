@@ -342,22 +342,24 @@ $routes->group('siswa', ['filter' => 'role:siswa'], function ($routes) {
     $routes->post('profil/update', 'Siswa\ProfilController::update');
     $routes->post('profil/change-password', 'Siswa\ProfilController::changePassword');
 
-    // Jurnal PKL (Task-Oriented)
-    $routes->get('jurnal-pkl', 'Siswa\PklController::index', ['as' => 'siswa.jurnal_pkl']);
-    $routes->get('jurnal-pkl/tambah', 'Siswa\PklController::create');
-    $routes->post('jurnal-pkl/simpan', 'Siswa\PklController::store');
-    $routes->get('jurnal-pkl/get-task-langkah-kerja', 'Siswa\PklController::getTaskLangkahKerja');
-    $routes->get('jurnal-pkl/get-template-langkah-kerja', 'Siswa\PklController::getTemplateLangkahKerja');
-    $routes->get('jurnal-pkl/task/(:num)', 'Siswa\PklController::taskDetail/$1');
-    $routes->get('jurnal-pkl/hari/(:any)', 'Siswa\PklController::dayDetail/$1');
-    $routes->post('jurnal-pkl/kirim/(:num)', 'Siswa\PklController::submitProgress/$1');
-    $routes->get('jurnal-pkl/edit-progress/(:num)', 'Siswa\PklController::editProgress/$1');
-    $routes->post('jurnal-pkl/update-progress/(:num)', 'Siswa\PklController::updateProgressData/$1');
-    $routes->post('jurnal-pkl/hapus-progress/(:num)', 'Siswa\PklController::deleteProgress/$1');
-    $routes->get('jurnal-pkl/cetak-jurnal/(:num)/(:num)', 'Siswa\PklController::printJurnal/$1/$2');
-    $routes->get('jurnal-pkl/cetak-catatan/(:any)/(:num)', 'Siswa\PklController::printCatatan/$1/$2');
-    $routes->get('jurnal-pkl/cetak-catatan/(:any)', 'Siswa\PklController::printCatatan/$1');
-    $routes->post('jurnal-pkl/selesaikan-task/(:num)', 'Siswa\PklController::selesaikanTask/$1');
+    // Jurnal PKL (Task-Oriented) - Hanya untuk Siswa Kelas 12
+    $routes->group('jurnal-pkl', ['filter' => 'kelas12'], function ($routes) {
+        $routes->get('', 'Siswa\PklController::index', ['as' => 'siswa.jurnal_pkl']);
+        $routes->get('tambah', 'Siswa\PklController::create');
+        $routes->post('simpan', 'Siswa\PklController::store');
+        $routes->get('get-task-langkah-kerja', 'Siswa\PklController::getTaskLangkahKerja');
+        $routes->get('get-template-langkah-kerja', 'Siswa\PklController::getTemplateLangkahKerja');
+        $routes->get('task/(:num)', 'Siswa\PklController::taskDetail/$1');
+        $routes->get('hari/(:any)', 'Siswa\PklController::dayDetail/$1');
+        $routes->post('kirim/(:num)', 'Siswa\PklController::submitProgress/$1');
+        $routes->get('edit-progress/(:num)', 'Siswa\PklController::editProgress/$1');
+        $routes->post('update-progress/(:num)', 'Siswa\PklController::updateProgressData/$1');
+        $routes->post('hapus-progress/(:num)', 'Siswa\PklController::deleteProgress/$1');
+        $routes->get('cetak-jurnal/(:num)/(:num)', 'Siswa\PklController::printJurnal/$1/$2');
+        $routes->get('cetak-catatan/(:any)/(:num)', 'Siswa\PklController::printCatatan/$1/$2');
+        $routes->get('cetak-catatan/(:any)', 'Siswa\PklController::printCatatan/$1');
+        $routes->post('selesaikan-task/(:num)', 'Siswa\PklController::selesaikanTask/$1');
+    });
 
     // Absensi PKL (Siswa)
     $routes->get('absensi-pkl', 'Siswa\AbsensiPklController::index');

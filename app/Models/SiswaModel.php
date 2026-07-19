@@ -89,13 +89,12 @@ class SiswaModel extends Model
 
         return $this->findAll();
     }
-
     /**
      * Get siswa by user_id
      */
     public function getByUserId($userId)
     {
-        return $this->select('siswa.*, kelas.nama_kelas, users.username, users.is_active, users.profile_photo')
+        return $this->select('siswa.*, kelas.nama_kelas, kelas.tingkat, users.username, users.is_active, users.profile_photo')
             ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
             ->join('users', 'users.id = siswa.user_id', 'left')
             ->where('siswa.user_id', $userId)

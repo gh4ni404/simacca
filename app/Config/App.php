@@ -203,12 +203,4 @@ class App extends BaseConfig
      */
     public bool $CSPEnabled = false;
 
-    public $sessionDriver = 'Codeigniter\Session\Handlers\FileHandler';
-    public $sessionCookieName = 'ci_session';
-    public $sessionExpiration = 7200; // 2 Hours
-    public $sessionSavePath = WRITEPATH . 'session';
-    public $sessionMatchIP = false; 
-    public $sessionTimeToUpdate = 300; 
-    public $sessionRegenerateDestroy = false; 
-
 }

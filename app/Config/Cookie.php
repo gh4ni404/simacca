@@ -74,25 +74,11 @@ class Cookie extends BaseConfig
             $this->secure = true;
         }
         
-        // Auto-detect domain for production environment
-        if (ENVIRONMENT === 'production' && isset($_SERVER['HTTP_HOST'])) {
-            // Extract domain from HTTP_HOST
-            $host = $_SERVER['HTTP_HOST'];
-            
-            // Remove port if present
-            $host = explode(':', $host)[0];
-            
-            // For subdomain cookie sharing, use root domain
-            // e.g., simacca.smkn8bone.sch.id -> .smkn8bone.sch.id
-            $parts = explode('.', $host);
-            if (count($parts) > 2) {
-                // Has subdomain, set to root domain for sharing
-                $this->domain = '.' . implode('.', array_slice($parts, -2));
-            } else {
-                // No subdomain, use as is
-                $this->domain = '';
-            }
-        }
+        // NOTE: Cookie domain diset via .env (cookie.domain = '.smkn8bone.sch.id')
+        // Auto-detect domain dihapus karena menyebabkan hasil yang salah pada domain
+        // dengan 2-level TLD Indonesia (.sch.id, .co.id, .or.id).
+        // Contoh bug: simacca.smkn8bone.sch.id → auto-detect menghasilkan .sch.id (salah)
+        // yang seharusnya .smkn8bone.sch.id
     }
 
     /**
