@@ -212,7 +212,7 @@
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-camera mr-2 text-yellow-500"></i>
-                                Foto Dokumentasi <span class="text-gray-400 font-normal">(opsional)</span>
+                                Foto Dokumentasi <span class="text-red-500">*</span>
                             </label>
                             <div id="uploadArea"
                                  class="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer"
@@ -225,7 +225,7 @@
                                         <span class="font-medium text-blue-600">Klik untuk upload foto</span>
                                         <span class="pl-1">atau drag & drop</span>
                                     </div>
-                                    <p class="text-xs text-gray-500">JPG, JPEG, PNG atau WebP (Max. 5MB)</p>
+                                    <p class="text-xs text-gray-500">JPG, JPEG, PNG atau WebP (Max. 5MB) <span class="text-red-500 font-medium">Wajib diisi</span></p>
                                     <input id="foto" name="foto" type="file" accept=".jpg,.jpeg,.png,.webp" class="sr-only" onchange="previewImage(this)">
                                     <div id="previewContainer" class="mt-3 hidden pointer-events-auto">
                                         <img id="preview" class="mx-auto max-h-40 rounded-lg shadow">
@@ -275,8 +275,8 @@
                         <p>Tuliskan aktivitas hari ini</p>
                     </div>
                     <div class="flex items-start gap-2">
-                        <span class="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">4</span>
-                        <p>Upload foto (opsional)</p>
+                        <span class="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold">4</span>
+                        <p>Upload foto dokumentasi <span class="font-semibold text-red-600">(wajib)</span></p>
                     </div>
                 </div>
             </div>
@@ -519,6 +519,12 @@ document.getElementById('pklForm').addEventListener('submit', function(e) {
     if (!hasLangkah) {
         e.preventDefault();
         alert('Minimal isi 1 langkah kerja!');
+        return false;
+    }
+    const fotoInput = document.getElementById('foto');
+    if (!fotoInput.files || !fotoInput.files[0]) {
+        e.preventDefault();
+        alert('Foto dokumentasi wajib diupload!');
         return false;
     }
     if (!confirm('Simpan aktivitas ini?')) {

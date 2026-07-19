@@ -267,10 +267,17 @@ class PklService extends BaseService
         }
     }
 
-    public function getProgressByTask(int $taskId): array
+    public function getProgressByTask(int $taskId, ?array $statuses = null): array
     {
         try {
-            $data = $this->progressModel->getByTask($taskId);
+            if (!empty($statuses)) {
+                $data = $this->progressModel->where('task_id', $taskId)
+                    ->whereIn('status', $statuses)
+                    ->orderBy('tanggal', 'ASC')
+                    ->findAll();
+            } else {
+                $data = $this->progressModel->getByTask($taskId);
+            }
             return $this->success($data);
         } catch (\Exception $e) {
             $this->logError('getProgressByTask', $e);
@@ -278,7 +285,7 @@ class PklService extends BaseService
         }
     }
 
-    public function getJurnalByTanggal(int $siswaId, ?string $startDate = null, ?string $endDate = null): array
+    public function getJurnalByTanggal(int $siswaId, ?string $startDate = null, ?string $endDate = null, ?array $statuses = null): array
     {
         try {
             $db = \Config\Database::connect();
@@ -296,6 +303,12 @@ class PklService extends BaseService
             if ($endDate) {
                 $sql .= ' AND pp.tanggal <= ?';
                 $binds[] = $endDate;
+            }
+
+            if (!empty($statuses)) {
+                $placeholders = implode(',', array_fill(0, count($statuses), '?'));
+                $sql .= " AND pp.status IN ($placeholders)";
+                $binds = array_merge($binds, $statuses);
             }
 
             $sql .= ' ORDER BY pp.tanggal ASC, pp.created_at ASC';

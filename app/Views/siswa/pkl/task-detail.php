@@ -33,7 +33,7 @@
                 <?php if ($task['status'] === 'active'): ?>
                 <form action="<?= base_url('siswa/jurnal-pkl/selesaikan-task/' . $task['id']); ?>" method="POST" class="inline">
                     <?= csrf_field(); ?>
-                    <button type="submit" onclick="return confirm('Yakin ingin menyelesaikan task ini? Task akan dipindahkan ke section Task Selesai.')"
+                    <button type="submit" onclick="return confirm('Yakin ingin menyelesaikan task ini? Status task akan berubah menjadi selesai.')"
                             class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
                         <i class="fas fa-check-circle mr-2"></i>Selesaikan Task
                     </button>

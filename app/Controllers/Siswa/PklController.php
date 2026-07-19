@@ -51,9 +51,6 @@ class PklController extends BaseController
         $tasksResult = $this->pklService->getActiveTasksBySiswa($siswa['id']);
         $tasks = $tasksResult['success'] ? $tasksResult['data'] : [];
 
-        $allTasksResult = $this->pklService->getAllTasksBySiswa($siswa['id']);
-        $allTasks = $allTasksResult['success'] ? $allTasksResult['data'] : [];
-
         $data = [
             'title' => 'Jurnal PKL',
             'siswa' => $siswa,
@@ -61,7 +58,6 @@ class PklController extends BaseController
             'timeline' => $timeline,
             'stats' => $stats,
             'tasks' => $tasks,
-            'allTasks' => $allTasks,
         ];
 
         return view('siswa/pkl/index', $data);
@@ -340,35 +336,38 @@ class PklController extends BaseController
             return redirect()->back()->withInput();
         }
 
+        $foto = $this->request->getFile('foto');
+        if (!$foto || !$foto->isValid() || $foto->hasMoved()) {
+            session()->setFlashdata('error', 'Foto dokumentasi wajib diupload');
+            return redirect()->back()->withInput();
+        }
+
         $uploadPath = WRITEPATH . 'uploads/pkl_progress';
         if (!is_dir($uploadPath)) {
             mkdir($uploadPath, 0755, true);
         }
 
-        $foto = $this->request->getFile('foto');
         $fotoName = null;
 
-        if ($foto && $foto->isValid() && !$foto->hasMoved()) {
-            $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-            $validation = validate_file_upload($foto, $allowedTypes, 5242880);
+        $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        $validation = validate_file_upload($foto, $allowedTypes, 5242880);
 
-            if (!$validation['valid']) {
-                session()->setFlashdata('error', $validation['error']);
-                return redirect()->back()->withInput();
-            }
+        if (!$validation['valid']) {
+            session()->setFlashdata('error', $validation['error']);
+            return redirect()->back()->withInput();
+        }
 
-            try {
-                $fotoName = 'pkl_progress_' . time() . '_' . uniqid() . '.' . $foto->getExtension();
-                $foto->move($uploadPath, $fotoName);
+        try {
+            $fotoName = 'pkl_progress_' . time() . '_' . uniqid() . '.' . $foto->getExtension();
+            $foto->move($uploadPath, $fotoName);
 
-                helper('image');
-                $filePath = $uploadPath . '/' . $fotoName;
-                optimize_jurnal_pkl_photo($filePath, $filePath);
-            } catch (\Exception $e) {
-                log_message('error', '[PKL PROGRESS] File upload failed: ' . $e->getMessage());
-                session()->setFlashdata('error', 'Upload foto gagal');
-                return redirect()->back()->withInput();
-            }
+            helper('image');
+            $filePath = $uploadPath . '/' . $fotoName;
+            optimize_jurnal_pkl_photo($filePath, $filePath);
+        } catch (\Exception $e) {
+            log_message('error', '[PKL PROGRESS] File upload failed: ' . $e->getMessage());
+            session()->setFlashdata('error', 'Upload foto gagal');
+            return redirect()->back()->withInput();
         }
 
         $progressData = [
@@ -670,6 +669,11 @@ class PklController extends BaseController
             }
         }
 
+        if (empty($fotoName)) {
+            session()->setFlashdata('error', 'Foto dokumentasi wajib diupload');
+            return redirect()->back()->withInput();
+        }
+
         $langkahKerja = $this->request->getPost('langkah_kerja');
         $langkahKerjaJson = null;
         if (is_array($langkahKerja)) {
@@ -723,7 +727,7 @@ class PklController extends BaseController
             $dateEnd = $d->format('Y-m-d');
         }
 
-        $jurnalResult = $this->pklService->getJurnalByTanggal($siswa['id'], $dateStart, $dateEnd);
+        $jurnalResult = $this->pklService->getJurnalByTanggal($siswa['id'], $dateStart, $dateEnd, ['approved', 'verified_by_instruktur']);
         $jurnalData = $jurnalResult['success'] ? $jurnalResult['data'] : [];
 
         $siswaPklModel = new \App\Models\SiswaPklModel();
@@ -791,7 +795,7 @@ class PklController extends BaseController
                 continue;
             }
 
-            $progressResult = $this->pklService->getProgressByTask($taskId);
+            $progressResult = $this->pklService->getProgressByTask($taskId, ['approved', 'verified_by_instruktur']);
             $progress = $progressResult['success'] ? $progressResult['data'] : [];
 
             if ($weekStart && $weekEnd && !empty($progress)) {

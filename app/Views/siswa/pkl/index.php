@@ -103,11 +103,6 @@ $kategoriBadge = [
                         </div>
                         <p class="text-gray-700 font-medium">Belum ada aktivitas hari ini</p>
                         <p class="text-gray-400 text-sm mt-1">Mulai catat kegiatan PKL Anda</p>
-                        <a href="<?= base_url('siswa/jurnal-pkl/tambah'); ?>"
-                           class="inline-flex items-center mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors text-sm">
-                            <i class="fa-solid fa-plus mr-2"></i>
-                            Tambah Aktivitas
-                        </a>
                     </div>
                 <?php else: ?>
                     <?php foreach ($todayProgress as $p): ?>
@@ -304,41 +299,6 @@ $kategoriBadge = [
             </div>
         </section>
 
-        <!-- Tugas Berjalan -->
-        <?php if (!empty($tasks)): ?>
-            <section class="space-y-4">
-                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Tugas Berjalan</h4>
-                <div class="rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                <div class="grid grid-cols-2 gap-3 overflow-y-auto max-h-80 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-track]:rounded [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:hover:bg-gray-400 [&::-webkit-scrollbar-button]:hidden [&::-webkit-scrollbar-button]:h-0 [&::-webkit-scrollbar-button]:w-0">
-                    <?php foreach ($tasks as $task): ?>
-                        <?php
-                        $progressSummary = (new \App\Models\PklTaskModel())->getProgressSummary($task['id']);
-                        $total = $progressSummary['total'];
-                        if ($total > 0) {
-                            $weightedSum = ($progressSummary['submitted'] * 50) + ($progressSummary['verified_by_instruktur'] * 80) + ($progressSummary['approved'] * 100);
-                            $progressPct = round($weightedSum / $total);
-                        } else {
-                            $progressPct = 0;
-                        }
-                        $remaining = $total - $progressSummary['approved'];
-                        ?>
-                        <a href="<?= base_url('siswa/jurnal-pkl/task/' . $task['id']); ?>"
-                           class="block bg-white p-5 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-                            <div class="flex justify-between items-center mb-3">
-                                <h4 class="font-bold text-gray-800 text-sm truncate flex-1 mr-2"><?= esc($task['judul']) ?></h4>
-                                <span class="text-primary font-bold text-xs bg-primary/10 px-2 py-0.5 rounded flex-shrink-0"><?= $progressPct ?>%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 h-1.5 rounded-full mb-2">
-                                <div class="bg-primary h-full rounded-full progress-fill-anim" style="width: <?= $progressPct ?>%"></div>
-                            </div>
-                            <p class="text-gray-500 text-[11px]"><?= $remaining ?> progress tersisa</p>
-                        </a>
-                    <?php endforeach; ?>
-                </div>
-                </div>
-            </section>
-        <?php endif; ?>
-
         <!-- Cetak Laporan -->
         <section class="space-y-4">
             <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Cetak Laporan</h4>
@@ -357,40 +317,6 @@ $kategoriBadge = [
                 <?php endif; ?>
             </div>
         </section>
-
-        <!-- Tasks Selesai (compact list in sidebar) -->
-        <?php
-        $completedTasks = array_filter($allTasks ?? [], fn($t) => $t['status'] === 'completed');
-        ?>
-        <?php if (!empty($completedTasks)): ?>
-            <section class="space-y-4">
-                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Task Selesai</h4>
-                <div class="space-y-2">
-                    <?php foreach ($completedTasks as $task): ?>
-                        <?php
-                        $progressSummary = (new \App\Models\PklTaskModel())->getProgressSummary($task['id']);
-                        $total = $progressSummary['total'];
-                        $approved = $progressSummary['approved'];
-                        $progressPct = $total > 0 ? round(($approved / $total) * 100) : 100;
-                        ?>
-                        <a href="<?= base_url('siswa/jurnal-pkl/task/' . $task['id']); ?>"
-                           class="block bg-white p-4 rounded-2xl border border-gray-200 shadow-sm border-l-4 border-l-green-500 hover:shadow-md transition-shadow">
-                            <div class="flex items-center gap-3 mb-2">
-                                <i class="fa-solid fa-circle-check text-green-500 flex-shrink-0"></i>
-                                <h4 class="font-semibold text-gray-800 text-sm truncate flex-1"><?= esc($task['judul']) ?></h4>
-                                <span class="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded flex-shrink-0">Selesai</span>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <div class="flex-1 bg-gray-200 h-1.5 rounded-full">
-                                    <div class="bg-green-500 h-full rounded-full" style="width: <?= $progressPct ?>%"></div>
-                                </div>
-                                <span class="text-[11px] text-gray-500 flex-shrink-0"><?= $approved ?>/<?= $total ?></span>
-                            </div>
-                        </a>
-                    <?php endforeach; ?>
-                </div>
-            </section>
-        <?php endif; ?>
 
     </aside>
 </div>
