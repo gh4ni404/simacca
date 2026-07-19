@@ -840,6 +840,17 @@ class PklController extends BaseController
             ];
         }
 
+        usort($tasksData, function ($a, $b) {
+            $aDate = $a['progress'][0]['tanggal'] ?? '9999-99-99';
+            $bDate = $b['progress'][0]['tanggal'] ?? '9999-99-99';
+            if ($aDate === $bDate) {
+                $aCreated = $a['progress'][0]['created_at'] ?? '';
+                $bCreated = $b['progress'][0]['created_at'] ?? '';
+                return strcmp($aCreated, $bCreated);
+            }
+            return strcmp($aDate, $bDate);
+        });
+
         if (empty($tasksData)) {
             $details = [];
 

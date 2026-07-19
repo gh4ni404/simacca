@@ -117,12 +117,8 @@
                         <i class="fas fa-medkit"></i> Semua Sakit
                     </button>
                     <button type="button" onclick="setAllStatus('alpa')"
-                            class="flex items-center justify-center gap-2 py-2.5 px-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow-md transition-all active:scale-95">
+                            class="flex items-center justify-center gap-2 py-2.5 px-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow-md transition-all active:scale-95 col-span-2">
                         <i class="fas fa-times-circle"></i> Semua Alpa
-                    </button>
-                    <button type="button" onclick="setAllStatus('dispen')"
-                            class="flex items-center justify-center gap-2 py-2.5 px-3 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-lg shadow-md transition-all active:scale-95 col-span-2">
-                        <i class="fas fa-id-badge"></i> Semua Dispen
                     </button>
                 </div>
             </div>
@@ -166,8 +162,7 @@ const statusStyles = {
     'hadir':  { active: 'bg-green-500 text-white border-green-500',  inactive: 'bg-white text-gray-700 border-gray-300', icon: 'fa-check-circle' },
     'izin':   { active: 'bg-blue-500 text-white border-blue-500',   inactive: 'bg-white text-gray-700 border-gray-300',  icon: 'fa-file-alt' },
     'sakit':  { active: 'bg-yellow-500 text-white border-yellow-500', inactive: 'bg-white text-gray-700 border-gray-300', icon: 'fa-medkit' },
-    'alpa':   { active: 'bg-red-500 text-white border-red-500',     inactive: 'bg-white text-gray-700 border-gray-300',    icon: 'fa-times-circle' },
-    'dispen': { active: 'bg-purple-500 text-white border-purple-500', inactive: 'bg-white text-gray-700 border-gray-300', icon: 'fa-id-badge' }
+    'alpa':   { active: 'bg-red-500 text-white border-red-500',     inactive: 'bg-white text-gray-700 border-gray-300',    icon: 'fa-times-circle' }
 };
 
 const MOBILE_BTN_BASE = 'status-btn flex flex-col items-center justify-center py-2.5 border-2 rounded-xl transition-all active:scale-95';
@@ -275,7 +270,7 @@ function setAllStatus(status) {
         selectStatus(siswaId, status);
     });
 
-    const labels = { hadir: 'Hadir', izin: 'Izin', sakit: 'Sakit', alpa: 'Alpa', dispen: 'Dispen' };
+    const labels = { hadir: 'Hadir', izin: 'Izin', sakit: 'Sakit', alpa: 'Alpa' };
     showToast(`Semua siswa di-set ${labels[status]}`);
 }
 

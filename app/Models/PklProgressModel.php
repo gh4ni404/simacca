@@ -38,6 +38,7 @@ class PklProgressModel extends Model
     {
         return $this->where('task_id', $taskId)
             ->orderBy('tanggal', 'ASC')
+            ->orderBy('created_at', 'ASC')
             ->findAll();
     }
 
@@ -99,7 +100,7 @@ class PklProgressModel extends Model
                 WHERE pp2.guru_id = ? AND pp.deleted_at IS NULL AND pt.deleted_at IS NULL
                 ORDER BY s.nama_lengkap, 
                          FIELD(pp.status, 'revision', 'submitted', 'verified_by_instruktur', 'draft', 'approved'),
-                         pp.tanggal DESC";
+                         pp.tanggal ASC";
 
         $rawData = $db->query($sql, [$guruId])->getResultArray();
 

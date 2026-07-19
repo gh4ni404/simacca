@@ -274,6 +274,7 @@ class PklService extends BaseService
                 $data = $this->progressModel->where('task_id', $taskId)
                     ->whereIn('status', $statuses)
                     ->orderBy('tanggal', 'ASC')
+                    ->orderBy('created_at', 'ASC')
                     ->findAll();
             } else {
                 $data = $this->progressModel->getByTask($taskId);

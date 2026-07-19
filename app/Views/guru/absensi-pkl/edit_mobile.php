@@ -81,15 +81,9 @@
                 </button>
                 <button type="button"
                         onclick="setAllStatus('alpa')"
-                        class="flex items-center justify-center gap-2 py-3 px-4 bg-red-50 border-2 border-red-200 rounded-xl text-red-700 font-medium text-sm hover:bg-red-100 transition-all">
+                        class="flex items-center justify-center gap-2 py-3 px-4 bg-red-50 border-2 border-red-200 rounded-xl text-red-700 font-medium text-sm hover:bg-red-100 transition-all col-span-2">
                     <i class="fas fa-times-circle"></i>
                     <span>Alpa Semua</span>
-                </button>
-                <button type="button"
-                        onclick="setAllStatus('dispen')"
-                        class="flex items-center justify-center gap-2 py-3 px-4 bg-purple-50 border-2 border-purple-200 rounded-xl text-purple-700 font-medium text-sm hover:bg-purple-100 transition-all col-span-2">
-                    <i class="fas fa-id-badge"></i>
-                    <span>Dispen Semua</span>
                 </button>
             </div>
         </div>
@@ -138,7 +132,7 @@
                         <div class="p-4">
                             <input type="hidden" name="siswa[<?= $sid ?>][status]" value="<?= $currentStatus ?>" class="status-input" data-siswa-id="<?= $sid ?>">
 
-                            <div class="grid grid-cols-5 gap-1.5">
+                            <div class="grid grid-cols-4 gap-1.5">
                                 <!-- Hadir -->
                                 <button type="button"
                                         class="status-btn flex flex-col items-center justify-center py-2.5 rounded-xl border-2 cursor-pointer transition-all active:scale-95 <?= $currentStatus === 'hadir' ? 'bg-green-500 text-white border-green-500' : 'bg-white text-gray-700 border-gray-300' ?>"
@@ -173,15 +167,6 @@
                                         onclick="selectStatus('<?= $sid ?>', 'alpa')">
                                     <i class="fas fa-times-circle text-lg mb-1"></i>
                                     <span class="text-xs font-semibold">Alpa</span>
-                                </button>
-
-                                <!-- Dispen -->
-                                <button type="button"
-                                        class="status-btn flex flex-col items-center justify-center py-2.5 rounded-xl border-2 cursor-pointer transition-all active:scale-95 <?= $currentStatus === 'dispen' ? 'bg-purple-500 text-white border-purple-500' : 'bg-white text-gray-700 border-gray-300' ?>"
-                                        data-siswa-id="<?= $sid ?>" data-status="dispen"
-                                        onclick="selectStatus('<?= $sid ?>', 'dispen')">
-                                    <i class="fas fa-id-badge text-lg mb-1"></i>
-                                    <span class="text-xs font-semibold">Dispen</span>
                                 </button>
                             </div>
 
@@ -249,12 +234,6 @@
     color: #ffffff;
 }
 
-.status-btn.active-dispen {
-    border-color: #a855f7;
-    background-color: #a855f7;
-    color: #ffffff;
-}
-
 .status-btn:hover {
     border-color: #9ca3af;
 }
@@ -271,7 +250,7 @@ function selectStatus(siswaId, status) {
     const buttons = document.querySelectorAll(`.status-btn[data-siswa-id="${siswaId}"]`);
     buttons.forEach(btn => {
         const btnStatus = btn.getAttribute('data-status');
-        btn.classList.remove('active-hadir', 'active-izin', 'active-sakit', 'active-alpa', 'active-dispen');
+        btn.classList.remove('active-hadir', 'active-izin', 'active-sakit', 'active-alpa');
         if (btnStatus === status) {
             btn.classList.add(`active-${status}`);
         }
@@ -286,7 +265,7 @@ function setAllStatus(status) {
         selectStatus(siswaId, status);
     });
 
-    const labels = { hadir: 'Hadir', izin: 'Izin', sakit: 'Sakit', alpa: 'Alpa', dispen: 'Dispen' };
+    const labels = { hadir: 'Hadir', izin: 'Izin', sakit: 'Sakit', alpa: 'Alpa' };
     showToast(`Semua siswa di-set ${labels[status]}`);
 }
 
