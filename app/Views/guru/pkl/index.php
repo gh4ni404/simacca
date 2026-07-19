@@ -290,7 +290,7 @@ $hariIndo = [
                                     <div class="min-w-0">
                                         <span class="font-bold">Progress disetujui</span>
                                         <?php if (!empty($p['catatan_pembimbing'])): ?>
-                                            <p class="text-green-700 mt-0.5 italic truncate">"<?= esc($p['catatan_pembimbing']) ?>"</p>
+                                            <p class="text-green-700 mt-0.5 italic break-words">"<?= esc($p['catatan_pembimbing']) ?>"</p>
                                         <?php endif; ?>
                                     </div>
                                 </div>

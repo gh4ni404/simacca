@@ -766,13 +766,23 @@ class PklController extends BaseController
     {
         $siswa = $this->getSiswa();
         if (!$siswa) {
-            return redirect()->to('/access-denied')->with('error', 'Data siswa tidak ditemukan');
+            return view('siswa/pkl/print-error', [
+                'title' => 'Sesi Berakhir',
+                'message' => 'Sesi Anda telah berakhir. Silakan login kembali.',
+                'details' => [],
+            ]);
         }
 
         $ids = array_filter(array_map('intval', explode('-', $taskIds)));
         if (empty($ids)) {
-            session()->setFlashdata('error', 'Task tidak ditemukan');
-            return redirect()->to('/siswa/jurnal-pkl');
+            return view('siswa/pkl/print-error', [
+                'title' => 'Data Tidak Ditemukan',
+                'message' => 'Tidak ada tugas PKL yang dipilih untuk dicetak.',
+                'details' => [
+                    'Pastikan Anda memiliki tugas PKL yang aktif.',
+                    'Silakan tambah aktivitas PKL terlebih dahulu dari halaman jurnal.',
+                ],
+            ]);
         }
 
         helper('setting');
@@ -788,15 +798,31 @@ class PklController extends BaseController
             }
         }
 
+        $validTaskCount = 0;
+        $tasksWithProgress = 0;
+        $tasksWithApproved = 0;
+
         $tasksData = [];
         foreach ($ids as $taskId) {
             $taskResult = $this->pklService->getTaskById($taskId);
             if (!$taskResult['success'] || $taskResult['data']['siswa_id'] != $siswa['id']) {
                 continue;
             }
+            $validTaskCount++;
 
-            $progressResult = $this->pklService->getProgressByTask($taskId, ['approved', 'verified_by_instruktur']);
-            $progress = $progressResult['success'] ? $progressResult['data'] : [];
+            $progressResult = $this->pklService->getProgressByTask($taskId);
+            $allProgress = $progressResult['success'] ? $progressResult['data'] : [];
+
+            if (!empty($allProgress)) {
+                $tasksWithProgress++;
+            }
+
+            $approvedProgress = $this->pklService->getProgressByTask($taskId, ['approved', 'verified_by_instruktur']);
+            $progress = $approvedProgress['success'] ? $approvedProgress['data'] : [];
+
+            if (!empty($progress)) {
+                $tasksWithApproved++;
+            }
 
             if ($weekStart && $weekEnd && !empty($progress)) {
                 $progress = array_values(array_filter($progress, function($p) use ($weekStart, $weekEnd) {
@@ -815,8 +841,35 @@ class PklController extends BaseController
         }
 
         if (empty($tasksData)) {
-            session()->setFlashdata('error', 'Task tidak ditemukan');
-            return redirect()->to('/siswa/jurnal-pkl');
+            $details = [];
+
+            if ($validTaskCount === 0) {
+                return view('siswa/pkl/print-error', [
+                    'title' => 'Tugas Tidak Ditemukan',
+                    'message' => 'Data tugas PKL tidak dapat ditemukan.',
+                    'details' => [
+                        'Pastikan tugas yang dipilih masih aktif dan milik Anda.',
+                        'Jika masalah berlanjut, silakan muat ulang halaman jurnal PKL.',
+                    ],
+                ]);
+            }
+
+            if ($tasksWithProgress === 0) {
+                $details[] = 'Anda belum mengisi catatan kegiatan untuk tugas ini.';
+                $details[] = 'Mulai catat aktivitas PKL Anda dari halaman jurnal.';
+            } elseif ($tasksWithApproved === 0) {
+                $details[] = 'Catatan kegiatan yang Anda ajukan masih menunggu persetujuan.';
+                $details[] = 'Hubungi guru pembimbing atau instruktur untuk melakukan verifikasi.';
+            } else {
+                $details[] = 'Tidak ada catatan kegiatan yang disetujui pada minggu yang dipilih.';
+                $details[] = 'Coba pilih minggu lain atau pastikan catatan sudah disetujui.';
+            }
+
+            return view('siswa/pkl/print-error', [
+                'title' => 'Belum Ada Catatan yang Dapat Dicetak',
+                'message' => 'Saat ini belum ada catatan kegiatan PKL yang memenuhi syarat untuk dicetak.',
+                'details' => $details,
+            ]);
         }
 
         $siswaPklModel = new \App\Models\SiswaPklModel();

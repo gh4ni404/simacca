@@ -349,6 +349,30 @@ $kategoriBadge = [
     </div>
 </div>
 
+<!-- Modal Error Cetak -->
+<div id="modalPrintError" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onclick="if(event.target===this)this.classList.add('hidden')">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 overflow-hidden">
+        <div class="px-5 pt-5 pb-4 text-center">
+            <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center">
+                <i class="fa-solid fa-triangle-exclamation text-xl text-amber-500"></i>
+            </div>
+            <h3 id="printErrorTitle" class="text-base font-bold text-gray-900 mb-1">Data Tidak Tersedia</h3>
+            <p id="printErrorMessage" class="text-sm text-gray-500 leading-relaxed">Belum ada catatan kegiatan yang dapat dicetak.</p>
+        </div>
+        <div id="printErrorDetails" class="px-5 pb-4 hidden">
+            <div class="bg-gray-50 rounded-xl p-3 text-left">
+                <ul id="printErrorDetailsList" class="text-xs text-gray-600 space-y-1.5"></ul>
+            </div>
+        </div>
+        <div class="px-5 pb-5">
+            <button onclick="document.getElementById('modalPrintError').classList.add('hidden')"
+                    class="w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold text-sm transition-colors">
+                Mengerti
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
     var TIMELINE_DAY_URL = '<?= base_url('siswa/jurnal-pkl/hari/') ?>';
     var PKL_START_DATE = '<?= get_jurnal_pkl_start_date() ?? '' ?>';
@@ -532,6 +556,26 @@ $kategoriBadge = [
         document.getElementById('modalCetakJurnal').classList.remove('hidden');
     }
 
+    function showPrintError(title, message, details) {
+        document.getElementById('printErrorTitle').textContent = title || 'Data Tidak Tersedia';
+        document.getElementById('printErrorMessage').textContent = message || 'Belum ada catatan kegiatan yang dapat dicetak.';
+        var detailsContainer = document.getElementById('printErrorDetails');
+        var detailsList = document.getElementById('printErrorDetailsList');
+        if (details && details.length > 0) {
+            detailsList.innerHTML = '';
+            details.forEach(function(d) {
+                var li = document.createElement('li');
+                li.className = 'flex items-start gap-1.5';
+                li.innerHTML = '<i class="fa-solid fa-circle-info text-gray-400 mt-0.5 flex-shrink-0" style="font-size:9px"></i><span>' + d + '</span>';
+                detailsList.appendChild(li);
+            });
+            detailsContainer.classList.remove('hidden');
+        } else {
+            detailsContainer.classList.add('hidden');
+        }
+        document.getElementById('modalPrintError').classList.remove('hidden');
+    }
+
     function printCetak(url, weekNum) {
         selectedWeek = weekNum;
         document.getElementById('modalCetakJurnal').classList.add('hidden');
@@ -545,6 +589,24 @@ $kategoriBadge = [
         iframe.onload = function() {
             iframe.onload = null;
             setTimeout(function() {
+                try {
+                    var doc = iframe.contentDocument || iframe.contentWindow.document;
+                    var errorMarker = doc.querySelector('.print-error-container[data-print-error]');
+                    if (errorMarker) {
+                        var titleEl = doc.querySelector('h2');
+                        var messageEl = doc.querySelector('.text-gray-500');
+                        var detailEls = doc.querySelectorAll('.text-gray-600 li span');
+                        var details = [];
+                        detailEls.forEach(function(el) { details.push(el.textContent.trim()); });
+                        showPrintError(
+                            titleEl ? titleEl.textContent.trim() : 'Data Tidak Tersedia',
+                            messageEl ? messageEl.textContent.trim() : 'Belum ada catatan kegiatan yang dapat dicetak.',
+                            details
+                        );
+                        return;
+                    }
+                } catch(e) {}
+
                 var win = iframe.contentWindow;
                 var done = false;
                 function onDone() {
