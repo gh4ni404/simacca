@@ -84,8 +84,8 @@ class SiswaPklModel extends Model
             $builder->where('kelas.nama_kelas', $filters['kelas']);
         }
 
-        if (!empty($filters['kota'])) {
-            $builder->where('tempat_pkl.kota', $filters['kota']);
+        if (!empty($filters['pembimbing_pkl_id'])) {
+            $builder->where('siswa_pkl.pembimbing_pkl_id', $filters['pembimbing_pkl_id']);
         }
 
         return $builder->findAll();
@@ -133,25 +133,20 @@ class SiswaPklModel extends Model
         return $list;
     }
 
-    public function getFilterKotaList()
+    public function getFilterPembimbingList()
     {
         $data = $this->db->table('siswa_pkl')
-            ->select('tempat_pkl.kota')
-            ->join('tempat_pkl', 'tempat_pkl.id = siswa_pkl.tempat_pkl_id')
+            ->select('pembimbing_pkl.id, guru.nama_lengkap, guru.nip')
+            ->join('pembimbing_pkl', 'pembimbing_pkl.id = siswa_pkl.pembimbing_pkl_id', 'left')
+            ->join('guru', 'guru.id = pembimbing_pkl.guru_id', 'left')
             ->where('siswa_pkl.deleted_at', null)
-            ->where('tempat_pkl.kota IS NOT NULL')
-            ->where('tempat_pkl.kota !=', '')
-            ->groupBy('tempat_pkl.kota')
-            ->orderBy('tempat_pkl.kota', 'ASC')
+            ->where('siswa_pkl.pembimbing_pkl_id IS NOT NULL')
+            ->groupBy('pembimbing_pkl.id')
+            ->orderBy('guru.nama_lengkap', 'ASC')
             ->get()
             ->getResultArray();
 
-        $list = [];
-        foreach ($data as $item) {
-            $list[] = $item['kota'];
-        }
-
-        return $list;
+        return $data;
     }
 
     public function getTahunAjaranList()

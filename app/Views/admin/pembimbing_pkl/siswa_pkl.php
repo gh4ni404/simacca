@@ -116,13 +116,13 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Kota</label>
-                    <select name="kota"
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Pembimbing PKL</label>
+                    <select name="pembimbing_pkl_id"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
-                        <option value="">Semua Kota</option>
-                        <?php foreach ($kotaFilterList as $k): ?>
-                            <option value="<?= esc($k) ?>" <?= ($selectedKota == $k) ? 'selected' : '' ?>>
-                                <?= esc($k) ?>
+                        <option value="">Semua Pembimbing</option>
+                        <?php foreach ($pembimbingFilterList as $p): ?>
+                            <option value="<?= esc($p['id']) ?>" <?= ($selectedPembimbing == $p['id']) ? 'selected' : '' ?>>
+                                <?= esc($p['nama_lengkap']) ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
@@ -132,7 +132,7 @@
                         class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm flex items-center">
                         <i class="fas fa-filter mr-1"></i> Filter
                     </button>
-                    <?php if ($selectedTahun || $selectedTempat || $selectedKelas || $selectedKota): ?>
+                    <?php if ($selectedTahun || $selectedTempat || $selectedKelas || $selectedPembimbing): ?>
                         <a href="<?= base_url('admin/pembimbing-pkl/siswa-pkl') ?>"
                             class="border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50 text-sm flex items-center">
                             Reset

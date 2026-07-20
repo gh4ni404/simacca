@@ -220,10 +220,10 @@ class PembimbingPklController extends BaseController
     public function siswaPkl()
     {
         $filters = [
-            'tahun_ajaran'  => $this->request->getGet('tahun_ajaran'),
-            'tempat_pkl_id' => $this->request->getGet('tempat_pkl_id'),
-            'kelas'         => $this->request->getGet('kelas'),
-            'kota'          => $this->request->getGet('kota'),
+            'tahun_ajaran'      => $this->request->getGet('tahun_ajaran'),
+            'tempat_pkl_id'     => $this->request->getGet('tempat_pkl_id'),
+            'kelas'             => $this->request->getGet('kelas'),
+            'pembimbing_pkl_id' => $this->request->getGet('pembimbing_pkl_id'),
         ];
 
         $siswaPklResult = $this->pembimbingPklService->getAllSiswaPkl($filters);
@@ -241,12 +241,12 @@ class PembimbingPklController extends BaseController
             'tahunAjaranList'    => $filterLists['data']['tahunAjaranList'] ?? [],
             'tempatFilterList'   => $filterLists['data']['tempatPklList'] ?? [],
             'kelasFilterList'    => $filterLists['data']['kelasList'] ?? [],
-            'kotaFilterList'     => $filterLists['data']['kotaList'] ?? [],
+            'pembimbingFilterList' => $filterLists['data']['pembimbingList'] ?? [],
             'tempatPklList'      => $formLists['data']['tempatPklList'] ?? [],
             'selectedTahun'      => $filters['tahun_ajaran'],
             'selectedTempat'     => $filters['tempat_pkl_id'],
             'selectedKelas'      => $filters['kelas'],
-            'selectedKota'       => $filters['kota'],
+            'selectedPembimbing'  => $filters['pembimbing_pkl_id'],
         ];
 
         return view('admin/pembimbing_pkl/siswa_pkl', $data);

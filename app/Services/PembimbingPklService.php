@@ -445,7 +445,7 @@ class PembimbingPklService extends BaseService
                 'tahunAjaranList' => $this->siswaPklModel->getTahunAjaranList(),
                 'tempatPklList'   => $this->siswaPklModel->getFilterTempatPklList(),
                 'kelasList'       => $this->siswaPklModel->getFilterKelasList(),
-                'kotaList'        => $this->siswaPklModel->getFilterKotaList(),
+                'pembimbingList' => $this->siswaPklModel->getFilterPembimbingList(),
             ];
 
             return $this->successResponse($data);
