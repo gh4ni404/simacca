@@ -121,6 +121,65 @@
             margin-bottom: 0.25rem;
         }
         
+        /* Bottom nav dropdown */
+        .bottom-nav-dropdown {
+            position: relative;
+        }
+
+        .bottom-nav-dropdown-menu {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            border: 1px solid #E5E7EB;
+            border-radius: 0.5rem;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.12);
+            min-width: 160px;
+            padding: 0.375rem 0;
+            z-index: 60;
+            display: none;
+        }
+
+        .bottom-nav-dropdown-menu.show {
+            display: block;
+        }
+
+        .bottom-nav-dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1rem;
+            font-size: 0.8rem;
+            color: #374151;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .bottom-nav-dropdown-menu a:hover,
+        .bottom-nav-dropdown-menu a:active {
+            background: #F3F4F6;
+            color: #2563EB;
+        }
+
+        .bottom-nav-dropdown-menu a i {
+            font-size: 0.875rem;
+            width: 1rem;
+            text-align: center;
+            color: #6B7280;
+        }
+
+        .bottom-nav-dropdown-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 55;
+            display: none;
+        }
+
+        .bottom-nav-dropdown-overlay.show {
+            display: block;
+        }
+
         /* Content padding for bottom nav */
         .mobile-content {
             padding-bottom: 80px;
@@ -292,62 +351,96 @@
 
     <!-- Bottom Navigation -->
     <?php if (is_logged_in()): ?>
+    <?php $role = session()->get('role'); $currentUrl = uri_string(); ?>
     <nav class="bottom-nav">
+        <div id="bottom-nav-overlay" class="bottom-nav-dropdown-overlay"></div>
         <div class="flex justify-around items-center">
-            <?php 
-            $role = session()->get('role');
-            $currentUrl = uri_string();
-            
-            // Define bottom nav items based on role
-            $bottomNavItems = [];
-            if ($role === 'admin') {
-                $bottomNavItems = [
-                    ['url' => 'admin/dashboard', 'icon' => 'fas fa-home', 'label' => 'Beranda'],
-                    ['url' => 'admin/guru', 'icon' => 'fas fa-users', 'label' => 'Guru'],
-                    ['url' => 'admin/siswa', 'icon' => 'fas fa-user-graduate', 'label' => 'Siswa'],
-                    ['url' => 'admin/kelas', 'icon' => 'fas fa-school', 'label' => 'Kelas'],
-                    ['url' => 'admin/laporan/absensi', 'icon' => 'fas fa-chart-bar', 'label' => 'Laporan'],
-                ];
-            } elseif ($role === 'guru_mapel') {
-                $bottomNavItems = [
-                    ['url' => 'guru/dashboard', 'icon' => 'fas fa-home', 'label' => 'Beranda'],
-                    ['url' => 'guru/absensi', 'icon' => 'fas fa-clipboard-check', 'label' => 'Absensi'],
-                    ['url' => 'guru/jurnal', 'icon' => 'fas fa-book', 'label' => 'Jurnal'],
-                    ['url' => 'guru/laporan', 'icon' => 'fas fa-chart-bar', 'label' => 'Laporan'],
-                ];
-            } elseif ($role === 'wali_kelas') {
-                $bottomNavItems = [
-                    ['url' => 'walikelas/dashboard', 'icon' => 'fas fa-home', 'label' => 'Beranda'],
-                    ['url' => 'walikelas/siswa', 'icon' => 'fas fa-users', 'label' => 'Siswa'],
-                    ['url' => 'walikelas/absensi', 'icon' => 'fas fa-clipboard-check', 'label' => 'Absensi'],
-                    ['url' => 'walikelas/izin', 'icon' => 'fas fa-check-circle', 'label' => 'Izin'],
-                ];
-            } elseif ($role === 'wakakur') {
-                $bottomNavItems = [
-                    ['url' => 'wakakur/dashboard', 'icon' => 'fas fa-home', 'label' => 'Beranda'],
-                    ['url' => 'guru/absensi', 'icon' => 'fas fa-clipboard-check', 'label' => 'Absensi'],
-                    ['url' => 'wakakur/laporan', 'icon' => 'fas fa-chart-bar', 'label' => 'Laporan'],
-                    ['url' => 'guru/jurnal', 'icon' => 'fas fa-book', 'label' => 'Jurnal'],
-                ];
-            } elseif ($role === 'siswa') {
-                $bottomNavItems = [
-                    ['url' => 'siswa/dashboard', 'icon' => 'fas fa-home', 'label' => 'Beranda'],
-                    ['url' => 'siswa/jadwal', 'icon' => 'fas fa-calendar-alt', 'label' => 'Jadwal'],
-                    ['url' => 'siswa/absensi', 'icon' => 'fas fa-clipboard-check', 'label' => 'Absensi'],
-                    ['url' => 'siswa/izin', 'icon' => 'fas fa-file-medical', 'label' => 'Izin'],
-                    ['url' => 'siswa/profil', 'icon' => 'fas fa-user', 'label' => 'Profil'],
-                ];
-            }
-            
-            foreach ($bottomNavItems as $item):
-                $isActive = ($currentUrl === $item['url'] || strpos($currentUrl, $item['url'] . '/') === 0);
-                $activeClass = $isActive ? 'active' : '';
-            ?>
-                <a href="<?= base_url($item['url']); ?>" class="bottom-nav-item <?= $activeClass ?>">
-                    <i class="<?= $item['icon'] ?>"></i>
-                    <span><?= $item['label'] ?></span>
+            <?php if ($role === 'guru_mapel'): ?>
+                <?php
+                $isAbsensiActive = strpos($currentUrl, 'guru/absensi') === 0;
+                $isJurnalActive = strpos($currentUrl, 'guru/jurnal') === 0;
+                $isDashboardActive = $currentUrl === 'guru/dashboard' || strpos($currentUrl, 'guru/dashboard') === 0;
+                $isLaporanActive = strpos($currentUrl, 'guru/laporan') === 0;
+                ?>
+                <a href="<?= base_url('guru/dashboard'); ?>" class="bottom-nav-item <?= $isDashboardActive ? 'active' : '' ?>">
+                    <i class="fas fa-home"></i>
+                    <span>Beranda</span>
                 </a>
-            <?php endforeach; ?>
+                <div class="bottom-nav-dropdown" id="dd-absensi">
+                    <a href="#" class="bottom-nav-item <?= $isAbsensiActive ? 'active' : '' ?>" onclick="toggleDropdown(event, 'dd-absensi')">
+                        <i class="fas fa-clipboard-check"></i>
+                        <span>Absensi</span>
+                    </a>
+                    <div class="bottom-nav-dropdown-menu" id="dd-absensi-menu">
+                        <a href="<?= base_url('guru/absensi'); ?>">
+                            <i class="fas fa-chalkboard-teacher"></i> Kelas (10-11)
+                        </a>
+                        <a href="<?= base_url('guru/absensi-pkl'); ?>">
+                            <i class="fas fa-building"></i> PKL (12)
+                        </a>
+                    </div>
+                </div>
+                <div class="bottom-nav-dropdown" id="dd-jurnal">
+                    <a href="#" class="bottom-nav-item <?= $isJurnalActive ? 'active' : '' ?>" onclick="toggleDropdown(event, 'dd-jurnal')">
+                        <i class="fas fa-book"></i>
+                        <span>Jurnal</span>
+                    </a>
+                    <div class="bottom-nav-dropdown-menu" id="dd-jurnal-menu">
+                        <a href="<?= base_url('guru/jurnal'); ?>">
+                            <i class="fas fa-book-open"></i> Jurnal KBM
+                        </a>
+                        <a href="<?= base_url('guru/jurnal-pkl'); ?>">
+                            <i class="fas fa-clipboard-list"></i> Verifikasi PKL
+                        </a>
+                    </div>
+                </div>
+                <a href="<?= base_url('guru/laporan'); ?>" class="bottom-nav-item <?= $isLaporanActive ? 'active' : '' ?>">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Laporan</span>
+                </a>
+            <?php else: ?>
+                <?php
+                $bottomNavItems = [];
+                if ($role === 'admin') {
+                    $bottomNavItems = [
+                        ['url' => 'admin/dashboard', 'icon' => 'fas fa-home', 'label' => 'Beranda'],
+                        ['url' => 'admin/guru', 'icon' => 'fas fa-users', 'label' => 'Guru'],
+                        ['url' => 'admin/siswa', 'icon' => 'fas fa-user-graduate', 'label' => 'Siswa'],
+                        ['url' => 'admin/kelas', 'icon' => 'fas fa-school', 'label' => 'Kelas'],
+                        ['url' => 'admin/laporan/absensi', 'icon' => 'fas fa-chart-bar', 'label' => 'Laporan'],
+                    ];
+                } elseif ($role === 'wali_kelas') {
+                    $bottomNavItems = [
+                        ['url' => 'walikelas/dashboard', 'icon' => 'fas fa-home', 'label' => 'Beranda'],
+                        ['url' => 'walikelas/siswa', 'icon' => 'fas fa-users', 'label' => 'Siswa'],
+                        ['url' => 'walikelas/absensi', 'icon' => 'fas fa-clipboard-check', 'label' => 'Absensi'],
+                        ['url' => 'walikelas/izin', 'icon' => 'fas fa-check-circle', 'label' => 'Izin'],
+                    ];
+                } elseif ($role === 'wakakur') {
+                    $bottomNavItems = [
+                        ['url' => 'wakakur/dashboard', 'icon' => 'fas fa-home', 'label' => 'Beranda'],
+                        ['url' => 'guru/absensi', 'icon' => 'fas fa-clipboard-check', 'label' => 'Absensi'],
+                        ['url' => 'wakakur/laporan', 'icon' => 'fas fa-chart-bar', 'label' => 'Laporan'],
+                        ['url' => 'guru/jurnal', 'icon' => 'fas fa-book', 'label' => 'Jurnal'],
+                    ];
+                } elseif ($role === 'siswa') {
+                    $bottomNavItems = [
+                        ['url' => 'siswa/dashboard', 'icon' => 'fas fa-home', 'label' => 'Beranda'],
+                        ['url' => 'siswa/jadwal', 'icon' => 'fas fa-calendar-alt', 'label' => 'Jadwal'],
+                        ['url' => 'siswa/absensi', 'icon' => 'fas fa-clipboard-check', 'label' => 'Absensi'],
+                        ['url' => 'siswa/izin', 'icon' => 'fas fa-file-medical', 'label' => 'Izin'],
+                        ['url' => 'siswa/profil', 'icon' => 'fas fa-user', 'label' => 'Profil'],
+                    ];
+                }
+                foreach ($bottomNavItems as $item):
+                    $isActive = ($currentUrl === $item['url'] || strpos($currentUrl, $item['url'] . '/') === 0);
+                ?>
+                    <a href="<?= base_url($item['url']); ?>" class="bottom-nav-item <?= $isActive ? 'active' : '' ?>">
+                        <i class="<?= $item['icon'] ?>"></i>
+                        <span><?= $item['label'] ?></span>
+                    </a>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </div>
     </nav>
     <?php endif; ?>
@@ -377,6 +470,34 @@
             });
         }
         
+        // Bottom nav dropdown toggle
+        function toggleDropdown(e, id) {
+            e.preventDefault();
+            e.stopPropagation();
+            var menu = document.getElementById(id + '-menu');
+            var overlay = document.getElementById('bottom-nav-overlay');
+            var isOpen = menu.classList.contains('show');
+
+            closeAllDropdowns();
+
+            if (!isOpen) {
+                menu.classList.add('show');
+                overlay.classList.add('show');
+            }
+        }
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.bottom-nav-dropdown-menu').forEach(function(m) {
+                m.classList.remove('show');
+            });
+            var overlay = document.getElementById('bottom-nav-overlay');
+            if (overlay) overlay.classList.remove('show');
+        }
+
+        document.getElementById('bottom-nav-overlay').addEventListener('click', function() {
+            closeAllDropdowns();
+        });
+
         // User info panel toggle
         const mobileUserMenuButton = document.getElementById('mobile-user-menu-button');
         const userInfoPanel = document.getElementById('user-info-panel');
@@ -409,7 +530,7 @@
         }, 5000);
         
         // Prevent double-tap zoom on buttons
-        document.querySelectorAll('.btn, .bottom-nav-item').forEach(element => {
+        document.querySelectorAll('.btn, .bottom-nav-item, .bottom-nav-dropdown-menu a').forEach(element => {
             element.addEventListener('touchend', function(e) {
                 e.preventDefault();
                 this.click();
