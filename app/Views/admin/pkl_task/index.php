@@ -21,25 +21,51 @@
 
     <!-- Filter & Search -->
     <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
-        <form method="GET" action="<?= base_url('admin/pkl-task'); ?>" class="flex flex-col sm:flex-row gap-3">
-            <div class="flex-1">
+        <form method="GET" action="<?= base_url('admin/pkl-task'); ?>">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
                 <input type="text" name="search" placeholder="Cari nama siswa, NIS, atau judul task..."
-                       value="<?= esc($search ?? '') ?>"
-                       class="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-            </div>
-            <div class="w-full sm:w-40">
-                <select name="status" class="w-full border border-gray-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                       value="<?= esc($filters['search'] ?? '') ?>"
+                       class="border border-gray-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                <select name="status" class="border border-gray-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
                     <option value="">Semua Status</option>
-                    <option value="active" <?= ($status ?? '') === 'active' ? 'selected' : '' ?>>Aktif</option>
-                    <option value="inactive" <?= ($status ?? '') === 'inactive' ? 'selected' : '' ?>>Nonaktif</option>
+                    <option value="active" <?= ($filters['status'] ?? '') === 'active' ? 'selected' : '' ?>>Aktif</option>
+                    <option value="inactive" <?= ($filters['status'] ?? '') === 'inactive' ? 'selected' : '' ?>>Nonaktif</option>
+                </select>
+                <select name="kategori_id" class="border border-gray-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    <option value="">Semua Kategori</option>
+                    <?php foreach ($kategoriList as $kat): ?>
+                        <option value="<?= esc($kat['id']) ?>" <?= ($filters['kategori_id'] ?? '') == $kat['id'] ? 'selected' : '' ?>><?= esc($kat['nama']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <select name="kelas" class="border border-gray-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    <option value="">Semua Kelas</option>
+                    <?php foreach ($kelasList as $k): ?>
+                        <option value="<?= esc($k) ?>" <?= ($filters['kelas'] ?? '') === $k ? 'selected' : '' ?>><?= esc($k) ?></option>
+                    <?php endforeach; ?>
                 </select>
             </div>
-            <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium transition-colors">
-                <i class="fas fa-search mr-2"></i>Cari
-            </button>
-            <a href="<?= base_url('admin/pkl-task'); ?>" class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors">
-                <i class="fas fa-undo mr-2"></i>Reset
-            </a>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                <select name="instruktur_id" class="border border-gray-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    <option value="">Semua Instruktur</option>
+                    <?php foreach ($instrukturList as $ip): ?>
+                        <option value="<?= esc($ip['instruktur_id']) ?>" <?= ($filters['instruktur_id'] ?? '') == $ip['instruktur_id'] ? 'selected' : '' ?>><?= esc($ip['nama_lengkap']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <select name="guru_id" class="border border-gray-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                    <option value="">Semua Pembimbing</option>
+                    <?php foreach ($pembimbingList as $p): ?>
+                        <option value="<?= esc($p['guru_id']) ?>" <?= ($filters['guru_id'] ?? '') == $p['guru_id'] ? 'selected' : '' ?>><?= esc($p['nama_lengkap']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <div class="flex gap-2 md:col-span-2">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium transition-colors">
+                        <i class="fas fa-search mr-2"></i>Cari
+                    </button>
+                    <a href="<?= base_url('admin/pkl-task'); ?>" class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors">
+                        <i class="fas fa-undo mr-2"></i>Reset
+                    </a>
+                </div>
+            </div>
         </form>
     </div>
 

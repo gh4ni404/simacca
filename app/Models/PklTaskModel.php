@@ -71,14 +71,16 @@ class PklTaskModel extends Model
         return $db->query($sql, [$siswaId, $kategoriId])->getRowArray() ?: null;
     }
 
-    public function getAllWithSiswa(?string $search = null, ?string $status = null): array
+    public function getAllWithSiswa(array $filters = []): array
     {
         $this->select('
                 pkl_tasks.*,
                 s.nama_lengkap, s.nis, k.nama_kelas,
                 pc.nama AS kategori_nama,
                 ip.nama_lengkap AS nama_instruktur,
-                g.nama_lengkap AS nama_pembimbing
+                ip.id AS instruktur_id,
+                g.nama_lengkap AS nama_pembimbing,
+                g.id AS guru_id
             ')
             ->join('siswa s', 's.id = pkl_tasks.siswa_id')
             ->join('kelas k', 'k.id = s.kelas_id', 'left')
@@ -90,19 +92,99 @@ class PklTaskModel extends Model
             ->join('guru g', 'g.id = pp.guru_id AND g.deleted_at IS NULL', 'left')
             ->orderBy('pkl_tasks.created_at', 'DESC');
 
-        if ($search) {
+        if (!empty($filters['search'])) {
             $this->groupStart()
-                ->like('s.nama_lengkap', $search)
-                ->orLike('s.nis', $search)
-                ->orLike('pkl_tasks.judul', $search)
+                ->like('s.nama_lengkap', $filters['search'])
+                ->orLike('s.nis', $filters['search'])
+                ->orLike('pkl_tasks.judul', $filters['search'])
                 ->groupEnd();
         }
 
-        if ($status) {
-            $this->where('pkl_tasks.status', $status);
+        if (!empty($filters['status'])) {
+            $this->where('pkl_tasks.status', $filters['status']);
+        }
+
+        if (!empty($filters['kategori_id'])) {
+            $this->where('pkl_tasks.kategori_id', $filters['kategori_id']);
+        }
+
+        if (!empty($filters['instruktur_id'])) {
+            $this->where('ip.id', $filters['instruktur_id']);
+        }
+
+        if (!empty($filters['guru_id'])) {
+            $this->where('g.id', $filters['guru_id']);
+        }
+
+        if (!empty($filters['kelas'])) {
+            $this->where('k.nama_kelas', $filters['kelas']);
         }
 
         return $this->findAll();
+    }
+
+    public function getFilterKategoriList(): array
+    {
+        return $this->db->table('pkl_tasks')
+            ->select('pc.id, pc.nama')
+            ->join('pkl_categories pc', 'pc.id = pkl_tasks.kategori_id')
+            ->where('pkl_tasks.deleted_at', null)
+            ->groupBy('pc.id, pc.nama')
+            ->orderBy('pc.nama', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
+
+    public function getFilterInstrukturList(): array
+    {
+        return $this->db->table('pkl_tasks')
+            ->select('ip.id AS instruktur_id, ip.nama_lengkap')
+            ->join('siswa_pkl sp', 'sp.siswa_id = pkl_tasks.siswa_id AND sp.tahun_ajaran = "' . get_active_tahun_ajaran() . '" AND sp.deleted_at IS NULL', 'left')
+            ->join('tempat_pkl tp', 'tp.id = sp.tempat_pkl_id', 'left')
+            ->join('instruktur_pkl ip', 'ip.tempat_pkl_id = tp.id AND ip.deleted_at IS NULL', 'left')
+            ->where('pkl_tasks.deleted_at', null)
+            ->where('ip.id IS NOT NULL', null, false)
+            ->groupBy('ip.id, ip.nama_lengkap')
+            ->orderBy('ip.nama_lengkap', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
+
+    public function getFilterPembimbingList(): array
+    {
+        return $this->db->table('pkl_tasks')
+            ->select('g.id AS guru_id, g.nama_lengkap')
+            ->join('siswa_pkl sp', 'sp.siswa_id = pkl_tasks.siswa_id AND sp.tahun_ajaran = "' . get_active_tahun_ajaran() . '" AND sp.deleted_at IS NULL', 'left')
+            ->join('tempat_pkl tp', 'tp.id = sp.tempat_pkl_id', 'left')
+            ->join('pembimbing_pkl pp', 'pp.tempat_pkl_id = tp.id AND pp.tahun_ajaran = sp.tahun_ajaran AND pp.deleted_at IS NULL', 'left')
+            ->join('guru g', 'g.id = pp.guru_id AND g.deleted_at IS NULL', 'left')
+            ->where('pkl_tasks.deleted_at', null)
+            ->where('g.id IS NOT NULL', null, false)
+            ->groupBy('g.id, g.nama_lengkap')
+            ->orderBy('g.nama_lengkap', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
+
+    public function getFilterKelasList(): array
+    {
+        $data = $this->db->table('pkl_tasks')
+            ->select('k.nama_kelas')
+            ->join('siswa s', 's.id = pkl_tasks.siswa_id')
+            ->join('kelas k', 'k.id = s.kelas_id', 'left')
+            ->where('pkl_tasks.deleted_at', null)
+            ->where('k.nama_kelas IS NOT NULL', null, false)
+            ->groupBy('k.nama_kelas')
+            ->orderBy('k.nama_kelas', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        $list = [];
+        foreach ($data as $item) {
+            $list[] = $item['nama_kelas'];
+        }
+
+        return $list;
     }
 
     public function getProgressSummary($taskId)

@@ -16,16 +16,25 @@ class PklTaskController extends BaseController
 
     public function index()
     {
-        $search = $this->request->getGet('search');
-        $status = $this->request->getGet('status');
+        $filters = [
+            'search'        => $this->request->getGet('search'),
+            'status'        => $this->request->getGet('status'),
+            'kategori_id'   => $this->request->getGet('kategori_id'),
+            'instruktur_id' => $this->request->getGet('instruktur_id'),
+            'guru_id'       => $this->request->getGet('guru_id'),
+            'kelas'         => $this->request->getGet('kelas'),
+        ];
 
-        $tasks = $this->taskModel->getAllWithSiswa($search, $status);
+        $tasks = $this->taskModel->getAllWithSiswa($filters);
 
         $data = [
-            'title' => 'Master Task PKL',
-            'tasks' => $tasks,
-            'search' => $search,
-            'status' => $status,
+            'title'              => 'Master Task PKL',
+            'tasks'              => $tasks,
+            'filters'            => $filters,
+            'kategoriList'       => $this->taskModel->getFilterKategoriList(),
+            'instrukturList'     => $this->taskModel->getFilterInstrukturList(),
+            'pembimbingList'     => $this->taskModel->getFilterPembimbingList(),
+            'kelasList'          => $this->taskModel->getFilterKelasList(),
         ];
 
         return view('admin/pkl_task/index', $data);
