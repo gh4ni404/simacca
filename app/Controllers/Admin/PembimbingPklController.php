@@ -223,7 +223,7 @@ class PembimbingPklController extends BaseController
             'tahun_ajaran'      => $this->request->getGet('tahun_ajaran'),
             'tempat_pkl_id'     => $this->request->getGet('tempat_pkl_id'),
             'kelas'             => $this->request->getGet('kelas'),
-            'pembimbing_pkl_id' => $this->request->getGet('pembimbing_pkl_id'),
+            'guru_id'           => $this->request->getGet('guru_id'),
         ];
 
         $siswaPklResult = $this->pembimbingPklService->getAllSiswaPkl($filters);
@@ -246,7 +246,7 @@ class PembimbingPklController extends BaseController
             'selectedTahun'      => $filters['tahun_ajaran'],
             'selectedTempat'     => $filters['tempat_pkl_id'],
             'selectedKelas'      => $filters['kelas'],
-            'selectedPembimbing'  => $filters['pembimbing_pkl_id'],
+            'selectedGuru'       => $filters['guru_id'],
         ];
 
         return view('admin/pembimbing_pkl/siswa_pkl', $data);

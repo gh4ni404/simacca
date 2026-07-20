@@ -84,8 +84,8 @@ class SiswaPklModel extends Model
             $builder->where('kelas.nama_kelas', $filters['kelas']);
         }
 
-        if (!empty($filters['pembimbing_pkl_id'])) {
-            $builder->where('siswa_pkl.pembimbing_pkl_id', $filters['pembimbing_pkl_id']);
+        if (!empty($filters['guru_id'])) {
+            $builder->where('guru.id', $filters['guru_id']);
         }
 
         return $builder->findAll();
@@ -136,11 +136,11 @@ class SiswaPklModel extends Model
     public function getFilterPembimbingList()
     {
         $data = $this->db->table('siswa_pkl')
-            ->select('pembimbing_pkl.id, guru.nama_lengkap, guru.nip')
+            ->select('guru.id AS guru_id, guru.nama_lengkap, guru.nip')
             ->join('pembimbing_pkl', 'pembimbing_pkl.id = siswa_pkl.pembimbing_pkl_id AND pembimbing_pkl.deleted_at IS NULL')
             ->join('guru', 'guru.id = pembimbing_pkl.guru_id AND guru.deleted_at IS NULL')
             ->where('siswa_pkl.deleted_at', null)
-            ->groupBy('pembimbing_pkl.id, guru.nama_lengkap, guru.nip')
+            ->groupBy('guru.id, guru.nama_lengkap, guru.nip')
             ->orderBy('guru.nama_lengkap', 'ASC')
             ->get()
             ->getResultArray();

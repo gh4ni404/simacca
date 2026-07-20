@@ -117,11 +117,11 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Pembimbing PKL</label>
-                    <select name="pembimbing_pkl_id"
+                    <select name="guru_id"
                         class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
                         <option value="">Semua Pembimbing</option>
                         <?php foreach ($pembimbingFilterList as $p): ?>
-                            <option value="<?= esc($p['id']) ?>" <?= ($selectedPembimbing == $p['id']) ? 'selected' : '' ?>>
+                            <option value="<?= esc($p['guru_id']) ?>" <?= ($selectedGuru == $p['guru_id']) ? 'selected' : '' ?>>
                                 <?= esc($p['nama_lengkap']) ?>
                             </option>
                         <?php endforeach; ?>
@@ -132,7 +132,7 @@
                         class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm flex items-center">
                         <i class="fas fa-filter mr-1"></i> Filter
                     </button>
-                    <?php if ($selectedTahun || $selectedTempat || $selectedKelas || $selectedPembimbing): ?>
+                    <?php if ($selectedTahun || $selectedTempat || $selectedKelas || $selectedGuru): ?>
                         <a href="<?= base_url('admin/pembimbing-pkl/siswa-pkl') ?>"
                             class="border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50 text-sm flex items-center">
                             Reset
