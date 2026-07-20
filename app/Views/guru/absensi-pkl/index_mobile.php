@@ -1,7 +1,7 @@
 <?= $this->extend(get_device_layout()) ?>
 
 <?= $this->section('content') ?>
-<div class="min-h-screen bg-gray-50 pb-20">
+<div class="min-h-screen bg-gray-50 px-4 pb-20">
     <!-- Header Section -->
     <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 mb-4 rounded-lg shadow-md">
         <h1 class="text-xl font-bold mb-1">Absensi PKL</h1>
@@ -21,7 +21,7 @@
     <!-- Flash Messages -->
     <?= render_flash_message() ?>
 
-    <div class="px-4">
+    <div>
         <!-- Stats Cards - 2 Column Grid -->
         <div class="grid grid-cols-2 gap-3 mb-6">
             <?= stat_card('Total', count($absensi), 'clipboard-list', 'blue', '', '', 'compact'); ?>
