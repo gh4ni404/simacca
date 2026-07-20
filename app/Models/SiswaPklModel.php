@@ -137,11 +137,10 @@ class SiswaPklModel extends Model
     {
         $data = $this->db->table('siswa_pkl')
             ->select('pembimbing_pkl.id, guru.nama_lengkap, guru.nip')
-            ->join('pembimbing_pkl', 'pembimbing_pkl.id = siswa_pkl.pembimbing_pkl_id', 'left')
-            ->join('guru', 'guru.id = pembimbing_pkl.guru_id', 'left')
+            ->join('pembimbing_pkl', 'pembimbing_pkl.id = siswa_pkl.pembimbing_pkl_id AND pembimbing_pkl.deleted_at IS NULL')
+            ->join('guru', 'guru.id = pembimbing_pkl.guru_id AND guru.deleted_at IS NULL')
             ->where('siswa_pkl.deleted_at', null)
-            ->where('siswa_pkl.pembimbing_pkl_id IS NOT NULL')
-            ->groupBy('pembimbing_pkl.id')
+            ->groupBy('pembimbing_pkl.id, guru.nama_lengkap, guru.nip')
             ->orderBy('guru.nama_lengkap', 'ASC')
             ->get()
             ->getResultArray();
