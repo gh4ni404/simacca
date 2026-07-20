@@ -102,7 +102,7 @@ class PklProgressModel extends Model
             ->join('pkl_categories', 'pkl_categories.id = pkl_tasks.kategori_id', 'left')
             ->join('siswa_pkl', 'siswa_pkl.siswa_id = siswa.id AND siswa_pkl.deleted_at IS NULL')
             ->join('tempat_pkl', 'tempat_pkl.id = siswa_pkl.tempat_pkl_id AND tempat_pkl.deleted_at IS NULL', 'left')
-            ->join('pembimbing_pkl', 'pembimbing_pkl.tempat_pkl_id = siswa_pkl.tempat_pkl_id AND pembimbing_pkl.tahun_ajaran = siswa_pkl.tahun_ajaran AND pembimbing_pkl.deleted_at IS NULL')
+            ->join('pembimbing_pkl', 'pembimbing_pkl.id = siswa_pkl.pembimbing_pkl_id AND pembimbing_pkl.deleted_at IS NULL')
             ->where('pembimbing_pkl.guru_id', $guruId)
             ->orderBy('siswa.nama_lengkap', 'ASC')
             ->orderBy('FIELD(pkl_progress.status, "revision", "submitted", "verified_by_instruktur", "draft", "approved")', '', false)
