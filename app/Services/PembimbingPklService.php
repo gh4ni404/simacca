@@ -36,14 +36,31 @@ class PembimbingPklService extends BaseService
         $this->userModel = new UserModel();
     }
 
-    public function getAllPembimbingPkl($tahunAjaran = null): array
+    public function getAllPembimbingPkl(array $filters = []): array
     {
         try {
-            $data = $this->pembimbingPklModel->getAllPembimbingPkl($tahunAjaran);
+            $data = $this->pembimbingPklModel->getAllPembimbingPkl($filters);
             return $this->successResponse($data);
         } catch (\Exception $e) {
             $this->log('error', 'Failed to get all pembimbing PKL: ' . $e->getMessage());
             return $this->errorResponse('Gagal mengambil data pembimbing PKL');
+        }
+    }
+
+    public function getFilterLists(): array
+    {
+        try {
+            $data = [
+                'guruList'       => $this->pembimbingPklModel->getFilterGuruList(),
+                'tempatPklList'  => $this->pembimbingPklModel->getFilterTempatPklList(),
+                'kotaList'       => $this->pembimbingPklModel->getFilterKotaList(),
+                'tahunAjaranList' => $this->pembimbingPklModel->getTahunAjaranList(),
+            ];
+
+            return $this->successResponse($data);
+        } catch (\Exception $e) {
+            $this->log('error', 'Failed to get filter lists: ' . $e->getMessage());
+            return $this->errorResponse('Gagal mengambil data filter');
         }
     }
 

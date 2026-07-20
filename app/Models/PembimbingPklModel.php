@@ -50,7 +50,7 @@ class PembimbingPklModel extends Model
     protected $beforeDelete   = [];
     protected $afterDelete    = [];
 
-    public function getAllPembimbingPkl($tahunAjaran = null)
+    public function getAllPembimbingPkl($filters = [])
     {
         $builder = $this->select('
                 pembimbing_pkl.*,
@@ -65,8 +65,20 @@ class PembimbingPklModel extends Model
             ->orderBy('pembimbing_pkl.tahun_ajaran', 'DESC')
             ->orderBy('guru.nama_lengkap', 'ASC');
 
-        if ($tahunAjaran) {
-            $builder->where('pembimbing_pkl.tahun_ajaran', $tahunAjaran);
+        if (!empty($filters['tahun_ajaran'])) {
+            $builder->where('pembimbing_pkl.tahun_ajaran', $filters['tahun_ajaran']);
+        }
+
+        if (!empty($filters['guru_id'])) {
+            $builder->where('pembimbing_pkl.guru_id', $filters['guru_id']);
+        }
+
+        if (!empty($filters['tempat_pkl_id'])) {
+            $builder->where('pembimbing_pkl.tempat_pkl_id', $filters['tempat_pkl_id']);
+        }
+
+        if (!empty($filters['kota'])) {
+            $builder->where('tempat_pkl.kota', $filters['kota']);
         }
 
         return $builder->findAll();
@@ -104,6 +116,55 @@ class PembimbingPklModel extends Model
         $list = [];
         foreach ($data as $item) {
             $list[] = $item['tahun_ajaran'];
+        }
+
+        return $list;
+    }
+
+    public function getFilterGuruList()
+    {
+        $data = $this->db->table('pembimbing_pkl')
+            ->select('guru.id, guru.nama_lengkap, guru.nip')
+            ->join('guru', 'guru.id = pembimbing_pkl.guru_id')
+            ->where('pembimbing_pkl.deleted_at', null)
+            ->groupBy('guru.id')
+            ->orderBy('guru.nama_lengkap', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        return $data;
+    }
+
+    public function getFilterTempatPklList()
+    {
+        $data = $this->db->table('pembimbing_pkl')
+            ->select('tempat_pkl.id, tempat_pkl.nama_perusahaan')
+            ->join('tempat_pkl', 'tempat_pkl.id = pembimbing_pkl.tempat_pkl_id')
+            ->where('pembimbing_pkl.deleted_at', null)
+            ->groupBy('tempat_pkl.id')
+            ->orderBy('tempat_pkl.nama_perusahaan', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        return $data;
+    }
+
+    public function getFilterKotaList()
+    {
+        $data = $this->db->table('pembimbing_pkl')
+            ->select('tempat_pkl.kota')
+            ->join('tempat_pkl', 'tempat_pkl.id = pembimbing_pkl.tempat_pkl_id')
+            ->where('pembimbing_pkl.deleted_at', null)
+            ->where('tempat_pkl.kota IS NOT NULL')
+            ->where('tempat_pkl.kota !=', '')
+            ->groupBy('tempat_pkl.kota')
+            ->orderBy('tempat_pkl.kota', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        $list = [];
+        foreach ($data as $item) {
+            $list[] = $item['kota'];
         }
 
         return $list;
