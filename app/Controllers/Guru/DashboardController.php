@@ -11,6 +11,11 @@ use App\Models\IzinSiswaModel;
 use App\Models\KelasModel;
 use App\Models\MataPelajaranModel;
 use App\Models\AbsensiGuruModel;
+use App\Models\PembimbingPklModel;
+use App\Models\SiswaPklModel;
+use App\Models\AbsensiPklModel;
+use App\Models\AbsensiPklDetailModel;
+use App\Models\PklProgressModel;
 
 class DashboardController extends BaseController
 {
@@ -22,6 +27,11 @@ class DashboardController extends BaseController
     protected $kelasModel;
     protected $mapelModel;
     protected $absensiGuruModel;
+    protected $pembimbingPklModel;
+    protected $siswaPklModel;
+    protected $absensiPklModel;
+    protected $absensiPklDetailModel;
+    protected $pklProgressModel;
     protected $session;
 
     public function __construct()
@@ -34,6 +44,11 @@ class DashboardController extends BaseController
         $this->kelasModel = new KelasModel();
         $this->mapelModel = new MataPelajaranModel();
         $this->absensiGuruModel = new AbsensiGuruModel();
+        $this->pembimbingPklModel = new PembimbingPklModel();
+        $this->siswaPklModel = new SiswaPklModel();
+        $this->absensiPklModel = new AbsensiPklModel();
+        $this->absensiPklDetailModel = new AbsensiPklDetailModel();
+        $this->pklProgressModel = new PklProgressModel();
         $this->session = session();
         
         // Note: Auth check removed - handled by AuthFilter and RoleFilter
@@ -56,12 +71,16 @@ class DashboardController extends BaseController
 
         $guruId = $guru['id'];
 
+        // Check if this guru is a pembimbing PKL
+        $isPembimbingPkl = $this->isPembimbingPkl($guruId);
+
         // Get data for dashboard
         $data = [
             'title' => 'Dashboard Guru',
             'pageTitle' => 'Dashboard',
             'pageDescription' => 'Selamat datang di dashboard guru',
             'guru' => $guru,
+            'isPembimbingPkl' => $isPembimbingPkl,
             'stats' => $this->getGuruStats($guruId),
             'jadwalHariIni' => $this->getJadwalHariIni($guruId),
             'jadwalMingguIni' => $this->getJadwalMingguIni($guruId),
@@ -69,10 +88,18 @@ class DashboardController extends BaseController
             'recentJurnal' => $this->getRecentJurnal($guruId),
             'pendingIzin' => $this->getPendingIzinForGuru($guruId),
             'chartData' => $this->getChartData($guruId),
-            'quickActions' => $this->getQuickActions($guru),
+            'quickActions' => $this->getQuickActions($guru, $isPembimbingPkl),
             'mapel' => $this->getMataPelajaran($guruId),
             'absensiGuruToday' => $this->getAbsensiGuruToday($guruId),
         ];
+
+        // Add PKL-specific data if guru is pembimbing PKL
+        if ($isPembimbingPkl) {
+            $data['pklStats'] = $this->getPklStats($guruId);
+            $data['recentAbsensiPkl'] = $this->getRecentAbsensiPkl($guruId);
+            $data['recentJurnalPkl'] = $this->getRecentJurnalPkl($guruId);
+            $data['siswaPklList'] = $this->getSiswaPklList($guruId);
+        }
 
         return view('guru/dashboard', $data);
     }
@@ -273,8 +300,41 @@ class DashboardController extends BaseController
     /**
      * Get quick actions for guru
      */
-    private function getQuickActions($guru)
+    private function getQuickActions($guru, $isPembimbingPkl = false)
     {
+        if ($isPembimbingPkl) {
+            return [
+                [
+                    'title' => 'Absensi PKL',
+                    'icon' => 'fas fa-clipboard-check',
+                    'url' => base_url('guru/absensi-pkl/tambah'),
+                    'color' => 'bg-blue-500 hover:bg-blue-600',
+                    'description' => 'Catat kehadiran siswa PKL'
+                ],
+                [
+                    'title' => 'Verifikasi Jurnal',
+                    'icon' => 'fas fa-check-double',
+                    'url' => base_url('guru/jurnal-pkl'),
+                    'color' => 'bg-green-500 hover:bg-green-600',
+                    'description' => 'Review jurnal siswa PKL'
+                ],
+                [
+                    'title' => 'Siswa PKL',
+                    'icon' => 'fas fa-building',
+                    'url' => base_url('guru/absensi-pkl'),
+                    'color' => 'bg-purple-500 hover:bg-purple-600',
+                    'description' => 'Lihat daftar siswa PKL'
+                ],
+                [
+                    'title' => 'Rekap PKL',
+                    'icon' => 'fas fa-chart-bar',
+                    'url' => base_url('guru/laporan'),
+                    'color' => 'bg-yellow-500 hover:bg-yellow-600',
+                    'description' => 'Rekap absensi & jurnal'
+                ]
+            ];
+        }
+
         return [
             [
                 'title' => 'Input Absensi',
@@ -390,5 +450,137 @@ class DashboardController extends BaseController
             ->where('guru_id', $guruId)
             ->where('tanggal', $today)
             ->first();
+    }
+
+    /**
+     * Check if guru is a pembimbing PKL
+     */
+    private function isPembimbingPkl(int $guruId): bool
+    {
+        $currentYear = date('Y') . '/' . (date('Y') + 1);
+        $nextYear = (date('Y') - 1) . '/' . date('Y');
+
+        return $this->pembimbingPklModel
+            ->where('guru_id', $guruId)
+            ->groupStart()
+                ->where('tahun_ajaran', $currentYear)
+                ->orWhere('tahun_ajaran', $nextYear)
+            ->groupEnd()
+            ->countAllResults() > 0;
+    }
+
+    /**
+     * Get PKL statistics for pembimbing
+     */
+    private function getPklStats(int $guruId): array
+    {
+        $currentMonth = date('m');
+        $currentYear = date('Y');
+
+        // Get siswa PKL count
+        $siswaPklCount = $this->siswaPklModel->select('COUNT(*) as total')
+            ->join('pembimbing_pkl', 'pembimbing_pkl.id = siswa_pkl.pembimbing_pkl_id AND pembimbing_pkl.deleted_at IS NULL')
+            ->where('pembimbing_pkl.guru_id', $guruId)
+            ->where('siswa_pkl.tahun_ajaran', date('Y') . '/' . (date('Y') + 1))
+            ->first();
+
+        // Get absensi PKL bulan ini
+        $absensiPklBulanIni = $this->absensiPklModel
+            ->join('pembimbing_pkl', 'pembimbing_pkl.id = absensi_pkl.pembimbing_pkl_id AND pembimbing_pkl.deleted_at IS NULL')
+            ->where('pembimbing_pkl.guru_id', $guruId)
+            ->where('MONTH(absensi_pkl.tanggal)', $currentMonth)
+            ->where('YEAR(absensi_pkl.tanggal)', $currentYear)
+            ->countAllResults();
+
+        // Get pending jurnal (submitted/verified_by_instruktur status)
+        $pendingJurnal = $this->pklProgressModel
+            ->join('pkl_tasks', 'pkl_tasks.id = pkl_progress.task_id AND pkl_tasks.deleted_at IS NULL')
+            ->join('siswa_pkl', 'siswa_pkl.siswa_id = pkl_tasks.siswa_id AND siswa_pkl.deleted_at IS NULL')
+            ->join('pembimbing_pkl', 'pembimbing_pkl.id = siswa_pkl.pembimbing_pkl_id AND pembimbing_pkl.deleted_at IS NULL')
+            ->where('pembimbing_pkl.guru_id', $guruId)
+            ->whereIn('pkl_progress.status', ['submitted', 'verified_by_instruktur'])
+            ->countAllResults();
+
+        // Get kehadiran percentage
+        $kehadiran = $this->absensiPklDetailModel->getStatsByPembimbingPkl(
+            $this->getPembimbingPklId($guruId)
+        );
+
+        return [
+            'total_siswa' => $siswaPklCount['total'] ?? 0,
+            'absensi_bulan_ini' => $absensiPklBulanIni,
+            'jurnal_pending' => $pendingJurnal,
+            'persen_kehadiran' => $kehadiran['persen_kehadiran'] ?? 0,
+            'total_hadir' => $kehadiran['hadir'] ?? 0,
+            'total_alpa' => $kehadiran['alpa'] ?? 0,
+        ];
+    }
+
+    /**
+     * Get pembimbing_pkl ID for a guru (first active one)
+     */
+    private function getPembimbingPklId(int $guruId): ?int
+    {
+        $pembimbing = $this->pembimbingPklModel
+            ->where('guru_id', $guruId)
+            ->orderBy('tahun_ajaran', 'DESC')
+            ->first();
+
+        return $pembimbing['id'] ?? null;
+    }
+
+    /**
+     * Get recent absensi PKL (5 terakhir)
+     */
+    private function getRecentAbsensiPkl(int $guruId): array
+    {
+        return $this->absensiPklModel
+            ->select('absensi_pkl.*, tempat_pkl.nama_perusahaan, tempat_pkl.kota')
+            ->join('pembimbing_pkl', 'pembimbing_pkl.id = absensi_pkl.pembimbing_pkl_id AND pembimbing_pkl.deleted_at IS NULL')
+            ->join('tempat_pkl', 'tempat_pkl.id = pembimbing_pkl.tempat_pkl_id AND tempat_pkl.deleted_at IS NULL')
+            ->where('pembimbing_pkl.guru_id', $guruId)
+            ->orderBy('absensi_pkl.tanggal', 'DESC')
+            ->limit(5)
+            ->findAll();
+    }
+
+    /**
+     * Get recent jurnal PKL needing verification (5 terbaru)
+     */
+    private function getRecentJurnalPkl(int $guruId): array
+    {
+        return $this->pklProgressModel
+            ->select('pkl_progress.*, pkl_tasks.judul AS nama_task, siswa.nama_lengkap AS nama_siswa,
+                      siswa.nis, kelas.nama_kelas, pkl_categories.nama AS kategori_nama,
+                      tempat_pkl.nama_perusahaan')
+            ->join('pkl_tasks', 'pkl_tasks.id = pkl_progress.task_id AND pkl_tasks.deleted_at IS NULL')
+            ->join('siswa', 'siswa.id = pkl_tasks.siswa_id AND siswa.deleted_at IS NULL')
+            ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
+            ->join('pkl_categories', 'pkl_categories.id = pkl_tasks.kategori_id', 'left')
+            ->join('siswa_pkl', 'siswa_pkl.siswa_id = siswa.id AND siswa_pkl.deleted_at IS NULL')
+            ->join('tempat_pkl', 'tempat_pkl.id = siswa_pkl.tempat_pkl_id AND tempat_pkl.deleted_at IS NULL', 'left')
+            ->join('pembimbing_pkl', 'pembimbing_pkl.id = siswa_pkl.pembimbing_pkl_id AND pembimbing_pkl.deleted_at IS NULL')
+            ->where('pembimbing_pkl.guru_id', $guruId)
+            ->whereIn('pkl_progress.status', ['submitted', 'verified_by_instruktur', 'revision'])
+            ->orderBy('pkl_progress.tanggal', 'DESC')
+            ->limit(5)
+            ->findAll();
+    }
+
+    /**
+     * Get list of siswa PKL under this pembimbing
+     */
+    private function getSiswaPklList(int $guruId): array
+    {
+        return $this->siswaPklModel
+            ->select('siswa.nama_lengkap, siswa.nis, kelas.nama_kelas, tempat_pkl.nama_perusahaan, tempat_pkl.kota')
+            ->join('siswa', 'siswa.id = siswa_pkl.siswa_id AND siswa.deleted_at IS NULL')
+            ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
+            ->join('tempat_pkl', 'tempat_pkl.id = siswa_pkl.tempat_pkl_id AND tempat_pkl.deleted_at IS NULL')
+            ->join('pembimbing_pkl', 'pembimbing_pkl.id = siswa_pkl.pembimbing_pkl_id AND pembimbing_pkl.deleted_at IS NULL')
+            ->where('pembimbing_pkl.guru_id', $guruId)
+            ->where('siswa_pkl.tahun_ajaran', date('Y') . '/' . (date('Y') + 1))
+            ->orderBy('siswa.nama_lengkap', 'ASC')
+            ->findAll();
     }
 }

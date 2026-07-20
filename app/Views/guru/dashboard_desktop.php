@@ -24,12 +24,26 @@
                 <div class="flex items-center space-x-4">
                     <div class="flex items-center space-x-4">
                         <div class="text-right">
-                            <p class="text-lg font-semibold">
-                                <span class="inline-flex items-center px-3 py-2 mt-2 rounded-full text-sm font-medium <?= $guru['is_wali_kelas'] ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'; ?>">
-                                    <i class="fas <?= $guru['is_wali_kelas'] ? 'fa-user-tie' : 'fa-chalkboard-teacher'; ?> mr-2"></i>
-                                    <?= $guru['is_wali_kelas'] ? 'Wali Kelas' : 'Guru Mata Pelajaran'; ?>
-                                </span>
-                            </p>
+                            <div class="flex items-center justify-end gap-2 mt-2">
+                                <?php if ($isPembimbingPkl): ?>
+                                    <span class="inline-flex items-center px-3 py-2 rounded-full text-sm font-medium bg-amber-100 text-amber-800">
+                                        <i class="fas fa-building mr-2"></i>
+                                        Pembimbing PKL
+                                    </span>
+                                <?php endif; ?>
+                                <?php if ($guru['is_wali_kelas']): ?>
+                                    <span class="inline-flex items-center px-3 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                        <i class="fas fa-user-tie mr-2"></i>
+                                        Wali Kelas
+                                    </span>
+                                <?php endif; ?>
+                                <?php if (!$guru['is_wali_kelas'] && !$isPembimbingPkl): ?>
+                                    <span class="inline-flex items-center px-3 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                        <i class="fas fa-chalkboard-teacher mr-2"></i>
+                                        Guru Mata Pelajaran
+                                    </span>
+                                <?php endif; ?>
+                            </div>
                         </div>
                         <div class="h-24 w-24 rounded-full bg-white/20 flex items-center justify-center">
                             <!-- <i class="fas <?= $guru['is_wali_kelas'] ? 'fa-user-tie' : 'fa-chalkboard-teacher'; ?> text-xl"></i> -->
@@ -54,41 +68,79 @@
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <?= stat_card(
-            'Total Jadwal', 
-            $stats['total_jadwal'], 
-            'calendar-alt', 
-            'blue', 
-            '', 
-            '<i class="fas fa-clock mr-1"></i>' . $stats['absensi_hari_ini'] . ' absensi hari ini'
-        ); ?>
+        <?php if ($isPembimbingPkl): ?>
+            <?= stat_card(
+                'Siswa PKL', 
+                $pklStats['total_siswa'], 
+                'user-graduate', 
+                'blue', 
+                '', 
+                '<i class="fas fa-building mr-1"></i>' . $pklStats['total_siswa'] . ' under bimbingan'
+            ); ?>
 
-        <?= stat_card(
-            'Absensi Bulan Ini', 
-            $stats['absensi_bulan_ini'], 
-            'clipboard-check', 
-            'green', 
-            '', 
-            '<i class="fas fa-chart-line mr-1"></i>' . $stats['absensi_bulan_ini'] . ' pertemuan'
-        ); ?>
+            <?= stat_card(
+                'Absensi PKL', 
+                $pklStats['absensi_bulan_ini'], 
+                'clipboard-check', 
+                'green', 
+                '', 
+                '<i class="fas fa-chart-line mr-1"></i>' . $pklStats['absensi_bulan_ini'] . ' bulan ini'
+            ); ?>
 
-        <?= stat_card(
-            'Jurnal Bulan Ini', 
-            $stats['jurnal_bulan_ini'], 
-            'book', 
-            'purple', 
-            '', 
-            '<i class="fas fa-check-circle mr-1"></i>' . $stats['jurnal_bulan_ini'] . ' dokumen'
-        ); ?>
+            <?= stat_card(
+                'Jurnal Pending', 
+                $pklStats['jurnal_pending'], 
+                'clock', 
+                'orange', 
+                '', 
+                '<i class="fas fa-exclamation-circle mr-1"></i>' . $pklStats['jurnal_pending'] . ' perlu review'
+            ); ?>
 
-        <?= stat_card(
-            'Kelas yang Diajar', 
-            $stats['total_kelas'], 
-            'school', 
-            'yellow', 
-            '', 
-            '<i class="fas fa-users mr-1"></i>' . $stats['total_kelas'] . ' kelas berbeda'
-        ); ?>
+            <?= stat_card(
+                'Kehadiran', 
+                $pklStats['persen_kehadiran'] . '%', 
+                'chart-pie', 
+                'purple', 
+                '', 
+                '<i class="fas fa-check-circle mr-1"></i>persentase kehadiran'
+            ); ?>
+        <?php else: ?>
+            <?= stat_card(
+                'Total Jadwal', 
+                $stats['total_jadwal'], 
+                'calendar-alt', 
+                'blue', 
+                '', 
+                '<i class="fas fa-clock mr-1"></i>' . $stats['absensi_hari_ini'] . ' absensi hari ini'
+            ); ?>
+
+            <?= stat_card(
+                'Absensi Bulan Ini', 
+                $stats['absensi_bulan_ini'], 
+                'clipboard-check', 
+                'green', 
+                '', 
+                '<i class="fas fa-chart-line mr-1"></i>' . $stats['absensi_bulan_ini'] . ' pertemuan'
+            ); ?>
+
+            <?= stat_card(
+                'Jurnal Bulan Ini', 
+                $stats['jurnal_bulan_ini'], 
+                'book', 
+                'purple', 
+                '', 
+                '<i class="fas fa-check-circle mr-1"></i>' . $stats['jurnal_bulan_ini'] . ' dokumen'
+            ); ?>
+
+            <?= stat_card(
+                'Kelas yang Diajar', 
+                $stats['total_kelas'], 
+                'school', 
+                'yellow', 
+                '', 
+                '<i class="fas fa-users mr-1"></i>' . $stats['total_kelas'] . ' kelas berbeda'
+            ); ?>
+        <?php endif; ?>
     </div>
 
     <!-- Absensi Guru Widget -->
@@ -203,7 +255,51 @@
                 </div>
             </div>
 
-            <!-- Jadwal Hari Ini -->
+            <!-- Jadwal Hari Ini / Siswa Bimbingan -->
+            <?php if ($isPembimbingPkl): ?>
+            <div class="bg-white rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900">Siswa Bimbingan</h3>
+                        <p class="mt-1 text-sm text-gray-500"><?= count($siswaPklList); ?> siswa aktif PKL</p>
+                    </div>
+                    <a href="<?= base_url('guru/absensi-pkl'); ?>" class="text-sm text-blue-500 hover:text-blue-700">
+                        Lihat Semua <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+                <div class="p-6">
+                    <?php if (empty($siswaPklList)): ?>
+                        <div class="text-center py-8">
+                            <i class="fas fa-building text-4xl text-gray-300 mb-4"></i>
+                            <p class="text-gray-500">Belum ada siswa PKL</p>
+                        </div>
+                    <?php else: ?>
+                        <div class="space-y-4">
+                            <?php foreach (array_slice($siswaPklList, 0, 5) as $siswa): ?>
+                                <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h4 class="font-medium text-gray-900"><?= $siswa['nama_lengkap']; ?></h4>
+                                            <p class="text-sm text-gray-600 mt-1">
+                                                <i class="fas fa-id-badge mr-2"></i>
+                                                <?= $siswa['nis']; ?> | <?= $siswa['nama_kelas']; ?>
+                                            </p>
+                                            <p class="text-sm text-gray-500 mt-1">
+                                                <i class="fas fa-building mr-2"></i>
+                                                <?= $siswa['nama_perusahaan']; ?>
+                                                <?php if (!empty($siswa['kota'])): ?>
+                                                    - <?= $siswa['kota']; ?>
+                                                <?php endif; ?>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php else: ?>
             <div class="bg-white rounded-lg shadow">
                 <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                     <div>
@@ -251,8 +347,52 @@
                     <?php endif; ?>
                 </div>
             </div>
+            <?php endif; ?>
 
             <!-- Recent Absensi -->
+            <?php if ($isPembimbingPkl): ?>
+            <div class="bg-white rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Absensi PKL Terbaru</h3>
+                    <p class="mt-1 text-sm text-gray-500">5 absensi PKL terakhir</p>
+                </div>
+                <div class="p-6">
+                    <?php if (empty($recentAbsensiPkl)): ?>
+                        <div class="text-center py-8">
+                            <i class="fas fa-clipboard-list text-4xl text-gray-300 mb-4"></i>
+                            <p class="text-gray-500">Belum ada absensi PKL</p>
+                        </div>
+                    <?php else: ?>
+                        <div class="space-y-4">
+                            <?php foreach ($recentAbsensiPkl as $absensi): ?>
+                                <a href="<?= base_url('guru/absensi-pkl/show/' . $absensi['id']); ?>"
+                                    class="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                                    <div>
+                                        <h4 class="font-medium text-gray-900"><?= $absensi['nama_perusahaan']; ?></h4>
+                                        <div class="flex items-center mt-1 space-x-4">
+                                            <span class="text-sm text-gray-600">
+                                                <i class="fas fa-calendar-alt mr-1"></i>
+                                                <?= date('d/m/Y', strtotime($absensi['tanggal'])); ?>
+                                            </span>
+                                            <span class="text-sm text-gray-600">
+                                                <i class="fas fa-map-marker-alt mr-1"></i>
+                                                <?= $absensi['kota']; ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-chevron-right text-gray-400"></i>
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <a href="<?= base_url('guru/absensi-pkl'); ?>" class="text-sm text-blue-500 hover:text-blue-700">
+                                Lihat semua absensi PKL <i class="fas fa-arrow-right ml-1"></i>
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php else: ?>
             <div class="bg-white rounded-lg shadow">
                 <div class="px-6 py-4 border-b border-gray-200">
                     <h3 class="text-lg font-medium text-gray-900">Absensi Terbaru</h3>
@@ -301,11 +441,52 @@
                     <?php endif; ?>
                 </div>
             </div>
+            <?php endif; ?>
         </div>
 
         <!-- Right Column -->
         <div class="space-y-6">
-            <!-- Jadwal Minggu Ini -->
+            <!-- Jadwal Minggu Ini / Info Siswa PKL -->
+            <?php if ($isPembimbingPkl): ?>
+            <div class="bg-white rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Info Siswa PKL</h3>
+                    <p class="mt-1 text-sm text-gray-500">Ringkasan data siswa bimbingan</p>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="p-2 rounded-lg bg-blue-100"><i class="fas fa-user-graduate text-blue-600"></i></div>
+                                <span class="ml-3 text-sm font-medium text-gray-700">Total Siswa PKL</span>
+                            </div>
+                            <span class="text-lg font-bold text-blue-600"><?= $pklStats['total_siswa']; ?></span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="p-2 rounded-lg bg-green-100"><i class="fas fa-check-circle text-green-600"></i></div>
+                                <span class="ml-3 text-sm font-medium text-gray-700">Total Hadir</span>
+                            </div>
+                            <span class="text-lg font-bold text-green-600"><?= $pklStats['total_hadir']; ?></span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="p-2 rounded-lg bg-red-100"><i class="fas fa-times-circle text-red-600"></i></div>
+                                <span class="ml-3 text-sm font-medium text-gray-700">Total Alpa</span>
+                            </div>
+                            <span class="text-lg font-bold text-red-600"><?= $pklStats['total_alpa']; ?></span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="p-2 rounded-lg bg-purple-100"><i class="fas fa-percentage text-purple-600"></i></div>
+                                <span class="ml-3 text-sm font-medium text-gray-700">Persentase Kehadiran</span>
+                            </div>
+                            <span class="text-lg font-bold text-purple-600"><?= $pklStats['persen_kehadiran']; ?>%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php else: ?>
             <div class="bg-white rounded-lg shadow">
                 <div class="px-6 py-4 border-b border-gray-200">
                     <h3 class="text-lg font-medium text-gray-900">Jadwal Minggu Ini</h3>
@@ -342,8 +523,10 @@
                     <?php endif; ?>
                 </div>
             </div>
+            <?php endif; ?>
 
-            <!-- Pending Izin -->
+            <!-- Pending Izin (only for non-PKL) -->
+            <?php if (!$isPembimbingPkl): ?>
             <div class="bg-white rounded-lg shadow">
                 <div class="px-6 py-4 border-b border-gray-200">
                     <h3 class="text-lg font-medium text-gray-900">Pengajuan Izin Pending</h3>
@@ -386,8 +569,59 @@
                     <?php endif; ?>
                 </div>
             </div>
+            <?php endif; ?>
 
-            <!-- Recent Jurnal -->
+            <!-- Recent Jurnal / Jurnal PKL -->
+            <?php if ($isPembimbingPkl): ?>
+            <div class="bg-white rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Jurnal Perlu Verifikasi</h3>
+                    <p class="mt-1 text-sm text-gray-500">Dari siswa PKL bimbingan Anda</p>
+                </div>
+                <div class="p-6">
+                    <?php if (empty($recentJurnalPkl)): ?>
+                        <div class="text-center py-8">
+                            <i class="fas fa-check-double text-4xl text-green-300 mb-4"></i>
+                            <p class="text-gray-500">Semua jurnal sudah terverifikasi</p>
+                        </div>
+                    <?php else: ?>
+                        <div class="space-y-3">
+                            <?php foreach ($recentJurnalPkl as $jurnal): ?>
+                                <a href="<?= base_url('guru/jurnal-pkl'); ?>"
+                                    class="block border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h4 class="font-medium text-gray-900"><?= $jurnal['nama_siswa']; ?></h4>
+                                            <p class="text-sm text-gray-600 mt-1">
+                                                <i class="fas fa-tasks mr-1"></i><?= $jurnal['nama_task']; ?>
+                                            </p>
+                                            <p class="text-xs text-gray-500 mt-1">
+                                                <i class="fas fa-calendar-alt mr-1"></i>
+                                                <?= date('d/m/Y', strtotime($jurnal['tanggal'])); ?>
+                                                <?php if (!empty($jurnal['kategori_nama'])): ?>
+                                                    | <?= $jurnal['kategori_nama']; ?>
+                                                <?php endif; ?>
+                                            </p>
+                                        </div>
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full
+                                            <?= $jurnal['status'] === 'revision' ? 'bg-red-100 text-red-800' :
+                                                 ($jurnal['status'] === 'submitted' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'); ?>">
+                                            <?= $jurnal['status'] === 'revision' ? 'Revisi' :
+                                                 ($jurnal['status'] === 'submitted' ? 'Baru' : 'Review'); ?>
+                                        </span>
+                                    </div>
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <a href="<?= base_url('guru/jurnal-pkl'); ?>" class="text-sm text-blue-500 hover:text-blue-700">
+                                Verifikasi semua <i class="fas fa-arrow-right ml-1"></i>
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php else: ?>
             <div class="bg-white rounded-lg shadow">
                 <div class="px-6 py-4 border-b border-gray-200">
                     <h3 class="text-lg font-medium text-gray-900">Jurnal Terbaru</h3>
@@ -426,6 +660,7 @@
                     <?php endif; ?>
                 </div>
             </div>
+            <?php endif; ?>
 
             <!-- Info Profile -->
             <div class="bg-white rounded-lg shadow">
@@ -456,9 +691,13 @@
                         <?php if (isset($guru['is_wali_kelas']) && $guru['is_wali_kelas'] == 1 && isset($guru['kelas_id']) && $guru['kelas_id'] > 0): ?>
                             <div class="flex items-center text-sm text-gray-600">
                                 <i class="fas fa-user-tie mr-3 w-5"></i>
-                                <span>
-                                    Wali Kelas
-                                </span>
+                                <span>Wali Kelas</span>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ($isPembimbingPkl): ?>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="fas fa-building mr-3 w-5"></i>
+                                <span>Pembimbing PKL</span>
                             </div>
                         <?php endif; ?>
                     </div>
