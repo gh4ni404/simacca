@@ -91,9 +91,9 @@ class AbsensiPklModel extends Model
                 pembimbing_pkl.tempat_pkl_id,
                 pembimbing_pkl.tahun_ajaran
             ')
-            ->join('pembimbing_pkl', 'pembimbing_pkl.id = absensi_pkl.pembimbing_pkl_id')
-            ->join('guru', 'guru.id = pembimbing_pkl.guru_id')
-            ->join('tempat_pkl', 'tempat_pkl.id = pembimbing_pkl.tempat_pkl_id')
+            ->join('pembimbing_pkl', 'pembimbing_pkl.id = absensi_pkl.pembimbing_pkl_id AND pembimbing_pkl.deleted_at IS NULL')
+            ->join('guru', 'guru.id = pembimbing_pkl.guru_id AND guru.deleted_at IS NULL')
+            ->join('tempat_pkl', 'tempat_pkl.id = pembimbing_pkl.tempat_pkl_id AND tempat_pkl.deleted_at IS NULL')
             ->where('pembimbing_pkl.guru_id', $guruId)
             ->orderBy('absensi_pkl.tanggal', 'DESC');
 
@@ -118,9 +118,9 @@ class AbsensiPklModel extends Model
                 tempat_pkl.alamat,
                 users.username AS pembimbing_username
             ')
-            ->join('pembimbing_pkl', 'pembimbing_pkl.id = absensi_pkl.pembimbing_pkl_id')
-            ->join('guru', 'guru.id = pembimbing_pkl.guru_id')
-            ->join('tempat_pkl', 'tempat_pkl.id = pembimbing_pkl.tempat_pkl_id')
+            ->join('pembimbing_pkl', 'pembimbing_pkl.id = absensi_pkl.pembimbing_pkl_id AND pembimbing_pkl.deleted_at IS NULL')
+            ->join('guru', 'guru.id = pembimbing_pkl.guru_id AND guru.deleted_at IS NULL')
+            ->join('tempat_pkl', 'tempat_pkl.id = pembimbing_pkl.tempat_pkl_id AND tempat_pkl.deleted_at IS NULL')
             ->join('users', 'users.id = absensi_pkl.created_by')
             ->where('absensi_pkl.id', $absensiPklId)
             ->where('absensi_pkl.deleted_at IS NULL', null, false)
@@ -143,9 +143,9 @@ class AbsensiPklModel extends Model
                 pembimbing_pkl.tahun_ajaran,
                 users.username AS pembimbing_username
             ')
-            ->join('pembimbing_pkl', 'pembimbing_pkl.id = absensi_pkl.pembimbing_pkl_id')
-            ->join('guru', 'guru.id = pembimbing_pkl.guru_id')
-            ->join('tempat_pkl', 'tempat_pkl.id = pembimbing_pkl.tempat_pkl_id')
+            ->join('pembimbing_pkl', 'pembimbing_pkl.id = absensi_pkl.pembimbing_pkl_id AND pembimbing_pkl.deleted_at IS NULL')
+            ->join('guru', 'guru.id = pembimbing_pkl.guru_id AND guru.deleted_at IS NULL')
+            ->join('tempat_pkl', 'tempat_pkl.id = pembimbing_pkl.tempat_pkl_id AND tempat_pkl.deleted_at IS NULL')
             ->join('users', 'users.id = absensi_pkl.created_by')
             ->orderBy('absensi_pkl.tanggal', 'DESC')
             ->orderBy('guru.nama_lengkap', 'ASC');
@@ -179,9 +179,9 @@ class AbsensiPklModel extends Model
                 MIN(absensi_pkl.tanggal) AS tanggal_mulai,
                 MAX(absensi_pkl.tanggal) AS tanggal_terakhir
             ')
-            ->join('pembimbing_pkl', 'pembimbing_pkl.id = absensi_pkl.pembimbing_pkl_id')
-            ->join('guru', 'guru.id = pembimbing_pkl.guru_id')
-            ->join('tempat_pkl', 'tempat_pkl.id = pembimbing_pkl.tempat_pkl_id')
+            ->join('pembimbing_pkl', 'pembimbing_pkl.id = absensi_pkl.pembimbing_pkl_id AND pembimbing_pkl.deleted_at IS NULL')
+            ->join('guru', 'guru.id = pembimbing_pkl.guru_id AND guru.deleted_at IS NULL')
+            ->join('tempat_pkl', 'tempat_pkl.id = pembimbing_pkl.tempat_pkl_id AND tempat_pkl.deleted_at IS NULL')
             ->where('absensi_pkl.deleted_at IS NULL', null, false)
             ->groupBy('absensi_pkl.pembimbing_pkl_id')
             ->orderBy('guru.nama_lengkap', 'ASC');
@@ -207,9 +207,9 @@ class AbsensiPklModel extends Model
                 guru.nama_lengkap AS nama_pembimbing,
                 tempat_pkl.nama_perusahaan
             ')
-            ->join('pembimbing_pkl', 'pembimbing_pkl.id = absensi_pkl.pembimbing_pkl_id')
-            ->join('guru', 'guru.id = pembimbing_pkl.guru_id')
-            ->join('tempat_pkl', 'tempat_pkl.id = pembimbing_pkl.tempat_pkl_id')
+            ->join('pembimbing_pkl', 'pembimbing_pkl.id = absensi_pkl.pembimbing_pkl_id AND pembimbing_pkl.deleted_at IS NULL')
+            ->join('guru', 'guru.id = pembimbing_pkl.guru_id AND guru.deleted_at IS NULL')
+            ->join('tempat_pkl', 'tempat_pkl.id = pembimbing_pkl.tempat_pkl_id AND tempat_pkl.deleted_at IS NULL')
             ->join('absensi_pkl_detail', 'absensi_pkl_detail.absensi_pkl_id = absensi_pkl.id')
             ->where('absensi_pkl_detail.siswa_id', $siswaId)
             ->orderBy('absensi_pkl.tanggal', 'DESC')
@@ -228,9 +228,9 @@ class AbsensiPklModel extends Model
                 tempat_pkl.nama_perusahaan,
                 tempat_pkl.kota
             ')
-            ->join('pembimbing_pkl', 'pembimbing_pkl.id = absensi_pkl.pembimbing_pkl_id')
-            ->join('guru', 'guru.id = pembimbing_pkl.guru_id')
-            ->join('tempat_pkl', 'tempat_pkl.id = pembimbing_pkl.tempat_pkl_id')
+            ->join('pembimbing_pkl', 'pembimbing_pkl.id = absensi_pkl.pembimbing_pkl_id AND pembimbing_pkl.deleted_at IS NULL')
+            ->join('guru', 'guru.id = pembimbing_pkl.guru_id AND guru.deleted_at IS NULL')
+            ->join('tempat_pkl', 'tempat_pkl.id = pembimbing_pkl.tempat_pkl_id AND tempat_pkl.deleted_at IS NULL')
             ->where('absensi_pkl.pembimbing_pkl_id', $pembimbingPklId)
             ->orderBy('absensi_pkl.tanggal', 'DESC')
             ->findAll();

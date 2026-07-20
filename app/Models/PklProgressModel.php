@@ -79,30 +79,35 @@ class PklProgressModel extends Model
 
     public function getGroupedBySiswaForPembimbing(): array
     {
-        $db = \Config\Database::connect();
         $userId = session()->get('user_id');
         $guruModel = new \App\Models\GuruModel();
         $guru = $guruModel->getByUserId($userId);
         $guruId = $guru['id'] ?? 0;
 
-        $sql = "SELECT pp.*, pt.judul AS nama_task, pt.siswa_id,
-                       s.nama_lengkap AS nama_siswa, s.nis, k.nama_kelas,
-                       pc.nama AS kategori_nama, u.profile_photo, tp.nama_perusahaan
-                FROM pkl_progress pp
-                JOIN pkl_tasks pt ON pt.id = pp.task_id
-                JOIN siswa s ON s.id = pt.siswa_id
-                LEFT JOIN users u ON u.id = s.user_id
-                JOIN kelas k ON k.id = s.kelas_id
-                LEFT JOIN pkl_categories pc ON pc.id = pt.kategori_id
-                JOIN siswa_pkl sp ON sp.siswa_id = s.id
-                LEFT JOIN tempat_pkl tp ON tp.id = sp.tempat_pkl_id
-                JOIN pembimbing_pkl pp2 ON pp2.tempat_pkl_id = sp.tempat_pkl_id AND pp2.tahun_ajaran = sp.tahun_ajaran
-                WHERE pp2.guru_id = ? AND pp.deleted_at IS NULL AND pt.deleted_at IS NULL
-                ORDER BY s.nama_lengkap, 
-                         FIELD(pp.status, 'revision', 'submitted', 'verified_by_instruktur', 'draft', 'approved'),
-                         pp.tanggal ASC";
-
-        $rawData = $db->query($sql, [$guruId])->getResultArray();
+        $rawData = $this->select('
+                pkl_progress.*,
+                pkl_tasks.judul AS nama_task,
+                pkl_tasks.siswa_id,
+                siswa.nama_lengkap AS nama_siswa,
+                siswa.nis,
+                kelas.nama_kelas,
+                pkl_categories.nama AS kategori_nama,
+                users.profile_photo,
+                tempat_pkl.nama_perusahaan
+            ')
+            ->join('pkl_tasks', 'pkl_tasks.id = pkl_progress.task_id AND pkl_tasks.deleted_at IS NULL')
+            ->join('siswa', 'siswa.id = pkl_tasks.siswa_id AND siswa.deleted_at IS NULL')
+            ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
+            ->join('users', 'users.id = siswa.user_id', 'left')
+            ->join('pkl_categories', 'pkl_categories.id = pkl_tasks.kategori_id', 'left')
+            ->join('siswa_pkl', 'siswa_pkl.siswa_id = siswa.id AND siswa_pkl.deleted_at IS NULL')
+            ->join('tempat_pkl', 'tempat_pkl.id = siswa_pkl.tempat_pkl_id AND tempat_pkl.deleted_at IS NULL', 'left')
+            ->join('pembimbing_pkl', 'pembimbing_pkl.tempat_pkl_id = siswa_pkl.tempat_pkl_id AND pembimbing_pkl.tahun_ajaran = siswa_pkl.tahun_ajaran AND pembimbing_pkl.deleted_at IS NULL')
+            ->where('pembimbing_pkl.guru_id', $guruId)
+            ->orderBy('siswa.nama_lengkap', 'ASC')
+            ->orderBy('FIELD(pkl_progress.status, "revision", "submitted", "verified_by_instruktur", "draft", "approved")', '', false)
+            ->orderBy('pkl_progress.tanggal', 'ASC')
+            ->findAll();
 
         $grouped = [];
         $stats = [
