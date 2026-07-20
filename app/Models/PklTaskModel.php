@@ -73,10 +73,21 @@ class PklTaskModel extends Model
 
     public function getAllWithSiswa(?string $search = null, ?string $status = null): array
     {
-        $this->select('pkl_tasks.*, s.nama_lengkap, s.nis, k.nama_kelas, pc.nama AS kategori_nama')
+        $this->select('
+                pkl_tasks.*,
+                s.nama_lengkap, s.nis, k.nama_kelas,
+                pc.nama AS kategori_nama,
+                ip.nama_lengkap AS nama_instruktur,
+                g.nama_lengkap AS nama_pembimbing
+            ')
             ->join('siswa s', 's.id = pkl_tasks.siswa_id')
             ->join('kelas k', 'k.id = s.kelas_id', 'left')
             ->join('pkl_categories pc', 'pc.id = pkl_tasks.kategori_id', 'left')
+            ->join('siswa_pkl sp', 'sp.siswa_id = pkl_tasks.siswa_id AND sp.tahun_ajaran = "' . get_active_tahun_ajaran() . '" AND sp.deleted_at IS NULL', 'left')
+            ->join('tempat_pkl tp', 'tp.id = sp.tempat_pkl_id', 'left')
+            ->join('instruktur_pkl ip', 'ip.tempat_pkl_id = tp.id AND ip.deleted_at IS NULL', 'left')
+            ->join('pembimbing_pkl pp', 'pp.tempat_pkl_id = tp.id AND pp.tahun_ajaran = sp.tahun_ajaran AND pp.deleted_at IS NULL', 'left')
+            ->join('guru g', 'g.id = pp.guru_id AND g.deleted_at IS NULL', 'left')
             ->orderBy('pkl_tasks.created_at', 'DESC');
 
         if ($search) {

@@ -90,6 +90,8 @@
                         <th class="px-4 py-3 text-left">Siswa</th>
                         <th class="px-4 py-3 text-left">Task</th>
                         <th class="px-4 py-3 text-left">Kategori</th>
+                        <th class="px-4 py-3 text-left">Instruktur PKL</th>
+                        <th class="px-4 py-3 text-left">Pembimbing PKL</th>
                         <th class="px-4 py-3 text-center">Status</th>
                         <th class="px-4 py-3 text-center">Progress</th>
                         <th class="px-4 py-3 text-center">Aksi</th>
@@ -98,7 +100,7 @@
                 <tbody class="divide-y divide-gray-100">
                     <?php if (empty($tasks)): ?>
                     <tr>
-                        <td colspan="7" class="px-4 py-12 text-center text-gray-500">
+                        <td colspan="9" class="px-4 py-12 text-center text-gray-500">
                             <i class="fas fa-inbox text-3xl mb-2 block"></i>
                             Tidak ada task ditemukan
                         </td>
@@ -126,6 +128,8 @@
                             <?php endif; ?>
                         </td>
                         <td class="px-4 py-3 text-gray-600"><?= esc($task['kategori_nama'] ?? '-') ?></td>
+                        <td class="px-4 py-3 text-gray-600"><?= esc($task['nama_instruktur'] ?? '-') ?></td>
+                        <td class="px-4 py-3 text-gray-600"><?= esc($task['nama_pembimbing'] ?? '-') ?></td>
                         <td class="px-4 py-3 text-center">
                             <?php if ($task['status'] === 'active'): ?>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">Aktif</span>
