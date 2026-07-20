@@ -219,21 +219,34 @@ class PembimbingPklController extends BaseController
 
     public function siswaPkl()
     {
-        $tahunAjaran = $this->request->getGet('tahun_ajaran');
-        $siswaPklResult = $this->pembimbingPklService->getAllSiswaPkl($tahunAjaran);
+        $filters = [
+            'tahun_ajaran'  => $this->request->getGet('tahun_ajaran'),
+            'tempat_pkl_id' => $this->request->getGet('tempat_pkl_id'),
+            'kelas'         => $this->request->getGet('kelas'),
+            'kota'          => $this->request->getGet('kota'),
+        ];
+
+        $siswaPklResult = $this->pembimbingPklService->getAllSiswaPkl($filters);
         $statsResult = $this->pembimbingPklService->getSiswaPklStats();
+        $filterLists = $this->pembimbingPklService->getSiswaPklFilterLists();
         $formLists = $this->pembimbingPklService->getFormLists();
 
         $data = [
-            'title'             => 'Penempatan Siswa PKL',
-            'pageTitle'         => 'Penempatan Siswa PKL',
-            'pageDescription'   => 'Kelola penempatan siswa kelas XII ke tempat PKL',
-            'user'              => $this->getUserData(),
-            'siswaPkl'          => $siswaPklResult['data'] ?? [],
-            'stats'             => $statsResult['data'] ?? [],
-            'tahunAjaranList'   => $formLists['data']['tahunAjaranList'] ?? [],
-            'tempatPklList'     => $formLists['data']['tempatPklList'] ?? [],
-            'selectedTahun'     => $tahunAjaran,
+            'title'              => 'Penempatan Siswa PKL',
+            'pageTitle'          => 'Penempatan Siswa PKL',
+            'pageDescription'    => 'Kelola penempatan siswa kelas XII ke tempat PKL',
+            'user'               => $this->getUserData(),
+            'siswaPkl'           => $siswaPklResult['data'] ?? [],
+            'stats'              => $statsResult['data'] ?? [],
+            'tahunAjaranList'    => $filterLists['data']['tahunAjaranList'] ?? [],
+            'tempatFilterList'   => $filterLists['data']['tempatPklList'] ?? [],
+            'kelasFilterList'    => $filterLists['data']['kelasList'] ?? [],
+            'kotaFilterList'     => $filterLists['data']['kotaList'] ?? [],
+            'tempatPklList'      => $formLists['data']['tempatPklList'] ?? [],
+            'selectedTahun'      => $filters['tahun_ajaran'],
+            'selectedTempat'     => $filters['tempat_pkl_id'],
+            'selectedKelas'      => $filters['kelas'],
+            'selectedKota'       => $filters['kota'],
         ];
 
         return view('admin/pembimbing_pkl/siswa_pkl', $data);

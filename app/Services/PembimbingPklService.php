@@ -427,14 +427,31 @@ class PembimbingPklService extends BaseService
         });
     }
 
-    public function getAllSiswaPkl($tahunAjaran = null): array
+    public function getAllSiswaPkl(array $filters = []): array
     {
         try {
-            $data = $this->siswaPklModel->getAllSiswaPkl($tahunAjaran);
+            $data = $this->siswaPklModel->getAllSiswaPkl($filters);
             return $this->successResponse($data);
         } catch (\Exception $e) {
             $this->log('error', 'Failed to get all siswa PKL: ' . $e->getMessage());
             return $this->errorResponse('Gagal mengambil data siswa PKL');
+        }
+    }
+
+    public function getSiswaPklFilterLists(): array
+    {
+        try {
+            $data = [
+                'tahunAjaranList' => $this->siswaPklModel->getTahunAjaranList(),
+                'tempatPklList'   => $this->siswaPklModel->getFilterTempatPklList(),
+                'kelasList'       => $this->siswaPklModel->getFilterKelasList(),
+                'kotaList'        => $this->siswaPklModel->getFilterKotaList(),
+            ];
+
+            return $this->successResponse($data);
+        } catch (\Exception $e) {
+            $this->log('error', 'Failed to get siswa PKL filter lists: ' . $e->getMessage());
+            return $this->errorResponse('Gagal mengambil data filter');
         }
     }
 

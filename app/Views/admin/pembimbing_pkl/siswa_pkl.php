@@ -75,31 +75,72 @@
         </div>
     </div>
 
-    <!-- Filter Tahun Ajaran -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <div class="w-full md:w-1/3">
-            <form method="GET" action="<?= base_url('admin/pembimbing-pkl/siswa-pkl') ?>" class="flex space-x-2">
-                <select name="tahun_ajaran"
-                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <option value="">Semua Tahun Ajaran</option>
-                    <?php foreach ($tahunAjaranList as $ta): ?>
-                        <option value="<?= esc($ta) ?>" <?= ($selectedTahun == $ta) ? 'selected' : '' ?>>
-                            <?= esc($ta) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-                <button type="submit"
-                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg">
-                    <i class="fas fa-filter"></i>
-                </button>
-                <?php if ($selectedTahun): ?>
-                    <a href="<?= base_url('admin/pembimbing-pkl/siswa-pkl') ?>"
-                        class="border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50 flex items-center">
-                        Reset
-                    </a>
-                <?php endif; ?>
-            </form>
-        </div>
+    <!-- Filter -->
+    <div class="bg-gray-50 rounded-lg p-4 mb-6">
+        <form method="GET" action="<?= base_url('admin/pembimbing-pkl/siswa-pkl') ?>">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Ajaran</label>
+                    <select name="tahun_ajaran"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <option value="">Semua Tahun Ajaran</option>
+                        <?php foreach ($tahunAjaranList as $ta): ?>
+                            <option value="<?= esc($ta) ?>" <?= ($selectedTahun == $ta) ? 'selected' : '' ?>>
+                                <?= esc($ta) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tempat PKL</label>
+                    <select name="tempat_pkl_id"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <option value="">Semua Tempat PKL</option>
+                        <?php foreach ($tempatFilterList as $t): ?>
+                            <option value="<?= esc($t['id']) ?>" <?= ($selectedTempat == $t['id']) ? 'selected' : '' ?>>
+                                <?= esc($t['nama_perusahaan']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                    <select name="kelas"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <option value="">Semua Kelas</option>
+                        <?php foreach ($kelasFilterList as $k): ?>
+                            <option value="<?= esc($k) ?>" <?= ($selectedKelas == $k) ? 'selected' : '' ?>>
+                                <?= esc($k) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kota</label>
+                    <select name="kota"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                        <option value="">Semua Kota</option>
+                        <?php foreach ($kotaFilterList as $k): ?>
+                            <option value="<?= esc($k) ?>" <?= ($selectedKota == $k) ? 'selected' : '' ?>>
+                                <?= esc($k) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="flex items-end space-x-2">
+                    <button type="submit"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm flex items-center">
+                        <i class="fas fa-filter mr-1"></i> Filter
+                    </button>
+                    <?php if ($selectedTahun || $selectedTempat || $selectedKelas || $selectedKota): ?>
+                        <a href="<?= base_url('admin/pembimbing-pkl/siswa-pkl') ?>"
+                            class="border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50 text-sm flex items-center">
+                            Reset
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </form>
     </div>
 
     <!-- Bulk Action Bar -->
