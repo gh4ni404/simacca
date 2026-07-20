@@ -1,9 +1,9 @@
 ﻿<?= $this->extend('templates/mobile_layout') ?>
 
 <?= $this->section('content') ?>
-<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 pb-24">
+<div class="min-h-screen bg-gray-50 pb-20">
     <!-- Header Section -->
-    <div class="mb-8">
+    <div class="mb-4 px-4">
         <div class="flex items-center gap-3 mb-2">
             <div class="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
                 <i class="fas fa-user-check text-white text-2xl"></i>
@@ -26,7 +26,7 @@
     <?= view('components/alerts') ?>
 
     <!-- Main Form Container -->
-    <div class="bg-white rounded-2xl shadow-xl p-4">
+    <div class="bg-white rounded-2xl shadow-xl p-4 mx-4">
         <form action="<?= base_url('guru/absensi/simpan'); ?>" method="post" id="absensiForm">
             <?= csrf_field(); ?>
 

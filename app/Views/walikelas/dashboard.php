@@ -115,7 +115,7 @@
                         Statistik Kehadiran Bulan Ini
                     </h2>
                 </div>
-                <div class="p-6">
+<div class="p-4 md:p-6">
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div class="text-center p-4 bg-green-50 rounded-lg">
                             <i class="fas fa-check-circle text-3xl text-green-500 mb-2"></i>

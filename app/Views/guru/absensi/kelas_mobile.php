@@ -2,7 +2,7 @@
 
 <?= $this->section('content') ?>
 
-<div class="min-h-screen bg-gray-50">
+<div class="min-h-screen bg-gray-50 pb-20">
     <!-- Header with Back Button -->
     <div class="bg-gradient-to-r from-purple-500 to-purple-600 px-4 py-6 mb-4">
         <div class="flex items-center mb-4">

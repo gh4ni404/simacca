@@ -1,7 +1,7 @@
 <?= $this->extend(get_device_layout()) ?>
 
 <?= $this->section('content') ?>
-<div class="p-6">
+<div class="p-4 md:p-6">
     <!-- Header -->
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Edit Mata Pelajaran</h1>

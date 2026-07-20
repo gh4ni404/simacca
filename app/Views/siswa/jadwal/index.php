@@ -76,7 +76,7 @@
                             Total <?= count($jadwalByDay[$day]); ?> mata pelajaran
                         </p>
                     </div>
-                    <div class="p-6">
+<div class="p-4 md:p-6">
                         <div class="relative">
                             <!-- Timeline Line -->
                             <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-300"></div>

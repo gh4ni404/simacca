@@ -25,7 +25,7 @@
         <!-- Form Section -->
         <div class="lg:col-span-2">
             <div class="bg-white rounded-lg shadow">
-                <div class="p-6">
+<div class="p-4 md:p-6">
                     <form action="<?= base_url('siswa/izin/simpan'); ?>" method="POST" enctype="multipart/form-data" id="izinForm">
                         <?= csrf_field(); ?>
 

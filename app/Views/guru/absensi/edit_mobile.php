@@ -149,7 +149,7 @@
                         </div>
 
                         <!-- Status Buttons -->
-                        <div class="p-4">
+    <div class="px-4">
                             <input type="hidden" name="siswa_id[]" value="<?= $siswa['id'] ?>">
                             
                             <div class="grid grid-cols-4 gap-2">

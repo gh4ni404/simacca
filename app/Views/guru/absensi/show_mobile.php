@@ -23,7 +23,7 @@
     </div>
 
     <!-- Absensi Info Card -->
-    <div class="px-4 py-4">
+    <div class="px-4">
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-4">
             <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-3">
                 <h2 class="text-white font-bold text-sm flex items-center">

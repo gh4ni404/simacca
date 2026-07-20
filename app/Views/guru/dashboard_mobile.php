@@ -1,9 +1,9 @@
 <?= $this->extend('templates/mobile_layout') ?>
 
 <?= $this->section('content') ?>
-<div class="pb-20">
+<div class="px-4 pb-20">
     <!-- Welcome Card - Compact Mobile Version -->
-    <div class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-4 mb-4 rounded-lg mx-4 shadow-md">
+    <div class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-4 mb-4 rounded-lg shadow-md">
         <div class="flex items-start justify-between">
             <div class="flex-1">
                 <h1 class="text-lg font-bold">Selamat Datang, <?= esc($guru['nama_lengkap'] ?? session()->get('username')); ?>!</h1>
@@ -33,7 +33,7 @@
     </div>
 
     <!-- Stats Grid - 2 Columns on Mobile -->
-    <div class="grid grid-cols-2 gap-3 mb-4 px-4">
+    <div class="grid grid-cols-2 gap-3 mb-4">
         <?= stat_card(
             'Total Jadwal', 
             $stats['total_jadwal'], 
@@ -76,7 +76,7 @@
     </div>
 
     <!-- Absensi Guru Widget - Mobile -->
-    <div class="mb-4 mx-4 bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="mb-4 bg-white rounded-lg shadow-md overflow-hidden">
         <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-3">
             <h3 class="text-sm font-semibold text-white flex items-center">
                 <i class="fas fa-user-check mr-2"></i>
@@ -159,10 +159,10 @@
 
     <!-- Quick Actions - Horizontal Scroll -->
     <div class="mb-4">
-        <div class="flex items-center justify-between px-4 mb-3">
+        <div class="flex items-center justify-between mb-3">
             <h3 class="text-sm font-semibold text-gray-900">Aksi Cepat</h3>
         </div>
-        <div class="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide">
+        <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
             <?php foreach ($quickActions as $action): ?>
                 <a href="<?= $action['url']; ?>"
                     class="flex-shrink-0 w-32 <?= $action['color']; ?> text-white rounded-lg p-3 shadow-sm active:shadow-lg transition-shadow">
@@ -178,7 +178,7 @@
     </div>
 
     <!-- Jadwal Hari Ini -->
-    <div class="bg-white rounded-lg shadow-sm mb-4 mx-4">
+    <div class="bg-white rounded-lg shadow-sm mb-4">
         <div class="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
             <div>
                 <h3 class="text-sm font-semibold text-gray-900">Jadwal Hari Ini</h3>
@@ -225,7 +225,7 @@
 
     <!-- Pending Izin - Mobile Optimized -->
     <?php if (!empty($pendingIzin)): ?>
-        <div class="bg-white rounded-lg shadow-sm mb-4 mx-4">
+    <div class="bg-white rounded-lg shadow-sm mb-4">
             <div class="px-4 py-3 border-b border-gray-200">
                 <h3 class="text-sm font-semibold text-gray-900">
                     <i class="fas fa-exclamation-circle text-yellow-500 mr-1"></i>
@@ -263,7 +263,7 @@
     <?php endif; ?>
 
     <!-- Recent Absensi -->
-    <div class="bg-white rounded-lg shadow-sm mb-4 mx-4">
+    <div class="bg-white rounded-lg shadow-sm mb-4">
         <div class="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
             <div>
                 <h3 class="text-sm font-semibold text-gray-900">Absensi Terbaru</h3>
@@ -306,7 +306,7 @@
     </div>
 
     <!-- Recent Jurnal -->
-    <div class="bg-white rounded-lg shadow-sm mb-4 mx-4">
+    <div class="bg-white rounded-lg shadow-sm mb-4">
         <div class="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
             <div>
                 <h3 class="text-sm font-semibold text-gray-900">Jurnal Terbaru</h3>

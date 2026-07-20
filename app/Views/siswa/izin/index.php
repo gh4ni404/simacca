@@ -126,7 +126,7 @@
         <?php else: ?>
             <?php foreach ($izinData as $izin): ?>
             <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
-                <div class="p-6">
+<div class="p-4 md:p-6">
                     <div class="flex items-start justify-between mb-4">
                         <div class="flex-1">
                             <div class="flex items-center mb-2">

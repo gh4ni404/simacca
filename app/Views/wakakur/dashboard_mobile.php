@@ -2,6 +2,7 @@
 
 <?= $this->section('content') ?>
 
+<div class="px-4 pb-20">
 <!-- Modern Mobile Header with Gradient -->
 <div class="bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-500 rounded-3xl shadow-lg p-4 mb-4 text-white">
     <div class="flex items-center justify-between mb-3">
@@ -242,6 +243,7 @@
             </div>
         <?php endif; ?>
     </div>
+</div>
 </div>
 
 <?= $this->endSection() ?>

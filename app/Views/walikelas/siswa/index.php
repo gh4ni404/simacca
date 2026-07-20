@@ -1,7 +1,7 @@
 <?= $this->extend(get_device_layout()) ?>
 
 <?= $this->section('content') ?>
-<div class="p-6">
+<div class="p-4 md:p-6">
     <!-- Header -->
     <div class="mb-6">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between">

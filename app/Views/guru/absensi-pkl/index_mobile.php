@@ -3,7 +3,7 @@
 <?= $this->section('content') ?>
 <div class="min-h-screen bg-gray-50 pb-20">
     <!-- Header Section -->
-    <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 mb-4 rounded-lg mx-4 shadow-md">
+    <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 mb-4 rounded-lg shadow-md">
         <h1 class="text-xl font-bold mb-1">Absensi PKL</h1>
         <p class="text-sm opacity-90 flex items-center">
             <i class="fas fa-info-circle mr-2"></i>
