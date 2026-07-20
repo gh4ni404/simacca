@@ -302,40 +302,7 @@ class DashboardController extends BaseController
      */
     private function getQuickActions($guru, $isPembimbingPkl = false)
     {
-        if ($isPembimbingPkl) {
-            return [
-                [
-                    'title' => 'Absensi PKL',
-                    'icon' => 'fas fa-clipboard-check',
-                    'url' => base_url('guru/absensi-pkl/tambah'),
-                    'color' => 'bg-blue-500 hover:bg-blue-600',
-                    'description' => 'Catat kehadiran siswa PKL'
-                ],
-                [
-                    'title' => 'Verifikasi Jurnal',
-                    'icon' => 'fas fa-check-double',
-                    'url' => base_url('guru/jurnal-pkl'),
-                    'color' => 'bg-green-500 hover:bg-green-600',
-                    'description' => 'Review jurnal siswa PKL'
-                ],
-                [
-                    'title' => 'Siswa PKL',
-                    'icon' => 'fas fa-building',
-                    'url' => base_url('guru/absensi-pkl'),
-                    'color' => 'bg-purple-500 hover:bg-purple-600',
-                    'description' => 'Lihat daftar siswa PKL'
-                ],
-                [
-                    'title' => 'Rekap PKL',
-                    'icon' => 'fas fa-chart-bar',
-                    'url' => base_url('guru/laporan'),
-                    'color' => 'bg-yellow-500 hover:bg-yellow-600',
-                    'description' => 'Rekap absensi & jurnal'
-                ]
-            ];
-        }
-
-        return [
+        $actions = [
             [
                 'title' => 'Input Absensi',
                 'icon' => 'fas fa-clipboard-check',
@@ -365,6 +332,42 @@ class DashboardController extends BaseController
                 'description' => 'Lihat rekap absensi'
             ]
         ];
+
+        if ($isPembimbingPkl) {
+            $pklActions = [
+                [
+                    'title' => 'Absensi PKL',
+                    'icon' => 'fas fa-clipboard-check',
+                    'url' => base_url('guru/absensi-pkl/tambah'),
+                    'color' => 'bg-blue-500 hover:bg-blue-600',
+                    'description' => 'Catat kehadiran siswa PKL'
+                ],
+                [
+                    'title' => 'Verifikasi Jurnal',
+                    'icon' => 'fas fa-check-double',
+                    'url' => base_url('guru/jurnal-pkl'),
+                    'color' => 'bg-green-500 hover:bg-green-600',
+                    'description' => 'Review jurnal siswa PKL'
+                ],
+                [
+                    'title' => 'Siswa PKL',
+                    'icon' => 'fas fa-building',
+                    'url' => base_url('guru/absensi-pkl'),
+                    'color' => 'bg-purple-500 hover:bg-purple-600',
+                    'description' => 'Lihat daftar siswa PKL'
+                ],
+                [
+                    'title' => 'Rekap PKL',
+                    'icon' => 'fas fa-chart-bar',
+                    'url' => base_url('guru/laporan'),
+                    'color' => 'bg-yellow-500 hover:bg-yellow-600',
+                    'description' => 'Rekap absensi & jurnal'
+                ]
+            ];
+            $actions = array_merge($pklActions, $actions);
+        }
+
+        return $actions;
     }
 
     /**
