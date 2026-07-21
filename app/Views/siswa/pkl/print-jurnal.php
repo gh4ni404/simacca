@@ -118,7 +118,7 @@
 
                         // Menggabungkan array menjadi satu kalimat dipisahkan dengan koma
                         $activitiesHtml = !empty($activitiesArray) ? implode(', ', $activitiesArray) . '.' : '';
-                        $catatanHtml = !empty($catatanArray) ? implode(', ', $catatanArray) . '.' : '';
+                        $catatanHtml = !empty($catatanArray) ? implode(', ', $catatanArray) : '';
                     }
             ?>
             <tr>
