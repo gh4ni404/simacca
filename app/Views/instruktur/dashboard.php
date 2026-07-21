@@ -380,8 +380,9 @@
                     <?php if (!empty($p['foto'])): ?>
                     <div>
                         <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1.5">Foto Dokumentasi</span>
-                        <a href="<?= base_url('files/pkl-progress/' . esc($p['foto'])); ?>" target="_blank"
-                           class="group/photo relative block rounded-xl overflow-hidden border border-gray-200 bg-gray-50 hover:border-indigo-300 transition-colors">
+                        <button type="button"
+                                onclick="openLightbox('<?= base_url('files/pkl-progress/' . esc($p['foto'])); ?>')"
+                                class="group/photo relative block w-full rounded-xl overflow-hidden border border-gray-200 bg-gray-50 hover:border-indigo-300 transition-colors cursor-zoom-in">
                             <img src="<?= base_url('files/pkl-progress/' . esc($p['foto'])); ?>"
                                  class="w-full max-h-44 object-cover" loading="lazy">
                             <div class="absolute inset-0 bg-black/0 group-hover/photo:bg-black/20 transition-colors flex items-center justify-center">
@@ -389,7 +390,7 @@
                                     <i class="fas fa-expand-alt text-[10px]"></i> Lihat Foto
                                 </span>
                             </div>
-                        </a>
+                        </button>
                     </div>
                     <?php endif; ?>
 
@@ -607,5 +608,33 @@ function closeMenungguReview() {
         </div>
     </div>
 </div>
+
+<!-- Lightbox -->
+<div id="lightbox" class="fixed inset-0 z-[9999] bg-black/90 hidden items-center justify-center p-4"
+     onclick="closeLightbox(event)">
+    <button onclick="closeLightbox()"
+            class="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white text-lg transition-colors">
+        <i class="fas fa-times"></i>
+    </button>
+    <img id="lightboxImg" class="max-w-full max-h-[90vh] rounded-2xl shadow-2xl object-contain" src="">
+</div>
+
+<script>
+function openLightbox(src) {
+    const lb = document.getElementById('lightbox');
+    document.getElementById('lightboxImg').src = src;
+    lb.classList.remove('hidden');
+    lb.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+}
+function closeLightbox(e) {
+    if (e && e.target !== e.currentTarget) return;
+    const lb = document.getElementById('lightbox');
+    lb.classList.add('hidden');
+    lb.classList.remove('flex');
+    document.body.style.overflow = '';
+}
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLightbox(); });
+</script>
 
 <?= $this->endSection() ?>
