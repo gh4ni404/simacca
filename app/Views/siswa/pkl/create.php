@@ -545,11 +545,11 @@
                         </h2>
                     </div>
                 </div>
-                <button type="button" onclick="document.getElementById('tanggalPicker').click()" class="btn-ubah">
+                <button type="button" onclick="const p = document.getElementById('tanggalPicker'); try { p.showPicker(); } catch(e) { p.click(); }" class="btn-ubah">
                     Ubah
                 </button>
                 <input type="date" id="tanggalPicker" name="tanggal" value="<?= old('tanggal', date('Y-m-d')); ?>"
-                    class="sr-only" onchange="updateTanggalDisplay(this)">
+                    style="position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none;" onchange="updateTanggalDisplay(this)">
             </div>
 
             <!-- Jenis Aktivitas -->
