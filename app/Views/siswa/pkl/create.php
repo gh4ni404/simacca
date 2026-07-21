@@ -443,6 +443,147 @@
         border-radius: 0 0 50px 50px;
         transition: width 2.5s ease;
     }
+
+    /* ── Segmented Upload Mode ── */
+    .upload-mode-picker {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2px;
+        background: #f3f4f6;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 3px;
+        margin-bottom: 12px;
+    }
+    .upload-mode-picker label {
+        cursor: pointer;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+    }
+    .upload-mode-picker input:checked + div {
+        background: #ffffff;
+        color: #3b82f6;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+        border-radius: 10px;
+        font-weight: 700;
+    }
+    .upload-mode-picker div {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 10px 0;
+        color: #6b7280;
+        font-size: 0.8rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    /* ── Camera Modal ── */
+    .camera-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 9998;
+        background: #000000;
+        display: flex;
+        flex-direction: column;
+        opacity: 0;
+        transition: opacity 0.25s ease;
+        pointer-events: none;
+    }
+    .camera-overlay.show {
+        opacity: 1;
+        pointer-events: all;
+    }
+    .camera-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        padding-top: max(12px, env(safe-area-inset-top));
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        z-index: 10;
+    }
+    .camera-header-title {
+        color: #ffffff;
+        font-size: 0.9rem;
+        font-weight: 700;
+    }
+    .camera-close-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 9999px;
+        background: rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background 0.2s;
+    }
+    .camera-close-btn:hover { background: rgba(255, 255, 255, 0.25); }
+    .camera-viewfinder {
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #000;
+    }
+    .camera-viewfinder video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .camera-footer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 32px;
+        padding: 20px 16px;
+        padding-bottom: max(20px, env(safe-area-inset-bottom));
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+    }
+    .camera-shutter {
+        width: 68px;
+        height: 68px;
+        border-radius: 9999px;
+        border: 4px solid #ffffff;
+        background: transparent;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.15s ease;
+    }
+    .camera-shutter::after {
+        content: '';
+        position: absolute;
+        inset: 4px;
+        border-radius: 9999px;
+        background: #ffffff;
+        transition: all 0.15s ease;
+    }
+    .camera-shutter:active { transform: scale(0.92); }
+    .camera-shutter:active::after { background: #ef4444; }
+    .camera-flash {
+        position: absolute;
+        inset: 0;
+        background: #ffffff;
+        z-index: 5;
+        opacity: 0;
+        pointer-events: none;
+    }
+    .camera-flash.flash {
+        animation: camFlash 0.3s ease-out;
+    }
+    @keyframes camFlash {
+        0%   { opacity: 0.8; }
+        100% { opacity: 0; }
+    }
 </style>
 
 <!-- Toast Container -->
@@ -462,6 +603,24 @@
                 <i class="fas fa-rocket" style="margin-right:6px;"></i>Ya, Simpan!
             </button>
         </div>
+    </div>
+</div>
+
+<!-- Camera Modal -->
+<div id="cameraOverlay" class="camera-overlay">
+    <div class="camera-flash" id="cameraFlash"></div>
+    <div class="camera-header">
+        <span class="camera-header-title">Ambil Foto Dokumentasi</span>
+        <button type="button" class="camera-close-btn" onclick="closeCamera()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="camera-viewfinder">
+        <video id="cameraVideo" autoplay playsinline></video>
+        <canvas id="cameraCanvas" style="display: none;"></canvas>
+    </div>
+    <div class="camera-footer">
+        <button type="button" class="camera-shutter" id="shutterBtn" onclick="capturePhoto()" aria-label="Ambil Foto"></button>
     </div>
 </div>
 
@@ -649,17 +808,47 @@
                             <label class="block text-sm font-semibold text-gray-700">Dokumentasi <span class="text-red-500">*</span></label>
                             <span class="wajib-badge">* Wajib</span>
                         </div>
+
+                        <!-- Segmented: Upload / Kamera -->
+                        <div class="upload-mode-picker">
+                            <label>
+                                <input type="radio" name="upload_mode" value="upload" checked class="sr-only"
+                                       onchange="switchUploadMode('upload')">
+                                <div><i class="fas fa-images"></i> Upload / Galeri</div>
+                            </label>
+                            <label>
+                                <input type="radio" name="upload_mode" value="camera" class="sr-only"
+                                       onchange="switchUploadMode('camera')">
+                                <div><i class="fas fa-camera"></i> Ambil Foto</div>
+                            </label>
+                        </div>
+
+                        <!-- Upload Area (visible in upload mode) -->
                         <div id="uploadArea" class="upload-area" onclick="document.getElementById('foto').click()">
                             <div class="upload-icon">
                                 <i class="fas fa-cloud-upload-alt"></i>
                             </div>
                             <div>
-                                <p class="upload-title">Upload Foto/File</p>
-                                <p class="upload-subtitle">JPG, PNG, PDF (Maks 5MB)</p>
+                                <p class="upload-title">Upload Foto</p>
+                                <p class="upload-subtitle">JPG, PNG (Maks 5MB, dikompres otomatis)</p>
                             </div>
                             <input id="foto" name="foto" type="file" accept=".jpg,.jpeg,.png,.webp" class="sr-only"
                                 onchange="previewImage(this)">
                         </div>
+
+                        <!-- Camera hint (visible in camera mode) -->
+                        <div id="cameraHint" class="hidden" style="display: none;">
+                            <div class="upload-area" id="cameraArea" onclick="openCamera()" style="cursor: pointer;">
+                                <div class="upload-icon" style="background-color: #ecfdf5; color: #10b981;">
+                                    <i class="fas fa-camera"></i>
+                                </div>
+                                <div>
+                                    <p class="upload-title">Tap untuk Buka Kamera</p>
+                                    <p class="upload-subtitle">Ambil foto langsung dari kamera perangkat</p>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Preview Container -->
                         <div id="previewContainer" class="hidden">
                             <div class="preview-container">
@@ -730,7 +919,7 @@
                             <span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-bold">5</span>
                             <div class="text-xs text-gray-600 leading-relaxed">
                                 <p class="font-bold text-gray-800">Foto Dokumentasi</p>
-                                <p class="mt-0.5">Wajib mengunggah foto saat melakukan aktivitas sebagai bukti autentik.</p>
+                                <p class="mt-0.5">Wajib mengunggah foto sebagai bukti. Bisa dari galeri atau langsung ambil dari kamera.</p>
                             </div>
                         </li>
                     </ul>
@@ -883,7 +1072,92 @@
         updateLangkahVisibility();
     }
 
+    // ═══════════════════════════════════════════════
+    // --- Upload Mode Switching ---
+    // ═══════════════════════════════════════════════
+    function switchUploadMode(mode) {
+        const uploadArea = document.getElementById('uploadArea');
+        const cameraHint = document.getElementById('cameraHint');
+        if (mode === 'camera') {
+            uploadArea.style.display = 'none';
+            cameraHint.style.display = '';
+            cameraHint.classList.remove('hidden');
+        } else {
+            uploadArea.style.display = '';
+            cameraHint.style.display = 'none';
+            cameraHint.classList.add('hidden');
+            closeCamera();
+        }
+    }
+
+    // ═══════════════════════════════════════════════
+    // --- Camera Capture ---
+    // ═══════════════════════════════════════════════
+    let cameraStream = null;
+    let capturedBlob = null;
+
+    function openCamera() {
+        const overlay = document.getElementById('cameraOverlay');
+        const video = document.getElementById('cameraVideo');
+        navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+            audio: false
+        }).then(function(stream) {
+            cameraStream = stream;
+            video.srcObject = stream;
+            overlay.classList.add('show');
+        }).catch(function(err) {
+            console.error('Camera error:', err);
+            showToast('Tidak dapat mengakses kamera. Pastikan izin kamera diberikan.', 'error');
+        });
+    }
+
+    function capturePhoto() {
+        const video = document.getElementById('cameraVideo');
+        const canvas = document.getElementById('cameraCanvas');
+        const flash = document.getElementById('cameraFlash');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        flash.classList.remove('flash');
+        void flash.offsetWidth;
+        flash.classList.add('flash');
+        canvas.toBlob(function(blob) {
+            const file = new File([blob], 'camera_' + Date.now() + '.jpg', { type: 'image/jpeg', lastModified: Date.now() });
+            compressImage(file, function(compressed) {
+                capturedBlob = compressed;
+                const url = URL.createObjectURL(compressed);
+                document.getElementById('preview').src = url;
+                document.getElementById('previewContainer').classList.remove('hidden');
+                const origKB = (blob.size / 1024).toFixed(1);
+                const compKB = (compressed.size / 1024).toFixed(1);
+                document.getElementById('fileName').textContent = 'Foto Kamera (' + compKB + ' KB' + (compressed.size < blob.size ? ' | dikompres dari ' + origKB + ' KB' : '') + ')';
+                const ua = document.getElementById('uploadArea');
+                ua.style.borderColor = '#22c55e';
+                ua.style.background = '#f0fdf4';
+                closeCamera();
+                showToast('Foto berhasil diambil!', 'success');
+            });
+        }, 'image/jpeg');
+    }
+
+    function closeCamera() {
+        const overlay = document.getElementById('cameraOverlay');
+        const video = document.getElementById('cameraVideo');
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(function(t) { t.stop(); });
+            cameraStream = null;
+        }
+        video.srcObject = null;
+        overlay.classList.remove('show');
+    }
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', closeCamera);
+
+    // ═══════════════════════════════════════════════
     // --- Foto Upload with Client-Side Compression ---
+    // ═══════════════════════════════════════════════
     function previewImage(input) {
         previewAndCompress(input, {
             maxSizeMB: 5,
@@ -901,6 +1175,7 @@
         const ua = document.getElementById('uploadArea');
         ua.style.borderColor = '';
         ua.style.background = '';
+        capturedBlob = null;
     }
 
     // ── Toast helper ──
@@ -981,8 +1256,10 @@
         }
 
         const fotoInput = document.getElementById('foto');
-        if (!fotoInput.files || !fotoInput.files[0]) {
-            showToast('Foto dokumentasi wajib diupload!', 'error');
+        const hasFileUpload = fotoInput.files && fotoInput.files[0];
+        const hasCaptured = capturedBlob !== null;
+        if (!hasFileUpload && !hasCaptured) {
+            showToast('Foto dokumentasi wajib diupload atau diambil dari kamera!', 'error');
             return;
         }
 
@@ -1005,8 +1282,23 @@
 
             showToast('Menyimpan aktivitas...', 'info');
 
-            // Submit form
-            setTimeout(() => form.submit(), 300);
+            if (hasCaptured) {
+                // Submit via FormData with captured blob
+                const fd = new FormData(form);
+                fd.delete('foto');
+                fd.append('foto', capturedBlob, 'foto_dokumentasi.jpg');
+                fetch(form.action, { method: 'POST', body: fd })
+                    .then(r => { window.location.href = '<?= base_url('siswa/jurnal-pkl') ?>'; })
+                    .catch(() => {
+                        btn.disabled = false;
+                        btn.style.background = '';
+                        document.getElementById('submitIcon').className = 'fas fa-rocket';
+                        document.getElementById('submitText').textContent = 'Simpan Aktivitas';
+                        showToast('Gagal menyimpan. Coba lagi.', 'error');
+                    });
+            } else {
+                setTimeout(() => form.submit(), 300);
+            }
         });
     });
 </script>
