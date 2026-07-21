@@ -6,6 +6,7 @@ use App\Models\UserModel;
 use App\Models\GuruModel;
 use App\Models\MataPelajaranModel;
 use App\Models\KelasModel;
+use App\Models\UserRoleModel;
 
 /**
  * Guru Service
@@ -124,7 +125,7 @@ class GuruService extends BaseService
             'username' => 'required|is_unique[users.username]',
             'password' => 'required|min_length[6]',
             'email' => 'permit_empty|valid_email',
-            'role' => 'required',
+            'roles' => 'required',
             'mata_pelajaran_id' => 'permit_empty|integer',
             'kelas_id' => 'permit_empty|integer',
             'is_wali_kelas' => 'permit_empty|in_list[0,1]'
@@ -135,11 +136,14 @@ class GuruService extends BaseService
         }
 
         return $this->executeInTransaction(function () use ($data) {
+            $roles = $data['roles'];
+            $primaryRole = $roles[0];
+
             // 1. Create user account
             $userData = [
                 'username' => $data['username'],
                 'password' => $data['password'],
-                'role' => $data['role'],
+                'role' => $primaryRole,
                 'email' => $data['email'] ?? null,
                 'is_active' => 1,
                 'created_at' => date('Y-m-d H:i:s')
@@ -151,16 +155,22 @@ class GuruService extends BaseService
                 throw new \Exception('Gagal membuat akun user');
             }
 
-            // 2. Create guru data
+            // 2. Sync roles to user_roles table
+            $userRoleModel = new UserRoleModel();
+            $userRoleModel->syncRoles($userId, $roles);
+
+            // 3. Create guru data
             $guruData = [
-                'user_id' => $userId,
-                'nip' => $data['nip'],
-                'nama_lengkap' => $data['nama_lengkap'],
-                'jenis_kelamin' => $data['jenis_kelamin'],
+                'user_id'          => $userId,
+                'nip'              => $data['nip'],
+                'nama_lengkap'     => $data['nama_lengkap'],
+                'jenis_kelamin'    => $data['jenis_kelamin'],
                 'mata_pelajaran_id' => $data['mata_pelajaran_id'] ?? null,
-                'is_wali_kelas' => $data['is_wali_kelas'] ?? 0,
-                'kelas_id' => $data['kelas_id'] ?? null,
-                'created_at' => date('Y-m-d H:i:s')
+                'is_wali_kelas'    => $data['is_wali_kelas'] ?? 0,
+                'kelas_id'         => $data['kelas_id'] ?? null,
+                'jurusan'          => $data['jurusan'] ?? null,
+                'is_ketua_jurusan' => $data['is_ketua_jurusan'] ?? 0,
+                'created_at'       => date('Y-m-d H:i:s')
             ];
 
             $guruId = $this->guruModel->insert($guruData);
@@ -169,20 +179,20 @@ class GuruService extends BaseService
                 throw new \Exception('Gagal membuat data guru');
             }
 
-            // 3. If wali kelas, update kelas table
+            // 4. If wali kelas, update kelas table
             if (!empty($data['is_wali_kelas']) && !empty($data['kelas_id'])) {
                 $this->assignWaliKelas($guruId, $data['kelas_id']);
             }
 
             $this->log('info', "Guru created successfully: {$data['nama_lengkap']} (ID: {$guruId})");
 
-            // 4. Send welcome email if email is provided
+            // 5. Send welcome email if email is provided
             if (!empty($data['email'])) {
                 $this->sendWelcomeEmail(
                     $data['email'],
                     $data['username'],
                     $data['password'],
-                    $data['role'],
+                    $primaryRole,
                     $data['nama_lengkap']
                 );
             }
@@ -218,7 +228,7 @@ class GuruService extends BaseService
             'nama_lengkap' => 'required',
             'jenis_kelamin' => 'required|in_list[L,P]',
             'email' => 'permit_empty|valid_email',
-            'role' => 'required',
+            'roles' => 'required',
             'mata_pelajaran_id' => 'permit_empty|integer',
             'kelas_id' => 'permit_empty|integer',
             'is_wali_kelas' => 'permit_empty|in_list[0,1]'
@@ -239,10 +249,13 @@ class GuruService extends BaseService
         }
 
         return $this->executeInTransaction(function () use ($id, $guru, $userData, $data) {
+            $roles = $data['roles'];
+            $primaryRole = $roles[0];
+
             // 1. Update user account
             $userUpdateData = [
                 'username' => $data['username'] ?? $userData['username'],
-                'role' => $data['role'],
+                'role' => $primaryRole,
                 'email' => $data['email'] ?? null
             ];
 
@@ -263,22 +276,28 @@ class GuruService extends BaseService
                 throw new \Exception('Gagal mengupdate data user');
             }
 
-            // 2. Update guru data
+            // 2. Sync roles to user_roles table
+            $userRoleModel = new UserRoleModel();
+            $userRoleModel->syncRoles($guru['user_id'], $roles);
+
+            // 3. Update guru data
             $guruUpdateData = [
-                'nip' => $data['nip'],
-                'nama_lengkap' => $data['nama_lengkap'],
-                'jenis_kelamin' => $data['jenis_kelamin'],
+                'nip'              => $data['nip'],
+                'nama_lengkap'     => $data['nama_lengkap'],
+                'jenis_kelamin'    => $data['jenis_kelamin'],
                 'mata_pelajaran_id' => $data['mata_pelajaran_id'] ?? null,
-                'is_wali_kelas' => $data['is_wali_kelas'] ?? 0,
-                'kelas_id' => $data['kelas_id'] ?? null
+                'is_wali_kelas'    => $data['is_wali_kelas'] ?? 0,
+                'kelas_id'         => $data['kelas_id'] ?? null,
+                'jurusan'          => $data['jurusan'] ?? null,
+                'is_ketua_jurusan' => $data['is_ketua_jurusan'] ?? 0,
             ];
 
             $this->guruModel->update($id, $guruUpdateData);
 
-            // 3. Handle wali kelas assignment
+            // 4. Handle wali kelas assignment
             $this->handleWaliKelasUpdate($id, $guru, $data);
 
-            // 4. Send email notification if password changed
+            // 5. Send email notification if password changed
             if ($plainPassword && !empty($userData['email'])) {
                 $this->sendPasswordChangeNotification(
                     $userData['email'],

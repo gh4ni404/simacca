@@ -26,6 +26,7 @@ if (!function_exists('get_user_data')) {
             'id'            => $session->get('userId'),
             'username'      => $session->get('username'),
             'role'          => $session->get('role'),
+            'all_roles'     => $session->get('all_roles') ?? [$session->get('role')],
             'email'         => $session->get('email'),
             'nama_lengkap'  => $session->get('nama_lengkap'),
             'guru_id'       => $session->get('guru_id'),
@@ -33,6 +34,8 @@ if (!function_exists('get_user_data')) {
             'nip'           => $session->get('nip'),
             'nis'           => $session->get('nis'),
             'kelas_id'      => $session->get('kelas_id'),
+            'jurusan'       => $session->get('jurusan'),
+            'is_ketua_jurusan' => $session->get('is_ketua_jurusan'),
         ];
     }
 }
@@ -40,17 +43,23 @@ if (!function_exists('get_user_data')) {
 if (!function_exists('has_role')) {
     /**
      * Check if user has specific role
+     * Supports multi-role: checks against all_roles array from session
      */
     function has_role($role)
     {
         $session = \Config\Services::session();
-        $userRole = $session->get('role');
+        $allRoles = $session->get('all_roles');
 
-        if (is_array($role)) {
-            return in_array($userRole, $role);
+        // Fallback to primary role if all_roles not set (backward compat)
+        if (empty($allRoles)) {
+            $allRoles = [$session->get('role')];
         }
 
-        return $userRole === $role;
+        if (is_array($role)) {
+            return count(array_intersect($role, $allRoles)) > 0;
+        }
+
+        return in_array($role, $allRoles);
     }
 }
 
@@ -104,7 +113,7 @@ if (!function_exists('get_greeting')) {
 
 if (!function_exists('check_access')) {
     /**
-     * Check access for menu items
+     * Check access for menu items (multi-role aware)
      */
     function check_access($allowedRoles = [])
     {
@@ -112,8 +121,8 @@ if (!function_exists('check_access')) {
             return true;
         }
 
-        $userRole = session()->get('role');
-        return in_array($userRole, $allowedRoles);
+        $allRoles = session()->get('all_roles') ?? [session()->get('role')];
+        return count(array_intersect($allowedRoles, $allRoles)) > 0;
     }
 }
 
@@ -123,7 +132,7 @@ if (!function_exists('get_sidebar_menu')) {
      */
     function get_sidebar_menu()
     {
-        $userRole = session()->get('role');
+        $allRoles = session()->get('all_roles') ?? [session()->get('role')];
 
         $menus = [
             'admin' => [
@@ -422,10 +431,52 @@ if (!function_exists('get_sidebar_menu')) {
                     'url' => '/instruktur/task-template',
                     'active' => ['instruktur/task-template']
                 ],
+            ],
+            'ketua_jurusan' => [
+                [
+                    'title' => 'Dashboard',
+                    'icon' => 'fas fa-th',
+                    'url' => '/ketua-jurusan/dashboard',
+                    'active' => ['ketua-jurusan/dashboard']
+                ],
+                [
+                    'title' => 'Monitoring PKL',
+                    'icon' => 'fas fa-building',
+                    'url' => '#',
+                    'submenu' => [
+                        [
+                            'title' => 'Jurnal PKL',
+                            'url' => '/ketua-jurusan/jurnal-pkl',
+                        ],
+                        [
+                            'title' => 'Siswa PKL',
+                            'url' => '/ketua-jurusan/siswa-pkl',
+                        ],
+                        [
+                            'title' => 'Absensi PKL',
+                            'url' => '/ketua-jurusan/absensi-pkl',
+                        ],
+                    ]
+                ],
             ]
         ];
 
-        return $menus[$userRole] ?? [];
+        // Merge menus from all roles, skip duplicates by title
+        $merged = [];
+        $seen = [];
+
+        foreach ($allRoles as $role) {
+            if (!isset($menus[$role])) continue;
+            foreach ($menus[$role] as $item) {
+                $key = $item['title'];
+                if (!isset($seen[$key])) {
+                    $seen[$key] = true;
+                    $merged[] = $item;
+                }
+            }
+        }
+
+        return $merged;
     }
 }
 
@@ -467,7 +518,10 @@ if (!function_exists('get_dashboard_url')) {
             'admin' => '/admin/dashboard',
             'guru_mapel' => '/guru/dashboard',
             'wali_kelas' => '/walikelas/dashboard',
-            'siswa' => '/siswa/jurnal-pkl'
+            'wakakur' => '/wakakur/dashboard',
+            'siswa' => '/siswa/jurnal-pkl',
+            'instruktur' => '/instruktur/dashboard',
+            'ketua_jurusan' => '/ketua-jurusan/dashboard',
         ];
 
         return $dashboards[$role] ?? '/';

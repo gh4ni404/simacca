@@ -50,7 +50,13 @@
                     </div>
                     <div>
                         <p class="text-sm opacity-80">Role</p>
-                        <p class="font-medium"><?= $guru['is_wali_kelas'] ? 'Wali Kelas' : 'Guru Mata Pelajaran' ?></p>
+                        <div class="flex flex-wrap gap-1 mt-1" id="roleBadges">
+                            <?php foreach ($allRoles as $r): ?>
+                                <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-white/20 role-badge" data-role="<?= $r ?>">
+                                    <?= get_role_name_from_role($r) ?>
+                                </span>
+                            <?php endforeach; ?>
+                        </div>
                     </div>
                     <div>
                         <p class="text-sm opacity-80">Jenis Kelamin</p>
@@ -89,7 +95,9 @@
                 </div>
                 <div class="flex justify-between py-2 border-b border-gray-100">
                     <span class="text-gray-600">Role Sistem</span>
-                    <span class="font-medium text-gray-800"><?= get_role_name_from_role($userData['role']) ?></span>
+                    <span class="font-medium text-gray-800">
+                        <?= implode(', ', array_map('get_role_name_from_role', $allRoles)) ?>
+                    </span>
                 </div>
             </div>
         </div>
@@ -167,6 +175,17 @@
                 </div>
             </a>
             
+            <button onclick="openRoleModal()" 
+                    class="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100">
+                <div class="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
+                    <i class="fas fa-user-tag"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-purple-800 text-left">Kelola Role</p>
+                    <p class="text-sm text-purple-600">Tambah/hapus role guru</p>
+                </div>
+            </button>
+
             <button onclick="confirmDelete(<?= $guru['id'] ?>, '<?= esc($guru['nama_lengkap']) ?>')" 
                     class="flex items-center p-4 bg-red-50 rounded-lg hover:bg-red-100">
                 <div class="p-3 rounded-full bg-red-100 text-red-600 mr-4">
@@ -211,6 +230,56 @@
     </div>
 </div>
 
+<!-- Role Management Modal -->
+<div id="roleModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-medium text-gray-900">Kelola Role</h3>
+            <button onclick="closeRoleModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <p class="text-sm text-gray-500 mb-4">Pilih role untuk <strong><?= esc($guru['nama_lengkap']) ?></strong></p>
+        
+        <div class="space-y-3" id="roleCheckboxes">
+            <?php foreach ($roleList as $roleName => $roleLabel): ?>
+                <label class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                    <input type="checkbox" name="modal_roles[]" value="<?= $roleName ?>"
+                        class="rounded text-indigo-600 focus:ring-indigo-500 mr-3 modal-role-checkbox"
+                        data-role="<?= $roleName ?>"
+                        <?= in_array($roleName, $allRoles) ? 'checked' : '' ?>>
+                    <span class="text-sm font-medium text-gray-700"><?= esc($roleLabel) ?></span>
+                </label>
+            <?php endforeach; ?>
+        </div>
+
+        <!-- Jurusan (shown when ketua_jurusan is checked) -->
+        <div id="modalJurusanSection" class="mt-3 <?= !in_array('ketua_jurusan', $allRoles) ? 'hidden' : '' ?>">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Jurusan *</label>
+            <select id="modalJurusanSelect"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="">Pilih Jurusan</option>
+                <option value="DKV" <?= ($guru['jurusan'] ?? '') == 'DKV' ? 'selected' : '' ?>>DKV (Desain Komunikasi Visual)</option>
+                <option value="MPLB" <?= ($guru['jurusan'] ?? '') == 'MPLB' ? 'selected' : '' ?>>MPLB (Manajemen Perkantoran & Layanan Bisnis)</option>
+                <option value="AT" <?= ($guru['jurusan'] ?? '') == 'AT' ? 'selected' : '' ?>>AT (Akuntansi)</option>
+            </select>
+        </div>
+
+        <div id="roleSaveFeedback" class="text-xs mt-2 hidden"></div>
+
+        <div class="flex justify-end space-x-2 mt-4">
+            <button onclick="closeRoleModal()" 
+                    class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm">
+                Batal
+            </button>
+            <button onclick="saveRoles()" id="btnSaveRoles"
+                    class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm flex items-center">
+                <i class="fas fa-save mr-1"></i> Simpan
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
     // Delete confirmation
     function confirmDelete(id, name) {
@@ -223,11 +292,103 @@
         document.getElementById('deleteModal').classList.add('hidden');
     }
 
+    // Role Management
+    function openRoleModal() {
+        document.getElementById('roleModal').classList.remove('hidden');
+    }
+
+    function closeRoleModal() {
+        document.getElementById('roleModal').classList.add('hidden');
+        document.getElementById('roleSaveFeedback').classList.add('hidden');
+    }
+
+    // Toggle jurusan section in modal
+    document.querySelectorAll('.modal-role-checkbox').forEach(function(cb) {
+        cb.addEventListener('change', function() {
+            const ketuaJurusanChecked = document.querySelector('.modal-role-checkbox[data-role="ketua_jurusan"]')?.checked;
+            const jurusanSection = document.getElementById('modalJurusanSection');
+            if (ketuaJurusanChecked) {
+                jurusanSection.classList.remove('hidden');
+            } else {
+                jurusanSection.classList.add('hidden');
+            }
+        });
+    });
+
+    function saveRoles() {
+        const checked = document.querySelectorAll('.modal-role-checkbox:checked');
+        const roles = Array.from(checked).map(cb => cb.value);
+
+        if (roles.length === 0) {
+            document.getElementById('roleSaveFeedback').classList.remove('hidden');
+            document.getElementById('roleSaveFeedback').innerHTML = '<span class="text-red-600"><i class="fas fa-exclamation-circle mr-1"></i> Pilih minimal satu role</span>';
+            return;
+        }
+
+        // Validate jurusan if ketua_jurusan is selected
+        if (roles.includes('ketua_jurusan')) {
+            const jurusan = document.getElementById('modalJurusanSelect').value;
+            if (!jurusan) {
+                document.getElementById('roleSaveFeedback').classList.remove('hidden');
+                document.getElementById('roleSaveFeedback').innerHTML = '<span class="text-red-600"><i class="fas fa-exclamation-circle mr-1"></i> Pilih jurusan untuk Ketua Jurusan</span>';
+                return;
+            }
+        }
+
+        const btn = document.getElementById('btnSaveRoles');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Menyimpan...';
+
+        const formData = new FormData();
+        roles.forEach(r => formData.append('roles[]', r));
+        if (roles.includes('ketua_jurusan')) {
+            formData.append('jurusan', document.getElementById('modalJurusanSelect').value);
+        }
+        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+
+        fetch('<?= base_url('admin/guru/update-role/' . $guru['id']) ?>', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save mr-1"></i> Simpan';
+
+            if (data.success) {
+                const badgesContainer = document.getElementById('roleBadges');
+                badgesContainer.innerHTML = data.role_labels.map(label =>
+                    '<span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-white/20 role-badge">' + label + '</span>'
+                ).join('');
+
+                document.getElementById('roleSaveFeedback').classList.remove('hidden');
+                document.getElementById('roleSaveFeedback').innerHTML = '<span class="text-green-600"><i class="fas fa-check mr-1"></i> ' + data.message + '</span>';
+                setTimeout(function() { closeRoleModal(); }, 1200);
+            } else {
+                document.getElementById('roleSaveFeedback').classList.remove('hidden');
+                document.getElementById('roleSaveFeedback').innerHTML = '<span class="text-red-600"><i class="fas fa-exclamation-circle mr-1"></i> ' + data.message + '</span>';
+            }
+        })
+        .catch(error => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save mr-1"></i> Simpan';
+            document.getElementById('roleSaveFeedback').classList.remove('hidden');
+            document.getElementById('roleSaveFeedback').innerHTML = '<span class="text-red-600"><i class="fas fa-exclamation-circle mr-1"></i> Gagal menyimpan</span>';
+        });
+    }
+
     // Close modal when clicking outside
     window.onclick = function(event) {
-        const modal = document.getElementById('deleteModal');
-        if (event.target === modal) {
+        const deleteModal = document.getElementById('deleteModal');
+        const roleModal = document.getElementById('roleModal');
+        if (event.target === deleteModal) {
             closeModal();
+        }
+        if (event.target === roleModal) {
+            closeRoleModal();
         }
     }
 </script>
@@ -240,9 +401,10 @@ function get_role_name_from_role($role) {
         'guru_mapel' => 'Guru Mata Pelajaran',
         'wali_kelas' => 'Wali Kelas',
         'wakakur' => 'Wakil Kepala Kurikulum',
-        'siswa' => 'Siswa'
+        'siswa' => 'Siswa',
+        'ketua_jurusan' => 'Ketua Jurusan'
     ];
-    return $roleNames[$role] ?? 'Unknown';
+    return $roleNames[$role] ?? ucfirst(str_replace('_', ' ', $role));
 }
 ?>
 <?= $this->endSection() ?>

@@ -68,19 +68,20 @@
 
                     <!-- Role -->
                     <div>
-                        <label class="block text-sm font-medium mb-1">Role *</label>
-                        <select name="role"
-                            class="w-full px-4 py-2 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
-                            id="roleSelect"
-                            required>
-                            <option value="">Pilih Role</option>
-                            <option value="guru_mapel" <?= old('role') == 'guru_mapel' ? 'selected' : '' ?>>Guru Mata Pelajaran</option>
-                            <option value="wali_kelas" <?= old('role') == 'wali_kelas' ? 'selected' : '' ?>>Wali Kelas</option>
-                            <option value="wakakur" <?= old('role') == 'wakakur' ? 'selected' : '' ?>>Wakil Kepala Kurikulum (Wakakur)</option>
-                        </select>
-                        <?php if ($validation->hasError('role')): ?>
-                            <p class="text-red-200 text-xs mt-1"><?= $validation->getError('role') ?></p>
-                        <?php endif; ?>
+                        <label class="block text-sm font-medium mb-2">Role *</label>
+                        <div class="space-y-2" id="rolesGroup">
+                            <?php foreach ($roleList as $roleName => $roleLabel): ?>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" name="roles[]" value="<?= $roleName ?>"
+                                        class="rounded text-indigo-600 focus:ring-indigo-500 mr-2 role-checkbox"
+                                        data-role="<?= $roleName ?>"
+                                        <?= in_array($roleName, old('roles', [])) ? 'checked' : '' ?>>
+                                    <span class="text-sm"><?= esc($roleLabel) ?></span>
+                                </label>
+                            <?php endforeach; ?>
+                        </div>
+                        <p class="text-xs text-white/60 mt-1">Role pertama yang dipilih akan menjadi role utama</p>
+                        <div id="rolesFeedback" class="text-red-200 text-xs mt-1"></div>
                     </div>
                 </div>
             </div>
@@ -155,7 +156,7 @@
                     </div>
 
                     <!-- Wali Kelas Section -->
-                    <div id="waliKelasSection" class="border-t pt-4 <?= old('role') != 'wali_kelas' ? 'hidden' : '' ?>">
+                    <div id="waliKelasSection" class="border-t pt-4 <?= !in_array('wali_kelas', old('roles', [])) ? 'hidden' : '' ?>">
                         <label class="inline-flex items-center">
                             <input type="checkbox" name="is_wali_kelas" value="1"
                                 class="rounded text-indigo-600 focus:ring-indigo-500"
@@ -178,6 +179,19 @@
                             </select>
                         </div>
                     </div>
+
+                    <!-- Ketua Jurusan Section -->
+                    <div id="ketuaJurusanSection" class="border-t pt-4 <?= !in_array('ketua_jurusan', old('roles', [])) ? 'hidden' : '' ?>">
+                        <label class="block text-sm font-medium text-white mb-2">Jurusan *</label>
+                        <select name="jurusan"
+                            class="w-full px-4 py-2 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
+                            id="jurusanSelect">
+                            <option value="">Pilih Jurusan</option>
+                            <option value="DKV" <?= old('jurusan') == 'DKV' ? 'selected' : '' ?>>DKV (Desain Komunikasi Visual)</option>
+                            <option value="MPLB" <?= old('jurusan') == 'MPLB' ? 'selected' : '' ?>>MPLB (Manajemen Perkantoran & Layanan Bisnis)</option>
+                            <option value="AT" <?= old('jurusan') == 'AT' ? 'selected' : '' ?>>AT (Akuntansi)</option>
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
@@ -197,16 +211,27 @@
 </div>
 
 <script>
-    // Toggle wali kelas section based on role selection
-    document.getElementById('roleSelect').addEventListener('change', function() {
-        const waliKelasSection = document.getElementById('waliKelasSection');
-        if (this.value === 'wali_kelas') {
-            waliKelasSection.classList.remove('hidden');
-        } else {
-            waliKelasSection.classList.add('hidden');
-            document.getElementById('isWaliKelasCheckbox').checked = false;
-            document.getElementById('kelasSelection').classList.add('hidden');
-        }
+    // Toggle wali kelas section based on wali_kelas role checkbox
+    document.querySelectorAll('.role-checkbox').forEach(function(cb) {
+        cb.addEventListener('change', function() {
+            const waliKelasChecked = document.querySelector('.role-checkbox[data-role="wali_kelas"]').checked;
+            const waliKelasSection = document.getElementById('waliKelasSection');
+            if (waliKelasChecked) {
+                waliKelasSection.classList.remove('hidden');
+            } else {
+                waliKelasSection.classList.add('hidden');
+                document.getElementById('isWaliKelasCheckbox').checked = false;
+                document.getElementById('kelasSelection').classList.add('hidden');
+            }
+
+            const ketuaJurusanChecked = document.querySelector('.role-checkbox[data-role="ketua_jurusan"]').checked;
+            const ketuaJurusanSection = document.getElementById('ketuaJurusanSection');
+            if (ketuaJurusanChecked) {
+                ketuaJurusanSection.classList.remove('hidden');
+            } else {
+                ketuaJurusanSection.classList.add('hidden');
+            }
+        });
     });
 
     // Toggle kelas selection based on wali kelas checkbox
@@ -279,14 +304,33 @@
 
     // Form validation before submit
     document.getElementById('guruForm').addEventListener('submit', function(e) {
-        const role = document.getElementById('roleSelect').value;
+        const checkedRoles = document.querySelectorAll('.role-checkbox:checked');
+        const rolesFeedback = document.getElementById('rolesFeedback');
+
+        if (checkedRoles.length === 0) {
+            e.preventDefault();
+            rolesFeedback.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i> Pilih minimal satu role';
+            return;
+        }
+        rolesFeedback.innerHTML = '';
+
         const isWaliKelas = document.getElementById('isWaliKelasCheckbox').checked;
         const kelasId = document.querySelector('select[name="kelas_id"]')?.value;
 
-        if (role === 'wali_kelas' && isWaliKelas && !kelasId) {
+        if (isWaliKelas && !kelasId) {
             e.preventDefault();
             alert('Silakan pilih kelas untuk wali kelas');
             document.getElementById('kelasSelection').classList.remove('hidden');
+            return;
+        }
+
+        const isKetuaJurusan = document.querySelector('.role-checkbox[data-role="ketua_jurusan"]').checked;
+        const jurusan = document.getElementById('jurusanSelect').value;
+
+        if (isKetuaJurusan && !jurusan) {
+            e.preventDefault();
+            alert('Silakan pilih jurusan untuk Ketua Jurusan');
+            document.getElementById('ketuaJurusanSection').classList.remove('hidden');
         }
     });
 </script>

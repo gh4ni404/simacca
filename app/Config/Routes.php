@@ -90,6 +90,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('guru/aktifkan/(:num)', 'Admin\GuruController::changeStatus/$1', ['filter' => 'role:admin']);
     $routes->post('guru/check-nip', 'Admin\GuruController::checkNip', ['filter' => 'role:admin']);
     $routes->post('guru/check-username', 'Admin\GuruController::checkUsername', ['filter' => 'role:admin']);
+    $routes->post('guru/update-role/(:num)', 'Admin\GuruController::updateRoles/$1', ['filter' => 'role:admin']);
     $routes->get('guru/export', 'Admin\GuruController::export', ['filter' => 'role:admin']);
     $routes->get('guru/import', 'Admin\GuruController::import', ['filter' => 'role:admin']);
     $routes->post('guru/process-import', 'Admin\GuruController::processImport', ['filter' => 'role:admin']);
@@ -381,6 +382,23 @@ $routes->group('instruktur', ['filter' => 'role:instruktur'], function ($routes)
     $routes->post('task-template/simpan', 'Instruktur\TaskTemplateController::store');
     $routes->post('task-template/update/(:num)', 'Instruktur\TaskTemplateController::update/$1');
     $routes->get('task-template/hapus/(:num)', 'Instruktur\TaskTemplateController::delete/$1');
+});
+
+// Ketua Jurusan Routes (read-only PKL monitoring)
+$routes->group('ketua-jurusan', ['filter' => 'role:ketua_jurusan'], function ($routes) {
+    $routes->get('dashboard', 'KetuaJurusan\DashboardController::index', ['as' => 'ketuajurusan.dashboard']);
+
+    // Jurnal PKL Monitoring
+    $routes->get('jurnal-pkl', 'KetuaJurusan\JurnalPklController::index', ['as' => 'ketuajurusan.jurnal_pkl']);
+    $routes->get('jurnal-pkl/detail/(:num)', 'KetuaJurusan\JurnalPklController::detail/$1');
+
+    // Siswa PKL Monitoring
+    $routes->get('siswa-pkl', 'KetuaJurusan\SiswaPklController::index', ['as' => 'ketuajurusan.siswa_pkl']);
+    $routes->get('siswa-pkl/detail/(:num)', 'KetuaJurusan\SiswaPklController::detail/$1');
+
+    // Absensi PKL Monitoring
+    $routes->get('absensi-pkl', 'KetuaJurusan\AbsensiPklController::index', ['as' => 'ketuajurusan.absensi_pkl']);
+    $routes->get('absensi-pkl/rekap/(:num)', 'KetuaJurusan\AbsensiPklController::rekap/$1');
 });
 
 // Profile Routes (for all roles)

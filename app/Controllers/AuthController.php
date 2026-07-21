@@ -7,12 +7,14 @@ use CodeIgniter\HTTP\ResponseInterface;
 use App\Models\UserModel;
 use App\Models\GuruModel;
 use App\Models\SiswaModel;
+use App\Models\UserRoleModel;
 
 class AuthController extends BaseController
 {
     protected $userModel;
     protected $guruModel;
     protected $siswaModel;
+    protected $userRoleModel;
     protected $passwordResetTokenModel;
     protected $appName;
 
@@ -21,6 +23,7 @@ class AuthController extends BaseController
         $this->userModel = new UserModel();
         $this->guruModel = new GuruModel();
         $this->siswaModel = new SiswaModel();
+        $this->userRoleModel = new UserRoleModel();
         $this->passwordResetTokenModel = new \App\Models\PasswordResetTokenModel();
         $this->appName = 'SIMACCA';
         
@@ -88,12 +91,20 @@ class AuthController extends BaseController
         $user = $this->userModel->checkLogin($username, $password);
 
         if ($user) {
+            // Load all roles for this user (multi-role support)
+            $allRoles = $this->userRoleModel->getRolesByUserId($user['id']);
+            if (empty($allRoles)) {
+                // Fallback: if user_roles not populated yet, use primary role
+                $allRoles = [$user['role']];
+            }
+
             // Set session data
             $sessionData = [
                 'user_id'       => $user['id'],
                 'userId'        => $user['id'], // Keep for backward compatibility
                 'username'      => $user['username'],
                 'role'          => $user['role'],
+                'all_roles'     => $allRoles,
                 'email'         => $user['email'],
                 'profile_photo' => $user['profile_photo'] ?? null,
                 'isLoggedIn'    => true,
@@ -101,45 +112,47 @@ class AuthController extends BaseController
             ];
 
             // Get Additional data based on role
-            switch ($user['role']) {
-                case 'guru_mapel':
-                case 'wali_kelas':
-                case 'wakakur':
-                    $guru = $this->guruModel->getByUserId($user['id']);
-                    if ($guru) {
-                        $sessionData['guru_id'] = $guru['id'];
-                        $sessionData['nama_lengkap'] = $guru['nama_lengkap'];
-                        $sessionData['nip'] = $guru['nip'];
+            // Check if user has any guru-related role
+            $guruRoles = ['guru_mapel', 'wali_kelas', 'wakakur', 'ketua_jurusan'];
+            $hasGuruRole = count(array_intersect($guruRoles, $allRoles)) > 0;
 
-                        // Jika Wali Kelas, simpan kelas_id
-                        if ($user['role'] == 'wali_kelas' && $guru['kelas_id']) {
-                            $sessionData['kelas_id'] = $guru['kelas_id'];
-                        }
+            if ($hasGuruRole) {
+                $guru = $this->guruModel->getByUserId($user['id']);
+                if ($guru) {
+                    $sessionData['guru_id'] = $guru['id'];
+                    $sessionData['nama_lengkap'] = $guru['nama_lengkap'];
+                    $sessionData['nip'] = $guru['nip'];
+                    $sessionData['jurusan'] = $guru['jurusan'] ?? null;
+                    $sessionData['is_ketua_jurusan'] = $guru['is_ketua_jurusan'] ?? false;
+
+                    // Jika Wali Kelas, simpan kelas_id
+                    if (in_array('wali_kelas', $allRoles) && $guru['kelas_id']) {
+                        $sessionData['kelas_id'] = $guru['kelas_id'];
                     }
-                    break;
+                }
+            }
 
-                case 'siswa':
-                    $siswa = $this->siswaModel->getByUserId($user['id']);
-                    if ($siswa) {
-                        $sessionData['siswa_id'] = $siswa['id'];
-                        $sessionData['nama_lengkap'] = $siswa['nama_lengkap'];
-                        $sessionData['nis'] = $siswa['nis'];
-                        $sessionData['kelas_id'] = $siswa['kelas_id'];
-                    }
-                    break;
+            if (in_array('siswa', $allRoles)) {
+                $siswa = $this->siswaModel->getByUserId($user['id']);
+                if ($siswa) {
+                    $sessionData['siswa_id'] = $siswa['id'];
+                    $sessionData['nama_lengkap'] = $siswa['nama_lengkap'];
+                    $sessionData['nis'] = $siswa['nis'];
+                    $sessionData['kelas_id'] = $siswa['kelas_id'];
+                }
+            }
 
-                case 'admin':
-                    $sessionData['nama_lengkap'] = 'Administrator';
-                    break;
+            if (in_array('admin', $allRoles) && !isset($sessionData['nama_lengkap'])) {
+                $sessionData['nama_lengkap'] = 'Administrator';
+            }
 
-                case 'instruktur':
-                    $instrukturModel = new \App\Models\InstrukturPklModel();
-                    $instruktur = $instrukturModel->where('user_id', $user['id'])->first();
-                    if ($instruktur) {
-                        $sessionData['instruktur_id'] = $instruktur['id'];
-                        $sessionData['nama_lengkap'] = $instruktur['nama_lengkap'];
-                    }
-                    break;
+            if (in_array('instruktur', $allRoles)) {
+                $instrukturModel = new \App\Models\InstrukturPklModel();
+                $instruktur = $instrukturModel->where('user_id', $user['id'])->first();
+                if ($instruktur) {
+                    $sessionData['instruktur_id'] = $instruktur['id'];
+                    $sessionData['nama_lengkap'] = $instruktur['nama_lengkap'];
+                }
             }
 
             // Set session first
@@ -166,27 +179,30 @@ class AuthController extends BaseController
 
     /**
      * Redirect to dashboard based on role
+     * Multi-role: uses role priority order
      */
     private function redirectToDashboard()
     {
-        $role = session()->get('role');
+        $allRoles = session()->get('all_roles') ?? [session()->get('role')];
 
-        switch ($role) {
-            case 'admin':
-                return redirect()->to('/admin/dashboard');
-            case 'guru_mapel':
-                return redirect()->to('/guru/dashboard');
-            case 'wali_kelas':
-                return redirect()->to('/walikelas/dashboard');
-            case 'wakakur':
-                return redirect()->to('/wakakur/dashboard');
-            case 'siswa':
-                return redirect()->to('/siswa/jurnal-pkl');
-            case 'instruktur':
-                return redirect()->to('/instruktur/dashboard');
-            default:
-                return redirect()->to('/');
+        // Priority order for redirect
+        $priority = [
+            'admin'          => '/admin/dashboard',
+            'wakakur'        => '/wakakur/dashboard',
+            'ketua_jurusan'  => '/ketua-jurusan/dashboard',
+            'wali_kelas'     => '/walikelas/dashboard',
+            'guru_mapel'     => '/guru/dashboard',
+            'instruktur'     => '/instruktur/dashboard',
+            'siswa'          => '/siswa/jurnal-pkl',
+        ];
+
+        foreach ($priority as $role => $url) {
+            if (in_array($role, $allRoles)) {
+                return redirect()->to($url);
+            }
         }
+
+        return redirect()->to('/');
     }
 
     /**
@@ -202,6 +218,7 @@ class AuthController extends BaseController
         session()->remove('userId');
         session()->remove('username');
         session()->remove('role');
+        session()->remove('all_roles');
         session()->remove('email');
         session()->remove('profile_photo');
         session()->remove('isLoggedIn');
@@ -213,6 +230,8 @@ class AuthController extends BaseController
         session()->remove('kelas_id');
         session()->remove('nip');
         session()->remove('nis');
+        session()->remove('jurusan');
+        session()->remove('is_ketua_jurusan');
         
         // Destroy session completely
         session()->destroy();

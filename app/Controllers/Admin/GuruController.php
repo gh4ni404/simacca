@@ -4,6 +4,8 @@ namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
 use App\Services\GuruService;
+use App\Models\RoleModel;
+use App\Models\UserRoleModel;
 
 class GuruController extends BaseController
 {
@@ -47,6 +49,7 @@ class GuruController extends BaseController
     public function create()
     {
         $listsResult = $this->guruService->getFormLists();
+        $roleModel = new RoleModel();
 
         $data = [
             'title' => 'Tambah Guru Baru',
@@ -55,6 +58,7 @@ class GuruController extends BaseController
             'user' => $this->getUserData(),
             'mapelList' => $listsResult['data']['mapelList'] ?? [],
             'kelasList' => $listsResult['data']['kelasList'] ?? [],
+            'roleList' => $roleModel->getDropdown(),
             'validation' => \Config\Services::validation()
         ];
 
@@ -66,6 +70,8 @@ class GuruController extends BaseController
      */
     public function store()
     {
+        $roles = $this->request->getPost('roles') ?? [];
+        $isKetuaJurusan = in_array('ketua_jurusan', $roles) ? 1 : 0;
         $data = [
             'nip' => $this->request->getPost('nip'),
             'nama_lengkap' => $this->request->getPost('nama_lengkap'),
@@ -73,10 +79,12 @@ class GuruController extends BaseController
             'username' => $this->request->getPost('username'),
             'password' => $this->request->getPost('password'),
             'email' => $this->request->getPost('email'),
-            'role' => $this->request->getPost('role'),
+            'roles' => $roles,
             'mata_pelajaran_id' => $this->request->getPost('mata_pelajaran_id') ?: null,
             'is_wali_kelas' => $this->request->getPost('is_wali_kelas') ? 1 : 0,
-            'kelas_id' => $this->request->getPost('kelas_id') ?: null
+            'kelas_id' => $this->request->getPost('kelas_id') ?: null,
+            'jurusan' => $isKetuaJurusan ? ($this->request->getPost('jurusan') ?: null) : null,
+            'is_ketua_jurusan' => $isKetuaJurusan
         ];
 
         $result = $this->guruService->createGuru($data);
@@ -102,6 +110,9 @@ class GuruController extends BaseController
         }
 
         $listsResult = $this->guruService->getFormLists();
+        $roleModel = new RoleModel();
+        $userRoleModel = new UserRoleModel();
+        $allRoles = $userRoleModel->getRolesByUserId($guruResult['data']['user']['id']);
 
         $data = [
             'title' => 'Edit Data Guru',
@@ -112,6 +123,8 @@ class GuruController extends BaseController
             'userData' => $guruResult['data']['user'],
             'mapelList' => $listsResult['data']['mapelList'] ?? [],
             'kelasList' => $listsResult['data']['kelasList'] ?? [],
+            'roleList' => $roleModel->getDropdown(),
+            'allRoles' => $allRoles,
             'validation' => \Config\Services::validation()
         ];
 
@@ -123,6 +136,8 @@ class GuruController extends BaseController
      */
     public function update($id)
     {
+        $roles = $this->request->getPost('roles') ?? [];
+        $isKetuaJurusan = in_array('ketua_jurusan', $roles) ? 1 : 0;
         $data = [
             'nip' => $this->request->getPost('nip'),
             'nama_lengkap' => $this->request->getPost('nama_lengkap'),
@@ -130,10 +145,12 @@ class GuruController extends BaseController
             'username' => $this->request->getPost('username'),
             'password' => $this->request->getPost('password'),
             'email' => $this->request->getPost('email'),
-            'role' => $this->request->getPost('role'),
+            'roles' => $roles,
             'mata_pelajaran_id' => $this->request->getPost('mata_pelajaran_id') ?: null,
             'is_wali_kelas' => $this->request->getPost('is_wali_kelas') ? 1 : 0,
-            'kelas_id' => $this->request->getPost('kelas_id') ?: null
+            'kelas_id' => $this->request->getPost('kelas_id') ?: null,
+            'jurusan' => $isKetuaJurusan ? ($this->request->getPost('jurusan') ?: null) : null,
+            'is_ketua_jurusan' => $isKetuaJurusan
         ];
 
         $result = $this->guruService->updateGuru($id, $data);
@@ -175,6 +192,10 @@ class GuruController extends BaseController
             return redirect()->to('/admin/guru');
         }
 
+        $userRoleModel = new UserRoleModel();
+        $roleModel = new RoleModel();
+        $allRoles = $userRoleModel->getRolesByUserId($guruResult['data']['user']['id']);
+
         $data = [
             'title' => 'Detail Guru',
             'pageTitle' => 'Detail Data Guru',
@@ -182,10 +203,72 @@ class GuruController extends BaseController
             'user' => $this->getUserData(),
             'guru' => $guruResult['data']['guru'],
             'userData' => $guruResult['data']['user'],
-            'kelas' => $guruResult['data']['kelas']
+            'kelas' => $guruResult['data']['kelas'],
+            'allRoles' => $allRoles,
+            'roleList' => $roleModel->getDropdown()
         ];
 
         return view('admin/guru/show', $data);
+    }
+
+    /**
+     * AJAX: Update guru roles (quick role management from detail page)
+     */
+    public function updateRoles($id)
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Invalid request']);
+        }
+
+        $guruResult = $this->guruService->getGuruById($id);
+        if (!$guruResult['success']) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Guru tidak ditemukan']);
+        }
+
+        $roles = $this->request->getPost('roles') ?? [];
+        $userId = $guruResult['data']['user']['id'];
+
+        if (empty($roles)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Pilih minimal satu role']);
+        }
+
+        try {
+            $userRoleModel = new UserRoleModel();
+            $userRoleModel->syncRoles($userId, $roles);
+
+            // Update primary role in users table
+            $primaryRole = $roles[0];
+            $userModel = new \App\Models\UserModel();
+            $userModel->skipValidation(true);
+            $userModel->update($userId, ['role' => $primaryRole]);
+            $userModel->skipValidation(false);
+
+            // Update jurusan/is_ketua_jurusan in guru table
+            $isKetuaJurusan = in_array('ketua_jurusan', $roles) ? 1 : 0;
+            $jurusan = $isKetuaJurusan ? ($this->request->getPost('jurusan') ?: null) : null;
+            $guruModel = new \App\Models\GuruModel();
+            $guruModel->skipValidation(true);
+            $guruModel->update($id, [
+                'is_ketua_jurusan' => $isKetuaJurusan,
+                'jurusan'          => $jurusan
+            ]);
+            $guruModel->skipValidation(false);
+
+            $roleLabels = [];
+            $roleModel = new RoleModel();
+            foreach ($roles as $r) {
+                $roleLabels[] = $roleModel->getDisplayName($r);
+            }
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Role berhasil diperbarui',
+                'roles' => $roles,
+                'role_labels' => $roleLabels
+            ]);
+        } catch (\Exception $e) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui role: ' . $e->getMessage()]);
+        }
     }
 
     /**

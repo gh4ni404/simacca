@@ -20,6 +20,8 @@ class GuruModel extends Model
         'mata_pelajaran_id',
         'is_wali_kelas',
         'kelas_id',
+        'jurusan',
+        'is_ketua_jurusan',
         'created_at',
     ];
 
@@ -81,6 +83,33 @@ class GuruModel extends Model
             ->join('mata_pelajaran', 'mata_pelajaran.id = guru.mata_pelajaran_id', 'left')
             ->where('guru.user_id', $userId)
             ->first();
+    }
+
+    /**
+     * Get ketua jurusan by jurusan name
+     */
+    public function getKetuaJurusanByJurusan(string $jurusan, string $tahunAjaran = null)
+    {
+        if ($tahunAjaran === null) {
+            $tahunAjaran = get_active_tahun_ajaran();
+        }
+
+        return $this->where('is_ketua_jurusan', true)
+            ->where('guru.jurusan', $jurusan)
+            ->join('users', 'users.id = guru.user_id', 'left')
+            ->select('guru.*, users.username, users.email, users.is_active')
+            ->first();
+    }
+
+    /**
+     * Get all ketua jurusan
+     */
+    public function getAllKetuaJurusan()
+    {
+        return $this->where('is_ketua_jurusan', true)
+            ->join('users', 'users.id = guru.user_id', 'left')
+            ->select('guru.*, users.username, users.email, users.is_active')
+            ->findAll();
     }
 
     /**

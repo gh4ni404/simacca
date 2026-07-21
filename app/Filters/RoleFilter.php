@@ -25,7 +25,7 @@ class RoleFilter implements FilterInterface
      */
 
     /**
-     * Before filter - check user role
+     * Before filter - check user role (supports multi-role)
      */
     public function before(RequestInterface $request, $arguments = null)
     {
@@ -34,14 +34,17 @@ class RoleFilter implements FilterInterface
             return $request;
         }
 
-        // Get user role from session
-        $userRole = session()->get('role');
+        // Get all user roles from session (multi-role support)
+        $allRoles = session()->get('all_roles');
+        if (empty($allRoles)) {
+            $allRoles = [session()->get('role')];
+        }
 
-        // Check if user role is in allowed roles
-        if (!in_array($userRole, $arguments)) {
-            // Redirect to access denied page or dashboard
+        // Check if user has any of the allowed roles
+        if (count(array_intersect($allRoles, $arguments)) === 0) {
             return redirect()->to('/access-denied')->with('error', 'Anda tidak memiliki akses ke halaman ini');
         }
+
         return $request;
     }
 

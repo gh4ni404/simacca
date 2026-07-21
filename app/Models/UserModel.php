@@ -141,25 +141,26 @@ class UserModel extends Model
             return null;
         }
 
-        // Load model yang diperlukan
-        switch ($user['role']) {
-            case 'guru_mapel':
-            case 'wali_kelas':
-            case 'wakakur':
-                # code..
-                $guruModel = new GuruModel();
-                $user['detail'] = $guruModel->where('user_id', $userId)->first();
-                break;
-
-            case 'siswa':
-                $siswaModel = new SiswaModel();
-                $user['detail'] = $siswaModel->where('user_id', $userId)->first();
-                break;
-
-            default:
-                # code..
-                break;
+        // Check all roles (multi-role support)
+        $userRoleModel = new \App\Models\UserRoleModel();
+        $allRoles = $userRoleModel->getRolesByUserId($userId);
+        if (empty($allRoles)) {
+            $allRoles = [$user['role']];
         }
+        $user['all_roles'] = $allRoles;
+
+        // Load model yang diperlukan based on roles
+        $guruRoles = ['guru_mapel', 'wali_kelas', 'wakakur', 'ketua_jurusan'];
+        if (count(array_intersect($guruRoles, $allRoles)) > 0) {
+            $guruModel = new GuruModel();
+            $user['detail'] = $guruModel->where('user_id', $userId)->first();
+        }
+
+        if (in_array('siswa', $allRoles)) {
+            $siswaModel = new SiswaModel();
+            $user['detail'] = $siswaModel->where('user_id', $userId)->first();
+        }
+
         return $user;
     }
 
