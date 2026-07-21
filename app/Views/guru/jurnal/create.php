@@ -3,83 +3,19 @@
 <?= $this->section('content') ?>
 <style>
     @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
-    
-    .animate-fade-in-up {
-        animation: fadeInUp 0.5s ease-out;
-    }
-
-    .capture-button {
-        transition: all 0.3s ease;
-    }
-
-    .capture-button:hover {
-        transform: scale(1.05);
-    }
-
-    .image-preview {
-        position: relative;
-        border-radius: 1rem;
-        overflow: hidden;
-    }
-
-    .image-preview img {
-        width: 100%;
-        height: auto;
-        display: block;
-    }
-
-    .remove-image {
-        position: absolute;
-        top: 0.5rem;
-        right: 0.5rem;
-        background: rgba(239, 68, 68, 0.9);
-        color: white;
-        border-radius: 50%;
-        width: 2rem;
-        height: 2rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .remove-image:hover {
-        background: rgba(220, 38, 38, 1);
-        transform: scale(1.1);
-    }
-
-    #video-container {
-        position: relative;
-        border-radius: 1rem;
-        overflow: hidden;
-        background: #000;
-    }
-
-    #video {
-        width: 100%;
-        height: auto;
-        display: block;
-    }
-
-    .camera-controls {
-        position: absolute;
-        bottom: 1rem;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        gap: 1rem;
-        z-index: 10;
-    }
+    .animate-fade-in-up { animation: fadeInUp 0.5s ease-out; }
+    .capture-button { transition: all 0.3s ease; }
+    .capture-button:hover { transform: scale(1.05); }
+    .image-preview { position: relative; border-radius: 1rem; overflow: hidden; }
+    .image-preview img { width: 100%; height: auto; display: block; }
+    .remove-image { position: absolute; top: 0.5rem; right: 0.5rem; background: rgba(239,68,68,0.9); color: white; border-radius: 50%; width: 2rem; height: 2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; }
+    .remove-image:hover { background: rgba(220,38,38,1); transform: scale(1.1); }
+    #video-container { position: relative; border-radius: 1rem; overflow: hidden; background: #000; }
+    #video { width: 100%; height: auto; display: block; }
+    .camera-controls { position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); display: flex; gap: 1rem; z-index: 10; }
 </style>
 
 <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-6 lg:p-8">
@@ -87,10 +23,7 @@
         <!-- Header Section -->
         <div class="mb-8 animate-fade-in-up">
             <div class="flex items-center mb-4">
-                <a href="<?= base_url('guru/jurnal') ?>" 
-                   class="mr-4 p-2 rounded-lg bg-white text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200 shadow-sm">
-                    <i class="fas fa-arrow-left text-xl"></i>
-                </a>
+                <?= button_link('secondary', '', 'arrow-left', base_url('guru/jurnal'), ['class' => 'mr-4 p-2 rounded-lg shadow-sm']) ?>
                 <div class="flex-1">
                     <h1 class="text-3xl font-bold text-gray-800">
                         <span class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
@@ -111,7 +44,7 @@
                 </div>
                 <h3 class="text-xl font-bold text-gray-800">Informasi Pembelajaran</h3>
             </div>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="flex items-center bg-white/60 backdrop-blur-sm rounded-xl p-4">
                     <div class="bg-blue-100 p-3 rounded-lg mr-4">
@@ -153,7 +86,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
 
         <!-- Form Card -->
@@ -168,23 +100,11 @@
                 </h2>
 
                 <!-- Materi Pembelajaran -->
-                <div class="mb-6">
-                    <label for="kegiatan_pembelajaran" class="block text-sm font-semibold text-gray-700 mb-3">
-                        <i class="fas fa-book-open text-indigo-600 mr-2"></i>
-                        Materi Pembelajaran <span class="text-red-500">*</span>
-                    </label>
-                    <textarea 
-                        id="kegiatan_pembelajaran" 
-                        name="kegiatan_pembelajaran" 
-                        rows="6" 
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-200 focus:border-indigo-500 transition-all duration-200 resize-none"
-                        placeholder="Jelaskan materi yang diajarkan hari ini...&#10;Contoh: Materi Pythagoras - siswa belajar rumus a² + b² = c² dan penerapannya dalam kehidupan sehari-hari"
-                        required><?= old('kegiatan_pembelajaran') ?></textarea>
-                    <p class="text-xs text-gray-500 mt-2">
-                        <i class="fas fa-info-circle mr-1"></i>
-                        Jelaskan materi, kegiatan, dan hal penting yang terjadi selama pembelajaran
-                    </p>
-                </div>
+                <?= form_textarea('kegiatan_pembelajaran', 'Materi Pembelajaran', old('kegiatan_pembelajaran'), [
+                    'rows' => 6,
+                    'required' => true,
+                    'placeholder' => "Jelaskan materi yang diajarkan hari ini...\nContoh: Materi Pythagoras - siswa belajar rumus a² + b² = c² dan penerapannya dalam kehidupan sehari-hari"
+                ]) ?>
 
                 <!-- Foto Dokumentasi Section -->
                 <div class="mb-6">
@@ -195,11 +115,11 @@
 
                     <!-- Camera/Upload Buttons -->
                     <div class="flex flex-wrap gap-3 mb-4">
-                        <button type="button" id="captureBtn" class="capture-button flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 shadow-lg">
+                        <button type="button" id="captureBtn" class="capture-button inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 shadow-lg font-semibold text-sm transition-colors duration-200">
                             <i class="fas fa-camera mr-2"></i>
                             Ambil Foto
                         </button>
-                        <button type="button" id="uploadBtn" class="capture-button flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 shadow-lg">
+                        <button type="button" id="uploadBtn" class="capture-button inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 shadow-lg font-semibold text-sm transition-colors duration-200">
                             <i class="fas fa-upload mr-2"></i>
                             Upload Foto
                         </button>
@@ -212,11 +132,11 @@
                         <div id="video-container" class="bg-gray-900">
                             <video id="video" autoplay playsinline></video>
                             <div class="camera-controls">
-                                <button type="button" id="snapBtn" class="px-6 py-3 bg-white text-gray-800 rounded-xl shadow-lg hover:bg-gray-100 transition-all">
+                                <button type="button" id="snapBtn" class="px-6 py-3 bg-white text-gray-800 rounded-xl shadow-lg hover:bg-gray-100 transition-all font-semibold text-sm">
                                     <i class="fas fa-circle text-red-600 mr-2"></i>
                                     Ambil Foto
                                 </button>
-                                <button type="button" id="closeCameraBtn" class="px-6 py-3 bg-red-600 text-white rounded-xl shadow-lg hover:bg-red-700 transition-all">
+                                <button type="button" id="closeCameraBtn" class="px-6 py-3 bg-red-600 text-white rounded-xl shadow-lg hover:bg-red-700 transition-all font-semibold text-sm">
                                     <i class="fas fa-times mr-2"></i>
                                     Tutup
                                 </button>
@@ -233,7 +153,7 @@
                                 <i class="fas fa-times"></i>
                             </div>
                         </div>
-                        <p class="text-sm text-gray-600 mt-2 text-center">
+                        <p id="compressionInfo" class="text-sm text-gray-600 mt-2 text-center">
                             <i class="fas fa-check-circle text-green-600 mr-1"></i>
                             Foto siap diupload
                         </p>
@@ -241,31 +161,25 @@
 
                     <p class="text-xs text-gray-500 mt-2">
                         <i class="fas fa-info-circle mr-1"></i>
-                        Opsional - Dokumentasi aktivitas pembelajaran (max 5MB)
+                        Opsional - Dokumentasi aktivitas pembelajaran (max 1MB, dikompres otomatis)
                     </p>
                 </div>
 
                 <!-- Submit Button -->
                 <div class="flex justify-end gap-3 mt-8 pt-6 border-t-2 border-gray-100">
-                    <a href="<?= base_url('guru/jurnal') ?>" 
-                       class="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all duration-200 font-medium">
-                        <i class="fas fa-times mr-2"></i>Batal
-                    </a>
-                    <button type="submit" 
-                            class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-lg font-medium">
-                        <i class="fas fa-save mr-2"></i>Simpan Jurnal
-                    </button>
+                    <?= button_link('secondary', 'Batal', 'times', base_url('guru/jurnal')) ?>
+                    <?= button('primary', 'Simpan Jurnal', 'save', ['type' => 'submit', 'class' => 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg']) ?>
                 </div>
             </div>
         </form>
     </div>
 </div>
 
+<?= view('components/upload_script') ?>
 <script>
     let stream = null;
     let capturedImageBlob = null;
 
-    // Elements
     const captureBtn = document.getElementById('captureBtn');
     const uploadBtn = document.getElementById('uploadBtn');
     const fileInput = document.getElementById('fileInput');
@@ -277,19 +191,13 @@
     const imagePreview = document.getElementById('imagePreview');
     const previewImg = document.getElementById('previewImg');
     const removeImage = document.getElementById('removeImage');
+    const compressionInfo = document.getElementById('compressionInfo');
 
-    // Open Camera
     captureBtn.addEventListener('click', async () => {
         try {
-            // Request camera permission and stream
-            stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { 
-                    facingMode: 'environment',  // Use back camera on mobile
-                    width: { ideal: 1920 },
-                    height: { ideal: 1080 }
-                } 
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
             });
-            
             video.srcObject = stream;
             cameraView.classList.remove('hidden');
             captureBtn.disabled = true;
@@ -300,36 +208,30 @@
         }
     });
 
-    // Capture Photo
     snapBtn.addEventListener('click', () => {
-        // Set canvas dimensions to match video
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-        
-        // Draw video frame to canvas
         const context = canvas.getContext('2d');
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        // Convert to blob
+
         canvas.toBlob((blob) => {
-            capturedImageBlob = blob;
-            
-            // Show preview
-            const url = URL.createObjectURL(blob);
-            previewImg.src = url;
-            imagePreview.classList.remove('hidden');
-            
-            // Hide camera
-            stopCamera();
-            cameraView.classList.add('hidden');
-            
-            // Re-enable buttons
-            captureBtn.disabled = false;
-            uploadBtn.disabled = false;
-        }, 'image/jpeg', 0.85);
+            const file = new File([blob], 'camera_photo.jpg', { type: 'image/jpeg', lastModified: Date.now() });
+            compressImage(file, (compressed) => {
+                capturedImageBlob = compressed;
+                const url = URL.createObjectURL(compressed);
+                previewImg.src = url;
+                imagePreview.classList.remove('hidden');
+                const origSize = (blob.size / 1024).toFixed(1);
+                const compSize = (compressed.size / 1024).toFixed(1);
+                compressionInfo.innerHTML = '<i class="fas fa-check-circle text-green-600 mr-1"></i> Foto siap diupload (' + compSize + ' KB' + (compressed.size < blob.size ? ' | dikompres dari ' + origSize + ' KB' : '') + ')';
+                stopCamera();
+                cameraView.classList.add('hidden');
+                captureBtn.disabled = false;
+                uploadBtn.disabled = false;
+            });
+        }, 'image/jpeg');
     });
 
-    // Close Camera
     closeCameraBtn.addEventListener('click', () => {
         stopCamera();
         cameraView.classList.add('hidden');
@@ -337,41 +239,27 @@
         uploadBtn.disabled = false;
     });
 
-    // Upload Button
-    uploadBtn.addEventListener('click', () => {
-        fileInput.click();
-    });
+    uploadBtn.addEventListener('click', () => fileInput.click());
 
-    // File Input Change
     fileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
-            // Validate file size (5MB)
-            if (file.size > 5242880) {
-                alert('Ukuran file terlalu besar. Maksimal 5MB');
-                fileInput.value = '';
-                return;
-            }
-
-            // Validate file type
-            if (!file.type.startsWith('image/')) {
-                alert('File harus berupa gambar');
-                fileInput.value = '';
-                return;
-            }
-
-            // Show preview
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                previewImg.src = e.target.result;
+            if (!file.type.startsWith('image/')) { alert('File harus berupa gambar'); fileInput.value = ''; return; }
+            compressImage(file, (compressed) => {
+                const dt = new DataTransfer();
+                dt.items.add(compressed);
+                fileInput.files = dt.files;
+                const url = URL.createObjectURL(compressed);
+                previewImg.src = url;
                 imagePreview.classList.remove('hidden');
-                capturedImageBlob = null; // Clear captured image
-            };
-            reader.readAsDataURL(file);
+                const origSize = (file.size / 1024).toFixed(1);
+                const compSize = (compressed.size / 1024).toFixed(1);
+                compressionInfo.innerHTML = '<i class="fas fa-check-circle text-green-600 mr-1"></i> Foto siap diupload (' + compSize + ' KB' + (compressed.size < file.size ? ' | dikompres dari ' + origSize + ' KB' : '') + ')';
+                capturedImageBlob = null;
+            });
         }
     });
 
-    // Remove Image
     removeImage.addEventListener('click', () => {
         previewImg.src = '';
         imagePreview.classList.add('hidden');
@@ -379,38 +267,20 @@
         capturedImageBlob = null;
     });
 
-    // Stop camera stream
     function stopCamera() {
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-            stream = null;
-        }
+        if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; }
     }
 
-    // Form Submit - handle captured image
     document.getElementById('jurnalForm').addEventListener('submit', async (e) => {
         if (capturedImageBlob) {
             e.preventDefault();
-            
-            // Create FormData
             const formData = new FormData(e.target);
-            
-            // Replace file input with captured blob
             formData.delete('foto_dokumentasi');
             formData.append('foto_dokumentasi', capturedImageBlob, 'captured_photo.jpg');
-            
-            // Submit form
             try {
-                const response = await fetch(e.target.action, {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                if (response.ok) {
-                    window.location.href = '<?= base_url('guru/jurnal') ?>';
-                } else {
-                    alert('Terjadi kesalahan saat menyimpan jurnal');
-                }
+                const response = await fetch(e.target.action, { method: 'POST', body: formData });
+                if (response.ok) { window.location.href = '<?= base_url('guru/jurnal') ?>'; }
+                else { alert('Terjadi kesalahan saat menyimpan jurnal'); }
             } catch (error) {
                 console.error('Error:', error);
                 alert('Terjadi kesalahan saat menyimpan jurnal');
@@ -418,7 +288,6 @@
         }
     });
 
-    // Cleanup on page unload
     window.addEventListener('beforeunload', stopCamera);
 </script>
 

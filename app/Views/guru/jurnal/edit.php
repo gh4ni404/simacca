@@ -296,7 +296,7 @@
 
                     <p class="text-xs text-gray-500 mt-2">
                         <i class="fas fa-info-circle mr-1"></i>
-                        <?= !empty($jurnal['foto_dokumentasi']) ? 'Kosongkan jika tidak ingin mengubah foto' : 'Opsional - Dokumentasi aktivitas pembelajaran (max 5MB)' ?>
+                        <?= !empty($jurnal['foto_dokumentasi']) ? 'Kosongkan jika tidak ingin mengubah foto' : 'Opsional - Dokumentasi aktivitas pembelajaran (max 1MB, dikompres otomatis)' ?>
                     </p>
                 </div>
 
@@ -316,6 +316,7 @@
     </div>
 </div>
 
+<?= view('components/upload_script') ?>
 <script>
     let stream = null;
     let capturedImageBlob = null;
@@ -378,18 +379,18 @@
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         
         canvas.toBlob((blob) => {
-            capturedImageBlob = blob;
-            
-            const url = URL.createObjectURL(blob);
-            previewImg.src = url;
-            imagePreview.classList.remove('hidden');
-            
-            stopCamera();
-            cameraView.classList.add('hidden');
-            
-            captureBtn.disabled = false;
-            uploadBtn.disabled = false;
-        }, 'image/jpeg', 0.85);
+            const file = new File([blob], 'camera_photo.jpg', { type: 'image/jpeg', lastModified: Date.now() });
+            compressImage(file, (compressed) => {
+                capturedImageBlob = compressed;
+                const url = URL.createObjectURL(compressed);
+                previewImg.src = url;
+                imagePreview.classList.remove('hidden');
+                stopCamera();
+                cameraView.classList.add('hidden');
+                captureBtn.disabled = false;
+                uploadBtn.disabled = false;
+            });
+        }, 'image/jpeg');
     });
 
     // Close Camera
@@ -409,25 +410,21 @@
     fileInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
-            if (file.size > 5242880) {
-                alert('Ukuran file terlalu besar. Maksimal 5MB');
-                fileInput.value = '';
-                return;
-            }
-
             if (!file.type.startsWith('image/')) {
                 alert('File harus berupa gambar');
                 fileInput.value = '';
                 return;
             }
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                previewImg.src = e.target.result;
+            compressImage(file, (compressed) => {
+                const dt = new DataTransfer();
+                dt.items.add(compressed);
+                fileInput.files = dt.files;
+                const url = URL.createObjectURL(compressed);
+                previewImg.src = url;
                 imagePreview.classList.remove('hidden');
                 capturedImageBlob = null;
-            };
-            reader.readAsDataURL(file);
+            });
         }
     });
 

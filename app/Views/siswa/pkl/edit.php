@@ -254,24 +254,13 @@ function updateLangkahVisibility() {
 }
 
 function previewImage(input) {
-    if (input.files && input.files[0]) {
-        const file = input.files[0];
-        const fileSize = (file.size / 1024 / 1024).toFixed(2);
-        if (fileSize > 5) {
-            alert('Ukuran file terlalu besar! Maksimal 5MB');
-            input.value = '';
-            return;
-        }
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('preview').src = e.target.result;
-            document.getElementById('previewContainer').classList.remove('hidden');
-        };
-        reader.readAsDataURL(file);
-        document.getElementById('fileName').textContent = file.name + ' (' + fileSize + ' MB)';
-        document.getElementById('uploadArea').classList.add('border-green-400', 'bg-green-50/50');
-        document.getElementById('uploadArea').classList.remove('border-gray-300');
-    }
+    previewAndCompress(input, {
+        maxSizeMB: 5,
+        previewId: 'preview',
+        containerId: 'previewContainer',
+        fileNameId: 'fileName',
+        uploadAreaId: 'uploadArea',
+    });
 }
 
 function removeImage() {
@@ -327,4 +316,5 @@ document.getElementById('pklForm').addEventListener('submit', function(e) {
     document.getElementById('submitText').textContent = 'Menyimpan...';
 });
 </script>
+<?= view('components/upload_script') ?>
 <?= $this->endSection() ?>

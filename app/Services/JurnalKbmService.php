@@ -400,6 +400,19 @@ class JurnalKbmService extends BaseService
             // Move file to uploads directory
             $file->move(WRITEPATH . 'uploads', $newName);
 
+            // Optimize image server-side (safety net after client-side compression)
+            helper('image');
+            $filePath = WRITEPATH . 'uploads/' . $newName;
+            if (file_exists($filePath)) {
+                $originalSize = filesize($filePath);
+                optimize_jurnal_photo($filePath, $filePath);
+                if (file_exists($filePath)) {
+                    $newSize = filesize($filePath);
+                    $savings = round((($originalSize - $newSize) / $originalSize) * 100, 2);
+                    log_message('info', "Jurnal photo optimized in service: {$newName} - {$savings}% smaller");
+                }
+            }
+
             // Update jurnal with new foto
             $updateResult = $this->updateJurnal($jurnalId, ['foto_dokumentasi' => $newName]);
 

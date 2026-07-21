@@ -350,7 +350,7 @@ class PklController extends BaseController
         $fotoName = null;
 
         $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-        $validation = validate_file_upload($foto, $allowedTypes, 5242880);
+        $validation = validate_file_upload($foto, $allowedTypes, 1048576);
 
         if (!$validation['valid']) {
             session()->setFlashdata('error', $validation['error']);
@@ -644,7 +644,7 @@ class PklController extends BaseController
 
         if ($foto && $foto->isValid() && !$foto->hasMoved()) {
             $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-            $validation = validate_file_upload($foto, $allowedTypes, 5242880);
+            $validation = validate_file_upload($foto, $allowedTypes, 1048576);
 
             if (!$validation['valid']) {
                 session()->setFlashdata('error', $validation['error']);
@@ -652,7 +652,7 @@ class PklController extends BaseController
             }
 
             try {
-                if ($progressResult['data']['foto'] && file_exists($uploadPath . '/' . $progressResult['data']['foto'])) {
+                if (!empty($progressResult['data']['foto']) && file_exists($uploadPath . '/' . $progressResult['data']['foto'])) {
                     unlink($uploadPath . '/' . $progressResult['data']['foto']);
                 }
 

@@ -1,36 +1,13 @@
 <?= $this->extend(get_device_layout()) ?>
 
 <?= $this->section('content') ?>
-<!-- Custom Styles -->
 <style>
     @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
-
-    .table-row-hover {
-        transition: all 0.2s ease;
-    }
-
-    .table-row-hover:hover {
-        background-color: #f8fafc;
-        transform: translateX(4px);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-
-    .stats-badge {
-        transition: all 0.3s ease;
-    }
-
-    .stats-badge:hover {
-        transform: scale(1.05);
-    }
+    .table-row-hover { transition: all 0.2s ease; }
+    .table-row-hover:hover { background-color: #f8fafc; transform: translateX(4px); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 </style>
 
 <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
@@ -49,17 +26,13 @@
                 </p>
             </div>
             <div>
-                <a href="<?= base_url('guru/absensi/tambah'); ?>"
-                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200">
-                    <i class="fas fa-plus-circle mr-2 text-lg"></i>
-                    <span>Input Absensi Baru</span>
-                </a>
+                <?= button_link('primary', 'Input Absensi Baru', 'plus-circle', base_url('guru/absensi/tambah'), ['class' => 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-lg']) ?>
             </div>
         </div>
     </div>
 
     <!-- Flash Messages -->
-    <?= render_flash_message() ?>
+    <?= view('components/alerts') ?>
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -80,52 +53,23 @@
 
         <form method="get" class="p-6">
             <div class="grid grid-cols-3 gap-4 mb-4">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                        <i class="fas fa-calendar-alt mr-2 text-blue-500"></i>
-                        Tanggal
-                    </label>
-                    <input type="date"
-                        name="tanggal"
-                        value="<?= $tanggal ?>"
-                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-                </div>
-                <div>
+                <?= form_input('tanggal', 'Tanggal', $tanggal, ['type' => 'date']) ?>
+                <div class="mb-4">
                     <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
                         <i class="fas fa-school mr-2 text-purple-500"></i>
                         Kelas
                     </label>
-                    <select name="kelas_id" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                    <select name="kelas_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                         <?php foreach ($kelasOptions as $id => $nama): ?>
-                            <option value="<?= $id; ?>" <?= $kelasId == $id ? 'selected' : ''; ?>>
-                                <?= $nama; ?>
-                            </option>
+                            <option value="<?= $id; ?>" <?= $kelasId == $id ? 'selected' : ''; ?>><?= $nama; ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
-                        <i class="fas fa-search mr-2 text-green-500"></i>
-                        Cari Mata Pelajaran
-                    </label>
-                    <input type="text"
-                        name="search"
-                        value="<?= $search ?>"
-                        placeholder="Ketik nama mata pelajaran..."
-                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-                </div>
+                <?= form_input('search', 'Cari Mata Pelajaran', $search, ['placeholder' => 'Ketik nama mata pelajaran...']) ?>
             </div>
             <div class="flex gap-3">
-                <button type="submit"
-                    class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all">
-                    <i class="fas fa-search mr-2"></i>
-                    Filter Data
-                </button>
-                <a href="<?= base_url('guru/absensi'); ?>"
-                    class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition-all">
-                    <i class="fas fa-redo mr-2"></i>
-                    Reset Filter
-                </a>
+                <?= button('primary', 'Filter Data', 'search', ['type' => 'submit', 'class' => 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-md hover:shadow-lg']) ?>
+                <?= button_link('secondary', 'Reset Filter', 'redo', base_url('guru/absensi')) ?>
             </div>
         </form>
     </div>
@@ -141,43 +85,21 @@
                     </h2>
                     <p class="text-blue-100 mt-1">Absensi dikelompokkan berdasarkan kelas dan mata pelajaran</p>
                 </div>
-                <div class="stats-badge bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-xl">
+                <div class="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-xl">
                     <p class="text-sm opacity-90">Total Kelas</p>
                     <p class="text-3xl font-bold"><?= count($kelasSummary ?? []) ?></p>
                 </div>
             </div>
         </div>
-        
+
         <div class="p-6">
             <?php if (empty($kelasSummary)): ?>
-            <!-- Empty State -->
-            <div class="text-center py-16">
-                <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 mb-6">
-                    <i class="fas fa-clipboard-list text-5xl text-blue-600"></i>
-                </div>
-                <h3 class="text-2xl font-bold text-gray-800 mb-3">Belum Ada Data Absensi</h3>
-                <p class="text-gray-600 mb-6 max-w-md mx-auto">Mulai dengan menginput data absensi pertama Anda untuk kelas yang Anda ajar.</p>
-                <a href="<?= base_url('guru/absensi/tambah') ?>" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                    <i class="fas fa-plus-circle mr-3 text-xl"></i>
-                    Input Absensi Pertama
-                </a>
-            </div>
+                <?= empty_state('clipboard-list', 'Belum Ada Data Absensi', 'Mulai dengan menginput data absensi pertama Anda untuk kelas yang Anda ajar.', 'Input Absensi Pertama', base_url('guru/absensi/tambah')) ?>
             <?php else: ?>
-            <!-- Table Desktop -->
-            <div class="hidden md:block overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
-                        <tr>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">No</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Kelas</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Mata Pelajaran</th>
-                            <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Pertemuan</th>
-                            <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Kehadiran</th>
-                            <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Absensi Terakhir</th>
-                            <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                <!-- Table Desktop -->
+                <div class="hidden md:block overflow-x-auto">
+                    <?= table_start() ?>
+                        <?= table_header(['No', 'Kelas', 'Mata Pelajaran', 'Pertemuan', 'Kehadiran', 'Absensi Terakhir', 'Aksi']) ?>
                         <?php $no = 1; foreach ($kelasSummary as $kelas): ?>
                         <tr class="table-row-hover">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900"><?= $no++ ?></td>
@@ -220,14 +142,7 @@
                                 <?php if ($kelas['last_absensi']): ?>
                                 <div class="text-sm font-semibold text-gray-900">
                                     <?php
-                                    $formatter = new IntlDateFormatter(
-                                        'id_ID',
-                                        IntlDateFormatter::LONG,
-                                        IntlDateFormatter::NONE,
-                                        'Asia/Makassar',
-                                        IntlDateFormatter::GREGORIAN,
-                                        'd MMM y'
-                                    );
+                                    $formatter = new IntlDateFormatter('id_ID', IntlDateFormatter::LONG, IntlDateFormatter::NONE, 'Asia/Makassar', IntlDateFormatter::GREGORIAN, 'd MMM y');
                                     echo $formatter->format(strtotime($kelas['last_absensi']));
                                     ?>
                                 </div>
@@ -236,92 +151,75 @@
                                 <?php endif; ?>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                <a href="<?= base_url('guru/absensi/kelas/' . $kelas['kelas_id']) ?>" 
-                                   class="inline-flex items-center px-6 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:from-blue-600 hover:to-cyan-600 transition-all font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-                                   title="Lihat Detail Pertemuan">
-                                    <i class="fas fa-eye mr-2"></i>
-                                    Lihat Detail
-                                </a>
+                                <?= button_link('info', 'Lihat Detail', 'eye', base_url('guru/absensi/kelas/' . $kelas['kelas_id']), ['class' => 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-md hover:shadow-lg transform hover:-translate-y-0.5']) ?>
                             </td>
                         </tr>
                         <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Cards Mobile -->
-            <div class="md:hidden space-y-4">
-                <?php $no = 1; foreach ($kelasSummary as $kelas): ?>
-                <div class="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-md border-2 border-gray-200 p-5 hover:shadow-lg transition-all">
-                    <div class="flex items-start justify-between mb-4">
-                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">#{<?= $no++ ?>}</span>
-                        <div class="flex gap-2">
-                            <span class="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 text-xs font-bold px-3 py-2 rounded-lg border border-blue-200">
-                                <i class="fas fa-hashtag mr-1"></i>
-                                <?= $kelas['total_pertemuan'] ?> kali
-                            </span>
-                            <span class="bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 text-xs font-bold px-3 py-2 rounded-lg border border-green-200">
-                                <i class="fas fa-user-check mr-1"></i>
-                                <?= $kelas['avg_kehadiran'] ?>%
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <div class="space-y-3 mb-4">
-                        <div class="flex items-center">
-                            <div class="bg-purple-100 p-2 rounded-lg mr-3">
-                                <i class="fas fa-school text-purple-600"></i>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-500">Kelas</p>
-                                <p class="text-sm font-bold text-gray-900"><?= esc($kelas['kelas_nama']) ?></p>
-                                <p class="text-xs text-gray-400"><?= $kelas['total_siswa'] ?> siswa</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-center">
-                            <div class="bg-green-100 p-2 rounded-lg mr-3">
-                                <i class="fas fa-book text-green-600"></i>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-500">Mata Pelajaran</p>
-                                <p class="text-sm font-bold text-gray-900"><?= esc($kelas['mata_pelajaran']) ?></p>
-                            </div>
-                        </div>
-
-                        <?php if ($kelas['last_absensi']): ?>
-                        <div class="flex items-center">
-                            <div class="bg-gray-100 p-2 rounded-lg mr-3">
-                                <i class="fas fa-calendar text-gray-600"></i>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-500">Absensi Terakhir</p>
-                                <p class="text-sm font-bold text-gray-900">
-                                    <?php
-                                    $formatter = new IntlDateFormatter(
-                                        'id_ID',
-                                        IntlDateFormatter::LONG,
-                                        IntlDateFormatter::NONE,
-                                        'Asia/Makassar',
-                                        IntlDateFormatter::GREGORIAN,
-                                        'd MMMM y'
-                                    );
-                                    echo $formatter->format(strtotime($kelas['last_absensi']));
-                                    ?>
-                                </p>
-                            </div>
-                        </div>
-                        <?php endif; ?>
-                    </div>
-                    
-                    <a href="<?= base_url('guru/absensi/kelas/' . $kelas['kelas_id']) ?>" 
-                       class="block w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg text-center font-semibold shadow-md hover:shadow-lg transition-all">
-                        <i class="fas fa-eye mr-2"></i>
-                        Lihat Detail Pertemuan
-                    </a>
+                    <?= table_end() ?>
                 </div>
-                <?php endforeach; ?>
-            </div>
+
+                <!-- Cards Mobile -->
+                <div class="md:hidden space-y-4">
+                    <?php $no = 1; foreach ($kelasSummary as $kelas): ?>
+                    <div class="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-md border-2 border-gray-200 p-5 hover:shadow-lg transition-all">
+                        <div class="flex items-start justify-between mb-4">
+                            <span class="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full">#{<?= $no++ ?>}</span>
+                            <div class="flex gap-2">
+                                <span class="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 text-xs font-bold px-3 py-2 rounded-lg border border-blue-200">
+                                    <i class="fas fa-hashtag mr-1"></i>
+                                    <?= $kelas['total_pertemuan'] ?> kali
+                                </span>
+                                <span class="bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 text-xs font-bold px-3 py-2 rounded-lg border border-green-200">
+                                    <i class="fas fa-user-check mr-1"></i>
+                                    <?= $kelas['avg_kehadiran'] ?>%
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3 mb-4">
+                            <div class="flex items-center">
+                                <div class="bg-purple-100 p-2 rounded-lg mr-3">
+                                    <i class="fas fa-school text-purple-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500">Kelas</p>
+                                    <p class="text-sm font-bold text-gray-900"><?= esc($kelas['kelas_nama']) ?></p>
+                                    <p class="text-xs text-gray-400"><?= $kelas['total_siswa'] ?> siswa</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center">
+                                <div class="bg-green-100 p-2 rounded-lg mr-3">
+                                    <i class="fas fa-book text-green-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500">Mata Pelajaran</p>
+                                    <p class="text-sm font-bold text-gray-900"><?= esc($kelas['mata_pelajaran']) ?></p>
+                                </div>
+                            </div>
+
+                            <?php if ($kelas['last_absensi']): ?>
+                            <div class="flex items-center">
+                                <div class="bg-gray-100 p-2 rounded-lg mr-3">
+                                    <i class="fas fa-calendar text-gray-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500">Absensi Terakhir</p>
+                                    <p class="text-sm font-bold text-gray-900">
+                                        <?php
+                                        $formatter = new IntlDateFormatter('id_ID', IntlDateFormatter::LONG, IntlDateFormatter::NONE, 'Asia/Makassar', IntlDateFormatter::GREGORIAN, 'd MMMM y');
+                                        echo $formatter->format(strtotime($kelas['last_absensi']));
+                                        ?>
+                                    </p>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <?= button_link('info', 'Lihat Detail Pertemuan', 'eye', base_url('guru/absensi/kelas/' . $kelas['kelas_id']), ['class' => 'w-full justify-center bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-md']) ?>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
             <?php endif; ?>
         </div>
     </div>
@@ -331,7 +229,6 @@
 
 <?= $this->section('scripts') ?>
 <script>
-    // Add fade-in animation for table rows
     document.addEventListener('DOMContentLoaded', function() {
         const rows = document.querySelectorAll('.table-row-hover');
         rows.forEach((row, index) => {

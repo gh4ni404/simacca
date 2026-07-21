@@ -116,6 +116,14 @@ class IzinGuruController extends BaseController
         if ($file && $file->isValid() && !$file->hasMoved()) {
             $newName = $file->getRandomName();
             $file->move(WRITEPATH . 'uploads/izin_guru', $newName);
+
+            // Optimize image server-side (safety net after client-side compression)
+            $filePath = WRITEPATH . 'uploads/izin_guru/' . $newName;
+            if (file_exists($filePath) && $file->isImage()) {
+                helper('image');
+                optimize_izin_photo($filePath, $filePath);
+            }
+
             $berkas = $newName;
         }
 

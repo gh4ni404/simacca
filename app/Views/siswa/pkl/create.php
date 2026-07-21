@@ -745,6 +745,7 @@
     </div>
 </form>
 
+<?= view('components/upload_script') ?>
 <script>
     // --- Tanggal Display ---
     function updateTanggalDisplay(input) {
@@ -882,27 +883,15 @@
         updateLangkahVisibility();
     }
 
-    // --- Foto Upload ---
+    // --- Foto Upload with Client-Side Compression ---
     function previewImage(input) {
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-            const fileSize = (file.size / 1024 / 1024).toFixed(2);
-            if (parseFloat(fileSize) > 5) {
-                alert('Ukuran file terlalu besar! Maksimal 5MB');
-                input.value = '';
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                document.getElementById('preview').src = e.target.result;
-                document.getElementById('previewContainer').classList.remove('hidden');
-            };
-            reader.readAsDataURL(file);
-            document.getElementById('fileName').textContent = file.name + ' (' + fileSize + ' MB)';
-            const ua = document.getElementById('uploadArea');
-            ua.style.borderColor = '#22c55e';
-            ua.style.background = '#f0fdf4';
-        }
+        previewAndCompress(input, {
+            maxSizeMB: 5,
+            previewId: 'preview',
+            containerId: 'previewContainer',
+            fileNameId: 'fileName',
+            uploadAreaId: 'uploadArea',
+        });
     }
 
     function removeImage() {
