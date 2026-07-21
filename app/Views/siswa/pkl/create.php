@@ -342,7 +342,183 @@
         box-shadow: 0 1px 4px rgba(0,0,0,0.05);
         margin-top: 10px;
     }
+
+    /* ── Toast Notification ── */
+    #toastContainer {
+        position: fixed;
+        top: 16px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: calc(100% - 32px);
+        max-width: 400px;
+        pointer-events: none;
+    }
+
+    .toast {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #fff;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        pointer-events: all;
+        animation: toastIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+
+    .toast.toast-error  { background: #ef4444; }
+    .toast.toast-success { background: #10b981; }
+    .toast.toast-info   { background: #2036bd; }
+
+    .toast-icon { font-size: 1rem; flex-shrink: 0; }
+
+    @keyframes toastIn {
+        from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+        to   { opacity: 1; transform: translateY(0)   scale(1); }
+    }
+    @keyframes toastOut {
+        from { opacity: 1; transform: translateY(0)   scale(1); }
+        to   { opacity: 0; transform: translateY(-12px) scale(0.95); }
+    }
+
+    /* ── Confirm Modal ── */
+    #confirmOverlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 8000;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.25s ease;
+        pointer-events: none;
+    }
+    #confirmOverlay.show {
+        opacity: 1;
+        pointer-events: all;
+    }
+    #confirmBox {
+        background: #fff;
+        border-radius: 24px 24px 0 0;
+        padding: 28px 24px 32px;
+        width: 100%;
+        max-width: 480px;
+        transform: translateY(100%);
+        transition: transform 0.35s cubic-bezier(0.34,1.2,0.64,1);
+        text-align: center;
+    }
+    #confirmOverlay.show #confirmBox {
+        transform: translateY(0);
+    }
+    .confirm-icon-wrap {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #eef0ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        font-size: 1.6rem;
+        color: #2036bd;
+    }
+    .confirm-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 6px;
+    }
+    .confirm-desc {
+        font-size: 0.83rem;
+        color: #6b7280;
+        margin-bottom: 22px;
+        line-height: 1.5;
+    }
+    .confirm-actions {
+        display: flex;
+        gap: 10px;
+    }
+    .confirm-cancel {
+        flex: 1;
+        padding: 13px;
+        border-radius: 12px;
+        border: 1.5px solid #e5e7eb;
+        background: #f9fafb;
+        color: #374151;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        transition: background 0.2s;
+    }
+    .confirm-cancel:hover { background: #f3f4f6; }
+    .confirm-ok {
+        flex: 1;
+        padding: 13px;
+        border-radius: 12px;
+        border: none;
+        background: #2036bd;
+        color: #fff;
+        font-size: 0.9rem;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        box-shadow: 0 4px 12px rgba(32,54,189,0.3);
+        transition: background 0.2s, transform 0.15s;
+    }
+    .confirm-ok:hover  { background: #1a2fa0; }
+    .confirm-ok:active { transform: scale(0.97); }
+
+    /* ── Zoom in/out click effect ── */
+    .btn-simpan { position: relative; overflow: hidden; }
+    @keyframes btnZoom {
+        0%   { transform: scale(1); }
+        35%  { transform: scale(0.92); }
+        65%  { transform: scale(1.06); }
+        100% { transform: scale(1); }
+    }
+    .btn-simpan.zoom-click {
+        animation: btnZoom 0.38s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+
+    /* ── Button loading progress bar ── */
+    .btn-simpan .btn-progress {
+        position: absolute;
+        left: 0; bottom: 0;
+        height: 3px;
+        width: 0%;
+        background: rgba(255,255,255,0.5);
+        border-radius: 0 0 50px 50px;
+        transition: width 2.5s ease;
+    }
 </style>
+
+<!-- Toast Container -->
+<div id="toastContainer"></div>
+
+<!-- Confirm Modal -->
+<div id="confirmOverlay">
+    <div id="confirmBox">
+        <div class="confirm-icon-wrap">
+            <i class="fas fa-rocket"></i>
+        </div>
+        <p class="confirm-title">Simpan Aktivitas?</p>
+        <p class="confirm-desc">Pastikan semua data sudah benar.<br>Aktivitas yang tersimpan tidak dapat diubah kembali.</p>
+        <div class="confirm-actions">
+            <button class="confirm-cancel" id="confirmCancelBtn">Cek Lagi</button>
+            <button class="confirm-ok" id="confirmOkBtn">
+                <i class="fas fa-rocket" style="margin-right:6px;"></i>Ya, Simpan!
+            </button>
+        </div>
+    </div>
+</div>
 
 <!-- Alerts -->
 <div class="px-4 pt-3 max-w-md mx-auto">
@@ -713,64 +889,111 @@
         ua.style.background = '';
     }
 
-    // --- Form Submit ---
+    // ── Toast helper ──
+    function showToast(message, type = 'error') {
+        const icons = { error: 'fa-circle-xmark', success: 'fa-circle-check', info: 'fa-circle-info' };
+        const t = document.createElement('div');
+        t.className = `toast toast-${type}`;
+        t.innerHTML = `<i class="fas ${icons[type]} toast-icon"></i><span>${message}</span>`;
+        document.getElementById('toastContainer').appendChild(t);
+        setTimeout(() => {
+            t.style.animation = 'toastOut 0.3s ease forwards';
+            setTimeout(() => t.remove(), 300);
+        }, 3200);
+    }
+
+    // ── Confirm modal helper ──
+    function showConfirm(onOk) {
+        const overlay = document.getElementById('confirmOverlay');
+        overlay.classList.add('show');
+        document.getElementById('confirmOkBtn').onclick = () => {
+            overlay.classList.remove('show');
+            onOk();
+        };
+        document.getElementById('confirmCancelBtn').onclick = () => {
+            overlay.classList.remove('show');
+        };
+        overlay.onclick = (e) => { if (e.target === overlay) overlay.classList.remove('show'); };
+    }
+
+    // ── Zoom in/out click effect ──
+    document.getElementById('submitBtn').addEventListener('click', function () {
+        const btn = this;
+        btn.classList.remove('zoom-click');
+        void btn.offsetWidth; // force reflow agar animasi restart
+        btn.classList.add('zoom-click');
+        btn.addEventListener('animationend', () => btn.classList.remove('zoom-click'), { once: true });
+    });
+
+    // ── Form Submit ──
     document.getElementById('pklForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const form  = this;
         const choice = document.getElementById('taskChoice').value;
+
+        // Validasi
         if (choice === 'new') {
             const judul = document.querySelector('input[name="judul"]').value.trim();
             if (judul.length < 3) {
-                e.preventDefault();
-                alert('Nama pekerjaan harus minimal 3 karakter!');
-                return false;
+                showToast('Nama pekerjaan harus minimal 3 karakter!', 'error');
+                return;
             }
         } else if (choice === 'template') {
             const val = document.getElementById('taskSelect').value;
             if (!val.startsWith('tpl:')) {
-                e.preventDefault();
-                alert('Pilih template pekerjaan terlebih dahulu!');
-                return false;
+                showToast('Pilih template pekerjaan terlebih dahulu!', 'error');
+                return;
             }
         } else {
             const taskId = document.getElementById('taskSelect').value;
             if (!taskId) {
-                e.preventDefault();
-                alert('Pilih pekerjaan terlebih dahulu!');
-                return false;
+                showToast('Pilih pekerjaan terlebih dahulu!', 'error');
+                return;
             }
         }
 
         const deskripsi = document.querySelector('textarea[name="deskripsi"]').value.trim();
         if (deskripsi.length < 3) {
-            e.preventDefault();
-            alert('Deskripsi harus minimal 3 karakter!');
-            return false;
+            showToast('Detail pengerjaan harus minimal 3 karakter!', 'error');
+            return;
         }
 
         const langkahInputs = document.querySelectorAll('input[name="langkah_kerja[]"]');
         let hasLangkah = false;
         langkahInputs.forEach(inp => { if (inp.value.trim().length > 0) hasLangkah = true; });
         if (!hasLangkah) {
-            e.preventDefault();
-            alert('Minimal isi 1 langkah kerja!');
-            return false;
+            showToast('Minimal isi 1 langkah kerja!', 'error');
+            return;
         }
 
         const fotoInput = document.getElementById('foto');
         if (!fotoInput.files || !fotoInput.files[0]) {
-            e.preventDefault();
-            alert('Foto dokumentasi wajib diupload!');
-            return false;
+            showToast('Foto dokumentasi wajib diupload!', 'error');
+            return;
         }
 
-        if (!confirm('Simpan aktivitas ini?')) {
-            e.preventDefault();
-            return false;
-        }
+        // Konfirmasi dengan modal cantik
+        showConfirm(() => {
+            // Loading state pada tombol
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
 
-        const btn = document.getElementById('submitBtn');
-        btn.disabled = true;
-        document.getElementById('submitIcon').className = 'fas fa-spinner fa-spin';
-        document.getElementById('submitText').textContent = 'Menyimpan...';
+            // Tambah progress bar
+            const bar = document.createElement('span');
+            bar.className = 'btn-progress';
+            btn.appendChild(bar);
+            requestAnimationFrame(() => { bar.style.width = '85%'; });
+
+            // Animasi teks & ikon
+            document.getElementById('submitIcon').className = 'fas fa-spinner fa-spin';
+            document.getElementById('submitText').textContent = 'Menyimpan...';
+            btn.style.background = '#1a2fa0';
+
+            showToast('Menyimpan aktivitas...', 'info');
+
+            // Submit form
+            setTimeout(() => form.submit(), 300);
+        });
     });
 </script>
 <?= $this->endSection() ?>
