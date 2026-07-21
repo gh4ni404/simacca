@@ -809,22 +809,22 @@
                             <span class="wajib-badge">* Wajib</span>
                         </div>
 
-                        <!-- Segmented: Upload / Kamera -->
+                        <!-- Segmented: Kamera / Upload -->
                         <div class="upload-mode-picker">
                             <label>
-                                <input type="radio" name="upload_mode" value="upload" checked class="sr-only"
-                                       onchange="switchUploadMode('upload')">
-                                <div><i class="fas fa-images"></i> Upload / Galeri</div>
-                            </label>
-                            <label>
-                                <input type="radio" name="upload_mode" value="camera" class="sr-only"
+                                <input type="radio" name="upload_mode" value="camera" checked class="sr-only"
                                        onchange="switchUploadMode('camera')">
                                 <div><i class="fas fa-camera"></i> Ambil Foto</div>
+                            </label>
+                            <label>
+                                <input type="radio" name="upload_mode" value="upload" class="sr-only"
+                                       onchange="switchUploadMode('upload')">
+                                <div><i class="fas fa-images"></i> Upload / Galeri</div>
                             </label>
                         </div>
 
                         <!-- Upload Area (visible in upload mode) -->
-                        <div id="uploadArea" class="upload-area" onclick="document.getElementById('foto').click()">
+                        <div id="uploadArea" class="upload-area hidden" style="display: none;" onclick="document.getElementById('foto').click()">
                             <div class="upload-icon">
                                 <i class="fas fa-cloud-upload-alt"></i>
                             </div>
@@ -837,7 +837,7 @@
                         </div>
 
                         <!-- Camera hint (visible in camera mode) -->
-                        <div id="cameraHint" class="hidden" style="display: none;">
+                        <div id="cameraHint">
                             <div class="upload-area" id="cameraArea" onclick="openCamera()" style="cursor: pointer;">
                                 <div class="upload-icon" style="background-color: #ecfdf5; color: #10b981;">
                                     <i class="fas fa-camera"></i>
@@ -1080,10 +1080,12 @@
         const cameraHint = document.getElementById('cameraHint');
         if (mode === 'camera') {
             uploadArea.style.display = 'none';
+            uploadArea.classList.add('hidden');
             cameraHint.style.display = '';
             cameraHint.classList.remove('hidden');
         } else {
             uploadArea.style.display = '';
+            uploadArea.classList.remove('hidden');
             cameraHint.style.display = 'none';
             cameraHint.classList.add('hidden');
             closeCamera();
