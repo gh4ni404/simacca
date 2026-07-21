@@ -34,6 +34,52 @@ class PklProgressModel extends Model
         'deskripsi' => 'required|min_length[3]',
     ];
 
+    public function getBySiswaIds(array $siswaIds): array
+    {
+        return $this->select('pkl_progress.*, pkl_tasks.judul AS nama_task, pkl_tasks.siswa_id, siswa.nama_lengkap AS nama_siswa, kelas.nama_kelas, pkl_categories.nama AS kategori_nama')
+            ->join('pkl_tasks', 'pkl_tasks.id = pkl_progress.task_id AND pkl_tasks.deleted_at IS NULL')
+            ->join('siswa', 'siswa.id = pkl_tasks.siswa_id')
+            ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
+            ->join('pkl_categories', 'pkl_categories.id = pkl_tasks.kategori_id', 'left')
+            ->whereIn('pkl_tasks.siswa_id', $siswaIds)
+            ->orderBy('pkl_progress.tanggal', 'DESC')
+            ->orderBy('pkl_progress.created_at', 'DESC')
+            ->findAll();
+    }
+
+    public function getStatsBySiswaIds(array $siswaIds): array
+    {
+        $row = $this->select('COUNT(pkl_progress.id) AS total')
+            ->selectSum('CASE WHEN pkl_progress.status = \'submitted\' THEN 1 ELSE 0 END', 'submitted')
+            ->selectSum('CASE WHEN pkl_progress.status = \'approved\' THEN 1 ELSE 0 END', 'approved')
+            ->selectSum('CASE WHEN pkl_progress.status = \'revision\' THEN 1 ELSE 0 END', 'revision')
+            ->join('pkl_tasks', 'pkl_tasks.id = pkl_progress.task_id AND pkl_tasks.deleted_at IS NULL')
+            ->whereIn('pkl_tasks.siswa_id', $siswaIds)
+            ->first();
+
+        return [
+            'total'     => (int) ($row['total'] ?? 0),
+            'submitted' => (int) ($row['submitted'] ?? 0),
+            'approved'  => (int) ($row['approved'] ?? 0),
+            'revision'  => (int) ($row['revision'] ?? 0),
+        ];
+    }
+
+    public function getPendingBySiswaIds(array $siswaIds): array
+    {
+        return $this->select('pkl_progress.*, pkl_tasks.judul AS task_judul, pkl_tasks.siswa_id, siswa.nama_lengkap AS nama_siswa, siswa.nis, kelas.nama_kelas, users.profile_photo, pkl_categories.nama AS kategori_nama')
+            ->join('pkl_tasks', 'pkl_tasks.id = pkl_progress.task_id AND pkl_tasks.deleted_at IS NULL')
+            ->join('siswa', 'siswa.id = pkl_tasks.siswa_id AND siswa.deleted_at IS NULL')
+            ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
+            ->join('users', 'users.id = siswa.user_id', 'left')
+            ->join('pkl_categories', 'pkl_categories.id = pkl_tasks.kategori_id', 'left')
+            ->whereIn('pkl_tasks.siswa_id', $siswaIds)
+            ->where('pkl_progress.status', 'submitted')
+            ->orderBy('pkl_progress.tanggal', 'ASC')
+            ->orderBy('pkl_progress.created_at', 'ASC')
+            ->findAll();
+    }
+
     public function getByTask($taskId)
     {
         return $this->where('task_id', $taskId)

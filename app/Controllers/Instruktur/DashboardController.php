@@ -55,44 +55,15 @@ class DashboardController extends BaseController
         $siswaIds = array_column($siswaList, 'siswa_id');
 
         $recentProgress = [];
+        $allProgress = [];
         $statsProgress = ['total' => 0, 'submitted' => 0, 'approved' => 0, 'revision' => 0];
+        $pendingProgress = [];
 
         if (!empty($siswaIds)) {
-            $db = \Config\Database::connect();
-
-            $recentProgress = $db->query("
-                SELECT pp.*, pt.judul AS nama_task, pt.siswa_id,
-                       s.nama_lengkap AS nama_siswa, k.nama_kelas,
-                       pc.nama AS kategori_nama
-                FROM pkl_progress pp
-                JOIN pkl_tasks pt ON pt.id = pp.task_id
-                JOIN siswa s ON s.id = pt.siswa_id
-                LEFT JOIN kelas k ON k.id = s.kelas_id
-                LEFT JOIN pkl_categories pc ON pc.id = pt.kategori_id
-                WHERE pt.siswa_id IN (" . implode(',', $siswaIds) . ")
-                  AND pp.deleted_at IS NULL AND pt.deleted_at IS NULL
-                ORDER BY pp.tanggal DESC, pp.created_at DESC
-                LIMIT 10
-            ")->getResultArray();
-
-            $statsRow = $db->query("
-                SELECT
-                    COUNT(pp.id) AS total,
-                    SUM(CASE WHEN pp.status = 'submitted' THEN 1 ELSE 0 END) AS submitted,
-                    SUM(CASE WHEN pp.status = 'approved' THEN 1 ELSE 0 END) AS approved,
-                    SUM(CASE WHEN pp.status = 'revision' THEN 1 ELSE 0 END) AS revision
-                FROM pkl_progress pp
-                JOIN pkl_tasks pt ON pt.id = pp.task_id
-                WHERE pt.siswa_id IN (" . implode(',', $siswaIds) . ")
-                  AND pp.deleted_at IS NULL AND pt.deleted_at IS NULL
-            ")->getRowArray();
-
-            $statsProgress = [
-                'total' => (int) ($statsRow['total'] ?? 0),
-                'submitted' => (int) ($statsRow['submitted'] ?? 0),
-                'approved' => (int) ($statsRow['approved'] ?? 0),
-                'revision' => (int) ($statsRow['revision'] ?? 0),
-            ];
+            $allProgress     = $this->progressModel->getBySiswaIds($siswaIds);
+            $recentProgress  = array_slice($allProgress, 0, 10);
+            $statsProgress   = $this->progressModel->getStatsBySiswaIds($siswaIds);
+            $pendingProgress = $this->progressModel->getPendingBySiswaIds($siswaIds);
         }
 
         $pembimbingList = $this->pembimbingPklModel
@@ -111,10 +82,12 @@ class DashboardController extends BaseController
             'tempatPkl'         => $tempatPkl,
             'siswaList'         => $siswaList,
             'recentProgress'    => $recentProgress,
+            'allProgress'       => $allProgress,
             'statsProgress'     => $statsProgress,
             'pembimbingList'    => $pembimbingList,
             'totalSiswa'        => count($siswaList),
             'tahunAjaran'       => $tahunAjaran,
+            'pendingProgress'   => $pendingProgress,
         ];
 
         return view('instruktur/dashboard', $data);
