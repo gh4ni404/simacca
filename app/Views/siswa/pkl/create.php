@@ -1,541 +1,776 @@
 <?= $this->extend(get_device_layout()) ?>
 
 <?= $this->section('content') ?>
-<div class="p-4 md:p-6">
-    <div class="mb-6">
-        <div class="flex items-center">
-            <a href="<?= base_url('siswa/jurnal-pkl'); ?>" class="mr-4 text-gray-600 hover:text-gray-800">
-                <i class="fas fa-arrow-left text-xl"></i>
-            </a>
-            <div>
-                <h1 class="text-2xl font-bold text-gray-800">
-                    <i class="fas fa-plus-circle mr-2 text-blue-600"></i>
-                    Tambah Aktivitas PKL
-                </h1>
-                <p class="text-gray-600 mt-1">Catat kegiatan PKL Anda hari ini</p>
-            </div>
-        </div>
-    </div>
+<style>
+    body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        -webkit-tap-highlight-color: transparent;
+        background-color: #f0f2f5;
+    }
 
+    .hidden-section {
+        display: none !important;
+    }
+
+    /* Segmented Picker */
+    .segmented-picker {
+        background-color: #e8eaed;
+        border-radius: 12px;
+        padding: 4px;
+    }
+
+    .segmented-picker label {
+        transition: all 0.2s ease;
+    }
+
+    .segmented-picker input:checked+div {
+        background-color: #ffffff;
+        color: #2036bd;
+        box-shadow: 0 2px 8px rgba(32, 54, 189, 0.15);
+        border-radius: 10px;
+        font-weight: 700;
+    }
+
+    .segmented-picker div {
+        color: #6b7280;
+        font-weight: 500;
+        font-size: 0.9rem;
+        padding: 10px 0;
+        border-radius: 10px;
+        text-align: center;
+        transition: all 0.2s ease;
+    }
+
+    /* Section label style */
+    .section-label {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #1a1a2e;
+        margin-bottom: 8px;
+    }
+
+    /* Card style */
+    .card-section {
+        background: #ffffff;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 14px 16px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+
+    /* Date card */
+    .date-card {
+        background: #ffffff;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+
+    .date-icon {
+        width: 38px;
+        height: 38px;
+        background: #eef0ff;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #2036bd;
+        font-size: 1rem;
+    }
+
+    .date-label {
+        font-size: 0.72rem;
+        color: #9ca3af;
+        font-weight: 500;
+        margin-bottom: 2px;
+    }
+
+    .date-value {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1a1a2e;
+    }
+
+    .btn-ubah {
+        color: #2036bd;
+        font-size: 0.85rem;
+        font-weight: 700;
+        padding: 6px 12px;
+        border-radius: 8px;
+        transition: background 0.2s;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-ubah:hover {
+        background: #eef0ff;
+    }
+
+    /* Select dropdown */
+    .custom-select-wrapper {
+        position: relative;
+    }
+
+    .custom-select {
+        width: 100%;
+        background: #ffffff;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 12px 40px 12px 14px;
+        appearance: none;
+        -webkit-appearance: none;
+        font-size: 0.9rem;
+        color: #1a1a2e;
+        font-weight: 500;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        cursor: pointer;
+    }
+
+    .custom-select:focus {
+        border-color: #2036bd;
+        box-shadow: 0 0 0 3px rgba(32, 54, 189, 0.1);
+    }
+
+    .select-arrow {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: #6b7280;
+        font-size: 0.75rem;
+    }
+
+    /* Textarea */
+    .custom-textarea {
+        width: 100%;
+        background: #ffffff;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 12px 14px;
+        font-size: 0.875rem;
+        color: #1a1a2e;
+        outline: none;
+        resize: none;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        line-height: 1.5;
+    }
+
+    .custom-textarea:focus {
+        border-color: #2036bd;
+        box-shadow: 0 0 0 3px rgba(32, 54, 189, 0.1);
+    }
+
+    .custom-textarea::placeholder {
+        color: #b0b7c3;
+    }
+
+    /* Upload area */
+    .upload-area {
+        border: 2px dashed #d1d5db;
+        border-radius: 14px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: #fafbfc;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .upload-area:hover {
+        border-color: #2036bd;
+        background: #f0f2ff;
+    }
+
+    .upload-area.drag-over {
+        border-color: #2036bd;
+        background: #eef0ff;
+    }
+
+    .upload-icon {
+        width: 48px;
+        height: 48px;
+        background: #2036bd;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .upload-title {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 2px;
+    }
+
+    .upload-subtitle {
+        font-size: 0.75rem;
+        color: #9ca3af;
+    }
+
+    /* Bottom action bar */
+    .bottom-bar {
+        position: fixed;
+        bottom: 60px; /* di atas bottom navigation (~56px) */
+        left: 0;
+        right: 0;
+        background: #ffffff;
+        border-top: 1px solid #f0f0f0;
+        padding: 12px 16px;
+        z-index: 45;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+    }
+
+    .btn-simpan {
+        width: 100%;
+        background: #2036bd;
+        color: #ffffff;
+        font-size: 0.95rem;
+        font-weight: 700;
+        padding: 14px 20px;
+        border-radius: 50px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 16px rgba(32, 54, 189, 0.3);
+        letter-spacing: 0.01em;
+    }
+
+    .btn-simpan:hover {
+        background: #1a2fa0;
+        box-shadow: 0 6px 20px rgba(32, 54, 189, 0.4);
+    }
+
+    .btn-simpan:active {
+        transform: scale(0.98);
+    }
+
+    .btn-simpan:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    /* Input normal */
+    .custom-input {
+        width: 100%;
+        background: #ffffff;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 12px 14px;
+        font-size: 0.875rem;
+        color: #1a1a2e;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .custom-input:focus {
+        border-color: #2036bd;
+        box-shadow: 0 0 0 3px rgba(32, 54, 189, 0.1);
+    }
+
+    /* Langkah row */
+    .langkah-row {
+        transition: all 0.2s ease;
+    }
+
+    .langkah-num {
+        flex-shrink: 0;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #eef0ff;
+        color: #2036bd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .btn-remove-langkah {
+        flex-shrink: 0;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #fee2e2;
+        color: #ef4444;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .btn-remove-langkah:hover {
+        background: #fecaca;
+    }
+
+    .wajib-badge {
+        font-size: 0.78rem;
+        color: #ef4444;
+        font-weight: 600;
+    }
+
+    /* Preview image container */
+    .preview-container {
+        background: #ffffff;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        margin-top: 10px;
+    }
+</style>
+
+<!-- Alerts -->
+<div class="px-4 pt-3 max-w-md mx-auto">
     <?= view('components/alerts') ?>
+</div>
 
-    <?php if (!empty($tasks)): ?>
-    <!-- Quick Task Cards -->
-    <div class="mb-6">
-        <h2 class="text-sm font-semibold text-gray-700 mb-3">
-            <i class="fas fa-bolt mr-1 text-yellow-500"></i>
-            Pilih Task Aktif
-        </h2>
-        <div class="flex gap-3 overflow-x-auto pb-2">
-            <?php foreach ($tasks as $task): ?>
-            <button type="button" onclick="selectTask(<?= $task['id'] ?>)"
-                    class="flex-shrink-0 bg-white rounded-lg shadow hover:shadow-md border-2 border-transparent hover:border-blue-400 transition-all p-4 text-left min-w-[200px] task-card"
-                    data-task-id="<?= $task['id'] ?>">
-                <h3 class="text-sm font-semibold text-gray-800 truncate"><?= esc($task['judul']) ?></h3>
-                <?php if (!empty($task['kategori_nama'])): ?>
-                <span class="inline-block mt-1 text-xs px-2 py-0.5 rounded-full
-                    <?= match ($task['kategori_nama']) {
-                        'Desain' => 'bg-purple-100 text-purple-700',
-                        'Programming' => 'bg-blue-100 text-blue-700',
-                        'Administrasi' => 'bg-green-100 text-green-700',
-                        'Marketing' => 'bg-orange-100 text-orange-700',
-                        default => 'bg-gray-100 text-gray-600'
-                    } ?>"><?= esc($task['kategori_nama']) ?></span>
-                <?php endif; ?>
-            </button>
-            <?php endforeach; ?>
-        </div>
-    </div>
-    <?php endif; ?>
+<form action="<?= base_url('siswa/jurnal-pkl/simpan'); ?>" method="POST" enctype="multipart/form-data" id="pklForm">
+    <?= csrf_field(); ?>
+    <input type="hidden" name="task_choice" id="taskChoice" value="<?= old('task_choice', 'existing') ?>">
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2">
-            <div class="bg-white rounded-lg shadow">
-                <div class="p-6">
-                    <form action="<?= base_url('siswa/jurnal-pkl/simpan'); ?>" method="POST" enctype="multipart/form-data" id="pklForm">
-                        <?= csrf_field(); ?>
+    <main style="padding: 16px 16px 160px; max-width: 480px; margin: 0 auto;">
+        <div style="display: flex; flex-direction: column; gap: 20px;">
 
-                        <!-- Tanggal -->
-                        <div class="mb-5">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-calendar-alt mr-2 text-blue-500"></i>
-                                Tanggal
-                            </label>
-                            <input type="date"
-                                   name="tanggal"
-                                   value="<?= old('tanggal', date('Y-m-d')); ?>"
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50">
-                            <p class="text-xs text-gray-400 mt-1">Tanggal otomatis hari ini</p>
-                        </div>
+            <!-- Tanggal Section -->
+            <div class="date-card">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="date-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div>
+                        <p class="date-label">Tanggal Aktivitas</p>
+                        <h2 id="tanggalDisplay" class="date-value">
+                            <?= date('d F Y') ?>
+                        </h2>
+                    </div>
+                </div>
+                <button type="button" onclick="document.getElementById('tanggalPicker').click()" class="btn-ubah">
+                    Ubah
+                </button>
+                <input type="date" id="tanggalPicker" name="tanggal" value="<?= old('tanggal', date('Y-m-d')); ?>"
+                    class="sr-only" onchange="updateTanggalDisplay(this)">
+            </div>
 
-                        <!-- Pilih Task -->
-                        <div class="mb-5">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-tasks mr-2 text-purple-500"></i>
-                                Pilih Task <span class="text-red-500">*</span>
-                            </label>
-                            <div class="flex gap-2">
-                                <select name="task_id" id="taskSelect"
-                                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent <?= old('task_choice') === 'new' ? 'hidden' : '' ?>">
-                                    <option value="">-- Pilih Task --</option>
-                                    <?php if (!empty($tasks)): ?>
-                                    <optgroup label="Task Aktif">
-                                        <?php foreach ($tasks as $task): ?>
+            <!-- Jenis Aktivitas -->
+            <div>
+                <p class="section-label">Jenis Aktivitas</p>
+                <div class="segmented-picker" style="display: flex; gap: 2px;">
+                    <label style="flex: 1; cursor: pointer;">
+                        <input <?= old('task_choice', 'existing') !== 'new' ? 'checked' : '' ?> class="sr-only"
+                            name="job_type_ui" onchange="switchToExisting()" type="radio" value="continue" />
+                        <div>Lanjut Kerja</div>
+                    </label>
+                    <label style="flex: 1; cursor: pointer;">
+                        <input <?= old('task_choice') === 'new' ? 'checked' : '' ?> class="sr-only" name="job_type_ui"
+                            onchange="switchToNew()" type="radio" value="new" />
+                        <div>Kerja Baru</div>
+                    </label>
+                </div>
+
+                <!-- Conditional: Pilih Task yang Sudah Ada -->
+                <div class="<?= old('task_choice') === 'new' ? 'hidden-section' : '' ?>" id="section-continue"
+                    style="margin-top: 12px;">
+                    <p style="font-size: 0.8rem; color: #6b7280; margin-bottom: 6px; font-weight: 500;">Pilih pekerjaan yang sedang berjalan</p>
+                    <div class="custom-select-wrapper">
+                        <select name="task_id" id="taskSelect" class="custom-select">
+                            <option value="">-- Pilih Pekerjaan --</option>
+                            <?php if (!empty($tasks)): ?>
+                                <optgroup label="Pekerjaan Aktif">
+                                    <?php foreach ($tasks as $task): ?>
                                         <option value="<?= $task['id'] ?>" <?= old('task_id') == $task['id'] ? 'selected' : '' ?>>
                                             <?= esc($task['judul']) ?>
                                         </option>
-                                        <?php endforeach; ?>
-                                    </optgroup>
-                                    <?php endif; ?>
-                                    <?php if (!empty($taskTemplates)): ?>
-                                    <optgroup label="Task Dari Instruktur">
-                                        <?php foreach ($taskTemplates as $tpl): ?>
+                                    <?php endforeach; ?>
+                                </optgroup>
+                            <?php endif; ?>
+                            <?php if (!empty($taskTemplates)): ?>
+                                <optgroup label="Pekerjaan Dari Instruktur">
+                                    <?php foreach ($taskTemplates as $tpl): ?>
                                         <option value="tpl:<?= $tpl['id'] ?>" <?= old('task_id') == 'tpl:' . $tpl['id'] ? 'selected' : '' ?>>
-                                            <?= esc($tpl['judul']) ?><?= !empty($tpl['kategori_nama']) ? ' (' . esc($tpl['kategori_nama']) . ')' : '' ?>
+                                            <?= esc($tpl['judul']) ?>        <?= !empty($tpl['kategori_nama']) ? ' (' . esc($tpl['kategori_nama']) . ')' : '' ?>
                                         </option>
-                                        <?php endforeach; ?>
-                                    </optgroup>
-                                    <?php endif; ?>
-                                </select>
-                            </div>
-                            <input type="hidden" name="task_choice" id="taskChoice" value="<?= old('task_choice', 'existing') ?>">
-                        </div>
+                                    <?php endforeach; ?>
+                                </optgroup>
+                            <?php endif; ?>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                </div>
 
-                        <!-- Task Baru (Hidden by default) -->
-                        <div id="newTaskSection" class="mb-5 <?= old('task_choice') === 'new' ? '' : 'hidden' ?>">
-                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                <h3 class="text-sm font-semibold text-gray-700 mb-3">
-                                    <i class="fas fa-plus-circle mr-1 text-green-500"></i>
-                                    Task Baru
-                                </h3>
-                                <div class="space-y-3">
-                                    <div>
-                                        <input type="text"
-                                               name="judul"
-                                               value="<?= old('judul'); ?>"
-                                               placeholder="Nama task (contoh: Desain Brosur)"
-                                               maxlength="255"
-                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
-                                    </div>
-                                    <div>
-                                        <select name="kategori_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
-                                            <option value="">-- Kategori (opsional) --</option>
-                                            <?php foreach ($categories as $cat): ?>
-                                            <option value="<?= $cat['id'] ?>" <?= old('kategori_id') == $cat['id'] ? 'selected' : '' ?>>
-                                                <?= esc($cat['nama']) ?>
-                                            </option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <input type="text" name="estimasi"
-                                               value="<?= old('estimasi'); ?>"
-                                               placeholder="Contoh: 3 hari, 1 minggu"
-                                               maxlength="30"
-                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
-                                    </div>
-                                </div>
-                                <button type="button" onclick="switchToExisting()"
-                                        class="mt-3 text-xs text-blue-600 hover:text-blue-800">
-                                    <i class="fas fa-arrow-left mr-1"></i>Pilih task yang sudah ada
+                <!-- Conditional: Task Baru -->
+                <div class="<?= old('task_choice') !== 'new' ? 'hidden-section' : '' ?>" id="section-new"
+                    style="margin-top: 12px;">
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div>
+                        <p style="font-size: 0.8rem; color: #6b7280; margin-bottom: 6px; font-weight: 500;">Nama pekerjaan baru</p>
+                        <input class="custom-input" id="input-job-name" type="text" name="judul"
+                            value="<?= old('judul'); ?>" placeholder="E.g., Logo UMKM" maxlength="255" />
+                    </div>
+                    <div class="custom-select-wrapper">
+                        <select name="kategori_id" class="custom-select" style="padding-right: 40px;">
+                            <option value="">-- Kategori (opsional) --</option>
+                            <?php foreach ($categories as $cat): ?>
+                                <option value="<?= $cat['id'] ?>" <?= old('kategori_id') == $cat['id'] ? 'selected' : '' ?>>
+                                    <?= esc($cat['nama']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <i class="fas fa-chevron-down select-arrow"></i>
+                    </div>
+                    <input type="text" name="estimasi" value="<?= old('estimasi'); ?>"
+                        placeholder="Estimasi waktu, contoh: 3 hari" maxlength="30" class="custom-input">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Langkah Kerja -->
+            <div>
+                <p class="section-label">
+                    Langkah Kerja <span style="font-size: 0.78rem; color: #9ca3af; font-weight: 400;">(Perencanaan)</span>
+                </p>
+                <div id="langkahKerjaContainer" style="display: flex; flex-direction: column; gap: 8px;">
+                    <?php
+                    $langkah = old('langkah_kerja');
+                    if ($langkah && is_array($langkah)):
+                        foreach ($langkah as $i => $val): ?>
+                            <div class="langkah-row" style="display: flex; align-items: center; gap: 8px;">
+                                <span class="langkah-num"><?= ($i + 1) ?></span>
+                                <input type="text" name="langkah_kerja[]" value="<?= esc($val) ?>"
+                                    placeholder="Langkah <?= ($i + 1) ?>" class="custom-input" style="flex: 1;">
+                                <button type="button" onclick="removeLangkah(this)"
+                                    class="btn-remove-langkah <?= count($langkah) <= 1 ? 'hidden' : '' ?> remove-btn">
+                                    <i class="fas fa-times"></i>
                                 </button>
                             </div>
-                        </div>
-
-                        <!-- Toggle New/Existing -->
-                        <div id="toggleSection" class="mb-5 <?= old('task_choice') === 'new' ? 'hidden' : '' ?>">
-                            <button type="button" onclick="switchToNew()"
-                                    class="inline-flex items-center px-3 py-1.5 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-xs font-medium">
-                                <i class="fas fa-plus mr-1"></i>
-                                Task Baru
+                        <?php endforeach;
+                    else: ?>
+                        <div class="langkah-row" style="display: flex; align-items: center; gap: 8px;">
+                            <span class="langkah-num">1</span>
+                            <input type="text" name="langkah_kerja[]" value="" placeholder="Langkah 1"
+                                class="custom-input" style="flex: 1;">
+                            <button type="button" onclick="removeLangkah(this)"
+                                class="btn-remove-langkah hidden remove-btn">
+                                <i class="fas fa-times"></i>
                             </button>
                         </div>
+                    <?php endif; ?>
+                </div>
+                <button type="button" onclick="addLangkah()"
+                    style="margin-top: 10px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #eef0ff; color: #2036bd; border-radius: 8px; border: none; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: background 0.2s; font-family: 'Plus Jakarta Sans', sans-serif;">
+                    <i class="fas fa-plus" style="font-size: 0.7rem;"></i> Tambah Langkah
+                </button>
+            </div>
 
-                        <!-- Langkah Kerja (Perencanaan & Persiapan) -->
-                        <div class="mb-5">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-list-ol mr-2 text-indigo-500"></i>
-                                Langkah Kerja <span class="text-gray-400 font-normal">(Perencanaan & Persiapan)</span>
-                            </label>
-                            <div id="langkahKerjaContainer" class="space-y-2">
-                                <?php
-                                $langkah = old('langkah_kerja');
-                                if ($langkah && is_array($langkah)):
-                                    foreach ($langkah as $i => $val): ?>
-                                    <div class="flex items-center gap-2 langkah-row">
-                                        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold langkah-num"><?= ($i + 1) ?></span>
-                                        <input type="text" name="langkah_kerja[]" value="<?= esc($val) ?>"
-                                               placeholder="Langkah <?= ($i + 1) ?>"
-                                               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
-                                        <button type="button" onclick="removeLangkah(this)"
-                                                class="flex-shrink-0 w-7 h-7 rounded-full bg-red-100 text-red-500 flex items-center justify-center hover:bg-red-200 transition-colors text-xs <?= count($langkah) <= 1 ? 'hidden' : '' ?> remove-btn">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </div>
-                                    <?php endforeach;
-                                else: ?>
-                                    <div class="flex items-center gap-2 langkah-row">
-                                        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold langkah-num">1</span>
-                                        <input type="text" name="langkah_kerja[]" value=""
-                                               placeholder="Langkah 1"
-                                               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
-                                        <button type="button" onclick="removeLangkah(this)"
-                                                class="flex-shrink-0 w-7 h-7 rounded-full bg-red-100 text-red-500 flex items-center justify-center hover:bg-red-200 transition-colors text-xs hidden remove-btn">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                            <button type="button" onclick="addLangkah()"
-                                    class="mt-2 inline-flex items-center px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors text-xs font-medium">
-                                <i class="fas fa-plus mr-1"></i> Tambah Langkah
+            <!-- Detail Pengerjaan -->
+            <div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <p class="section-label" style="margin-bottom: 0;">Detail Pengerjaan</p>
+                    <span class="wajib-badge">* Wajib</span>
+                </div>
+                <textarea class="custom-textarea" id="description" name="deskripsi"
+                    placeholder="Ceritakan apa yang kamu kerjakan hari ini..."
+                    rows="4" required minlength="3"><?= old('deskripsi'); ?></textarea>
+                <p style="font-size: 0.72rem; color: #b0b7c3; margin-top: 4px;">Minimal 3 karakter</p>
+            </div>
+
+            <!-- Dokumentasi (Foto) -->
+            <div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <p class="section-label" style="margin-bottom: 0;">Dokumentasi</p>
+                </div>
+                <div id="uploadArea" class="upload-area" onclick="document.getElementById('foto').click()">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <div>
+                        <p class="upload-title">Upload Foto/File</p>
+                        <p class="upload-subtitle">JPG, PNG, PDF (Maks 5MB)</p>
+                    </div>
+                    <input id="foto" name="foto" type="file" accept=".jpg,.jpeg,.png,.webp" class="sr-only"
+                        onchange="previewImage(this)">
+                </div>
+                <!-- Preview Container -->
+                <div id="previewContainer" class="hidden">
+                    <div class="preview-container">
+                        <img id="preview" class="w-full" style="max-height: 200px; object-fit: cover; display: block;">
+                        <div style="padding: 10px 14px; display: flex; align-items: center; justify-content: space-between;">
+                            <p id="fileName" style="font-size: 0.75rem; color: #6b7280; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></p>
+                            <button type="button" onclick="removeImage(); event.stopPropagation();"
+                                style="flex-shrink: 0; font-size: 0.75rem; color: #ef4444; font-weight: 700; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                <i class="fas fa-times"></i> Hapus
                             </button>
-                            <p class="text-xs text-gray-400 mt-1">Isi langkah persiapan sebelum mengerjakan</p>
                         </div>
-
-                        <!-- Deskripsi -->
-                        <div class="mb-5">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-align-left mr-2 text-green-500"></i>
-                                Aktivitas Hari Ini <span class="text-red-500">*</span>
-                            </label>
-                            <textarea name="deskripsi"
-                                      rows="4"
-                                      required
-                                      minlength="3"
-                                      placeholder="Hari ini saya..."
-                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"><?= old('deskripsi'); ?></textarea>
-                            <p class="text-xs text-gray-400 mt-1">Minimal 3 karakter</p>
-                        </div>
-
-                        <!-- Foto -->
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-camera mr-2 text-yellow-500"></i>
-                                Foto Dokumentasi <span class="text-red-500">*</span>
-                            </label>
-                            <div id="uploadArea"
-                                 class="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer"
-                                 onclick="document.getElementById('foto').click()">
-                                <div class="space-y-1 text-center pointer-events-none">
-                                    <svg class="mx-auto h-10 w-10 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                    <div class="flex text-sm text-gray-600 justify-center">
-                                        <span class="font-medium text-blue-600">Klik untuk upload foto</span>
-                                        <span class="pl-1">atau drag & drop</span>
-                                    </div>
-                                    <p class="text-xs text-gray-500">JPG, JPEG, PNG atau WebP (Max. 5MB) <span class="text-red-500 font-medium">Wajib diisi</span></p>
-                                    <input id="foto" name="foto" type="file" accept=".jpg,.jpeg,.png,.webp" class="sr-only" onchange="previewImage(this)">
-                                    <div id="previewContainer" class="mt-3 hidden pointer-events-auto">
-                                        <img id="preview" class="mx-auto max-h-40 rounded-lg shadow">
-                                        <button type="button" onclick="removeImage(); event.stopPropagation();" class="mt-2 text-xs text-red-600 hover:text-red-800 pointer-events-auto">
-                                            <i class="fas fa-times mr-1"></i>Hapus foto
-                                        </button>
-                                    </div>
-                                    <p id="fileName" class="text-sm text-blue-600 font-medium mt-2"></p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Submit -->
-                        <div class="flex gap-3">
-                            <button type="submit" id="submitBtn"
-                                    class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2">
-                                <i class="fas fa-save" id="submitIcon"></i>
-                                <span id="submitText">Simpan</span>
-                            </button>
-                            <a href="<?= base_url('siswa/jurnal-pkl'); ?>"
-                               class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium">
-                                <i class="fas fa-times mr-2"></i>Batal
-                            </a>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
+
         </div>
+    </main>
 
-        <div class="lg:col-span-1">
-            <div class="bg-white rounded-lg shadow p-5 mb-4">
-                <h3 class="text-sm font-semibold text-gray-800 mb-3">
-                    <i class="fas fa-info-circle mr-2 text-blue-500"></i>
-                    Panduan
-                </h3>
-                <div class="space-y-2 text-xs text-gray-600">
-                    <div class="flex items-start gap-2">
-                        <span class="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">1</span>
-                        <p>Pilih task yang sedang dikerjakan</p>
-                    </div>
-                    <div class="flex items-start gap-2">
-                        <span class="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">2</span>
-                        <p>Buat task baru jika belum ada</p>
-                    </div>
-                    <div class="flex items-start gap-2">
-                        <span class="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">3</span>
-                        <p>Tuliskan aktivitas hari ini</p>
-                    </div>
-                    <div class="flex items-start gap-2">
-                        <span class="flex-shrink-0 w-5 h-5 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold">4</span>
-                        <p>Upload foto dokumentasi <span class="font-semibold text-red-600">(wajib)</span></p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg shadow p-5 text-white">
-                <h3 class="text-sm font-semibold mb-2">
-                    <i class="fas fa-lightbulb mr-2"></i>Tips
-                </h3>
-                <ul class="text-xs space-y-1.5 opacity-90">
-                    <li><i class="fas fa-check mr-1"></i>Isi setiap hari setelah selesai kegiatan</li>
-                    <li><i class="fas fa-check mr-1"></i>Deskripsikan aktivitas dengan jelas</li>
-                    <li><i class="fas fa-check mr-1"></i>Anda bisa mengisi lebih dari 1 aktivitas per hari</li>
-                    <li><i class="fas fa-check mr-1"></i>1 task bisa berlangsung beberapa hari</li>
-                </ul>
-            </div>
+    <!-- Bottom Action Bar -->
+    <div class="bottom-bar">
+        <div style="max-width: 480px; margin: 0 auto;">
+            <button type="submit" id="submitBtn" class="btn-simpan">
+                <i class="fas fa-rocket" id="submitIcon" style="font-size: 1rem;"></i>
+                <span id="submitText">Simpan Aktivitas</span>
+            </button>
         </div>
     </div>
-</div>
+
+</form>
 
 <script>
-function selectTask(taskId) {
-    const select = document.getElementById('taskSelect');
-    select.value = taskId;
-    select.dispatchEvent(new Event('change'));
-
-    document.querySelectorAll('.task-card').forEach(card => {
-        card.classList.remove('border-blue-500', 'bg-blue-50');
-        card.classList.add('border-transparent');
-    });
-    const selectedCard = document.querySelector(`.task-card[data-task-id="${taskId}"]`);
-    if (selectedCard) {
-        selectedCard.classList.add('border-blue-500', 'bg-blue-50');
-        selectedCard.classList.remove('border-transparent');
+    // --- Tanggal Display ---
+    function updateTanggalDisplay(input) {
+        const date = new Date(input.value + 'T00:00:00');
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+        document.getElementById('tanggalDisplay').textContent = date.toLocaleDateString('id-ID', options);
     }
-}
 
-function addLangkah() {
-    const container = document.getElementById('langkahKerjaContainer');
-    const count = container.querySelectorAll('.langkah-row').length + 1;
-    const row = document.createElement('div');
-    row.className = 'flex items-center gap-2 langkah-row';
-    row.innerHTML = `
-        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold langkah-num">${count}</span>
+    // --- Toggle Jenis Aktivitas ---
+    function switchToNew() {
+        document.getElementById('section-continue').classList.add('hidden-section');
+        document.getElementById('section-new').classList.remove('hidden-section');
+        document.getElementById('taskChoice').value = 'new';
+        resetLangkahKerja();
+    }
+
+    function switchToExisting() {
+        const sectionNew = document.getElementById('section-new');
+        sectionNew.classList.add('hidden-section');
+        document.getElementById('section-continue').classList.remove('hidden-section');
+        document.getElementById('taskChoice').value = 'existing';
+    }
+
+    // --- Langkah Kerja ---
+    function addLangkah() {
+        const container = document.getElementById('langkahKerjaContainer');
+        const count = container.querySelectorAll('.langkah-row').length + 1;
+        const row = document.createElement('div');
+        row.className = 'langkah-row';
+        row.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+        row.innerHTML = `
+        <span class="langkah-num">${count}</span>
         <input type="text" name="langkah_kerja[]" value=""
                placeholder="Langkah ${count}"
-               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
-        <button type="button" onclick="removeLangkah(this)"
-                class="flex-shrink-0 w-7 h-7 rounded-full bg-red-100 text-red-500 flex items-center justify-center hover:bg-red-200 transition-colors text-xs remove-btn">
+               class="custom-input" style="flex: 1;">
+        <button type="button" onclick="removeLangkah(this)" class="btn-remove-langkah remove-btn">
             <i class="fas fa-times"></i>
         </button>
     `;
-    container.appendChild(row);
-    row.querySelector('input').focus();
-    updateLangkahVisibility();
-}
+        container.appendChild(row);
+        row.querySelector('input').focus();
+        updateLangkahVisibility();
+    }
 
-function removeLangkah(btn) {
-    const row = btn.closest('.langkah-row');
-    row.remove();
-    updateLangkahNumbers();
-    updateLangkahVisibility();
-}
+    function removeLangkah(btn) {
+        const row = btn.closest('.langkah-row');
+        row.remove();
+        updateLangkahNumbers();
+        updateLangkahVisibility();
+    }
 
-function updateLangkahNumbers() {
-    const rows = document.querySelectorAll('#langkahKerjaContainer .langkah-row');
-    rows.forEach((row, i) => {
-        row.querySelector('.langkah-num').textContent = i + 1;
-        row.querySelector('input').placeholder = 'Langkah ' + (i + 1);
-    });
-}
+    function updateLangkahNumbers() {
+        const rows = document.querySelectorAll('#langkahKerjaContainer .langkah-row');
+        rows.forEach((row, i) => {
+            row.querySelector('.langkah-num').textContent = i + 1;
+            row.querySelector('input').placeholder = 'Langkah ' + (i + 1);
+        });
+    }
 
-function updateLangkahVisibility() {
-    const rows = document.querySelectorAll('#langkahKerjaContainer .langkah-row');
-    const btns = document.querySelectorAll('#langkahKerjaContainer .remove-btn');
-    btns.forEach(btn => {
-        if (rows.length <= 1) {
-            btn.classList.add('hidden');
-        } else {
-            btn.classList.remove('hidden');
-        }
-    });
-}
-function switchToNew() {
-    document.getElementById('taskSelect').classList.add('hidden');
-    document.getElementById('toggleSection').classList.add('hidden');
-    document.getElementById('newTaskSection').classList.remove('hidden');
-    document.getElementById('taskChoice').value = 'new';
-    resetLangkahKerja();
-}
+    function updateLangkahVisibility() {
+        const rows = document.querySelectorAll('#langkahKerjaContainer .langkah-row');
+        const btns = document.querySelectorAll('#langkahKerjaContainer .remove-btn');
+        btns.forEach(btn => {
+            rows.length <= 1 ? btn.classList.add('hidden') : btn.classList.remove('hidden');
+        });
+    }
 
-function switchToExisting() {
-    document.getElementById('newTaskSection').classList.add('hidden');
-    document.getElementById('taskSelect').classList.remove('hidden');
-    document.getElementById('toggleSection').classList.remove('hidden');
-    document.getElementById('taskChoice').value = 'existing';
-}
-
-function resetLangkahKerja() {
-    const container = document.getElementById('langkahKerjaContainer');
-    container.innerHTML = `
-        <div class="flex items-center gap-2 langkah-row">
-            <span class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold langkah-num">1</span>
+    function resetLangkahKerja() {
+        const container = document.getElementById('langkahKerjaContainer');
+        container.innerHTML = `
+        <div class="langkah-row" style="display: flex; align-items: center; gap: 8px;">
+            <span class="langkah-num">1</span>
             <input type="text" name="langkah_kerja[]" value=""
                    placeholder="Langkah 1"
-                   class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+                   class="custom-input" style="flex: 1;">
             <button type="button" onclick="removeLangkah(this)"
-                    class="flex-shrink-0 w-7 h-7 rounded-full bg-red-100 text-red-500 flex items-center justify-center hover:bg-red-200 transition-colors text-xs hidden remove-btn">
+                    class="btn-remove-langkah hidden remove-btn">
                 <i class="fas fa-times"></i>
             </button>
         </div>
     `;
-}
-
-// Handle template selection (tpl:ID) and task selection for langkah_kerja auto-fill
-document.getElementById('taskSelect').addEventListener('change', function() {
-    const val = this.value;
-    if (val.startsWith('tpl:')) {
-        document.getElementById('taskChoice').value = 'template';
-        const templateId = val.replace('tpl:', '');
-        fetchLangkahKerja('template', templateId);
-    } else if (val) {
-        document.getElementById('taskChoice').value = 'existing';
-        fetchLangkahKerja('task', val);
-    } else {
-        document.getElementById('taskChoice').value = 'existing';
-    }
-});
-
-function fetchLangkahKerja(type, id) {
-    const baseUrl = '<?= base_url('siswa/jurnal-pkl') ?>';
-    let url;
-    if (type === 'task') {
-        url = baseUrl + '/get-task-langkah-kerja?task_id=' + id;
-    } else {
-        url = baseUrl + '/get-template-langkah-kerja?template_id=' + id;
     }
 
-    fetch(url)
-        .then(response => response.json())
-        .then(result => {
-            if (result.success && result.data && result.data.length > 0) {
-                populateLangkahKerja(result.data);
-            } else {
-                resetLangkahKerja();
-            }
-        })
-        .catch(err => {
-            console.error('Gagal mengambil langkah kerja:', err);
-            resetLangkahKerja();
-        });
-}
+    // --- Task Select Change ---
+    document.getElementById('taskSelect').addEventListener('change', function () {
+        const val = this.value;
+        if (val.startsWith('tpl:')) {
+            document.getElementById('taskChoice').value = 'template';
+            fetchLangkahKerja('template', val.replace('tpl:', ''));
+        } else if (val) {
+            document.getElementById('taskChoice').value = 'existing';
+            fetchLangkahKerja('task', val);
+        } else {
+            document.getElementById('taskChoice').value = 'existing';
+        }
+    });
 
-function populateLangkahKerja(steps) {
-    const container = document.getElementById('langkahKerjaContainer');
-    container.innerHTML = '';
+    function fetchLangkahKerja(type, id) {
+        const baseUrl = '<?= base_url('siswa/jurnal-pkl') ?>';
+        const url = type === 'task'
+            ? baseUrl + '/get-task-langkah-kerja?task_id=' + id
+            : baseUrl + '/get-template-langkah-kerja?template_id=' + id;
 
-    steps.forEach((step, i) => {
-        const row = document.createElement('div');
-        row.className = 'flex items-center gap-2 langkah-row';
-        row.innerHTML = `
-            <span class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold langkah-num">${i + 1}</span>
+        fetch(url)
+            .then(r => r.json())
+            .then(result => {
+                if (result.success && result.data && result.data.length > 0) {
+                    populateLangkahKerja(result.data);
+                } else {
+                    resetLangkahKerja();
+                }
+            })
+            .catch(() => resetLangkahKerja());
+    }
+
+    function populateLangkahKerja(steps) {
+        const container = document.getElementById('langkahKerjaContainer');
+        container.innerHTML = '';
+        steps.forEach((step, i) => {
+            const row = document.createElement('div');
+            row.className = 'langkah-row';
+            row.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+            row.innerHTML = `
+            <span class="langkah-num">${i + 1}</span>
             <input type="text" name="langkah_kerja[]" value="${step.replace(/"/g, '&quot;')}"
                    placeholder="Langkah ${i + 1}"
-                   class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+                   class="custom-input" style="flex: 1;">
             <button type="button" onclick="removeLangkah(this)"
-                    class="flex-shrink-0 w-7 h-7 rounded-full bg-red-100 text-red-500 flex items-center justify-center hover:bg-red-200 transition-colors text-xs remove-btn">
+                    class="btn-remove-langkah remove-btn">
                 <i class="fas fa-times"></i>
             </button>
         `;
-        container.appendChild(row);
+            container.appendChild(row);
+        });
+        updateLangkahVisibility();
+    }
+
+    // --- Foto Upload ---
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const fileSize = (file.size / 1024 / 1024).toFixed(2);
+            if (parseFloat(fileSize) > 5) {
+                alert('Ukuran file terlalu besar! Maksimal 5MB');
+                input.value = '';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('preview').src = e.target.result;
+                document.getElementById('previewContainer').classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+            document.getElementById('fileName').textContent = file.name + ' (' + fileSize + ' MB)';
+            const ua = document.getElementById('uploadArea');
+            ua.style.borderColor = '#22c55e';
+            ua.style.background = '#f0fdf4';
+        }
+    }
+
+    function removeImage() {
+        document.getElementById('foto').value = '';
+        document.getElementById('previewContainer').classList.add('hidden');
+        document.getElementById('fileName').textContent = '';
+        const ua = document.getElementById('uploadArea');
+        ua.style.borderColor = '';
+        ua.style.background = '';
+    }
+
+    // --- Form Submit ---
+    document.getElementById('pklForm').addEventListener('submit', function (e) {
+        const choice = document.getElementById('taskChoice').value;
+        if (choice === 'new') {
+            const judul = document.querySelector('input[name="judul"]').value.trim();
+            if (judul.length < 3) {
+                e.preventDefault();
+                alert('Nama pekerjaan harus minimal 3 karakter!');
+                return false;
+            }
+        } else if (choice === 'template') {
+            const val = document.getElementById('taskSelect').value;
+            if (!val.startsWith('tpl:')) {
+                e.preventDefault();
+                alert('Pilih template pekerjaan terlebih dahulu!');
+                return false;
+            }
+        } else {
+            const taskId = document.getElementById('taskSelect').value;
+            if (!taskId) {
+                e.preventDefault();
+                alert('Pilih pekerjaan terlebih dahulu!');
+                return false;
+            }
+        }
+
+        const deskripsi = document.querySelector('textarea[name="deskripsi"]').value.trim();
+        if (deskripsi.length < 3) {
+            e.preventDefault();
+            alert('Deskripsi harus minimal 3 karakter!');
+            return false;
+        }
+
+        const langkahInputs = document.querySelectorAll('input[name="langkah_kerja[]"]');
+        let hasLangkah = false;
+        langkahInputs.forEach(inp => { if (inp.value.trim().length > 0) hasLangkah = true; });
+        if (!hasLangkah) {
+            e.preventDefault();
+            alert('Minimal isi 1 langkah kerja!');
+            return false;
+        }
+
+        const fotoInput = document.getElementById('foto');
+        if (!fotoInput.files || !fotoInput.files[0]) {
+            e.preventDefault();
+            alert('Foto dokumentasi wajib diupload!');
+            return false;
+        }
+
+        if (!confirm('Simpan aktivitas ini?')) {
+            e.preventDefault();
+            return false;
+        }
+
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        document.getElementById('submitIcon').className = 'fas fa-spinner fa-spin';
+        document.getElementById('submitText').textContent = 'Menyimpan...';
     });
-
-    updateLangkahVisibility();
-}
-
-function previewImage(input) {
-    if (input.files && input.files[0]) {
-        const file = input.files[0];
-        const fileSize = (file.size / 1024 / 1024).toFixed(2);
-        if (fileSize > 5) {
-            alert('Ukuran file terlalu besar! Maksimal 5MB');
-            input.value = '';
-            return;
-        }
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('preview').src = e.target.result;
-            document.getElementById('previewContainer').classList.remove('hidden');
-        };
-        reader.readAsDataURL(file);
-        document.getElementById('fileName').textContent = file.name + ' (' + fileSize + ' MB)';
-        document.getElementById('uploadArea').classList.add('border-green-400', 'bg-green-50/50');
-        document.getElementById('uploadArea').classList.remove('border-gray-300');
-    }
-}
-
-function removeImage() {
-    document.getElementById('foto').value = '';
-    document.getElementById('previewContainer').classList.add('hidden');
-    document.getElementById('fileName').textContent = '';
-    document.getElementById('uploadArea').classList.remove('border-green-400', 'bg-green-50/50');
-    document.getElementById('uploadArea').classList.add('border-gray-300');
-}
-
-document.getElementById('pklForm').addEventListener('submit', function(e) {
-    const choice = document.getElementById('taskChoice').value;
-    if (choice === 'new') {
-        const judul = document.querySelector('input[name="judul"]').value.trim();
-        if (judul.length < 3) {
-            e.preventDefault();
-            alert('Nama task harus minimal 3 karakter!');
-            return false;
-        }
-    } else if (choice === 'template') {
-        const val = document.getElementById('taskSelect').value;
-        if (!val.startsWith('tpl:')) {
-            e.preventDefault();
-            alert('Pilih template task terlebih dahulu!');
-            return false;
-        }
-    } else {
-        const taskId = document.getElementById('taskSelect').value;
-        if (!taskId) {
-            e.preventDefault();
-            alert('Pilih task terlebih dahulu!');
-            return false;
-        }
-    }
-    const deskripsi = document.querySelector('textarea[name="deskripsi"]').value.trim();
-    if (deskripsi.length < 3) {
-        e.preventDefault();
-        alert('Deskripsi harus minimal 3 karakter!');
-        return false;
-    }
-    const langkahInputs = document.querySelectorAll('input[name="langkah_kerja[]"]');
-    let hasLangkah = false;
-    langkahInputs.forEach(inp => {
-        if (inp.value.trim().length > 0) hasLangkah = true;
-    });
-    if (!hasLangkah) {
-        e.preventDefault();
-        alert('Minimal isi 1 langkah kerja!');
-        return false;
-    }
-    const fotoInput = document.getElementById('foto');
-    if (!fotoInput.files || !fotoInput.files[0]) {
-        e.preventDefault();
-        alert('Foto dokumentasi wajib diupload!');
-        return false;
-    }
-    if (!confirm('Simpan aktivitas ini?')) {
-        e.preventDefault();
-        return false;
-    }
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.classList.add('bg-blue-400', 'cursor-not-allowed');
-    document.getElementById('submitIcon').classList.add('fa-spinner', 'fa-spin');
-    document.getElementById('submitText').textContent = 'Menyimpan...';
-});
 </script>
 <?= $this->endSection() ?>
