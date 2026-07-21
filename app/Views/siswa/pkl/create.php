@@ -5,7 +5,6 @@
     body {
         font-family: 'Plus Jakarta Sans', sans-serif;
         -webkit-tap-highlight-color: transparent;
-        background-color: #f0f2f5;
     }
 
     .hidden-section {
@@ -14,9 +13,10 @@
 
     /* Segmented Picker */
     .segmented-picker {
-        background-color: #e8eaed;
+        background-color: #f3f4f6;
         border-radius: 12px;
         padding: 4px;
+        border: 1px solid #e5e7eb;
     }
 
     .segmented-picker label {
@@ -25,90 +25,37 @@
 
     .segmented-picker input:checked+div {
         background-color: #ffffff;
-        color: #2036bd;
-        box-shadow: 0 2px 8px rgba(32, 54, 189, 0.15);
-        border-radius: 10px;
+        color: #3b82f6;
+        box-shadow: 0 4px 10px rgba(59, 130, 246, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+        border-radius: 8px;
         font-weight: 700;
     }
 
     .segmented-picker div {
-        color: #6b7280;
-        font-weight: 500;
-        font-size: 0.9rem;
+        color: #4b5563;
+        font-weight: 600;
+        font-size: 0.875rem;
         padding: 10px 0;
-        border-radius: 10px;
+        border-radius: 8px;
         text-align: center;
         transition: all 0.2s ease;
     }
 
-    /* Section label style */
-    .section-label {
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: #1a1a2e;
-        margin-bottom: 8px;
-    }
-
-    /* Card style */
-    .card-section {
-        background: #ffffff;
-        border: 1.5px solid #e5e7eb;
-        border-radius: 14px;
-        padding: 14px 16px;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-    }
-
-    /* Date card */
-    .date-card {
-        background: #ffffff;
-        border: 1.5px solid #e5e7eb;
-        border-radius: 14px;
-        padding: 14px 16px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-    }
-
-    .date-icon {
-        width: 38px;
-        height: 38px;
-        background: #eef0ff;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #2036bd;
-        font-size: 1rem;
-    }
-
-    .date-label {
-        font-size: 0.72rem;
-        color: #9ca3af;
-        font-weight: 500;
-        margin-bottom: 2px;
-    }
-
-    .date-value {
-        font-size: 1rem;
-        font-weight: 700;
-        color: #1a1a2e;
-    }
-
     .btn-ubah {
-        color: #2036bd;
-        font-size: 0.85rem;
+        padding: 6px 14px;
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb;
+        color: #3b82f6;
+        font-size: 0.75rem;
         font-weight: 700;
-        padding: 6px 12px;
         border-radius: 8px;
-        transition: background 0.2s;
-        background: transparent;
-        border: none;
         cursor: pointer;
+        transition: all 0.2s ease;
     }
 
     .btn-ubah:hover {
-        background: #eef0ff;
+        border-color: #3b82f6;
+        background-color: rgba(59, 130, 246, 0.05);
     }
 
     /* Select dropdown */
@@ -118,24 +65,23 @@
 
     .custom-select {
         width: 100%;
-        background: #ffffff;
-        border: 1.5px solid #e5e7eb;
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb;
         border-radius: 12px;
         padding: 12px 40px 12px 14px;
         appearance: none;
         -webkit-appearance: none;
-        font-size: 0.9rem;
-        color: #1a1a2e;
+        font-size: 0.875rem;
+        color: #1f2937;
         font-weight: 500;
         outline: none;
-        transition: border-color 0.2s, box-shadow 0.2s;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        transition: all 0.2s ease;
         cursor: pointer;
     }
 
     .custom-select:focus {
-        border-color: #2036bd;
-        box-shadow: 0 0 0 3px rgba(32, 54, 189, 0.1);
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
     }
 
     .select-arrow {
@@ -144,104 +90,98 @@
         top: 50%;
         transform: translateY(-50%);
         pointer-events: none;
-        color: #6b7280;
-        font-size: 0.75rem;
+        color: #9ca3af;
+        font-size: 0.875rem;
     }
 
     /* Textarea */
     .custom-textarea {
         width: 100%;
-        background: #ffffff;
-        border: 1.5px solid #e5e7eb;
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb;
         border-radius: 12px;
         padding: 12px 14px;
         font-size: 0.875rem;
-        color: #1a1a2e;
+        color: #1f2937;
         outline: none;
-        resize: none;
+        resize: vertical;
         font-family: 'Plus Jakarta Sans', sans-serif;
-        transition: border-color 0.2s, box-shadow 0.2s;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-        line-height: 1.5;
+        transition: all 0.2s ease;
+        line-height: 1.6;
     }
 
     .custom-textarea:focus {
-        border-color: #2036bd;
-        box-shadow: 0 0 0 3px rgba(32, 54, 189, 0.1);
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
     }
 
     .custom-textarea::placeholder {
-        color: #b0b7c3;
+        color: #9ca3af;
     }
 
     /* Upload area */
     .upload-area {
         border: 2px dashed #d1d5db;
-        border-radius: 14px;
-        padding: 16px;
+        border-radius: 16px;
+        padding: 24px 16px;
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 14px;
-        background: #fafbfc;
+        justify-content: center;
+        background-color: #f9fafb;
         cursor: pointer;
         transition: all 0.2s ease;
+        gap: 12px;
     }
 
     .upload-area:hover {
-        border-color: #2036bd;
-        background: #f0f2ff;
+        border-color: #3b82f6;
+        background-color: rgba(59, 130, 246, 0.02);
     }
 
     .upload-area.drag-over {
-        border-color: #2036bd;
-        background: #eef0ff;
+        border-color: #3b82f6;
+        background: #f0f4ff;
     }
 
     .upload-icon {
         width: 48px;
         height: 48px;
-        background: #2036bd;
+        background-color: #eff6ff;
         border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #ffffff;
-        font-size: 1.2rem;
+        color: #3b82f6;
+        font-size: 1.25rem;
         flex-shrink: 0;
+        transition: all 0.2s ease;
+    }
+
+    .upload-area:hover .upload-icon {
+        background-color: #3b82f6;
+        color: #ffffff;
     }
 
     .upload-title {
-        font-size: 0.92rem;
+        font-size: 0.875rem;
         font-weight: 700;
-        color: #1a1a2e;
-        margin-bottom: 2px;
+        color: #1f2937;
     }
 
     .upload-subtitle {
         font-size: 0.75rem;
-        color: #9ca3af;
-    }
-
-    /* Bottom action bar */
-    .bottom-bar {
-        position: fixed;
-        bottom: 60px; /* di atas bottom navigation (~56px) */
-        left: 0;
-        right: 0;
-        background: #ffffff;
-        border-top: 1px solid #f0f0f0;
-        padding: 12px 16px;
-        z-index: 45;
-        box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+        color: #6b7280;
+        margin-top: 2px;
     }
 
     .btn-simpan {
         width: 100%;
-        background: #2036bd;
+        background-color: #3b82f6;
         color: #ffffff;
         font-size: 0.95rem;
         font-weight: 700;
-        padding: 14px 20px;
+        padding: 14px 24px;
         border-radius: 50px;
         border: none;
         cursor: pointer;
@@ -250,13 +190,13 @@
         justify-content: center;
         gap: 8px;
         transition: all 0.2s ease;
-        box-shadow: 0 4px 16px rgba(32, 54, 189, 0.3);
+        box-shadow: 0 4px 14px rgba(59, 130, 246, 0.25);
         letter-spacing: 0.01em;
     }
 
     .btn-simpan:hover {
-        background: #1a2fa0;
-        box-shadow: 0 6px 20px rgba(32, 54, 189, 0.4);
+        background-color: #2563eb;
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
     }
 
     .btn-simpan:active {
@@ -271,21 +211,20 @@
     /* Input normal */
     .custom-input {
         width: 100%;
-        background: #ffffff;
-        border: 1.5px solid #e5e7eb;
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb;
         border-radius: 12px;
-        padding: 12px 14px;
+        padding: 10px 16px;
         font-size: 0.875rem;
-        color: #1a1a2e;
+        color: #1f2937;
         outline: none;
-        transition: border-color 0.2s, box-shadow 0.2s;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        transition: all 0.2s ease;
         font-family: 'Plus Jakarta Sans', sans-serif;
     }
 
     .custom-input:focus {
-        border-color: #2036bd;
-        box-shadow: 0 0 0 3px rgba(32, 54, 189, 0.1);
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
     }
 
     /* Langkah row */
@@ -295,58 +234,61 @@
 
     .langkah-num {
         flex-shrink: 0;
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background: #eef0ff;
-        color: #2036bd;
+        width: 32px;
+        height: 32px;
+        border-radius: 9999px;
+        background-color: #eff6ff;
+        color: #3b82f6;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.75rem;
+        font-size: 0.875rem;
         font-weight: 700;
+        border: 1px solid #dbeafe;
     }
 
     .btn-remove-langkah {
         flex-shrink: 0;
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background: #fee2e2;
+        width: 32px;
+        height: 32px;
+        border-radius: 9999px;
+        background-color: #fef2f2;
         color: #ef4444;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.7rem;
-        border: none;
+        font-size: 0.875rem;
+        border: 1px solid #fee2e2;
         cursor: pointer;
-        transition: background 0.2s;
+        transition: all 0.2s ease;
     }
 
     .btn-remove-langkah:hover {
-        background: #fecaca;
+        background-color: #fee2e2;
+        color: #dc2626;
+        border-color: #fecaca;
     }
 
     .wajib-badge {
-        font-size: 0.78rem;
+        font-size: 0.75rem;
         color: #ef4444;
         font-weight: 600;
     }
 
     /* Preview image container */
     .preview-container {
-        background: #ffffff;
-        border: 1.5px solid #e5e7eb;
-        border-radius: 12px;
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
         overflow: hidden;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-        margin-top: 10px;
+        margin-top: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
     /* ── Toast Notification ── */
     #toastContainer {
         position: fixed;
-        top: 16px;
+        top: 24px;
         left: 50%;
         transform: translateX(-50%);
         z-index: 9999;
@@ -362,19 +304,19 @@
         display: flex;
         align-items: center;
         gap: 10px;
-        padding: 12px 16px;
+        padding: 12px 18px;
         border-radius: 12px;
-        font-size: 0.85rem;
+        font-size: 0.875rem;
         font-weight: 600;
         color: #fff;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         pointer-events: all;
         animation: toastIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
     }
 
     .toast.toast-error  { background: #ef4444; }
     .toast.toast-success { background: #10b981; }
-    .toast.toast-info   { background: #2036bd; }
+    .toast.toast-info   { background: #3b82f6; }
 
     .toast-icon { font-size: 1rem; flex-shrink: 0; }
 
@@ -391,14 +333,16 @@
     #confirmOverlay {
         position: fixed;
         inset: 0;
-        background: rgba(0,0,0,0.45);
-        z-index: 8000;
+        background: rgba(17, 24, 39, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 9000;
         display: flex;
-        align-items: flex-end;
+        align-items: center;
         justify-content: center;
         opacity: 0;
         transition: opacity 0.25s ease;
         pointer-events: none;
+        padding: 16px;
     }
     #confirmOverlay.show {
         opacity: 1;
@@ -406,53 +350,54 @@
     }
     #confirmBox {
         background: #fff;
-        border-radius: 24px 24px 0 0;
-        padding: 28px 24px 32px;
+        border-radius: 20px;
+        padding: 24px;
         width: 100%;
-        max-width: 480px;
-        transform: translateY(100%);
-        transition: transform 0.35s cubic-bezier(0.34,1.2,0.64,1);
+        max-width: 400px;
+        transform: scale(0.95);
+        transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
         text-align: center;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     }
     #confirmOverlay.show #confirmBox {
-        transform: translateY(0);
+        transform: scale(1);
     }
     .confirm-icon-wrap {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background: #eef0ff;
+        width: 56px;
+        height: 56px;
+        border-radius: 9999px;
+        background: #eff6ff;
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0 auto 16px;
-        font-size: 1.6rem;
-        color: #2036bd;
+        font-size: 1.5rem;
+        color: #3b82f6;
     }
     .confirm-title {
-        font-size: 1.05rem;
+        font-size: 1.125rem;
         font-weight: 700;
-        color: #1a1a2e;
-        margin-bottom: 6px;
+        color: #111827;
+        margin-bottom: 8px;
     }
     .confirm-desc {
-        font-size: 0.83rem;
+        font-size: 0.875rem;
         color: #6b7280;
-        margin-bottom: 22px;
+        margin-bottom: 24px;
         line-height: 1.5;
     }
     .confirm-actions {
         display: flex;
-        gap: 10px;
+        gap: 12px;
     }
     .confirm-cancel {
         flex: 1;
-        padding: 13px;
-        border-radius: 12px;
-        border: 1.5px solid #e5e7eb;
+        padding: 10px 16px;
+        border-radius: 10px;
+        border: 1px solid #e5e7eb;
         background: #f9fafb;
         color: #374151;
-        font-size: 0.9rem;
+        font-size: 0.875rem;
         font-weight: 600;
         cursor: pointer;
         font-family: 'Plus Jakarta Sans', sans-serif;
@@ -461,19 +406,19 @@
     .confirm-cancel:hover { background: #f3f4f6; }
     .confirm-ok {
         flex: 1;
-        padding: 13px;
-        border-radius: 12px;
+        padding: 10px 16px;
+        border-radius: 10px;
         border: none;
-        background: #2036bd;
+        background: #3b82f6;
         color: #fff;
-        font-size: 0.9rem;
+        font-size: 0.875rem;
         font-weight: 700;
         cursor: pointer;
         font-family: 'Plus Jakarta Sans', sans-serif;
-        box-shadow: 0 4px 12px rgba(32,54,189,0.3);
+        box-shadow: 0 4px 12px rgba(59,130,246,0.3);
         transition: background 0.2s, transform 0.15s;
     }
-    .confirm-ok:hover  { background: #1a2fa0; }
+    .confirm-ok:hover  { background: #2563eb; }
     .confirm-ok:active { transform: scale(0.97); }
 
     /* ── Zoom in/out click effect ── */
@@ -481,7 +426,7 @@
     @keyframes btnZoom {
         0%   { transform: scale(1); }
         35%  { transform: scale(0.92); }
-        65%  { transform: scale(1.06); }
+        65%  { transform: scale(1.04); }
         100% { transform: scale(1); }
     }
     .btn-simpan.zoom-click {
@@ -521,7 +466,7 @@
 </div>
 
 <!-- Alerts -->
-<div class="px-4 pt-3 max-w-md mx-auto">
+<div class="p-4 md:p-6 pb-0 max-w-6xl mx-auto">
     <?= view('components/alerts') ?>
 </div>
 
@@ -529,195 +474,275 @@
     <?= csrf_field(); ?>
     <input type="hidden" name="task_choice" id="taskChoice" value="<?= old('task_choice', 'existing') ?>">
 
-    <main style="padding: 16px 16px 160px; max-width: 480px; margin: 0 auto;">
-        <div style="display: flex; flex-direction: column; gap: 20px;">
-
-            <!-- Tanggal Section -->
-            <div class="date-card">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <div class="date-icon">
-                        <i class="fas fa-calendar-alt"></i>
-                    </div>
-                    <div>
-                        <p class="date-label">Tanggal Aktivitas</p>
-                        <h2 id="tanggalDisplay" class="date-value">
-                            <?= date('d F Y') ?>
-                        </h2>
-                    </div>
-                </div>
-                <button type="button" onclick="const p = document.getElementById('tanggalPicker'); try { p.showPicker(); } catch(e) { p.click(); }" class="btn-ubah">
-                    Ubah
-                </button>
-                <input type="date" id="tanggalPicker" name="tanggal" value="<?= old('tanggal', date('Y-m-d')); ?>"
-                    style="position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none;" onchange="updateTanggalDisplay(this)">
-            </div>
-
-            <!-- Jenis Aktivitas -->
-            <div>
-                <p class="section-label">Jenis Aktivitas</p>
-                <div class="segmented-picker" style="display: flex; gap: 2px;">
-                    <label style="flex: 1; cursor: pointer;">
-                        <input <?= old('task_choice', 'existing') !== 'new' ? 'checked' : '' ?> class="sr-only"
-                            name="job_type_ui" onchange="switchToExisting()" type="radio" value="continue" />
-                        <div>Lanjut Kerja</div>
-                    </label>
-                    <label style="flex: 1; cursor: pointer;">
-                        <input <?= old('task_choice') === 'new' ? 'checked' : '' ?> class="sr-only" name="job_type_ui"
-                            onchange="switchToNew()" type="radio" value="new" />
-                        <div>Kerja Baru</div>
-                    </label>
-                </div>
-
-                <!-- Conditional: Pilih Task yang Sudah Ada -->
-                <div class="<?= old('task_choice') === 'new' ? 'hidden-section' : '' ?>" id="section-continue"
-                    style="margin-top: 12px;">
-                    <p style="font-size: 0.8rem; color: #6b7280; margin-bottom: 6px; font-weight: 500;">Pilih pekerjaan yang sedang berjalan</p>
-                    <div class="custom-select-wrapper">
-                        <select name="task_id" id="taskSelect" class="custom-select">
-                            <option value="">-- Pilih Pekerjaan --</option>
-                            <?php if (!empty($tasks)): ?>
-                                <optgroup label="Pekerjaan Aktif">
-                                    <?php foreach ($tasks as $task): ?>
-                                        <option value="<?= $task['id'] ?>" <?= old('task_id') == $task['id'] ? 'selected' : '' ?>>
-                                            <?= esc($task['judul']) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </optgroup>
-                            <?php endif; ?>
-                            <?php if (!empty($taskTemplates)): ?>
-                                <optgroup label="Pekerjaan Dari Instruktur">
-                                    <?php foreach ($taskTemplates as $tpl): ?>
-                                        <option value="tpl:<?= $tpl['id'] ?>" <?= old('task_id') == 'tpl:' . $tpl['id'] ? 'selected' : '' ?>>
-                                            <?= esc($tpl['judul']) ?>        <?= !empty($tpl['kategori_nama']) ? ' (' . esc($tpl['kategori_nama']) . ')' : '' ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </optgroup>
-                            <?php endif; ?>
-                        </select>
-                        <i class="fas fa-chevron-down select-arrow"></i>
-                    </div>
-                </div>
-
-                <!-- Conditional: Task Baru -->
-                <div class="<?= old('task_choice') !== 'new' ? 'hidden-section' : '' ?>" id="section-new"
-                    style="margin-top: 12px;">
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <div>
-                        <p style="font-size: 0.8rem; color: #6b7280; margin-bottom: 6px; font-weight: 500;">Nama pekerjaan baru</p>
-                        <input class="custom-input" id="input-job-name" type="text" name="judul"
-                            value="<?= old('judul'); ?>" placeholder="E.g., Logo UMKM" maxlength="255" />
-                    </div>
-                    <div class="custom-select-wrapper">
-                        <select name="kategori_id" class="custom-select" style="padding-right: 40px;">
-                            <option value="">-- Kategori (opsional) --</option>
-                            <?php foreach ($categories as $cat): ?>
-                                <option value="<?= $cat['id'] ?>" <?= old('kategori_id') == $cat['id'] ? 'selected' : '' ?>>
-                                    <?= esc($cat['nama']) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                        <i class="fas fa-chevron-down select-arrow"></i>
-                    </div>
-                    <input type="text" name="estimasi" value="<?= old('estimasi'); ?>"
-                        placeholder="Estimasi waktu, contoh: 3 hari" maxlength="30" class="custom-input">
-                    </div>
+    <div class="p-4 md:p-6 max-w-6xl mx-auto">
+        <!-- Header with Back Button -->
+        <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-center">
+                <a href="<?= base_url('siswa/jurnal-pkl'); ?>" class="mr-4 w-10 h-10 bg-white border border-gray-200 rounded-xl flex items-center justify-center text-gray-600 hover:text-gray-900 hover:border-gray-300 transition-all shadow-sm">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800 tracking-tight">Tambah Aktivitas PKL</h1>
+                    <p class="text-sm text-gray-500 mt-0.5">Catat progress dan dokumentasikan kegiatan magang Anda hari ini</p>
                 </div>
             </div>
-
-            <!-- Langkah Kerja -->
-            <div>
-                <p class="section-label">
-                    Langkah Kerja <span style="font-size: 0.78rem; color: #9ca3af; font-weight: 400;">(Perencanaan)</span>
-                </p>
-                <div id="langkahKerjaContainer" style="display: flex; flex-direction: column; gap: 8px;">
-                    <?php
-                    $langkah = old('langkah_kerja');
-                    if ($langkah && is_array($langkah)):
-                        foreach ($langkah as $i => $val): ?>
-                            <div class="langkah-row" style="display: flex; align-items: center; gap: 8px;">
-                                <span class="langkah-num"><?= ($i + 1) ?></span>
-                                <input type="text" name="langkah_kerja[]" value="<?= esc($val) ?>"
-                                    placeholder="Langkah <?= ($i + 1) ?>" class="custom-input" style="flex: 1;">
-                                <button type="button" onclick="removeLangkah(this)"
-                                    class="btn-remove-langkah <?= count($langkah) <= 1 ? 'hidden' : '' ?> remove-btn">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        <?php endforeach;
-                    else: ?>
-                        <div class="langkah-row" style="display: flex; align-items: center; gap: 8px;">
-                            <span class="langkah-num">1</span>
-                            <input type="text" name="langkah_kerja[]" value="" placeholder="Langkah 1"
-                                class="custom-input" style="flex: 1;">
-                            <button type="button" onclick="removeLangkah(this)"
-                                class="btn-remove-langkah hidden remove-btn">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    <?php endif; ?>
-                </div>
-                <button type="button" onclick="addLangkah()"
-                    style="margin-top: 10px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #eef0ff; color: #2036bd; border-radius: 8px; border: none; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: background 0.2s; font-family: 'Plus Jakarta Sans', sans-serif;">
-                    <i class="fas fa-plus" style="font-size: 0.7rem;"></i> Tambah Langkah
-                </button>
-            </div>
-
-            <!-- Detail Pengerjaan -->
-            <div>
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                    <p class="section-label" style="margin-bottom: 0;">Detail Pengerjaan</p>
-                    <span class="wajib-badge">* Wajib</span>
-                </div>
-                <textarea class="custom-textarea" id="description" name="deskripsi"
-                    placeholder="Ceritakan apa yang kamu kerjakan hari ini..."
-                    rows="4" required minlength="3"><?= old('deskripsi'); ?></textarea>
-                <p style="font-size: 0.72rem; color: #b0b7c3; margin-top: 4px;">Minimal 3 karakter</p>
-            </div>
-
-            <!-- Dokumentasi (Foto) -->
-            <div>
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                    <p class="section-label" style="margin-bottom: 0;">Dokumentasi</p>
-                </div>
-                <div id="uploadArea" class="upload-area" onclick="document.getElementById('foto').click()">
-                    <div class="upload-icon">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                    </div>
-                    <div>
-                        <p class="upload-title">Upload Foto/File</p>
-                        <p class="upload-subtitle">JPG, PNG, PDF (Maks 5MB)</p>
-                    </div>
-                    <input id="foto" name="foto" type="file" accept=".jpg,.jpeg,.png,.webp" class="sr-only"
-                        onchange="previewImage(this)">
-                </div>
-                <!-- Preview Container -->
-                <div id="previewContainer" class="hidden">
-                    <div class="preview-container">
-                        <img id="preview" class="w-full" style="max-height: 200px; object-fit: cover; display: block;">
-                        <div style="padding: 10px 14px; display: flex; align-items: center; justify-content: space-between;">
-                            <p id="fileName" style="font-size: 0.75rem; color: #6b7280; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></p>
-                            <button type="button" onclick="removeImage(); event.stopPropagation();"
-                                style="flex-shrink: 0; font-size: 0.75rem; color: #ef4444; font-weight: 700; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                                <i class="fas fa-times"></i> Hapus
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
-    </main>
 
-    <!-- Bottom Action Bar -->
-    <div class="bottom-bar">
-        <div style="max-width: 480px; margin: 0 auto;">
-            <button type="submit" id="submitBtn" class="btn-simpan">
-                <i class="fas fa-rocket" id="submitIcon" style="font-size: 1rem;"></i>
-                <span id="submitText">Simpan Aktivitas</span>
-            </button>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Side: Form Content -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-6">
+
+                    <!-- Tanggal Section -->
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-100 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-lg">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 font-medium">Tanggal Aktivitas</p>
+                                <h3 id="tanggalDisplay" class="text-base font-bold text-gray-800">
+                                    <?= date('d F Y') ?>
+                                </h3>
+                            </div>
+                        </div>
+                        <button type="button" onclick="const p = document.getElementById('tanggalPicker'); try { p.showPicker(); } catch(e) { p.click(); }" class="btn-ubah">
+                            Ubah
+                        </button>
+                        <input type="date" id="tanggalPicker" name="tanggal" value="<?= old('tanggal', date('Y-m-d')); ?>"
+                            style="position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none;" onchange="updateTanggalDisplay(this)">
+                    </div>
+
+                    <!-- Jenis Aktivitas -->
+                    <div>
+                        <p class="block text-sm font-semibold text-gray-700 mb-2">Jenis Aktivitas</p>
+                        <div class="segmented-picker" style="display: flex; gap: 2px;">
+                            <label style="flex: 1; cursor: pointer;">
+                                <input <?= old('task_choice', 'existing') !== 'new' ? 'checked' : '' ?> class="sr-only"
+                                    name="job_type_ui" onchange="switchToExisting()" type="radio" value="continue" />
+                                <div>Lanjut Kerja</div>
+                            </label>
+                            <label style="flex: 1; cursor: pointer;">
+                                <input <?= old('task_choice') === 'new' ? 'checked' : '' ?> class="sr-only" name="job_type_ui"
+                                    onchange="switchToNew()" type="radio" value="new" />
+                                <div>Kerja Baru</div>
+                            </label>
+                        </div>
+
+                        <!-- Conditional: Pilih Task yang Sudah Ada -->
+                        <div class="<?= old('task_choice') === 'new' ? 'hidden-section' : '' ?>" id="section-continue"
+                            style="margin-top: 16px;">
+                            <p style="font-size: 0.8rem; color: #6b7280; margin-bottom: 6px; font-weight: 500;">Pilih pekerjaan yang sedang berjalan</p>
+                            <div class="custom-select-wrapper">
+                                <select name="task_id" id="taskSelect" class="custom-select">
+                                    <option value="">-- Pilih Pekerjaan --</option>
+                                    <?php if (!empty($tasks)): ?>
+                                        <optgroup label="Pekerjaan Aktif">
+                                            <?php foreach ($tasks as $task): ?>
+                                                <option value="<?= $task['id'] ?>" <?= old('task_id') == $task['id'] ? 'selected' : '' ?>>
+                                                    <?= esc($task['judul']) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </optgroup>
+                                    <?php endif; ?>
+                                    <?php if (!empty($taskTemplates)): ?>
+                                        <optgroup label="Pekerjaan Dari Instruktur">
+                                            <?php foreach ($taskTemplates as $tpl): ?>
+                                                <option value="tpl:<?= $tpl['id'] ?>" <?= old('task_id') == 'tpl:' . $tpl['id'] ? 'selected' : '' ?>>
+                                                    <?= esc($tpl['judul']) ?>        <?= !empty($tpl['kategori_nama']) ? ' (' . esc($tpl['kategori_nama']) . ')' : '' ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </optgroup>
+                                    <?php endif; ?>
+                                </select>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                        </div>
+
+                        <!-- Conditional: Task Baru -->
+                        <div class="<?= old('task_choice') !== 'new' ? 'hidden-section' : '' ?>" id="section-new"
+                            style="margin-top: 16px;">
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                <div>
+                                    <p style="font-size: 0.8rem; color: #6b7280; margin-bottom: 6px; font-weight: 500;">Nama pekerjaan baru</p>
+                                    <input class="custom-input" id="input-job-name" type="text" name="judul"
+                                        value="<?= old('judul'); ?>" placeholder="E.g., Logo UMKM" maxlength="255" />
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <p style="font-size: 0.8rem; color: #6b7280; margin-bottom: 6px; font-weight: 500;">Kategori (opsional)</p>
+                                        <div class="custom-select-wrapper">
+                                            <select name="kategori_id" class="custom-select">
+                                                <option value="">-- Kategori (opsional) --</option>
+                                                <?php foreach ($categories as $cat): ?>
+                                                    <option value="<?= $cat['id'] ?>" <?= old('kategori_id') == $cat['id'] ? 'selected' : '' ?>>
+                                                        <?= esc($cat['nama']) ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <i class="fas fa-chevron-down select-arrow"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p style="font-size: 0.8rem; color: #6b7280; margin-bottom: 6px; font-weight: 500;">Estimasi Waktu</p>
+                                        <input type="text" name="estimasi" value="<?= old('estimasi'); ?>"
+                                            placeholder="Estimasi waktu, contoh: 3 hari" maxlength="30" class="custom-input">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Langkah Kerja -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Langkah Kerja <span style="font-size: 0.78rem; color: #9ca3af; font-weight: 400;">(Perencanaan)</span>
+                        </label>
+                        <div id="langkahKerjaContainer" style="display: flex; flex-direction: column; gap: 10px;">
+                            <?php
+                            $langkah = old('langkah_kerja');
+                            if ($langkah && is_array($langkah)):
+                                foreach ($langkah as $i => $val): ?>
+                                    <div class="langkah-row" style="display: flex; align-items: center; gap: 10px;">
+                                        <span class="langkah-num"><?= ($i + 1) ?></span>
+                                        <input type="text" name="langkah_kerja[]" value="<?= esc($val) ?>"
+                                            placeholder="Langkah <?= ($i + 1) ?>" class="custom-input" style="flex: 1;">
+                                        <button type="button" onclick="removeLangkah(this)"
+                                            class="btn-remove-langkah <?= count($langkah) <= 1 ? 'hidden' : '' ?> remove-btn">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                <?php endforeach;
+                            else: ?>
+                                <div class="langkah-row" style="display: flex; align-items: center; gap: 10px;">
+                                    <span class="langkah-num">1</span>
+                                    <input type="text" name="langkah_kerja[]" value="" placeholder="Langkah 1"
+                                        class="custom-input" style="flex: 1;">
+                                    <button type="button" onclick="removeLangkah(this)"
+                                        class="btn-remove-langkah hidden remove-btn">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <button type="button" onclick="addLangkah()"
+                            style="margin-top: 12px; display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #eef0ff; color: #2036bd; border-radius: 10px; border: none; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: background 0.2s; font-family: 'Plus Jakarta Sans', sans-serif;">
+                            <i class="fas fa-plus" style="font-size: 0.7rem;"></i> Tambah Langkah
+                        </button>
+                    </div>
+
+                    <!-- Detail Pengerjaan -->
+                    <div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <label class="block text-sm font-semibold text-gray-700">Detail Pengerjaan <span class="text-red-500">*</span></label>
+                            <span class="wajib-badge">* Wajib</span>
+                        </div>
+                        <textarea class="custom-textarea" id="description" name="deskripsi"
+                            placeholder="Ceritakan secara mendalam apa yang kamu kerjakan hari ini..."
+                            rows="4" required minlength="3"><?= old('deskripsi'); ?></textarea>
+                        <p style="font-size: 0.72rem; color: #b0b7c3; margin-top: 4px;">Minimal 3 karakter</p>
+                    </div>
+
+                    <!-- Dokumentasi (Foto) -->
+                    <div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <label class="block text-sm font-semibold text-gray-700">Dokumentasi <span class="text-red-500">*</span></label>
+                            <span class="wajib-badge">* Wajib</span>
+                        </div>
+                        <div id="uploadArea" class="upload-area" onclick="document.getElementById('foto').click()">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <div>
+                                <p class="upload-title">Upload Foto/File</p>
+                                <p class="upload-subtitle">JPG, PNG, PDF (Maks 5MB)</p>
+                            </div>
+                            <input id="foto" name="foto" type="file" accept=".jpg,.jpeg,.png,.webp" class="sr-only"
+                                onchange="previewImage(this)">
+                        </div>
+                        <!-- Preview Container -->
+                        <div id="previewContainer" class="hidden">
+                            <div class="preview-container">
+                                <img id="preview" class="w-full" style="max-height: 220px; object-fit: cover; display: block;">
+                                <div style="padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; background: #ffffff;">
+                                    <p id="fileName" style="font-size: 0.75rem; color: #374151; font-weight: 600; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></p>
+                                    <button type="button" onclick="removeImage(); event.stopPropagation();"
+                                        style="flex-shrink: 0; font-size: 0.75rem; color: #ef4444; font-weight: 700; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                        <i class="fas fa-times"></i> Hapus
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Action Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-100">
+                        <button type="submit" id="submitBtn" class="btn-simpan flex-1">
+                            <i class="fas fa-rocket" id="submitIcon" style="font-size: 1rem;"></i>
+                            <span id="submitText">Simpan Aktivitas</span>
+                        </button>
+                        <a href="<?= base_url('siswa/jurnal-pkl'); ?>"
+                           style="padding: 14px 24px; border-radius: 50px; background-color: #f3f4f6; color: #4b5563; font-size: 0.95rem; font-weight: 700; text-align: center; transition: all 0.2s; border: none; text-decoration: none;"
+                           onmouseover="this.style.backgroundColor='#e5e7eb'" onmouseout="this.style.backgroundColor='#f3f4f6'">
+                            Batal
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Right Side: Sidebar Info -->
+            <div class="lg:col-span-1 space-y-6">
+                <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+                    <h3 class="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-info-circle text-blue-600"></i> Petunjuk Pengisian
+                    </h3>
+                    <ul class="space-y-4">
+                        <li class="flex gap-3">
+                            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-bold">1</span>
+                            <div class="text-xs text-gray-600 leading-relaxed">
+                                <p class="font-bold text-gray-800">Pilih Tanggal</p>
+                                <p class="mt-0.5">Pastikan tanggal sesuai dengan hari pelaksanaan aktivitas.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-bold">2</span>
+                            <div class="text-xs text-gray-600 leading-relaxed">
+                                <p class="font-bold text-gray-800">Jenis Aktivitas</p>
+                                <p class="mt-0.5">Gunakan <strong>Lanjut Kerja</strong> jika melanjutkan pekerjaan sebelumnya, atau <strong>Kerja Baru</strong> jika memulai pekerjaan baru.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-bold">3</span>
+                            <div class="text-xs text-gray-600 leading-relaxed">
+                                <p class="font-bold text-gray-800">Langkah Kerja</p>
+                                <p class="mt-0.5">Tuliskan rencana langkah/tahapan yang dirancang untuk menyelesaikan tugas tersebut.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-bold">4</span>
+                            <div class="text-xs text-gray-600 leading-relaxed">
+                                <p class="font-bold text-gray-800">Detail Pengerjaan</p>
+                                <p class="mt-0.5">Jelaskan kegiatan yang telah diselesaikan hari ini secara spesifik, minimal 3 karakter.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-bold">5</span>
+                            <div class="text-xs text-gray-600 leading-relaxed">
+                                <p class="font-bold text-gray-800">Foto Dokumentasi</p>
+                                <p class="mt-0.5">Wajib mengunggah foto saat melakukan aktivitas sebagai bukti autentik.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-blue-50 border border-blue-100 rounded-2xl p-5">
+                    <h4 class="text-xs font-bold text-blue-900 uppercase tracking-wider mb-2">Informasi Status</h4>
+                    <p class="text-xs text-blue-800 leading-relaxed">Setelah disimpan, aktivitas akan secara otomatis berstatus <strong>Submitted</strong> (Menunggu Verifikasi Instruktur Industri/Pembimbing).</p>
+                </div>
+            </div>
         </div>
     </div>
-
 </form>
 
 <script>
@@ -749,7 +774,7 @@
         const count = container.querySelectorAll('.langkah-row').length + 1;
         const row = document.createElement('div');
         row.className = 'langkah-row';
-        row.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+        row.style.cssText = 'display: flex; align-items: center; gap: 10px;';
         row.innerHTML = `
         <span class="langkah-num">${count}</span>
         <input type="text" name="langkah_kerja[]" value=""
@@ -790,7 +815,7 @@
     function resetLangkahKerja() {
         const container = document.getElementById('langkahKerjaContainer');
         container.innerHTML = `
-        <div class="langkah-row" style="display: flex; align-items: center; gap: 8px;">
+        <div class="langkah-row" style="display: flex; align-items: center; gap: 10px;">
             <span class="langkah-num">1</span>
             <input type="text" name="langkah_kerja[]" value=""
                    placeholder="Langkah 1"
@@ -841,7 +866,7 @@
         steps.forEach((step, i) => {
             const row = document.createElement('div');
             row.className = 'langkah-row';
-            row.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+            row.style.cssText = 'display: flex; align-items: center; gap: 10px;';
             row.innerHTML = `
             <span class="langkah-num">${i + 1}</span>
             <input type="text" name="langkah_kerja[]" value="${step.replace(/"/g, '&quot;')}"
