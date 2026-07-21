@@ -466,7 +466,7 @@ class PklService extends BaseService
         try {
             $db = \Config\Database::connect();
             $sql = "SELECT
-                        COUNT(DISTINCT pt.id) AS total_tasks,
+                        COUNT(DISTINCT pp.task_id) AS total_tasks,
                         COUNT(pp.id) AS total_progress,
                         SUM(CASE WHEN pp.status = 'draft' THEN 1 ELSE 0 END) AS draft,
                         SUM(CASE WHEN pp.status = 'submitted' THEN 1 ELSE 0 END) AS submitted,
