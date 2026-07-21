@@ -36,7 +36,7 @@ class SiswaPklController extends BaseController
         foreach ($siswaPklList as &$siswa) {
             $stats = $db->table('pkl_tasks')
                 ->select('
-                    COUNT(DISTINCT pkl_tasks.id) AS total_tasks,
+                    COUNT(DISTINCT CASE WHEN pkl_progress.id IS NOT NULL THEN pkl_tasks.id END) AS total_tasks,
                     COUNT(pkl_progress.id) AS total_progress,
                     SUM(CASE WHEN pkl_progress.status = \'approved\' THEN 1 ELSE 0 END) AS approved,
                     SUM(CASE WHEN pkl_progress.status = \'submitted\' THEN 1 ELSE 0 END) AS submitted,

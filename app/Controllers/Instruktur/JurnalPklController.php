@@ -197,7 +197,13 @@ class JurnalPklController extends BaseController
             return redirect()->to('/login')->with('error', 'Sesi Anda telah habis atau data instruktur tidak ditemukan.');
         }
 
-        $catatan = $this->request->getPost('catatan_instruktur');
+        $catatan = trim($this->request->getPost('catatan_instruktur') ?? '');
+
+        if ($catatan === '') {
+            session()->setFlashdata('error', 'Catatan instruktur wajib diisi');
+            return redirect()->back()->withInput();
+        }
+
         $progress = $this->progressModel->find($progressId);
 
         if (!$progress) {
@@ -233,11 +239,16 @@ class JurnalPklController extends BaseController
         }
 
         $status = $this->request->getPost('status');
-        $catatan = $this->request->getPost('catatan_instruktur');
+        $catatan = trim($this->request->getPost('catatan_instruktur') ?? '');
 
         if (!in_array($status, ['verified_by_instruktur', 'revision'])) {
             session()->setFlashdata('error', 'Status verifikasi tidak valid');
             return redirect()->back();
+        }
+
+        if ($catatan === '') {
+            session()->setFlashdata('error', 'Catatan instruktur wajib diisi');
+            return redirect()->back()->withInput();
         }
 
         $progress = $this->progressModel->find($progressId);
@@ -320,7 +331,7 @@ class JurnalPklController extends BaseController
             'status' => 'submitted',
             'instruktur_verified_by' => null,
             'instruktur_verified_at' => null,
-            'catatan_instruktur' => null,
+            'catatan_instruktur' => '',
         ]);
 
         session()->setFlashdata('success', 'Verifikasi progress berhasil dibatalkan');

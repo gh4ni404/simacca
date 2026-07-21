@@ -145,7 +145,7 @@ $formatIndoDate = function($dateStr) use ($hariIndo, $bulanIndo) {
                                     <form action="<?= base_url('instruktur/jurnal-pkl/verifikasi-progress/' . $p['id']); ?>" method="POST" class="flex-1 flex gap-2">
                                         <?= csrf_field(); ?>
                                         <input type="hidden" name="status" value="verified_by_instruktur">
-                                        <input type="text" name="catatan_instruktur" placeholder="Catatan persetujuan (opsional)..." class="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-green-500 focus:border-transparent">
+                                        <input type="text" name="catatan_instruktur" required placeholder="Catatan persetujuan..." class="flex-1 border border-gray-300 rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-green-500 focus:border-transparent">
                                         <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1 active:scale-95 flex-shrink-0">
                                             <i class="fas fa-check"></i> Setujui
                                         </button>

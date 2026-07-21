@@ -307,8 +307,8 @@ $hariIndo = [
                             <form action="<?= base_url('guru/jurnal-pkl/verify/' . $p['id']); ?>" method="POST" onsubmit="saveActiveSiswa(<?= $student['siswa_id'] ?>)" class="space-y-3">
                                 <?= csrf_field(); ?>
                                 <div class="bg-gray-50 border border-gray-200 rounded-xl p-3.5 shadow-inner">
-                                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Catatan Pembimbing (Opsional)</label>
-                                    <textarea name="catatan" rows="2" 
+                                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Catatan Pembimbing <span class="text-red-500">*</span></label>
+                                    <textarea name="catatan" rows="2" required
                                               class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none shadow-sm" 
                                               placeholder="Tulis catatan revisi atau catatan persetujuan..."><?= esc($p['catatan_pembimbing'] ?? '') ?></textarea>
                                     

@@ -166,6 +166,34 @@ class PklController extends BaseController
             return redirect()->back();
         }
 
+        $rules = [
+            'deskripsi' => 'required|min_length[3]',
+        ];
+        if (!$this->validate($rules)) {
+            $errors = $this->validator->getErrors();
+            $errorList = '<ul class="list-disc ml-4">';
+            foreach ($errors as $error) {
+                $errorList .= '<li>' . $error . '</li>';
+            }
+            $errorList .= '</ul>';
+            session()->setFlashdata('error', 'Lengkapi datanya: ' . $errorList);
+            return redirect()->back()->withInput();
+        }
+
+        $foto = $this->request->getFile('foto');
+        if (!$foto || !$foto->isValid() || $foto->hasMoved()) {
+            session()->setFlashdata('error', 'Foto dokumentasi wajib diupload');
+            return redirect()->back()->withInput();
+        }
+
+        $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        $validation = validate_file_upload($foto, $allowedTypes, 1048576);
+
+        if (!$validation['valid']) {
+            session()->setFlashdata('error', $validation['error']);
+            return redirect()->back()->withInput();
+        }
+
         $taskChoice = $this->request->getPost('task_choice');
 
         if ($taskChoice === 'new') {
@@ -322,40 +350,12 @@ class PklController extends BaseController
             }
         }
 
-        $rules = [
-            'deskripsi' => 'required|min_length[3]',
-        ];
-        if (!$this->validate($rules)) {
-            $errors = $this->validator->getErrors();
-            $errorList = '<ul class="list-disc ml-4">';
-            foreach ($errors as $error) {
-                $errorList .= '<li>' . $error . '</li>';
-            }
-            $errorList .= '</ul>';
-            session()->setFlashdata('error', 'Lengkapi datanya: ' . $errorList);
-            return redirect()->back()->withInput();
-        }
-
-        $foto = $this->request->getFile('foto');
-        if (!$foto || !$foto->isValid() || $foto->hasMoved()) {
-            session()->setFlashdata('error', 'Foto dokumentasi wajib diupload');
-            return redirect()->back()->withInput();
-        }
-
         $uploadPath = WRITEPATH . 'uploads/pkl_progress';
         if (!is_dir($uploadPath)) {
             mkdir($uploadPath, 0755, true);
         }
 
         $fotoName = null;
-
-        $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-        $validation = validate_file_upload($foto, $allowedTypes, 1048576);
-
-        if (!$validation['valid']) {
-            session()->setFlashdata('error', $validation['error']);
-            return redirect()->back()->withInput();
-        }
 
         try {
             $fotoName = 'pkl_progress_' . time() . '_' . uniqid() . '.' . $foto->getExtension();

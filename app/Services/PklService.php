@@ -364,7 +364,7 @@ class PklService extends BaseService
                 'status' => $status,
                 'verified_by' => $userId,
                 'verified_at' => date('Y-m-d H:i:s'),
-                'catatan_pembimbing' => $catatan,
+                'catatan_pembimbing' => $catatan ?? '',
             ];
 
             $success = $this->progressModel->update($id, $data);
@@ -411,7 +411,7 @@ class PklService extends BaseService
                 'status' => $progress['instruktur_verified_by'] ? 'verified_by_instruktur' : 'submitted',
                 'verified_by' => null,
                 'verified_at' => null,
-                'catatan_pembimbing' => null,
+                'catatan_pembimbing' => '',
             ];
 
             $success = $this->progressModel->update($id, $data);

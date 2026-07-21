@@ -145,7 +145,7 @@ $formatIndoDate = function($dateStr) use ($hariIndo, $bulanIndo) {
                                         <?= csrf_field(); ?>
                                         <input type="hidden" name="status" value="verified_by_instruktur">
                                         <div class="flex gap-2">
-                                            <input type="text" name="catatan_instruktur" placeholder="Catatan persetujuan (opsional)..." class="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
+                                            <input type="text" name="catatan_instruktur" required placeholder="Catatan persetujuan..." class="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
                                             <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all"><i class="fas fa-check mr-1"></i>Setujui</button>
                                         </div>
                                     </form>
@@ -280,7 +280,7 @@ $formatIndoDate = function($dateStr) use ($hariIndo, $bulanIndo) {
                                         <form action="<?= base_url('instruktur/jurnal-pkl/catatan/' . $p['id']); ?>" method="POST" class="w-full">
                                             <?= csrf_field(); ?>
                                             <div class="flex gap-2">
-                                                <input type="text" name="catatan_instruktur" value="<?= esc($p['catatan_instruktur'] ?? ''); ?>" placeholder="Perbarui catatan..." class="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
+                                                <input type="text" name="catatan_instruktur" value="<?= esc($p['catatan_instruktur'] ?? ''); ?>" required placeholder="Perbarui catatan..." class="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
                                                 <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all" title="Simpan Catatan"><i class="fas fa-save"></i></button>
                                             </div>
                                         </form>

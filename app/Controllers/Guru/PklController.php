@@ -50,11 +50,16 @@ class PklController extends BaseController
         }
 
         $status = $this->request->getPost('status');
-        $catatan = $this->request->getPost('catatan');
+        $catatan = trim($this->request->getPost('catatan') ?? '');
 
         if (!in_array($status, ['approved', 'revision'])) {
             session()->setFlashdata('error', 'Status verifikasi tidak valid');
             return redirect()->to('/guru/jurnal-pkl');
+        }
+
+        if ($catatan === '') {
+            session()->setFlashdata('error', 'Catatan pembimbing wajib diisi');
+            return redirect()->back()->withInput();
         }
 
         $result = $this->pklService->verify($id, $userId, $status, $catatan);

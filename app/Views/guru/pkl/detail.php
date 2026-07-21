@@ -129,8 +129,8 @@
                     <?= csrf_field(); ?>
 
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Catatan Pembimbing <span class="text-gray-400 font-normal">(opsional)</span></label>
-                        <textarea name="catatan" rows="4"
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Catatan Pembimbing <span class="text-red-500">*</span></label>
+                        <textarea name="catatan" rows="4" required
                                   class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                   placeholder="Tambahkan catatan untuk siswa..."><?= esc($progress['catatan_pembimbing'] ?? '') ?></textarea>
                     </div>
