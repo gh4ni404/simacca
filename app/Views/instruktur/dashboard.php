@@ -58,7 +58,7 @@
             </div>
         </div>
         <div class="bg-white rounded-xl shadow p-5 cursor-pointer hover:shadow-md hover:bg-yellow-50 transition-all"
-             onclick="document.getElementById('modalMenungguReview').classList.remove('hidden')">
+             onclick="openMenungguReview()">
             <div class="flex items-center space-x-3">
                 <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
                     <i class="fas fa-clock text-yellow-600 text-lg"></i>
@@ -265,118 +265,222 @@
 
 <!-- Modal Menunggu Review -->
 <div id="modalMenungguReview"
-     class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-     onclick="if(event.target===this)this.classList.add('hidden')">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+     class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+     onclick="if(event.target===this)closeMenungguReview()">
+    <div id="modalMenungguReviewPanel"
+         class="bg-white w-full sm:max-w-2xl sm:mx-4 sm:rounded-2xl rounded-t-3xl shadow-2xl flex flex-col overflow-hidden
+                translate-y-full sm:translate-y-0 sm:scale-95 sm:opacity-0
+                transition-all duration-300 ease-out
+                max-h-[92vh] sm:max-h-[88vh]">
+
         <!-- Header -->
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-shrink-0">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 bg-yellow-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-clock text-yellow-600 text-sm"></i>
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0">
+            <!-- Drag handle (mobile only) -->
+            <div class="absolute top-2.5 left-1/2 -translate-x-1/2 w-10 h-1 bg-gray-200 rounded-full sm:hidden"></div>
+
+            <div class="flex items-center gap-3 mt-1 sm:mt-0">
+                <div class="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-clock text-yellow-600"></i>
                 </div>
                 <div>
-                    <h3 class="text-base font-bold text-gray-900">Menunggu Review</h3>
-                    <p class="text-xs text-gray-500">Jurnal siswa yang perlu diverifikasi atau direvisi</p>
+                    <h3 class="text-base font-bold text-gray-900 leading-tight">Menunggu Review</h3>
+                    <p class="text-xs text-gray-400 mt-0.5">
+                        <span class="inline-flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse inline-block"></span>
+                            <?= count($pendingProgress) ?> jurnal perlu ditindaklanjuti
+                        </span>
+                    </p>
                 </div>
             </div>
-            <button onclick="document.getElementById('modalMenungguReview').classList.add('hidden')"
-                    class="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
-                <i class="fas fa-xmark text-lg"></i>
-            </button>
+
+            <div class="flex items-center gap-2">
+                <a href="<?= base_url('instruktur/jurnal-pkl'); ?>"
+                   class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg text-xs font-semibold transition-colors">
+                    <i class="fas fa-external-link-alt text-[10px]"></i> Buka Halaman Penuh
+                </a>
+                <button onclick="closeMenungguReview()"
+                        class="w-8 h-8 flex items-center justify-center rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-xmark"></i>
+                </button>
+            </div>
         </div>
+
         <!-- Body -->
-        <div class="overflow-y-auto flex-1 p-4 space-y-4">
+        <div class="overflow-y-auto flex-1 px-4 py-4 space-y-3">
+
             <?php if (empty($pendingProgress)): ?>
-            <div class="text-center py-12">
-                <div class="w-14 h-14 rounded-full bg-green-50 text-green-500 flex items-center justify-center mx-auto mb-3">
-                    <i class="fas fa-check-circle text-2xl"></i>
+            <!-- Empty State -->
+            <div class="flex flex-col items-center justify-center py-16 text-center">
+                <div class="w-16 h-16 rounded-2xl bg-green-50 flex items-center justify-center mb-4">
+                    <i class="fas fa-check-circle text-3xl text-green-500"></i>
                 </div>
-                <p class="font-semibold text-gray-800">Semua Sudah Ditinjau</p>
-                <p class="text-gray-500 text-sm mt-1">Tidak ada jurnal yang menunggu verifikasi saat ini.</p>
+                <p class="text-base font-bold text-gray-800">Semua Sudah Ditinjau</p>
+                <p class="text-sm text-gray-400 mt-1 max-w-xs">Tidak ada jurnal yang sedang menunggu verifikasi saat ini.</p>
+                <a href="<?= base_url('instruktur/jurnal-pkl'); ?>"
+                   class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors">
+                    <i class="fas fa-book-open text-xs"></i> Lihat Semua Jurnal
+                </a>
             </div>
+
             <?php else: ?>
-            <?php foreach ($pendingProgress as $p): ?>
-            <div class="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-sm transition-all">
-                <!-- Card Header -->
-                <div class="flex items-start justify-between gap-3 mb-3">
-                    <div class="flex items-center gap-3">
+            <?php foreach ($pendingProgress as $idx => $p): ?>
+            <div class="group bg-white border border-gray-200 rounded-2xl overflow-hidden hover:border-yellow-300 hover:shadow-md transition-all duration-200">
+
+                <!-- Card Top: Siswa info + Tanggal -->
+                <div class="flex items-center justify-between px-4 pt-4 pb-3 border-b border-gray-50">
+                    <div class="flex items-center gap-3 min-w-0">
                         <?php if (!empty($p['profile_photo'])): ?>
-                            <img class="w-10 h-10 rounded-xl object-cover border border-gray-200 flex-shrink-0"
+                            <img class="w-9 h-9 rounded-xl object-cover border-2 border-white shadow-sm flex-shrink-0"
                                  src="<?= base_url('profile-photo/' . esc($p['profile_photo'])); ?>"
                                  alt="<?= esc($p['nama_siswa']) ?>">
                         <?php else: ?>
-                            <div class="w-10 h-10 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                                <span class="text-sm font-bold text-indigo-600"><?= strtoupper(substr($p['nama_siswa'], 0, 2)); ?></span>
+                            <div class="w-9 h-9 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
+                                <span class="text-xs font-bold text-white"><?= strtoupper(substr($p['nama_siswa'], 0, 2)); ?></span>
                             </div>
                         <?php endif; ?>
-                        <div>
-                            <p class="text-sm font-bold text-gray-900"><?= esc($p['nama_siswa']); ?></p>
-                            <p class="text-xs text-gray-500"><?= esc($p['nama_kelas'] ?? '-'); ?> &middot; NIS: <?= esc($p['nis'] ?? '-'); ?></p>
+                        <div class="min-w-0">
+                            <p class="text-sm font-bold text-gray-900 truncate"><?= esc($p['nama_siswa']); ?></p>
+                            <p class="text-xs text-gray-400 truncate">
+                                <?= esc($p['nama_kelas'] ?? '-'); ?>
+                                <?php if (!empty($p['nis'])): ?>&nbsp;&middot;&nbsp;<?= esc($p['nis']); ?><?php endif; ?>
+                            </p>
                         </div>
                     </div>
-                    <span class="text-xs text-gray-400 bg-gray-50 border border-gray-200 px-2 py-1 rounded-lg flex-shrink-0">
-                        <?= date('d M Y', strtotime($p['tanggal'])); ?>
-                    </span>
+                    <div class="flex items-center gap-2 flex-shrink-0 ml-2">
+                        <span class="inline-flex items-center gap-1 text-[11px] text-gray-500 bg-gray-50 border border-gray-200 px-2.5 py-1 rounded-lg">
+                            <i class="far fa-calendar text-gray-400 text-[10px]"></i>
+                            <?= date('d M Y', strtotime($p['tanggal'])); ?>
+                        </span>
+                        <span class="inline-flex items-center gap-1 text-[10px] font-bold text-yellow-700 bg-yellow-50 border border-yellow-200 px-2 py-1 rounded-lg">
+                            <span class="w-1.5 h-1.5 bg-yellow-400 rounded-full animate-pulse"></span>
+                            Menunggu
+                        </span>
+                    </div>
                 </div>
 
-                <!-- Task Reference -->
-                <div class="mb-3 px-3 py-2 bg-indigo-50/60 border-l-4 border-indigo-500 rounded-r-lg">
-                    <span class="text-[10px] text-indigo-700 font-bold uppercase tracking-wider block">Task</span>
-                    <span class="text-xs font-semibold text-gray-700 line-clamp-1"><?= esc($p['task_judul']); ?></span>
+                <!-- Card Body: Task + Deskripsi + Foto -->
+                <div class="px-4 py-3 space-y-3">
+
+                    <!-- Task badge -->
+                    <div class="flex items-start gap-2.5 bg-indigo-50/80 border border-indigo-100 rounded-xl px-3 py-2.5">
+                        <i class="fas fa-tasks text-indigo-400 text-xs mt-0.5 flex-shrink-0"></i>
+                        <div class="min-w-0">
+                            <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest block leading-none mb-1">Task Pekerjaan</span>
+                            <span class="text-xs font-semibold text-indigo-800 leading-snug"><?= esc($p['task_judul']); ?></span>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1.5">Hasil Kerja</span>
+                        <p class="text-sm text-gray-700 bg-gray-50/80 border border-gray-100 rounded-xl px-3 py-2.5 leading-relaxed"><?= esc($p['deskripsi']); ?></p>
+                    </div>
+
+                    <!-- Photo (if any) -->
+                    <?php if (!empty($p['foto'])): ?>
+                    <div>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1.5">Foto Dokumentasi</span>
+                        <a href="<?= base_url('files/pkl-progress/' . esc($p['foto'])); ?>" target="_blank"
+                           class="group/photo relative block rounded-xl overflow-hidden border border-gray-200 bg-gray-50 hover:border-indigo-300 transition-colors">
+                            <img src="<?= base_url('files/pkl-progress/' . esc($p['foto'])); ?>"
+                                 class="w-full max-h-44 object-cover" loading="lazy">
+                            <div class="absolute inset-0 bg-black/0 group-hover/photo:bg-black/20 transition-colors flex items-center justify-center">
+                                <span class="opacity-0 group-hover/photo:opacity-100 transition-opacity bg-black/60 text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                                    <i class="fas fa-expand-alt text-[10px]"></i> Lihat Foto
+                                </span>
+                            </div>
+                        </a>
+                    </div>
+                    <?php endif; ?>
+
+                    <!-- Catatan Pembimbing (if any) -->
+                    <?php if (!empty($p['catatan_pembimbing'])): ?>
+                    <div class="flex gap-2.5 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2.5">
+                        <i class="fas fa-comment-dots text-blue-400 text-xs mt-0.5 flex-shrink-0"></i>
+                        <div>
+                            <span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest block leading-none mb-1">Catatan Pembimbing</span>
+                            <p class="text-xs text-blue-800 leading-relaxed"><?= esc($p['catatan_pembimbing']); ?></p>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
                 </div>
 
-                <!-- Description -->
-                <p class="text-xs text-gray-700 bg-slate-50 border border-slate-100 rounded-lg p-2.5 mb-3 leading-relaxed line-clamp-3"><?= esc($p['deskripsi']); ?></p>
+                <!-- Card Footer: Action Forms -->
+                <div class="px-4 pb-4 pt-1">
+                    <div class="bg-gray-50 border border-gray-200 rounded-xl p-3 space-y-2.5">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Tindakan</p>
 
-                <?php if (!empty($p['foto'])): ?>
-                <div class="mb-3">
-                    <a href="<?= base_url('files/pkl-progress/' . esc($p['foto'])); ?>" target="_blank"
-                       class="inline-block group relative rounded-lg overflow-hidden border border-gray-200">
-                        <img src="<?= base_url('files/pkl-progress/' . esc($p['foto'])); ?>"
-                             class="max-h-36 rounded-lg group-hover:opacity-90 transition-opacity" loading="lazy">
-                    </a>
-                </div>
-                <?php endif; ?>
+                        <!-- Setujui -->
+                        <form action="<?= base_url('instruktur/jurnal-pkl/verifikasi-progress/' . $p['id']); ?>" method="POST">
+                            <?= csrf_field(); ?>
+                            <input type="hidden" name="status" value="verified_by_instruktur">
+                            <div class="flex gap-2">
+                                <input type="text" name="catatan_instruktur" required
+                                       placeholder="Tulis catatan persetujuan..."
+                                       class="flex-1 min-w-0 border border-gray-200 bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent placeholder:text-gray-400 transition-all">
+                                <button type="submit"
+                                        class="flex-shrink-0 inline-flex items-center gap-1.5 bg-green-600 hover:bg-green-700 active:scale-95 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm shadow-green-200">
+                                    <i class="fas fa-check text-xs"></i>
+                                    <span class="hidden sm:inline">Setujui</span>
+                                    <span class="sm:hidden">OK</span>
+                                </button>
+                            </div>
+                        </form>
 
-                <?php if (!empty($p['catatan_pembimbing'])): ?>
-                <div class="bg-blue-50 border-l-2 border-blue-400 px-3 py-2 rounded-r-lg mb-3 text-xs">
-                    <span class="font-bold text-blue-700 uppercase text-[9px] block mb-0.5">Catatan Pembimbing</span>
-                    <p class="text-blue-800"><?= esc($p['catatan_pembimbing']); ?></p>
+                        <!-- Revisi -->
+                        <form action="<?= base_url('instruktur/jurnal-pkl/verifikasi-progress/' . $p['id']); ?>" method="POST">
+                            <?= csrf_field(); ?>
+                            <input type="hidden" name="status" value="revision">
+                            <div class="flex gap-2">
+                                <input type="text" name="catatan_instruktur" required
+                                       placeholder="Tulis alasan revisi..."
+                                       class="flex-1 min-w-0 border border-gray-200 bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent placeholder:text-gray-400 transition-all">
+                                <button type="submit"
+                                        onclick="return confirm('Minta siswa merevisi progress ini?')"
+                                        class="flex-shrink-0 inline-flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm shadow-orange-200">
+                                    <i class="fas fa-undo text-xs"></i>
+                                    <span>Revisi</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <?php endif; ?>
 
-                <!-- Action Forms -->
-                <div class="pt-3 border-t border-gray-100 flex flex-col sm:flex-row gap-2">
-                    <!-- Setujui -->
-                    <form action="<?= base_url('instruktur/jurnal-pkl/verifikasi-progress/' . $p['id']); ?>" method="POST" class="flex-1 flex gap-2">
-                        <?= csrf_field(); ?>
-                        <input type="hidden" name="status" value="verified_by_instruktur">
-                        <input type="text" name="catatan_instruktur" required placeholder="Catatan persetujuan..."
-                               class="flex-1 min-w-0 border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-green-500 focus:border-transparent">
-                        <button type="submit"
-                                class="flex-shrink-0 bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 active:scale-95">
-                            <i class="fas fa-check"></i> Setujui
-                        </button>
-                    </form>
-                    <!-- Revisi -->
-                    <form action="<?= base_url('instruktur/jurnal-pkl/verifikasi-progress/' . $p['id']); ?>" method="POST" class="flex-1 flex gap-2">
-                        <?= csrf_field(); ?>
-                        <input type="hidden" name="status" value="revision">
-                        <input type="text" name="catatan_instruktur" required placeholder="Alasan revisi..."
-                               class="flex-1 min-w-0 border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-orange-500 focus:border-transparent">
-                        <button type="submit"
-                                onclick="return confirm('Minta revisi progress ini?')"
-                                class="flex-shrink-0 bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 active:scale-95">
-                            <i class="fas fa-edit"></i> Revisi
-                        </button>
-                    </form>
-                </div>
             </div>
             <?php endforeach; ?>
+
+            <!-- Footer link -->
+            <div class="pt-1 pb-2 text-center">
+                <a href="<?= base_url('instruktur/jurnal-pkl'); ?>"
+                   class="inline-flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-800 font-semibold transition-colors">
+                    Lihat semua jurnal <i class="fas fa-arrow-right text-xs"></i>
+                </a>
+            </div>
+
             <?php endif; ?>
         </div>
     </div>
 </div>
+
+<script>
+function openMenungguReview() {
+    const modal = document.getElementById('modalMenungguReview');
+    const panel = document.getElementById('modalMenungguReviewPanel');
+    modal.classList.remove('hidden');
+    requestAnimationFrame(() => {
+        panel.classList.remove('translate-y-full', 'sm:scale-95', 'sm:opacity-0');
+        panel.classList.add('translate-y-0', 'sm:scale-100', 'sm:opacity-100');
+    });
+}
+function closeMenungguReview() {
+    const modal = document.getElementById('modalMenungguReview');
+    const panel = document.getElementById('modalMenungguReviewPanel');
+    panel.classList.add('translate-y-full', 'sm:scale-95', 'sm:opacity-0');
+    panel.classList.remove('translate-y-0', 'sm:scale-100', 'sm:opacity-100');
+    setTimeout(() => modal.classList.add('hidden'), 280);
+}
+</script>
 
 <!-- Modal Total Progress -->
 <div id="modalTotalProgress"
