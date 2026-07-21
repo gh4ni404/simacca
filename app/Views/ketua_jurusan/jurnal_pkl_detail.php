@@ -7,7 +7,7 @@ $bulanIndo = [
 <?= $this->extend(get_device_layout()) ?>
 
 <?= $this->section('content') ?>
-<div class="h-full">
+<div class="h-full px-4 md:px-1">
     <?= render_flash_message() ?>
 
     <!-- Breadcrumb -->
