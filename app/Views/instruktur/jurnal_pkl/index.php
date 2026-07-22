@@ -444,35 +444,40 @@ $totalStats = [
         localStorage.setItem('selected_siswa_id', siswaId);
     }
 
-    function selectStudent(siswaId) {
+    function selectStudent(siswaId, forceShowDetailOnMobile = true) {
         localStorage.setItem('selected_siswa_id', siswaId);
-
+ 
         document.querySelectorAll('.student-item').forEach(function(item) {
             item.classList.remove('active');
         });
         var selectedBtn = document.getElementById('student-btn-' + siswaId);
         if (selectedBtn) selectedBtn.classList.add('active');
-
+ 
         var emptyState = document.getElementById('empty-state');
         if (emptyState) emptyState.classList.add('hidden');
-
+ 
         document.querySelectorAll('.student-detail-panel').forEach(function(panel) {
             panel.classList.add('hidden');
         });
         var activePanel = document.getElementById('student-detail-' + siswaId);
         if (activePanel) activePanel.classList.remove('hidden');
-
+ 
         if (window.innerWidth < 1024) {
-            document.getElementById('list-panel').classList.add('hidden');
-            document.getElementById('detail-panel').classList.remove('hidden');
+            if (forceShowDetailOnMobile) {
+                document.getElementById('list-panel').classList.add('hidden');
+                document.getElementById('detail-panel').classList.remove('hidden');
+            } else {
+                document.getElementById('detail-panel').classList.add('hidden');
+                document.getElementById('list-panel').classList.remove('hidden');
+            }
         }
     }
-
+ 
     function backToList() {
         document.getElementById('list-panel').classList.remove('hidden');
         document.getElementById('detail-panel').classList.add('hidden');
     }
-
+ 
     function filterStudents() {
         var q = document.getElementById('searchInput').value.toLowerCase();
         document.querySelectorAll('.student-item').forEach(function(card) {
@@ -485,23 +490,23 @@ $totalStats = [
             }
         });
     }
-
+ 
     document.addEventListener('DOMContentLoaded', function() {
         var savedSiswaId = localStorage.getItem('selected_siswa_id');
-
+ 
         if (window.innerWidth < 1024) {
             document.getElementById('detail-panel').classList.add('hidden');
             document.getElementById('list-panel').classList.remove('hidden');
         }
-
+ 
         if (savedSiswaId) {
             var targetBtn = document.getElementById('student-btn-' + savedSiswaId);
             if (targetBtn && targetBtn.style.display !== 'none') {
-                selectStudent(savedSiswaId);
+                selectStudent(savedSiswaId, false);
                 return;
             }
         }
-
+ 
         if (window.innerWidth >= 1024) {
             var firstBtn = document.querySelector('.student-item');
             if (firstBtn) {

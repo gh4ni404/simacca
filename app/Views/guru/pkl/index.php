@@ -511,7 +511,7 @@ $hariIndo = [
     }
 
     // Select a student and show their details
-    function selectStudent(siswaId) {
+    function selectStudent(siswaId, forceShowDetailOnMobile = true) {
         // Save selection
         localStorage.setItem('selected_siswa_id', siswaId);
 
@@ -539,8 +539,13 @@ $hariIndo = [
 
         // Handle mobile view toggling
         if (window.innerWidth < 1024) {
-            document.getElementById('list-panel').classList.add('hidden');
-            document.getElementById('detail-panel').classList.remove('hidden');
+            if (forceShowDetailOnMobile) {
+                document.getElementById('list-panel').classList.add('hidden');
+                document.getElementById('detail-panel').classList.remove('hidden');
+            } else {
+                document.getElementById('detail-panel').classList.add('hidden');
+                document.getElementById('list-panel').classList.remove('hidden');
+            }
         }
     }
 
@@ -578,7 +583,7 @@ $hariIndo = [
             const targetBtn = document.getElementById('student-btn-' + savedSiswaId);
             // Verify if student still exists in list (for case when they have no tasks left or deleted)
             if (targetBtn && targetBtn.style.display !== 'none') {
-                selectStudent(savedSiswaId);
+                selectStudent(savedSiswaId, false);
                 return;
             }
         }
