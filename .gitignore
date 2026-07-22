@@ -125,7 +125,10 @@ _modules/*
 /results/
 /phpunit*.xml
 
-/public/
+# Ubah aturan /public/ menjadi seperti ini:
+/public/*
+!/public/css/
+!/public/css/*.css
 
 error_log
 /error_log
