@@ -116,6 +116,34 @@ $formatIndoDate = function($dateStr) use ($hariIndo, $bulanIndo) {
                                     <span class="text-xs font-bold text-gray-700 line-clamp-1"><?= esc($p['task_judul']) ?></span>
                                 </div>
 
+                                <!-- Langkah Kerja -->
+                                <?php
+                                $langkahKerja = [];
+                                if (!empty($p['langkah_kerja'])) {
+                                    $decoded = json_decode($p['langkah_kerja'], true);
+                                    if (is_array($decoded)) {
+                                        $langkahKerja = array_filter($decoded, fn($v) => trim($v) !== '');
+                                    }
+                                }
+                                ?>
+                                <?php if (!empty($langkahKerja)): ?>
+                                    <div class="mb-3 px-3 py-2 bg-slate-50/60 border border-slate-100 rounded-xl">
+                                        <span class="text-[10px] text-indigo-500 font-extrabold uppercase tracking-wider block mb-2 flex items-center gap-1">
+                                            <i class="fas fa-list-ol text-[9px]"></i> Langkah Kerja
+                                        </span>
+                                        <ol class="space-y-1.5">
+                                            <?php foreach (array_values($langkahKerja) as $idx => $step): ?>
+                                                <li class="flex items-start gap-2 text-xs text-gray-700">
+                                                    <span class="flex-shrink-0 w-4 h-4 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-[9px]">
+                                                        <?= $idx + 1 ?>
+                                                    </span>
+                                                    <span class="leading-normal"><?= esc($step) ?></span>
+                                                </li>
+                                            <?php endforeach; ?>
+                                        </ol>
+                                    </div>
+                                <?php endif; ?>
+
                                 <!-- Progress Description -->
                                 <div class="mb-4">
                                     <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1">Deskripsi Hasil Kerja</span>
