@@ -68,15 +68,7 @@ class AbsensiPklController extends BaseController
         $stats = $this->absensiPklDetailModel->getDetailStats($absensiPklId);
 
         // Get absensi header info
-        $absensiInfo = $this->db->table('absensi_pkl')
-            ->select('absensi_pkl.*, guru.nama_lengkap AS nama_pembimbing, tempat_pkl.nama_perusahaan')
-            ->join('pembimbing_pkl', 'pembimbing_pkl.id = absensi_pkl.pembimbing_pkl_id')
-            ->join('guru', 'guru.id = pembimbing_pkl.guru_id')
-            ->join('tempat_pkl', 'tempat_pkl.id = pembimbing_pkl.tempat_pkl_id')
-            ->where('absensi_pkl.id', $absensiPklId)
-            ->where('absensi_pkl.deleted_at', null)
-            ->get()
-            ->getRowArray();
+        $absensiInfo = $this->kjModel->getAbsensiPklInfo($absensiPklId);
 
         if (!$absensiInfo) {
             session()->setFlashdata('error', 'Data absensi tidak ditemukan');

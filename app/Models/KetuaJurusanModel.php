@@ -252,6 +252,22 @@ class KetuaJurusanModel extends Model
     }
 
     /**
+     * Get absensi PKL header info (with pembimbing & tempat pkl)
+     */
+    public function getAbsensiPklInfo(int $absensiPklId): ?array
+    {
+        return $this->db->table('absensi_pkl')
+            ->select('absensi_pkl.*, guru.nama_lengkap AS nama_pembimbing, tempat_pkl.nama_perusahaan')
+            ->join('pembimbing_pkl', 'pembimbing_pkl.id = absensi_pkl.pembimbing_pkl_id')
+            ->join('guru', 'guru.id = pembimbing_pkl.guru_id')
+            ->join('tempat_pkl', 'tempat_pkl.id = pembimbing_pkl.tempat_pkl_id')
+            ->where('absensi_pkl.id', $absensiPklId)
+            ->where('absensi_pkl.deleted_at', null)
+            ->get()
+            ->getRowArray() ?: null;
+    }
+
+    /**
      * Get stats for dashboard: total siswa PKL, tasks, progress per status
      */
     public function getDashboardStats(string $jurusan, ?string $tahunAjaran = null): array
