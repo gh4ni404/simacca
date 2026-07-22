@@ -192,7 +192,7 @@ class KetuaJurusanModel extends Model
             }
         }
 
-        uasort($grouped, fn($a, $b) => $b['pending_count'] <=> $a['pending_count']);
+        uasort($grouped, fn($a, $b) => strcmp($a['nama_siswa'], $b['nama_siswa']));
 
         return [
             'grouped' => array_values($grouped),

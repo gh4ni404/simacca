@@ -115,9 +115,9 @@ $bulanIndo = [
             }
             $persenLengkap = $totalProgress > 0 ? round(($approvedCount / $totalProgress) * 100) : 0;
         ?>
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <!-- Student Header -->
-            <div class="px-5 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+            <!-- Student Header (accordion trigger) -->
+            <div class="accordion-trigger px-5 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between cursor-pointer select-none" data-accordion-target="acc-<?= $student['siswa_id'] ?>">
                 <div class="flex items-center gap-3">
                     <?php if (!empty($student['profile_photo'])): ?>
                         <img src="<?= base_url('profile-photo/' . esc($student['profile_photo'])) ?>"
@@ -144,52 +144,85 @@ $bulanIndo = [
                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
                         Detail <i class="fas fa-arrow-right ml-1"></i>
                     </a>
+                    <i class="accordion-chevron fas fa-chevron-down text-gray-400 transition-transform duration-200"></i>
                 </div>
             </div>
 
-            <!-- Progress Entries -->
-            <div class="divide-y divide-gray-100 max-h-64 overflow-y-auto">
-                <?php foreach (array_slice($student['progress'], 0, 5) as $prog): ?>
-                <div class="px-5 py-3 hover:bg-gray-50 transition-colors">
-                    <div class="flex items-center justify-between">
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-500"><?= date('d/m/Y', strtotime($prog['tanggal'])) ?></span>
-                                <span class="text-sm font-medium text-gray-800 truncate"><?= esc($prog['nama_task']) ?></span>
+            <!-- Progress Entries (accordion body) -->
+            <div id="acc-<?= $student['siswa_id'] ?>" class="accordion-body overflow-hidden transition-all duration-300 ease-in-out" style="max-height: 0; opacity: 0;">
+                <div class="divide-y divide-gray-100 max-h-64 overflow-y-auto">
+                    <?php foreach (array_slice($student['progress'], 0, 5) as $prog): ?>
+                    <div class="px-5 py-3 hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs text-gray-500"><?= date('d/m/Y', strtotime($prog['tanggal'])) ?></span>
+                                    <span class="text-sm font-medium text-gray-800 truncate"><?= esc($prog['nama_task']) ?></span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-0.5 truncate"><?= esc(mb_strimwidth($prog['deskripsi'], 0, 100, '...')) ?></p>
                             </div>
-                            <p class="text-xs text-gray-500 mt-0.5 truncate"><?= esc(mb_strimwidth($prog['deskripsi'], 0, 100, '...')) ?></p>
-                        </div>
-                        <div class="ml-3 flex-shrink-0">
-                            <?php
-                            $statusBadge = match($prog['status']) {
-                                'approved' => 'bg-green-100 text-green-800',
-                                'submitted' => 'bg-yellow-100 text-yellow-800',
-                                'revision' => 'bg-red-100 text-red-800',
-                                'verified_by_instruktur' => 'bg-blue-100 text-blue-800',
-                                default => 'bg-gray-100 text-gray-800',
-                            };
-                            $statusLabel = match($prog['status']) {
-                                'approved' => 'Disetujui',
-                                'submitted' => 'Menunggu',
-                                'revision' => 'Revisi',
-                                'verified_by_instruktur' => 'Verified',
-                                default => ucfirst($prog['status']),
-                            };
-                            ?>
-                            <span class="px-2 py-0.5 text-xs font-medium rounded <?= $statusBadge ?>"><?= $statusLabel ?></span>
+                            <div class="ml-3 flex-shrink-0">
+                                <?php
+                                $statusBadge = match($prog['status']) {
+                                    'approved' => 'bg-green-100 text-green-800',
+                                    'submitted' => 'bg-yellow-100 text-yellow-800',
+                                    'revision' => 'bg-red-100 text-red-800',
+                                    'verified_by_instruktur' => 'bg-blue-100 text-blue-800',
+                                    default => 'bg-gray-100 text-gray-800',
+                                };
+                                $statusLabel = match($prog['status']) {
+                                    'approved' => 'Disetujui',
+                                    'submitted' => 'Menunggu',
+                                    'revision' => 'Revisi',
+                                    'verified_by_instruktur' => 'Verified',
+                                    default => ucfirst($prog['status']),
+                                };
+                                ?>
+                                <span class="px-2 py-0.5 text-xs font-medium rounded <?= $statusBadge ?>"><?= $statusLabel ?></span>
+                            </div>
                         </div>
                     </div>
+                    <?php endforeach; ?>
+                    <?php if ($totalProgress > 5): ?>
+                    <div class="px-5 py-2 text-center text-xs text-blue-600 font-medium bg-blue-50">
+                        +<?= $totalProgress - 5 ?> entri lainnya
+                    </div>
+                    <?php endif; ?>
                 </div>
-                <?php endforeach; ?>
-                <?php if ($totalProgress > 5): ?>
-                <div class="px-5 py-2 text-center text-xs text-blue-600 font-medium bg-blue-50">
-                    +<?= $totalProgress - 5 ?> entri lainnya
-                </div>
-                <?php endif; ?>
             </div>
         </div>
         <?php endforeach; ?>
     </div>
     <?php endif; ?>
 </div>
+<script>
+document.addEventListener('click', function(e) {
+    if (e.target.closest('a')) return;
+    var trigger = e.target.closest('.accordion-trigger');
+    if (!trigger) return;
+    e.preventDefault();
+    var targetId = trigger.getAttribute('data-accordion-target');
+    var body = document.getElementById(targetId);
+    if (!body) return;
+    var chevron = trigger.querySelector('.accordion-chevron');
+    var isOpen = parseFloat(body.style.opacity) === 1;
+    // Close all other accordions
+    document.querySelectorAll('.accordion-body').forEach(function(other) {
+        if (other !== body && parseFloat(other.style.opacity) === 1) {
+            other.style.maxHeight = '0';
+            other.style.opacity = '0';
+            var otherTrigger = document.querySelector('.accordion-trigger[data-accordion-target="' + other.id + '"]');
+            if (otherTrigger) otherTrigger.querySelector('.accordion-chevron')?.classList.remove('-rotate-180');
+        }
+    });
+    if (isOpen) {
+        body.style.maxHeight = '0';
+        body.style.opacity = '0';
+    } else {
+        body.style.maxHeight = body.scrollHeight + 'px';
+        body.style.opacity = '1';
+    }
+    if (chevron) chevron.classList.toggle('-rotate-180');
+});
+</script>
 <?= $this->endSection() ?>
