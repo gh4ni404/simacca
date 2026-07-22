@@ -124,7 +124,6 @@
                         'izin'   => ['bg-blue-100 text-blue-800 border-blue-300', 'fa-file-alt'],
                         'sakit'  => ['bg-yellow-100 text-yellow-800 border-yellow-300', 'fa-medkit'],
                         'alpa'   => ['bg-red-100 text-red-800 border-red-300', 'fa-user-times'],
-                        'dispen' => ['bg-purple-100 text-purple-800 border-purple-300', 'fa-id-badge'],
                     ];
                     $no = 1;
                     foreach ($details as $d):

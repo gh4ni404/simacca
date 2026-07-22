@@ -76,7 +76,6 @@
         $totalIzin = $globalStats['izin'] ?? 0;
         $totalSakit = $globalStats['sakit'] ?? 0;
         $totalAlpa = $globalStats['alpa'] ?? 0;
-        $totalDispen = $globalStats['dispen'] ?? 0;
         $persenGlobal = $globalStats['persen_kehadiran'] ?? 0;
         ?>
         <div class="grid grid-cols-3 gap-3 mb-4">
@@ -99,10 +98,6 @@
             <div class="bg-white rounded-xl shadow-md p-3 text-center border-t-2 border-red-500">
                 <p class="text-xs text-gray-500">Alpa</p>
                 <p class="text-xl font-bold text-red-600"><?= $totalAlpa ?></p>
-            </div>
-            <div class="bg-white rounded-xl shadow-md p-3 text-center border-t-2 border-purple-500">
-                <p class="text-xs text-gray-500">Dispen</p>
-                <p class="text-xl font-bold text-purple-600"><?= $totalDispen ?></p>
             </div>
         </div>
 
@@ -171,10 +166,6 @@
                             <div class="text-center p-1 bg-red-50 rounded-lg">
                                 <p class="text-xs text-gray-500">Alpa</p>
                                 <p class="text-sm font-bold text-red-600"><?= $rp['alpa'] ?? 0 ?></p>
-                            </div>
-                            <div class="text-center p-1 bg-purple-50 rounded-lg">
-                                <p class="text-xs text-gray-500">Dispen</p>
-                                <p class="text-sm font-bold text-purple-600"><?= $rp['dispen'] ?? 0 ?></p>
                             </div>
                         </div>
                         <a href="<?= base_url('admin/absensi-pkl/rekap/' . $rp['pembimbing_pkl_id']) ?>"

@@ -496,7 +496,6 @@ if (!function_exists('get_status_badge')) {
             'izin' => 'bg-blue-100 text-blue-800',
             'sakit' => 'bg-yellow-100 text-yellow-800',
             'alpa' => 'bg-red-100 text-red-800',
-            'dispen' => 'bg-purple-100 text-purple-800',
         ];
 
         $class = $badges[$status] ?? 'bg-gray-100 text-gray-800';

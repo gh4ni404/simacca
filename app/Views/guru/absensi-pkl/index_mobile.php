@@ -29,7 +29,6 @@
             <?= stat_card('Izin', array_sum(array_column($absensi, 'izin_count')), 'file-alt', 'blue', '', '', 'compact'); ?>
             <?= stat_card('Sakit', array_sum(array_column($absensi, 'sakit_count')), 'medkit', 'yellow', '', '', 'compact'); ?>
             <?= stat_card('Alpa', array_sum(array_column($absensi, 'alpa_count')), 'user-times', 'red', '', '', 'compact'); ?>
-            <?= stat_card('Dispen', array_sum(array_column($absensi, 'dispen_count')), 'id-badge', 'purple', '', '', 'compact'); ?>
         </div>
 
         <!-- Filter Section - Collapsible -->
@@ -127,9 +126,6 @@
                             </span>
                             <span class="inline-flex items-center px-2.5 py-1 bg-red-100 text-red-800 rounded-lg text-xs font-bold">
                                 <i class="fas fa-times-circle mr-1"></i> Alpa <?= $item['alpa_count'] ?? 0 ?>
-                            </span>
-                            <span class="inline-flex items-center px-2.5 py-1 bg-purple-100 text-purple-800 rounded-lg text-xs font-bold">
-                                <i class="fas fa-id-badge mr-1"></i> Dispen <?= $item['dispen_count'] ?? 0 ?>
                             </span>
                         </div>
 

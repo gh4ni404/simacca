@@ -29,7 +29,6 @@
                 ['label' => 'Izin', 'value' => $statistics['izin'] ?? 0, 'color' => 'blue'],
                 ['label' => 'Sakit', 'value' => $statistics['sakit'] ?? 0, 'color' => 'yellow'],
                 ['label' => 'Alpa', 'value' => $statistics['alpa'] ?? 0, 'color' => 'red'],
-                ['label' => 'Dispen', 'value' => $statistics['dispen'] ?? 0, 'color' => 'purple'],
             ];
             ?>
             <?php foreach ($statCards as $sc): ?>
@@ -145,10 +144,6 @@
                             <div class="text-center p-1 bg-red-50 rounded-lg">
                                 <p class="text-xs text-gray-500">Alpa</p>
                                 <p class="text-sm font-bold text-red-600"><?= $item['alpa_count'] ?? 0 ?></p>
-                            </div>
-                            <div class="text-center p-1 bg-purple-50 rounded-lg">
-                                <p class="text-xs text-gray-500">Dispen</p>
-                                <p class="text-sm font-bold text-purple-600"><?= $item['dispen_count'] ?? 0 ?></p>
                             </div>
                         </div>
                         <div class="flex items-center justify-between">

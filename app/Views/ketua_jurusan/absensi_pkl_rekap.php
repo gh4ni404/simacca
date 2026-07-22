@@ -87,7 +87,6 @@
                             'izin' => 'bg-blue-100 text-blue-800',
                             'sakit' => 'bg-yellow-100 text-yellow-800',
                             'alpa' => 'bg-red-100 text-red-800',
-                            'dispen' => 'bg-purple-100 text-purple-800',
                             default => 'bg-gray-100 text-gray-800',
                         };
                         $statusLabel = match($detail['status']) {
@@ -95,7 +94,6 @@
                             'izin' => 'Izin',
                             'sakit' => 'Sakit',
                             'alpa' => 'Alpa',
-                            'dispen' => 'Dispen',
                             default => ucfirst($detail['status']),
                         };
                     ?>

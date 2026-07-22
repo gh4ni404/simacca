@@ -80,7 +80,6 @@
     $totalIzin = $globalStats['izin'] ?? 0;
     $totalSakit = $globalStats['sakit'] ?? 0;
     $totalAlpa = $globalStats['alpa'] ?? 0;
-    $totalDispen = $globalStats['dispen'] ?? 0;
     $persenGlobal = $globalStats['persen_kehadiran'] ?? 0;
     ?>
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -136,17 +135,6 @@
                 </div>
                 <div class="p-3 bg-red-100 rounded-full">
                     <i class="fas fa-user-times text-red-600"></i>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-xl shadow-lg p-5 border-t-4 border-purple-500">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-500">Dispen</p>
-                    <p class="text-2xl font-bold text-gray-800"><?= $totalDispen ?></p>
-                </div>
-                <div class="p-3 bg-purple-100 rounded-full">
-                    <i class="fas fa-id-badge text-purple-600"></i>
                 </div>
             </div>
         </div>
@@ -208,7 +196,6 @@
                             <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Izin</th>
                             <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Sakit</th>
                             <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Alpa</th>
-                            <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Dispen</th>
                             <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Kehadiran</th>
                             <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Aksi</th>
                         </tr>
@@ -251,11 +238,6 @@
                             <td class="px-6 py-4 whitespace-nowrap text-center">
                                 <span class="inline-flex items-center justify-center bg-red-100 text-red-800 border border-red-200 px-3 py-1 rounded-lg text-sm font-bold">
                                     <?= $rp['alpa'] ?? 0 ?>
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center">
-                                <span class="inline-flex items-center justify-center bg-purple-100 text-purple-800 border border-purple-200 px-3 py-1 rounded-lg text-sm font-bold">
-                                    <?= $rp['dispen'] ?? 0 ?>
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">

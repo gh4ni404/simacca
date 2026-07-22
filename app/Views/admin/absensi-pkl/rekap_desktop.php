@@ -35,7 +35,6 @@
         ['label' => 'Izin', 'value' => $statistics['izin'] ?? 0, 'icon' => 'file-alt', 'color' => 'blue'],
         ['label' => 'Sakit', 'value' => $statistics['sakit'] ?? 0, 'icon' => 'medkit', 'color' => 'yellow'],
         ['label' => 'Alpa', 'value' => $statistics['alpa'] ?? 0, 'icon' => 'user-times', 'color' => 'red'],
-        ['label' => 'Dispen', 'value' => $statistics['dispen'] ?? 0, 'icon' => 'id-badge', 'color' => 'purple'],
     ];
     ?>
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -131,7 +130,6 @@
                             <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Izin</th>
                             <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Sakit</th>
                             <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Alpa</th>
-                            <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Dispen</th>
                             <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Kehadiran</th>
                             <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Aksi</th>
                         </tr>
@@ -174,11 +172,6 @@
                             <td class="px-6 py-4 whitespace-nowrap text-center">
                                 <span class="inline-flex items-center justify-center bg-red-100 text-red-800 border border-red-200 px-3 py-1 rounded-lg text-sm font-bold">
                                     <?= $item['alpa_count'] ?? 0 ?>
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center">
-                                <span class="inline-flex items-center justify-center bg-purple-100 text-purple-800 border border-purple-200 px-3 py-1 rounded-lg text-sm font-bold">
-                                    <?= $item['dispen_count'] ?? 0 ?>
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">

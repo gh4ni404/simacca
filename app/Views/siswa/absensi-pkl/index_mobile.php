@@ -19,7 +19,6 @@
         $totalIzin = $statistik['izin'] ?? 0;
         $totalSakit = $statistik['sakit'] ?? 0;
         $totalAlpa = $statistik['alpa'] ?? 0;
-        $totalDispen = $statistik['dispen'] ?? 0;
         $persenKehadiran = $statistik['persen_kehadiran'] ?? 0;
         ?>
 
@@ -44,10 +43,6 @@
             <div class="bg-white rounded-xl shadow-md p-3 text-center border-t-2 border-red-500">
                 <p class="text-xs text-gray-500">Alpa</p>
                 <p class="text-xl font-bold text-red-600"><?= $totalAlpa ?></p>
-            </div>
-            <div class="bg-white rounded-xl shadow-md p-3 text-center border-t-2 border-purple-500">
-                <p class="text-xs text-gray-500">Dispen</p>
-                <p class="text-xl font-bold text-purple-600"><?= $totalDispen ?></p>
             </div>
         </div>
 
@@ -108,10 +103,6 @@
                             case 'alpa':
                                 $badgeClass = 'bg-red-100 text-red-800 border-red-300';
                                 $icon = 'fa-user-times';
-                                break;
-                            case 'dispen':
-                                $badgeClass = 'bg-purple-100 text-purple-800 border-purple-300';
-                                $icon = 'fa-id-badge';
                                 break;
                         }
                     ?>

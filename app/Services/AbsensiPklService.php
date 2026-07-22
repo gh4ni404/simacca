@@ -43,7 +43,6 @@ class AbsensiPklService extends BaseService
                 $item['izin_count'] = $stats['izin'];
                 $item['sakit_count'] = $stats['sakit'];
                 $item['alpa_count'] = $stats['alpa'];
-                $item['dispen_count'] = $stats['dispen'];
                 $item['persen_kehadiran'] = $stats['persen_kehadiran'];
                 $item['can_edit'] = true; // Pembimbing can always edit
                 $item['can_delete'] = true;
@@ -317,7 +316,6 @@ class AbsensiPklService extends BaseService
                 $item['izin']             = $stats['izin'] ?? 0;
                 $item['sakit']            = $stats['sakit'] ?? 0;
                 $item['alpa']             = $stats['alpa'] ?? 0;
-                $item['dispen']           = $stats['dispen'] ?? 0;
                 $item['total']            = $stats['total'] ?? 0;
                 $item['persen_kehadiran'] = $stats['persen_kehadiran'] ?? 0;
             }

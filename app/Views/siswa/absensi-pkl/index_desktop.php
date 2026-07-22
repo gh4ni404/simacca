@@ -33,7 +33,6 @@
     $totalIzin = $statistik['izin'] ?? 0;
     $totalSakit = $statistik['sakit'] ?? 0;
     $totalAlpa = $statistik['alpa'] ?? 0;
-    $totalDispen = $statistik['dispen'] ?? 0;
     $persenKehadiran = $statistik['persen_kehadiran'] ?? 0;
     ?>
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -89,17 +88,6 @@
                 </div>
                 <div class="p-3 bg-red-100 rounded-full">
                     <i class="fas fa-user-times text-red-600"></i>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-xl shadow-lg p-5 border-t-4 border-purple-500">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-500">Dispen</p>
-                    <p class="text-2xl font-bold text-gray-800"><?= $totalDispen ?></p>
-                </div>
-                <div class="p-3 bg-purple-100 rounded-full">
-                    <i class="fas fa-id-badge text-purple-600"></i>
                 </div>
             </div>
         </div>
@@ -178,7 +166,6 @@
                                     'izin'   => 'bg-blue-100 text-blue-800',
                                     'sakit'  => 'bg-yellow-100 text-yellow-800',
                                     'alpa'   => 'bg-red-100 text-red-800',
-                                    'dispen' => 'bg-purple-100 text-purple-800',
                                 ];
                                 foreach ($items['items'] as $item):
                                 ?>
