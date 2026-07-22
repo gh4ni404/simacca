@@ -2,7 +2,7 @@
 
 <?= $this->section('content') ?>
 <div class="p-4 md:p-6">
-    <?php
+    <?php helper('setting');
     $bulanIndo = [
         1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
         'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
@@ -54,27 +54,10 @@
             <div class="p-5 hover:bg-gray-50 transition-colors">
                 <div class="flex items-start gap-3">
                     <div class="flex-shrink-0 mt-1">
-                        <?php if ($p['status'] === 'approved'): ?>
-                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-600">
-                            <i class="fas fa-check text-sm"></i>
+                        <?php $ds = get_pkl_progress_display_status($p); $st = get_pkl_status_style($ds); ?>
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full <?= $st['icon_bg'] ?>">
+                            <i class="fas <?= $st['icon'] ?> text-sm"></i>
                         </span>
-                        <?php elseif ($p['status'] === 'verified_by_instruktur'): ?>
-                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600">
-                            <i class="fas fa-check-double text-sm"></i>
-                        </span>
-                        <?php elseif ($p['status'] === 'submitted'): ?>
-                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-yellow-100 text-yellow-600">
-                            <i class="fas fa-clock text-sm"></i>
-                        </span>
-                        <?php elseif ($p['status'] === 'revision'): ?>
-                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-orange-100 text-orange-600">
-                            <i class="fas fa-edit text-sm"></i>
-                        </span>
-                        <?php else: ?>
-                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-500">
-                            <i class="fas fa-pen text-sm"></i>
-                        </span>
-                        <?php endif; ?>
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-1">
@@ -110,7 +93,7 @@
                         </div>
                         <?php endif; ?>
 
-                        <?php if ($p['status'] !== 'approved'): ?>
+                        <?php if (get_pkl_progress_display_status($p) !== 'completed'): ?>
                         <div class="mt-3 flex gap-2">
                             <a href="<?= base_url('siswa/jurnal-pkl/edit-progress/' . $p['id']); ?>"
                                class="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-xs font-medium">

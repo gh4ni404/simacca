@@ -113,7 +113,13 @@ class PklProgressModel extends Model
                        SUM(CASE WHEN pp.status = 'verified_by_instruktur' THEN 1 ELSE 0 END) AS verified_by_instruktur,
                        SUM(CASE WHEN pp.status = 'submitted' THEN 1 ELSE 0 END) AS submitted,
                        SUM(CASE WHEN pp.status = 'revision' THEN 1 ELSE 0 END) AS revision,
-                       SUM(CASE WHEN pp.status = 'draft' THEN 1 ELSE 0 END) AS draft
+                       SUM(CASE WHEN pp.status = 'draft' THEN 1 ELSE 0 END) AS draft,
+                       SUM(CASE WHEN pp.status = 'approved'
+                           AND pp.instruktur_verified_by IS NOT NULL
+                           AND pp.verified_by IS NOT NULL
+                           AND pp.catatan_instruktur IS NOT NULL AND pp.catatan_instruktur != ''
+                           AND pp.catatan_pembimbing IS NOT NULL AND pp.catatan_pembimbing != ''
+                           THEN 1 ELSE 0 END) AS fully_verified
                 FROM pkl_progress pp
                 JOIN pkl_tasks pt ON pt.id = pp.task_id
                 WHERE pt.siswa_id = ? AND pp.deleted_at IS NULL AND pt.deleted_at IS NULL

@@ -48,6 +48,138 @@
     .progress-fill-anim {
         transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
+    /* ── Toast Notification ── */
+    #toastContainer {
+        position: fixed;
+        top: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: calc(100% - 32px);
+        max-width: 400px;
+        pointer-events: none;
+    }
+    .toast {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 18px;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #fff;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        pointer-events: all;
+        animation: toastIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    .toast.toast-error  { background: #ef4444; }
+    .toast.toast-success { background: #10b981; }
+    .toast.toast-info   { background: #3b82f6; }
+    .toast-icon { font-size: 1rem; flex-shrink: 0; }
+    @keyframes toastIn {
+        from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+        to   { opacity: 1; transform: translateY(0)   scale(1); }
+    }
+    @keyframes toastOut {
+        from { opacity: 1; transform: translateY(0)   scale(1); }
+        to   { opacity: 0; transform: translateY(-12px) scale(0.95); }
+    }
+
+    /* ── Confirm Modal ── */
+    #confirmOverlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(17, 24, 39, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 9000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.25s ease;
+        pointer-events: none;
+        padding: 16px;
+    }
+    #confirmOverlay.show {
+        opacity: 1;
+        pointer-events: all;
+    }
+    #confirmBox {
+        background: #fff;
+        border-radius: 20px;
+        padding: 24px;
+        width: 100%;
+        max-width: 400px;
+        transform: scale(0.95);
+        transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+        text-align: center;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    #confirmOverlay.show #confirmBox {
+        transform: scale(1);
+    }
+    .confirm-icon-wrap {
+        width: 56px;
+        height: 56px;
+        border-radius: 9999px;
+        background: #fef2f2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        font-size: 1.5rem;
+        color: #ef4444;
+    }
+    .confirm-title {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 8px;
+    }
+    .confirm-desc {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin-bottom: 24px;
+        line-height: 1.5;
+    }
+    .confirm-actions {
+        display: flex;
+        gap: 12px;
+    }
+    .confirm-cancel {
+        flex: 1;
+        padding: 10px 16px;
+        border-radius: 10px;
+        border: 1px solid #e5e7eb;
+        background: #f9fafb;
+        color: #374151;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.2s;
+    }
+    .confirm-cancel:hover { background: #f3f4f6; }
+    .confirm-ok {
+        flex: 1;
+        padding: 10px 16px;
+        border-radius: 10px;
+        border: none;
+        background: #ef4444;
+        color: #fff;
+        font-size: 0.875rem;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: inherit;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        transition: background 0.2s, transform 0.15s;
+    }
+    .confirm-ok:hover  { background: #dc2626; }
+    .confirm-ok:active { transform: scale(0.97); }
 </style>
 <?= $this->endSection() ?>
 
@@ -86,21 +218,7 @@ $hariSingkat = [
     'Saturday' => 'Sab'
 ];
 
-$statusIconMap = [
-    'approved' => ['icon' => 'fa-circle-check', 'color' => 'text-green-500', 'bg' => 'bg-green-100'],
-    'verified_by_instruktur' => ['icon' => 'fa-circle-check', 'color' => 'text-blue-500', 'bg' => 'bg-blue-100'],
-    'submitted' => ['icon' => 'fa-clock', 'color' => 'text-yellow-500', 'bg' => 'bg-yellow-100'],
-    'revision' => ['icon' => 'fa-pen-to-square', 'color' => 'text-red-500', 'bg' => 'bg-red-100'],
-    'draft' => ['icon' => 'fa-pen', 'color' => 'text-gray-500', 'bg' => 'bg-gray-100'],
-];
-
-$statusLabel = [
-    'approved' => 'Disetujui',
-    'verified_by_instruktur' => 'Diverifikasi Instruktur',
-    'submitted' => 'Menunggu',
-    'revision' => 'Revisi',
-    'draft' => 'Draft',
-];
+helper('setting');
 
 $kategoriBadge = [
     'Desain' => 'bg-purple-100 text-purple-700',
@@ -151,84 +269,98 @@ $kategoriBadge = [
                         </div>
                     <?php else: ?>
                         <?php foreach ($todayProgress as $p): ?>
-                            <?php $sInfo = $statusIconMap[$p['status']] ?? $statusIconMap['draft']; ?>
-                            <div class="p-4 flex items-center gap-2 hover:bg-gray-50 transition-colors">
-                                <div
-                                    class="flex-shrink-0 w-12 h-12 rounded-xl <?= $sInfo['bg'] ?> <?= $sInfo['color'] ?> flex items-center justify-center">
-                                    <i class="fa-solid <?= $sInfo['icon'] ?> text-lg"></i>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <span
-                                            class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider <?= $kategoriBadge[$p['kategori_nama'] ?? ''] ?? 'bg-gray-100 text-gray-600' ?>">
-                                            <?= esc($p['kategori_nama'] ?? 'Lainnya') ?>
-                                        </span>
-                                        <span class="text-xs text-gray-400">/</span>
-                                        <span class="text-xs font-medium text-gray-500"><?= esc($p['nama_task']) ?></span>
+                            <?php $ds = get_pkl_progress_display_status($p); $st = get_pkl_status_style($ds); ?>
+                            <div class="p-4 hover:bg-gray-50 transition-colors">
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                                    <div class="flex items-center gap-2 flex-1 min-w-0">
+                                        <div
+                                            class="flex-shrink-0 w-12 h-12 rounded-xl <?= $st['icon_bg'] ?> <?= $st['color'] ?> flex items-center justify-center">
+                                            <i class="fa-solid <?= $st['icon'] ?> text-lg"></i>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <span
+                                                    class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider <?= $kategoriBadge[$p['kategori_nama'] ?? ''] ?? 'bg-gray-100 text-gray-600' ?>">
+                                                    <?= esc($p['kategori_nama'] ?? 'Lainnya') ?>
+                                                </span>
+                                                <span class="text-xs text-gray-400">/</span>
+                                                <span class="text-xs font-medium text-gray-500"><?= esc($p['nama_task']) ?></span>
+                                            </div>
+                                            <p class="text-sm text-gray-700 line-clamp-2"><?= esc($p['deskripsi']) ?></p>
+                                        </div>
+                                        <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 flex-shrink-0">
+                                            <?php if ($p['foto']): ?>
+                                                <button type="button"
+                                                    onclick="openLightbox('<?= base_url('files/pkl-progress/' . $p['foto']); ?>')"
+                                                    title="Lihat Foto" class="block flex-shrink-0 cursor-zoom-in">
+                                                    <img src="<?= base_url('files/pkl-progress/' . $p['foto']); ?>"
+                                                        class="w-9 h-9 rounded-lg object-cover border border-gray-200 shadow-sm hover:scale-110 transition-transform"
+                                                        loading="lazy" alt="Foto aktivitas">
+                                                </button>
+                                            <?php endif; ?>
+                                            <?php if ($p['catatan_pembimbing']): ?>
+                                                <span
+                                                    class="hidden sm:flex items-center gap-1 max-w-[120px] bg-orange-50 border border-orange-100 text-orange-700 text-[10px] font-medium px-1.5 py-0.5 rounded-lg truncate"
+                                                    title="<?= esc($p['catatan_pembimbing']) ?>">
+                                                    <i class="fa-solid fa-comment text-orange-400 flex-shrink-0 text-[8px]"></i>
+                                                    <span
+                                                        class="truncate"><?= esc(mb_substr($p['catatan_pembimbing'], 0, 30)) . (mb_strlen($p['catatan_pembimbing']) > 30 ? '…' : '') ?></span>
+                                                </span>
+                                                <span
+                                                    class="sm:hidden inline-flex items-center justify-center w-7 h-7 rounded bg-orange-50 text-orange-400"
+                                                    title="<?= esc($p['catatan_pembimbing']) ?>"><i
+                                                        class="fa-solid fa-comment text-[9px]"></i></span>
+                                            <?php endif; ?>
+                                            <?php if (!empty($p['catatan_instruktur'])): ?>
+                                                <span
+                                                    class="hidden sm:flex items-center gap-1 max-w-[120px] bg-purple-50 border border-purple-100 text-purple-700 text-[10px] font-medium px-1.5 py-0.5 rounded-lg truncate"
+                                                    title="<?= esc($p['catatan_instruktur']) ?>">
+                                                    <i class="fa-solid fa-comment-dots text-purple-400 flex-shrink-0 text-[8px]"></i>
+                                                    <span
+                                                        class="truncate"><?= esc(mb_substr($p['catatan_instruktur'], 0, 30)) . (mb_strlen($p['catatan_instruktur']) > 30 ? '…' : '') ?></span>
+                                                </span>
+                                                <span
+                                                    class="sm:hidden inline-flex items-center justify-center w-7 h-7 rounded bg-purple-50 text-purple-400"
+                                                    title="<?= esc($p['catatan_instruktur']) ?>"><i
+                                                        class="fa-solid fa-comment-dots text-[9px]"></i></span>
+                                            <?php endif; ?>
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold <?= $st['bg'] ?>" title="<?= $st['label'] ?>">
+                                                <?php if ($st['badge_icon']): ?><i class="fa-solid <?= $st['badge_icon'] ?>"></i><?php else: ?><?= $st['label'] ?><?php endif; ?>
+                                            </span>
+                                        </div>
                                     </div>
-                                    <p class="text-sm text-gray-700 line-clamp-2"><?= esc($p['deskripsi']) ?></p>
+                                    <?php if ($ds !== 'completed'): ?>
+                                    <div class="flex sm:hidden items-center gap-2">
+                                        <a href="<?= base_url('siswa/jurnal-pkl/edit-progress/' . $p['id']); ?>" title="Edit"
+                                            class="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-all active:scale-95 text-xs font-medium">
+                                            <i class="fa-solid fa-pen-to-square"></i>Edit
+                                        </a>
+                                        <form action="<?= base_url('siswa/jurnal-pkl/hapus-progress/' . $p['id']); ?>" method="POST"
+                                            class="flex-1">
+                                            <?= csrf_field(); ?>
+                                            <button type="button" onclick="confirmHapus(this)"
+                                                title="Hapus"
+                                                class="w-full flex items-center justify-center gap-1 px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all active:scale-95 text-xs font-medium">
+                                                <i class="fa-solid fa-trash"></i>Hapus
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div class="hidden sm:flex items-center gap-0 flex-shrink-0">
+                                        <a href="<?= base_url('siswa/jurnal-pkl/edit-progress/' . $p['id']); ?>" title="Edit"
+                                            class="text-gray-400 hover:text-blue-500 transition-colors p-2">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </a>
+                                        <form action="<?= base_url('siswa/jurnal-pkl/hapus-progress/' . $p['id']); ?>" method="POST"
+                                            class="inline flex-shrink-0">
+                                            <?= csrf_field(); ?>
+                                            <button type="button" onclick="confirmHapus(this)"
+                                                title="Hapus" class="text-gray-400 hover:text-red-500 transition-colors p-2">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <?php endif; ?>
                                 </div>
-                                <div class="flex items-center gap-1.5 flex-shrink-0">
-                                    <?php if ($p['foto']): ?>
-                                        <button type="button"
-                                            onclick="openLightbox('<?= base_url('files/pkl-progress/' . $p['foto']); ?>')"
-                                            title="Lihat Foto" class="block flex-shrink-0 cursor-zoom-in">
-                                            <img src="<?= base_url('files/pkl-progress/' . $p['foto']); ?>"
-                                                class="w-9 h-9 rounded-lg object-cover border border-gray-200 shadow-sm hover:scale-110 transition-transform"
-                                                loading="lazy" alt="Foto aktivitas">
-                                        </button>
-                                    <?php endif; ?>
-                                    <?php if ($p['catatan_pembimbing']): ?>
-                                        <span
-                                            class="hidden sm:flex items-center gap-1 max-w-[120px] bg-orange-50 border border-orange-100 text-orange-700 text-[10px] font-medium px-1.5 py-0.5 rounded-lg truncate"
-                                            title="<?= esc($p['catatan_pembimbing']) ?>">
-                                            <i class="fa-solid fa-comment text-orange-400 flex-shrink-0 text-[8px]"></i>
-                                            <span
-                                                class="truncate"><?= esc(mb_substr($p['catatan_pembimbing'], 0, 30)) . (mb_strlen($p['catatan_pembimbing']) > 30 ? '…' : '') ?></span>
-                                        </span>
-                                        <span
-                                            class="sm:hidden inline-flex items-center justify-center w-7 h-7 rounded bg-orange-50 text-orange-400"
-                                            title="<?= esc($p['catatan_pembimbing']) ?>"><i
-                                                class="fa-solid fa-comment text-[9px]"></i></span>
-                                    <?php endif; ?>
-                                    <?php if (!empty($p['catatan_instruktur'])): ?>
-                                        <span
-                                            class="hidden sm:flex items-center gap-1 max-w-[120px] bg-purple-50 border border-purple-100 text-purple-700 text-[10px] font-medium px-1.5 py-0.5 rounded-lg truncate"
-                                            title="<?= esc($p['catatan_instruktur']) ?>">
-                                            <i class="fa-solid fa-comment-dots text-purple-400 flex-shrink-0 text-[8px]"></i>
-                                            <span
-                                                class="truncate"><?= esc(mb_substr($p['catatan_instruktur'], 0, 30)) . (mb_strlen($p['catatan_instruktur']) > 30 ? '…' : '') ?></span>
-                                        </span>
-                                        <span
-                                            class="sm:hidden inline-flex items-center justify-center w-7 h-7 rounded bg-purple-50 text-purple-400"
-                                            title="<?= esc($p['catatan_instruktur']) ?>"><i
-                                                class="fa-solid fa-comment-dots text-[9px]"></i></span>
-                                    <?php endif; ?>
-                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold
-                                    <?= match ($p['status']) {
-                                        'approved' => 'bg-green-100 text-green-700',
-                                        'verified_by_instruktur' => 'bg-blue-100 text-blue-700',
-                                        'submitted' => 'bg-yellow-100 text-yellow-700',
-                                        'revision' => 'bg-red-100 text-red-700',
-                                        default => 'bg-gray-100 text-gray-600'
-                                    } ?>">
-                                        <?= $statusLabel[$p['status']] ?? 'Draft' ?>
-                                    </span>
-                                </div>
-                                <?php if ($p['status'] !== 'approved'): ?>
-                                    <a href="<?= base_url('siswa/jurnal-pkl/edit-progress/' . $p['id']); ?>" title="Edit"
-                                        class="text-gray-400 hover:text-blue-500 transition-colors p-2">
-                                        <i class="fa-solid fa-pen-to-square"></i>
-                                    </a>
-                                    <form action="<?= base_url('siswa/jurnal-pkl/hapus-progress/' . $p['id']); ?>" method="POST"
-                                        class="inline flex-shrink-0">
-                                        <?= csrf_field(); ?>
-                                        <button type="submit" onclick="return confirm('Yakin ingin menghapus progress ini?')"
-                                            title="Hapus" class="text-gray-400 hover:text-red-500 transition-colors p-2">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </form>
-                                <?php endif; ?>
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -263,15 +395,15 @@ $kategoriBadge = [
                             $dateDay = $dateObj->format('d');
                             $isToday = $day['tanggal'] === date('Y-m-d');
 
-                            $allApproved = ($day['total_aktivitas'] == $day['approved']);
+                            $allVerified = ($day['total_aktivitas'] == $day['fully_verified']);
                             $hasRevision = ($day['revision'] > 0);
 
                             $dotColor = $isToday ? 'dot-blue' : 'dot-gray';
                             $dotActive = $isToday ? 'pkl-timeline-dot-active' : '';
 
                             $cardBorder = $isToday ? 'border-l-4 border-l-primary' : '';
-                            if ($allApproved) {
-                                $statusBadge = 'Disetujui';
+                            if ($allVerified) {
+                                $statusBadge = 'Selesai';
                                 $statusIcon = 'fa-circle-check text-green-500';
                             } elseif ($hasRevision) {
                                 $statusBadge = 'Revisi';
@@ -350,7 +482,7 @@ $kategoriBadge = [
                     <p class="text-[11px] font-bold text-green-700 uppercase mb-1">Selesai</p>
                     <div class="flex items-end justify-between">
                         <span
-                            class="text-2xl font-bold text-green-600 leading-none pkl-stat-number"><?= str_pad($stats['approved'] ?? 0, 2, '0', STR_PAD_LEFT) ?></span>
+                            class="text-2xl font-bold text-green-600 leading-none pkl-stat-number"><?= str_pad($stats['fully_verified'] ?? 0, 2, '0', STR_PAD_LEFT) ?></span>
                         <i class="fa-solid fa-circle-check text-green-300"></i>
                     </div>
                 </div>
@@ -464,6 +596,7 @@ $kategoriBadge = [
     var PKL_START_DATE = '<?= get_jurnal_pkl_start_date() ?? '' ?>';
     var PKL_END_DATE = '<?= get_jurnal_pkl_end_date() ?? '' ?>';
     var CURRENT_DATE = '<?= date('Y-m-d') ?>';
+    var WEEK_READINESS_URL = '<?= base_url('siswa/jurnal-pkl/week-readiness') ?>';
 
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.progress-fill-anim').forEach(bar => {
@@ -552,9 +685,11 @@ $kategoriBadge = [
                     var sColor = 'text-gray-400';
                     var sBg = 'bg-gray-100 text-gray-500';
                     var sLabel = 'Draft';
+                    var sIcon = '';
                     if (icon) {
-                        if (icon.classList.contains('fa-check-double')) { sColor = 'text-blue-500'; sBg = 'bg-blue-100 text-blue-600'; sLabel = 'Verifikasi'; }
-                        else if (icon.classList.contains('fa-check')) { sColor = 'text-green-500'; sBg = 'bg-green-100 text-green-600'; sLabel = 'Disetujui'; }
+                        if (icon.classList.contains('fa-check-double')) { sColor = 'text-blue-500'; sBg = 'bg-blue-100 text-blue-600'; sLabel = 'Proses Pembimbing'; sIcon = 'fa-chalkboard'; }
+                        else if (icon.classList.contains('fa-circle-check')) { sColor = 'text-orange-500'; sBg = 'bg-orange-100 text-orange-600'; sLabel = 'Proses Instruktur'; sIcon = 'fa-industry'; }
+                        else if (icon.classList.contains('fa-check')) { sColor = 'text-green-500'; sBg = 'bg-green-100 text-green-600'; sLabel = 'Selesai'; }
                         else if (icon.classList.contains('fa-clock')) { sColor = 'text-yellow-500'; sBg = 'bg-yellow-100 text-yellow-600'; sLabel = 'Menunggu'; }
                         else if (icon.classList.contains('fa-edit')) { sColor = 'text-red-500'; sBg = 'bg-red-100 text-red-600'; sLabel = 'Revisi'; }
                     }
@@ -594,7 +729,7 @@ $kategoriBadge = [
                             '<span class="sm:hidden inline-flex items-center justify-center w-6 h-6 rounded bg-purple-50 text-purple-400"><i class="fa-solid fa-comment-dots text-[9px]"></i></span>';
                     }
 
-                    item += '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ' + sBg + '">' + sLabel + '</span>' +
+                    item += '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ' + sBg + '" title="' + sLabel + '">' + (sIcon ? '<i class="fa-solid ' + sIcon + '"></i>' : sLabel) + '</span>' +
                         '</div>' +
                         '</div></a>';
 
@@ -793,25 +928,88 @@ $kategoriBadge = [
             var labelStart = wStart.toLocaleDateString('id-ID', opts);
             var labelEnd = wEnd.toLocaleDateString('id-ID', opts);
 
-            html += '<a href="javascript:void(0)" data-week="' + w + '" onclick="buildCetakUrl(' + w + ', \'' + wStart.getFullYear() + '\')" ' +
-                'class="block p-3 rounded-xl border transition-all ' +
+            html += '<a href="javascript:void(0)" data-week="' + w + '" data-year="' + wStart.getFullYear() + '" ' +
+                'class="block p-3 rounded-xl border transition-all week-item ' +
                 (isCurrentWeek
-                    ? 'border-primary bg-primary/5 hover:bg-primary/10'
-                    : 'border-gray-200 hover:border-primary/50 hover:bg-gray-50') +
+                    ? 'border-primary bg-primary/5'
+                    : 'border-gray-200') +
                 '">' +
                 '<div class="flex items-center justify-between">' +
                 '<div>' +
                 '<p class="text-sm font-semibold text-gray-800">Minggu ' + w + '</p>' +
                 '<p class="text-xs text-gray-500">' + labelStart + ' – ' + labelEnd + '</p>' +
                 '</div>' +
+                '<div class="flex items-center gap-2">' +
+                '<span class="week-status text-[10px] font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-400">Memuat...</span>' +
                 (isCurrentWeek
                     ? '<span class="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Minggu Ini</span>'
                     : '<i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>') +
+                '</div>' +
                 '</div>' +
                 '</a>';
         }
 
         container.innerHTML = html;
+
+        // Fetch week readiness from backend
+        fetch(WEEK_READINESS_URL)
+            .then(function (r) { return r.json(); })
+            .then(function (result) {
+                if (!result.success) return;
+                var weekData = result.data || {};
+
+                for (var w = 1; w <= totalWeeks; w++) {
+                    var item = container.querySelector('.week-item[data-week="' + w + '"]');
+                    if (!item) continue;
+                    var statusEl = item.querySelector('.week-status');
+                    if (!statusEl) continue;
+
+                    var data = weekData[w];
+                    if (!data) {
+                        statusEl.className = 'week-status text-[10px] font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-400';
+                        statusEl.textContent = 'Tidak Ada Data';
+                        item.classList.add('opacity-50', 'cursor-not-allowed');
+                        item.classList.remove('hover:border-primary/50', 'hover:bg-gray-50');
+                        item.removeAttribute('data-ready');
+                        continue;
+                    }
+
+                    if (data.week_ready) {
+                        statusEl.className = 'week-status text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700';
+                        statusEl.textContent = 'Siap Cetak';
+                        item.setAttribute('data-ready', 'true');
+                        item.classList.add('cursor-pointer', 'hover:border-primary/50', 'hover:bg-gray-50');
+                        item.classList.remove('opacity-50', 'cursor-not-allowed');
+                        item.onclick = function (week, year) {
+                            return function () { buildCetakUrl(week, year); };
+                        }(w, item.getAttribute('data-year'));
+                    } else {
+                        var readyInfo = data.ready_days + '/' + data.total_workdays + ' hari';
+                        statusEl.className = 'week-status text-[10px] font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-600';
+                        statusEl.textContent = readyInfo;
+                        item.removeAttribute('data-ready');
+                        item.classList.add('opacity-50', 'cursor-not-allowed');
+                        item.classList.remove('cursor-pointer', 'hover:border-primary/50', 'hover:bg-gray-50');
+                        item.onclick = null;
+                        item.removeAttribute('href');
+                    }
+                }
+            })
+            .catch(function () {
+                var statusEls = container.querySelectorAll('.week-status');
+                statusEls.forEach(function (el) {
+                    el.className = 'week-status text-[10px] font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-400';
+                    el.textContent = 'Gagal Memuat';
+                    var parent = el.closest('.week-item');
+                    if (parent) {
+                        parent.classList.add('opacity-50', 'cursor-not-allowed');
+                        parent.classList.remove('hover:border-primary/50', 'hover:bg-gray-50');
+                        parent.removeAttribute('data-ready');
+                        parent.onclick = null;
+                        parent.removeAttribute('href');
+                    }
+                });
+            });
     });
 
     function openLightbox(src) {
@@ -834,5 +1032,68 @@ $kategoriBadge = [
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') closeLightbox({ target: document.getElementById('lightbox') });
     });
+
+    /* ── Toast ── */
+    function showToast(msg, type) {
+        var c = document.getElementById('toastContainer');
+        var t = document.createElement('div');
+        t.className = 'toast toast-' + type;
+        var icon = type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-xmark' : 'fa-circle-info';
+        t.innerHTML = '<i class="fa-solid ' + icon + ' toast-icon"></i>' + msg;
+        c.appendChild(t);
+        setTimeout(function () {
+            t.style.animation = 'toastOut 0.3s ease both';
+            setTimeout(function () { t.remove(); }, 350);
+        }, 3000);
+    }
+
+    /* ── Confirm Modal ── */
+    function showConfirm(opts) {
+        var o = document.getElementById('confirmOverlay');
+        document.querySelector('.confirm-icon-wrap i').className = 'fa-solid ' + (opts.icon || 'fa-trash');
+        document.querySelector('.confirm-icon-wrap').style.backgroundColor = opts.iconBg || '#fef2f2';
+        document.querySelector('.confirm-icon-wrap i').style.color = opts.iconColor || '#ef4444';
+        document.querySelector('.confirm-title').textContent = opts.title || 'Yakin?';
+        document.querySelector('.confirm-desc').innerHTML = opts.desc || '';
+        document.querySelector('.confirm-ok').innerHTML = opts.okLabel || '<i class="fa-solid fa-trash" style="margin-right:6px;"></i>Ya, Hapus!';
+        document.querySelector('.confirm-ok').style.background = opts.okBg || '#ef4444';
+        document.querySelector('.confirm-ok').style.boxShadow = opts.okShadow || '0 4px 12px rgba(239,68,68,0.3)';
+        document.querySelector('.confirm-cancel').textContent = opts.cancelLabel || 'Batal';
+        o.classList.add('show');
+        if (opts.onOk) {
+            document.getElementById('confirmOkBtn').onclick = function () { o.classList.remove('show'); opts.onOk(); };
+        }
+        document.getElementById('confirmCancelBtn').onclick = function () { o.classList.remove('show'); };
+        o.onclick = function (e) { if (e.target === o) o.classList.remove('show'); };
+    }
+
+    function confirmHapus(btn) {
+        var form = btn.closest('form');
+        showConfirm({
+            icon: 'fa-trash',
+            title: 'Hapus Progress?',
+            desc: 'Progress yang dihapus tidak dapat dikembalikan.',
+            okLabel: '<i class="fa-solid fa-trash" style="margin-right:6px;"></i>Ya, Hapus!',
+            onOk: function () { form.submit(); }
+        });
+    }
 </script>
+
+<!-- Toast Container -->
+<div id="toastContainer"></div>
+
+<!-- Confirm Modal -->
+<div id="confirmOverlay">
+    <div id="confirmBox">
+        <div class="confirm-icon-wrap">
+            <i class="fa-solid fa-trash"></i>
+        </div>
+        <p class="confirm-title">Yakin?</p>
+        <p class="confirm-desc"></p>
+        <div class="confirm-actions">
+            <button class="confirm-cancel" id="confirmCancelBtn">Batal</button>
+            <button class="confirm-ok" id="confirmOkBtn"><i class="fa-solid fa-trash" style="margin-right:6px;"></i>Ya, Hapus!</button>
+        </div>
+    </div>
+</div>
 <?= $this->endSection() ?>

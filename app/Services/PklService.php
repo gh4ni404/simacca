@@ -446,6 +446,84 @@ class PklService extends BaseService
         }
     }
 
+    public function getWeekReadiness(int $siswaId, string $weekStart, string $weekEnd, int $requiredDays): array
+    {
+        try {
+            $db = \Config\Database::connect();
+
+            $sql = "SELECT pp.tanggal, pp.status,
+                           pp.verified_by, pp.catatan_pembimbing,
+                           pp.instruktur_verified_by, pp.catatan_instruktur
+                    FROM pkl_progress pp
+                    JOIN pkl_tasks pt ON pt.id = pp.task_id
+                    WHERE pt.siswa_id = ?
+                      AND pp.deleted_at IS NULL
+                      AND pt.deleted_at IS NULL
+                      AND pp.tanggal >= ?
+                      AND pp.tanggal <= ?
+                    ORDER BY pp.tanggal ASC";
+
+            $progress = $db->query($sql, [$siswaId, $weekStart, $weekEnd])->getResultArray();
+
+            $dayStatus = [];
+            foreach ($progress as $p) {
+                $date = $p['tanggal'];
+                if (!isset($dayStatus[$date])) {
+                    $dayStatus[$date] = ['total' => 0, 'verified' => 0];
+                }
+                $dayStatus[$date]['total']++;
+                $bothVerified = $p['status'] === 'approved'
+                    && !empty($p['verified_by'])
+                    && !empty($p['catatan_pembimbing'])
+                    && !empty($p['instruktur_verified_by'])
+                    && !empty($p['catatan_instruktur']);
+                if ($bothVerified) {
+                    $dayStatus[$date]['verified']++;
+                }
+            }
+
+            $start = new \DateTime($weekStart);
+            $end = new \DateTime($weekEnd);
+            $end->modify('+1 day');
+            $interval = new \DateInterval('P1D');
+            $period = new \DatePeriod($start, $interval, $end);
+
+            $readyDays = 0;
+            $totalDays = 0;
+
+            foreach ($period as $dt) {
+                $dayOfWeek = (int) $dt->format('N');
+                if ($dayOfWeek > $requiredDays) continue;
+
+                $totalDays++;
+                $dateStr = $dt->format('Y-m-d');
+
+                if (isset($dayStatus[$dateStr]) && $dayStatus[$dateStr]['total'] > 0) {
+                    $d = $dayStatus[$dateStr];
+                    if ($d['total'] === $d['verified']) $readyDays++;
+                }
+            }
+
+            $targetDays = min($requiredDays, $totalDays);
+            $weekReady = ($readyDays >= $targetDays && $targetDays > 0);
+
+            return [
+                'week_ready' => $weekReady,
+                'ready_days' => $readyDays,
+                'required_days' => $requiredDays,
+                'total_workdays' => $totalDays,
+            ];
+        } catch (\Exception $e) {
+            log_message('error', '[PKL] getWeekReadiness error: ' . $e->getMessage());
+            return [
+                'week_ready' => false,
+                'ready_days' => 0,
+                'required_days' => $requiredDays,
+                'total_workdays' => 0,
+            ];
+        }
+    }
+
     // ─── Categories ──────────────────────────────────────
 
     public function getCategories(): array
@@ -472,7 +550,13 @@ class PklService extends BaseService
                         SUM(CASE WHEN pp.status = 'submitted' THEN 1 ELSE 0 END) AS submitted,
                         SUM(CASE WHEN pp.status = 'verified_by_instruktur' THEN 1 ELSE 0 END) AS verified_by_instruktur,
                         SUM(CASE WHEN pp.status = 'approved' THEN 1 ELSE 0 END) AS approved,
-                        SUM(CASE WHEN pp.status = 'revision' THEN 1 ELSE 0 END) AS revision
+                        SUM(CASE WHEN pp.status = 'revision' THEN 1 ELSE 0 END) AS revision,
+                        SUM(CASE WHEN pp.status = 'approved'
+                            AND pp.instruktur_verified_by IS NOT NULL
+                            AND pp.verified_by IS NOT NULL
+                            AND pp.catatan_instruktur IS NOT NULL AND pp.catatan_instruktur != ''
+                            AND pp.catatan_pembimbing IS NOT NULL AND pp.catatan_pembimbing != ''
+                            THEN 1 ELSE 0 END) AS fully_verified
                     FROM pkl_tasks pt
                     LEFT JOIN pkl_progress pp ON pp.task_id = pt.id AND pp.deleted_at IS NULL
                     WHERE pt.siswa_id = ? AND pt.deleted_at IS NULL";
@@ -480,7 +564,7 @@ class PklService extends BaseService
             $result = $db->query($sql, [$siswaId])->getRowArray();
             return $this->success($result ?: [
                 'total_tasks' => 0, 'total_progress' => 0,
-                'draft' => 0, 'submitted' => 0, 'verified_by_instruktur' => 0, 'approved' => 0, 'revision' => 0,
+                'draft' => 0, 'submitted' => 0, 'verified_by_instruktur' => 0, 'approved' => 0, 'revision' => 0, 'fully_verified' => 0,
             ]);
         } catch (\Exception $e) {
             $this->logError('getStatistics', $e);

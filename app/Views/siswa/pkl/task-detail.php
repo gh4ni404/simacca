@@ -2,16 +2,16 @@
 
 <?= $this->section('content') ?>
 <div class="p-4 md:p-6">
-    <?php
-    $bulanIndo = [
-        1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-    ];
-    $hariIndo = [
-        'Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa',
-        'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat',
-        'Saturday' => 'Sabtu'
-    ];
+<?php helper('setting');
+$bulanIndo = [
+    1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+];
+$hariIndo = [
+    'Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa',
+    'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat',
+    'Saturday' => 'Sabtu'
+];
     ?>
 
     <!-- Header -->
@@ -82,9 +82,12 @@
                 $dayName = $hariIndo[$dateObj->format('l')];
                 $dateStr = $dateObj->format('j') . ' ' . $bulanIndo[(int)$dateObj->format('m')] . ' ' . $dateObj->format('Y');
 
-                $borderClass = match($p['status']) {
-                    'approved' => 'border-l-green-500',
-                    'verified_by_instruktur' => 'border-l-blue-500',
+                $ds = get_pkl_progress_display_status($p);
+                $st = get_pkl_status_style($ds);
+                $borderClass = match($ds) {
+                    'completed' => 'border-l-green-500',
+                    'pending_instruktur' => 'border-l-orange-500',
+                    'pending_pembimbing' => 'border-l-blue-500',
                     'submitted' => 'border-l-yellow-500',
                     'revision' => 'border-l-orange-500',
                     default => 'border-l-gray-300'
@@ -92,9 +95,10 @@
             ?>
             <div class="relative">
                 <div class="hidden md:flex absolute left-4 -top-1 w-4 h-4 rounded-full border-4 border-white shadow z-10
-                    <?= match($p['status']) {
-                        'approved' => 'bg-green-500',
-                        'verified_by_instruktur' => 'bg-blue-500',
+                    <?= match($ds) {
+                        'completed' => 'bg-green-500',
+                        'pending_instruktur' => 'bg-orange-500',
+                        'pending_pembimbing' => 'bg-blue-500',
                         'submitted' => 'bg-yellow-500',
                         'revision' => 'bg-orange-500',
                         default => 'bg-gray-400'
@@ -107,21 +111,8 @@
                             <div class="flex items-center gap-2">
                                 <span class="text-sm font-semibold text-gray-800"><?= $dayName ?>, <?= $dateStr ?></span>
                             </div>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                <?= match($p['status']) {
-                                    'approved' => 'bg-green-100 text-green-700',
-                                    'verified_by_instruktur' => 'bg-blue-100 text-blue-700',
-                                    'submitted' => 'bg-yellow-100 text-yellow-700',
-                                    'revision' => 'bg-orange-100 text-orange-700',
-                                    default => 'bg-gray-100 text-gray-600'
-                                } ?>">
-                                <?= match($p['status']) {
-                                    'approved' => '<i class="fas fa-check-circle mr-1"></i>Disetujui',
-                                    'verified_by_instruktur' => '<i class="fas fa-check-double mr-1"></i>Diverifikasi Instruktur',
-                                    'submitted' => '<i class="fas fa-clock mr-1"></i>Menunggu',
-                                    'revision' => '<i class="fas fa-edit mr-1"></i>Revisi',
-                                    default => '<i class="fas fa-pen mr-1"></i>Draft'
-                                } ?>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?= $st['bg'] ?>" title="<?= $st['label'] ?>">
+                                <?php if ($st['badge_icon']): ?><i class="fas <?= $st['badge_icon'] ?>"></i><?php else: ?><i class="fas <?= $st['icon'] ?> mr-1"></i><?= $st['label'] ?><?php endif; ?>
                             </span>
                         </div>
 
@@ -156,9 +147,8 @@
                         </div>
                         <?php endif; ?>
 
-                        <?php if ($p['status'] !== 'approved'): ?>
+                        <?php if (get_pkl_progress_display_status($p) !== 'completed'): ?>
                         <div class="mt-3 pt-3 border-t border-gray-100 flex items-center gap-2">
-                            <?php if ($p['status'] !== 'approved'): ?>
                             <form action="<?= base_url('siswa/jurnal-pkl/hapus-progress/' . $p['id']); ?>" method="POST" class="inline">
                                 <?= csrf_field(); ?>
                                 <button type="submit" onclick="return confirm('Yakin hapus?')"
@@ -166,7 +156,6 @@
                                     <i class="fas fa-trash mr-1"></i>Hapus
                                 </button>
                             </form>
-                            <?php endif; ?>
                         </div>
                         <?php endif; ?>
                     </div>

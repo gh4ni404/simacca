@@ -359,6 +359,7 @@ $routes->group('siswa', ['filter' => 'role:siswa'], function ($routes) {
         $routes->get('cetak-jurnal/(:num)/(:num)', 'Siswa\PklController::printJurnal/$1/$2');
         $routes->get('cetak-catatan/(:any)/(:num)', 'Siswa\PklController::printCatatan/$1/$2');
         $routes->get('cetak-catatan/(:any)', 'Siswa\PklController::printCatatan/$1');
+        $routes->get('week-readiness', 'Siswa\PklController::getWeeksReadiness');
         $routes->post('selesaikan-task/(:num)', 'Siswa\PklController::selesaikanTask/$1');
     });
 

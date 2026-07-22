@@ -269,18 +269,23 @@ class JurnalPklController extends BaseController
             return redirect()->to('/instruktur/jurnal-pkl');
         }
 
-        if ($progress['status'] !== 'submitted') {
+        if (!in_array($progress['status'], ['submitted', 'approved'])) {
             session()->setFlashdata('error', 'Progress ini sudah diverifikasi sebelumnya');
             return redirect()->back();
         }
 
         $userId = session()->get('user_id');
-        $this->progressModel->update($progressId, [
-            'status' => $status,
+        $updateData = [
             'instruktur_verified_by' => $userId,
             'instruktur_verified_at' => date('Y-m-d H:i:s'),
             'catatan_instruktur' => $catatan,
-        ]);
+        ];
+
+        if ($progress['status'] !== 'approved' || $status === 'revision') {
+            $updateData['status'] = $status;
+        }
+
+        $this->progressModel->update($progressId, $updateData);
 
         if ($status === 'revision') {
             $task = $db->table('pkl_tasks')->where('id', $progress['task_id'])->where('deleted_at IS NULL', null, false)->get()->getRowArray();
@@ -322,17 +327,22 @@ class JurnalPklController extends BaseController
             return redirect()->to('/instruktur/jurnal-pkl');
         }
 
-        if (!in_array($progress['status'], ['verified_by_instruktur', 'revision'])) {
-            session()->setFlashdata('error', 'Progress ini belum diverifikasi');
+        if (!in_array($progress['status'], ['verified_by_instruktur', 'revision']) && !$progress['instruktur_verified_by']) {
+            session()->setFlashdata('error', 'Progress ini belum diverifikasi oleh instruktur');
             return redirect()->back();
         }
 
-        $this->progressModel->update($progressId, [
-            'status' => 'submitted',
+        $updateData = [
             'instruktur_verified_by' => null,
             'instruktur_verified_at' => null,
             'catatan_instruktur' => '',
-        ]);
+        ];
+
+        if ($progress['status'] !== 'approved') {
+            $updateData['status'] = 'submitted';
+        }
+
+        $this->progressModel->update($progressId, $updateData);
 
         session()->setFlashdata('success', 'Verifikasi progress berhasil dibatalkan');
         return redirect()->back();

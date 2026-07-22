@@ -132,6 +132,15 @@ if (!function_exists('get_week_number')) {
     }
 }
 
+if (!function_exists('get_jurnal_pkl_required_days')) {
+    function get_jurnal_pkl_required_days(): int
+    {
+        $settingModel = model(SettingModel::class);
+        $days = $settingModel->get('jurnal_pkl_required_days');
+        return $days ? (int) $days : 5;
+    }
+}
+
 if (!function_exists('get_week_range')) {
     function get_week_range(string $startDate, int $minggu): array
     {
@@ -162,3 +171,80 @@ if (!function_exists('get_week_range')) {
         ];
     }
 }
+
+if (!function_exists('get_pkl_progress_display_status')) {
+    function get_pkl_progress_display_status(array $progress): string
+    {
+        $status = $progress['status'] ?? 'draft';
+        if (in_array($status, ['draft', 'submitted', 'revision'])) return $status;
+
+        $pembimbingOk = $status === 'approved'
+            && !empty($progress['verified_by'])
+            && !empty($progress['catatan_pembimbing']);
+        $instrukturOk = !empty($progress['instruktur_verified_by'])
+            && !empty($progress['catatan_instruktur']);
+
+        if ($pembimbingOk && $instrukturOk) return 'completed';
+        if ($pembimbingOk) return 'pending_instruktur';
+        if ($status === 'verified_by_instruktur') return 'pending_pembimbing';
+
+        return $status;
+    }
+}
+
+if (!function_exists('get_pkl_status_style')) {
+    function get_pkl_status_style(string $displayStatus): array
+    {
+        return match ($displayStatus) {
+            'completed' => [
+                'label' => 'Selesai',
+                'icon' => 'fa-check',
+                'color' => 'text-green-500',
+                'bg' => 'bg-green-100 text-green-700',
+                'icon_bg' => 'bg-green-100 text-green-600',
+                'badge_icon' => null,
+            ],
+            'approved', 'pending_instruktur' => [
+                'label' => 'Proses Instruktur',
+                'icon' => 'fa-circle-check',
+                'color' => 'text-orange-500',
+                'bg' => 'bg-orange-100 text-orange-700',
+                'icon_bg' => 'bg-orange-100 text-orange-600',
+                'badge_icon' => 'fa-industry',
+            ],
+            'verified_by_instruktur', 'pending_pembimbing' => [
+                'label' => 'Proses Pembimbing',
+                'icon' => 'fa-check-double',
+                'color' => 'text-blue-500',
+                'bg' => 'bg-blue-100 text-blue-700',
+                'icon_bg' => 'bg-blue-100 text-blue-600',
+                'badge_icon' => 'fa-chalkboard',
+            ],
+            'submitted' => [
+                'label' => 'Menunggu',
+                'icon' => 'fa-clock',
+                'color' => 'text-yellow-500',
+                'bg' => 'bg-yellow-100 text-yellow-700',
+                'icon_bg' => 'bg-yellow-100 text-yellow-600',
+                'badge_icon' => null,
+            ],
+            'revision' => [
+                'label' => 'Revisi',
+                'icon' => 'fa-edit',
+                'color' => 'text-red-500',
+                'bg' => 'bg-red-100 text-red-700',
+                'icon_bg' => 'bg-orange-100 text-orange-600',
+                'badge_icon' => null,
+            ],
+            default => [
+                'label' => 'Draft',
+                'icon' => 'fa-pen',
+                'color' => 'text-gray-500',
+                'bg' => 'bg-gray-100 text-gray-600',
+                'icon_bg' => 'bg-gray-100 text-gray-500',
+                'badge_icon' => null,
+            ],
+        };
+    }
+}
+

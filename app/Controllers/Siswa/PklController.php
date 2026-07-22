@@ -727,8 +727,36 @@ class PklController extends BaseController
             $dateEnd = $d->format('Y-m-d');
         }
 
-        $jurnalResult = $this->pklService->getJurnalByTanggal($siswa['id'], $dateStart, $dateEnd, ['approved', 'verified_by_instruktur']);
+        $jurnalResult = $this->pklService->getJurnalByTanggal($siswa['id'], $dateStart, $dateEnd, ['approved']);
         $jurnalData = $jurnalResult['success'] ? $jurnalResult['data'] : [];
+
+        $jurnalData = array_values(array_filter($jurnalData, function ($e) {
+            return !empty($e['verified_by'])
+                && !empty($e['catatan_pembimbing'])
+                && !empty($e['instruktur_verified_by'])
+                && !empty($e['catatan_instruktur']);
+        }));
+
+        if (empty($jurnalData)) {
+            $allResult = $this->pklService->getJurnalByTanggal($siswa['id'], $dateStart, $dateEnd);
+            $hasAnyProgress = $allResult['success'] && !empty($allResult['data']);
+
+            $details = [];
+            if (!$hasAnyProgress) {
+                $details[] = 'Belum ada catatan kegiatan PKL pada minggu yang dipilih.';
+                $details[] = 'Mulai catat aktivitas PKL Anda dari halaman jurnal.';
+            } else {
+                $details[] = 'Catatan kegiatan pada minggu ini masih menunggu persetujuan.';
+                $details[] = 'Hubungi guru pembimbing atau instruktur untuk melakukan verifikasi.';
+            }
+            $details[] = 'Atau coba pilih minggu lain yang sudah memiliki kegiatan disetujui.';
+
+            return view('siswa/pkl/print-error', [
+                'title' => 'Belum Ada Jurnal yang Dapat Dicetak',
+                'message' => 'Saat ini belum ada kegiatan PKL yang disetujui dan siap dicetak.',
+                'details' => $details,
+            ]);
+        }
 
         $siswaPklModel = new \App\Models\SiswaPklModel();
         $tempatPklModel = new \App\Models\TempatPklModel();
@@ -817,8 +845,15 @@ class PklController extends BaseController
                 $tasksWithProgress++;
             }
 
-            $approvedProgress = $this->pklService->getProgressByTask($taskId, ['approved', 'verified_by_instruktur']);
+            $approvedProgress = $this->pklService->getProgressByTask($taskId, ['approved']);
             $progress = $approvedProgress['success'] ? $approvedProgress['data'] : [];
+
+            $progress = array_values(array_filter($progress, function ($e) {
+                return !empty($e['verified_by'])
+                    && !empty($e['catatan_pembimbing'])
+                    && !empty($e['instruktur_verified_by'])
+                    && !empty($e['catatan_instruktur']);
+            }));
 
             if (!empty($progress)) {
                 $tasksWithApproved++;
@@ -909,5 +944,54 @@ class PklController extends BaseController
         ];
 
         return view('siswa/pkl/print-catatan', $data);
+    }
+
+    public function getWeeksReadiness()
+    {
+        $siswa = $this->getSiswa();
+        if (!$siswa) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
+        }
+
+        helper('setting');
+        $startDate = get_jurnal_pkl_start_date();
+        $endDate = get_jurnal_pkl_end_date();
+        $requiredDays = get_jurnal_pkl_required_days();
+
+        if (!$startDate) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Tanggal mulai PKL belum diatur']);
+        }
+
+        $end = $endDate ? new \DateTime($endDate) : new \DateTime($startDate);
+        $endDt = $endDate ? $end : null;
+
+        $weekBase = new \DateTime(get_jurnal_pkl_week_base());
+        $totalDaysCount = (int) $weekBase->diff($end)->days;
+        $totalWeeks = (int) floor($totalDaysCount / 7) + 1;
+
+        $weeksData = [];
+        for ($w = 1; $w <= $totalWeeks; $w++) {
+            $range = get_week_range($startDate, $w);
+            $wEnd = new \DateTime($range['end']);
+
+            if ($w === $totalWeeks && $endDt && $wEnd > $endDt) {
+                $wEnd = clone $endDt;
+            }
+
+            $readiness = $this->pklService->getWeekReadiness(
+                $siswa['id'],
+                $range['start'],
+                $wEnd->format('Y-m-d'),
+                $requiredDays
+            );
+
+            $weeksData[$w] = $readiness;
+        }
+
+        return $this->response->setJSON([
+            'success' => true,
+            'data' => $weeksData,
+            'requiredDays' => $requiredDays,
+        ]);
     }
 }

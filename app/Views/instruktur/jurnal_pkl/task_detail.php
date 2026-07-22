@@ -269,15 +269,50 @@ $formatIndoDate = function($dateStr) use ($hariIndo, $bulanIndo) {
                                 </div>
                                 <?php endif; ?>
 
-                                <div class="pt-3 border-t border-gray-100 flex justify-end">
+                                <div class="pt-3 border-t border-gray-100">
                                     <?php if ($p['status'] === 'verified_by_instruktur'): ?>
-                                        <form action="<?= base_url('instruktur/jurnal-pkl/batal-verifikasi-progress/' . $p['id']); ?>" method="POST" class="inline">
+                                        <form action="<?= base_url('instruktur/jurnal-pkl/batal-verifikasi-progress/' . $p['id']); ?>" method="POST" class="flex justify-end">
                                             <?= csrf_field(); ?>
                                             <button type="submit" onclick="return confirm('Batalkan verifikasi progress ini?')" class="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-250 hover:text-gray-900 text-xs font-bold transition-all"><i class="fas fa-undo mr-1"></i>Batalkan</button>
                                         </form>
+                                    <?php elseif ($p['status'] === 'approved' && empty($p['instruktur_verified_by'])): ?>
+                                        <!-- Approved by pembimbing, need instructor verification -->
+                                        <div class="w-full space-y-2">
+                                            <form action="<?= base_url('instruktur/jurnal-pkl/verifikasi-progress/' . $p['id']); ?>" method="POST" class="space-y-2">
+                                                <?= csrf_field(); ?>
+                                                <input type="hidden" name="status" value="verified_by_instruktur">
+                                                <div class="flex gap-2">
+                                                    <input type="text" name="catatan_instruktur" required placeholder="Catatan verifikasi..." class="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
+                                                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all"><i class="fas fa-check mr-1"></i>Verifikasi</button>
+                                                </div>
+                                            </form>
+                                            <form action="<?= base_url('instruktur/jurnal-pkl/verifikasi-progress/' . $p['id']); ?>" method="POST" class="space-y-2">
+                                                <?= csrf_field(); ?>
+                                                <input type="hidden" name="status" value="revision">
+                                                <div class="flex gap-2">
+                                                    <input type="text" name="catatan_instruktur" required placeholder="Alasan revisi..." class="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-orange-500 focus:border-transparent">
+                                                    <button type="submit" onclick="return confirm('Minta revisi progress ini?')" class="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all"><i class="fas fa-edit mr-1"></i>Revisi</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    <?php elseif ($p['status'] === 'approved'): ?>
+                                        <!-- Verified by instructor, approved by pembimbing -->
+                                        <div class="flex gap-2">
+                                            <form action="<?= base_url('instruktur/jurnal-pkl/catatan/' . $p['id']); ?>" method="POST" class="flex-1">
+                                                <?= csrf_field(); ?>
+                                                <div class="flex gap-2">
+                                                    <input type="text" name="catatan_instruktur" value="<?= esc($p['catatan_instruktur'] ?? ''); ?>" required placeholder="Perbarui catatan..." class="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
+                                                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all" title="Simpan Catatan"><i class="fas fa-save"></i></button>
+                                                </div>
+                                            </form>
+                                            <form action="<?= base_url('instruktur/jurnal-pkl/batal-verifikasi-progress/' . $p['id']); ?>" method="POST" class="inline">
+                                                <?= csrf_field(); ?>
+                                                <button type="submit" onclick="return confirm('Batalkan verifikasi instruktur? Approval pembimbing tetap berlaku.')" class="inline-flex items-center px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-250 hover:text-gray-900 text-xs font-bold transition-all"><i class="fas fa-undo mr-1"></i></button>
+                                            </form>
+                                        </div>
                                     <?php else: ?>
-                                        <!-- Approved: Hanya tambah/update catatan -->
-                                        <form action="<?= base_url('instruktur/jurnal-pkl/catatan/' . $p['id']); ?>" method="POST" class="w-full">
+                                        <!-- Already verified by both: Only update catatan -->
+                                        <form action="<?= base_url('instruktur/jurnal-pkl/catatan/' . $p['id']); ?>" method="POST" class="w-full flex justify-end">
                                             <?= csrf_field(); ?>
                                             <div class="flex gap-2">
                                                 <input type="text" name="catatan_instruktur" value="<?= esc($p['catatan_instruktur'] ?? ''); ?>" required placeholder="Perbarui catatan..." class="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-transparent">

@@ -226,6 +226,20 @@
                         <p class="text-xs text-gray-400 mt-1.5">Batas akhir periode PKL untuk keperluan laporan.</p>
                     </div>
 
+                    <!-- Hari Wajib per Minggu -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Hari Wajib per Minggu</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <i class="fas fa-calendar-week fa-sm"></i>
+                            </div>
+                            <input type="number" name="jurnal_pkl_required_days" value="<?= old('jurnal_pkl_required_days', $jurnalPklRequiredDays ?? 5) ?>"
+                                   min="1" max="7"
+                                   class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm">
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1.5">Jumlah hari kerja wajib per minggu (contoh: 5 = Senin&ndash;Jumat). Digunakan untuk indikator kesiapan cetak jurnal.</p>
+                    </div>
+
                     <!-- Info Ringkas -->
                     <?php if ($jurnalPklStartDate || $jurnalPklEndDate): ?>
                     <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-gray-500 bg-gray-50 rounded-lg px-3.5 py-2.5 border border-gray-100 mb-5">

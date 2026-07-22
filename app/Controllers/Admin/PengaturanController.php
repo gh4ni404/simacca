@@ -43,6 +43,7 @@ class PengaturanController extends BaseController
             'jurnalPklStartDate' => get_jurnal_pkl_start_date(),
             'jurnalPklEndDate' => get_jurnal_pkl_end_date(),
             'jurnalPklDurationDays' => get_jurnal_pkl_duration_days(),
+            'jurnalPklRequiredDays' => get_jurnal_pkl_required_days(),
         ];
 
         return view('admin/pengaturan/index', $data);
@@ -152,6 +153,12 @@ class PengaturanController extends BaseController
 
         set_jurnal_pkl_start_date($startDate ?: '');
         set_jurnal_pkl_end_date($endDate ?: '');
+
+        $requiredDays = (int) $this->request->getPost('jurnal_pkl_required_days');
+        if ($requiredDays >= 1 && $requiredDays <= 7) {
+            $settingModel = new \App\Models\SettingModel();
+            $settingModel->setSetting('jurnal_pkl_required_days', (string) $requiredDays);
+        }
 
         session()->setFlashdata('success', 'Pengaturan periode jurnal PKL berhasil disimpan.');
         return redirect()->to('/admin/pengaturan');
