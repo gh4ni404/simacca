@@ -361,7 +361,7 @@ $hariIndo = [
                                                 </div>
                                             <?php endif; ?>
 
-                                            <?php if (!empty($p['catatan_pembimbing']) && $p['status'] !== 'approved'): ?>
+                                            <?php if (!empty($p['catatan_pembimbing'])): ?>
                                                 <div class="bg-orange-50/50 border border-orange-100 rounded-xl p-3 shadow-sm">
                                                     <p
                                                         class="text-[10px] font-bold text-orange-700 uppercase tracking-wider flex items-center gap-1">
@@ -398,6 +398,41 @@ $hariIndo = [
                                                     </button>
                                                 </form>
                                             </div>
+                                        <?php elseif ($p['status'] === 'revision' && (int)$p['verified_by'] === (int)session()->get('user_id')): ?>
+                                            <!-- Undo revision form -->
+                                            <div
+                                                class="flex items-center justify-between gap-4 bg-orange-50/40 border border-orange-100 rounded-xl p-3.5 pl-4 shadow-inner">
+                                                <div class="flex items-center gap-2.5 text-xs text-orange-850">
+                                                    <i class="fas fa-edit text-base text-orange-500 flex-shrink-0"></i>
+                                                    <div class="min-w-0">
+                                                        <span class="font-bold">Minta revisi (oleh Anda)</span>
+                                                        <?php if (!empty($p['catatan_pembimbing'])): ?>
+                                                            <p class="text-orange-700 mt-0.5 italic break-words">
+                                                                "<?= esc($p['catatan_pembimbing']) ?>"</p>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                                <form action="<?= base_url('guru/jurnal-pkl/batal-verifikasi/' . $p['id']); ?>"
+                                                    method="POST" onsubmit="saveActiveSiswa(<?= $student['siswa_id'] ?>)">
+                                                    <?= csrf_field(); ?>
+                                                    <button type="submit" onclick="return confirm('Batalkan permintaan revisi ini?')"
+                                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-orange-200 text-orange-700 font-semibold rounded-xl hover:bg-orange-50 hover:border-orange-300 text-xs shadow-sm transition-all active:scale-95 whitespace-nowrap">
+                                                        <i class="fas fa-undo text-[10px]"></i> Batalkan
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        <?php elseif ($p['status'] === 'revision'): ?>
+                                            <!-- Revision requested by Instructor -->
+                                            <div
+                                                class="flex items-center gap-2.5 text-xs text-orange-850 bg-orange-50/40 border border-orange-100 rounded-xl p-3.5 pl-4 shadow-inner">
+                                                <i class="fas fa-exclamation-triangle text-base text-orange-500 flex-shrink-0"></i>
+                                                <div class="min-w-0">
+                                                    <span class="font-bold">Menunggu revisi dari siswa (diminta oleh Instruktur)</span>
+                                                    <?php if (!empty($p['catatan_instruktur'])): ?>
+                                                        <p class="text-orange-700 mt-0.5 italic break-words">"<?= esc($p['catatan_instruktur']) ?>"</p>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
                                         <?php else: ?>
                                             <!-- Verification form -->
                                             <form action="<?= base_url('guru/jurnal-pkl/verify/' . $p['id']); ?>" method="POST"
@@ -410,7 +445,7 @@ $hariIndo = [
                                                     <textarea name="catatan" rows="2" required
                                                         class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none shadow-sm"
                                                         placeholder="Tulis catatan revisi atau catatan persetujuan..."><?= esc($p['catatan_pembimbing'] ?? '') ?></textarea>
-
+ 
                                                     <div class="flex justify-end gap-2.5 mt-3">
                                                         <button type="submit" name="status" value="revision"
                                                             onclick="return confirm('Minta revisi progress ini?')"

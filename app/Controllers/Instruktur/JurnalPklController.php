@@ -77,7 +77,7 @@ class JurnalPklController extends BaseController
 
             // Fetch all pending review progress entries across all students
             $pendingProgress = $db->query("
-                SELECT pp.*, pt.judul AS task_judul, s.nama_lengkap AS nama_siswa, s.nis, k.nama_kelas, users.profile_photo
+                SELECT pp.*, pt.siswa_id, pt.judul AS task_judul, s.nama_lengkap AS nama_siswa, s.nis, k.nama_kelas, users.profile_photo
                 FROM pkl_progress pp
                 JOIN pkl_tasks pt ON pt.id = pp.task_id
                 JOIN siswa s ON s.id = pt.siswa_id
@@ -90,8 +90,25 @@ class JurnalPklController extends BaseController
                   AND pt.deleted_at IS NULL
                 ORDER BY pp.tanggal ASC
             ", [$tahunAjaran, $instruktur['tempat_pkl_id']])->getResultArray();
+            // Fetch all progress entries for full history view
+            $allProgressRows = $db->query("
+                SELECT pp.*, pt.judul AS task_judul, pt.siswa_id
+                FROM pkl_progress pp
+                JOIN pkl_tasks pt ON pt.id = pp.task_id
+                JOIN siswa_pkl sp ON sp.siswa_id = pt.siswa_id AND sp.tahun_ajaran = ?
+                WHERE sp.tempat_pkl_id = ?
+                  AND pp.deleted_at IS NULL
+                  AND pt.deleted_at IS NULL
+                ORDER BY pp.tanggal DESC
+            ", [$tahunAjaran, $instruktur['tempat_pkl_id']])->getResultArray();
+
+            $allProgress = [];
+            foreach ($allProgressRows as $row) {
+                $allProgress[$row['siswa_id']][] = $row;
+            }
         } else {
             $pendingProgress = [];
+            $allProgress = [];
         }
 
         $data = [
@@ -100,6 +117,7 @@ class JurnalPklController extends BaseController
             'siswaList'       => $siswaList,
             'siswaStats'      => $siswaStats,
             'pendingProgress' => $pendingProgress,
+            'allProgress'     => $allProgress,
         ];
 
         return view('instruktur/jurnal_pkl/index', $data);
