@@ -328,7 +328,7 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
 
                                     <!-- Description -->
                                     <div class="pt-4 md:pt-5 border-t border-gray-100">
-                                        <div class="rounded-xl bg-gray-50 p-4">
+                                        <div class="rounded-xl bg-gray-50 border border-gray-200 p-4">
                                             <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
                                                 <i class="far fa-file-lines text-gray-400"></i> Deskripsi Pekerjaan
                                             </h4>
@@ -343,8 +343,9 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
                                             <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-3">
                                                 <i class="far fa-image text-gray-400"></i> Dokumentasi
                                             </h4>
-                                            <a href="<?= base_url('files/pkl-progress/' . $p['foto']); ?>" target="_blank"
-                                                class="group relative inline-block overflow-hidden rounded-xl border border-gray-200 hover:shadow-md transition-shadow w-full md:w-auto">
+                                            <a href="<?= base_url('files/pkl-progress/' . $p['foto']); ?>"
+                                                onclick="openLightbox(this.href); return false;"
+                                                class="group relative inline-block overflow-hidden rounded-xl border border-gray-200 hover:shadow-md transition-shadow w-full md:w-auto cursor-pointer">
                                                 <img src="<?= base_url('files/pkl-progress/' . $p['foto']); ?>"
                                                     class="w-full h-48 md:h-40 md:w-auto object-cover transition-transform duration-300 group-hover:scale-105"
                                                     loading="lazy" alt="Dokumentasi">
@@ -513,9 +514,47 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
         color: #1D4ED8;
     }
 
+    @keyframes lightboxIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    #lightboxImg {
+        animation: lightboxIn 0.25s ease-out;
+    }
 </style>
 
+<!-- Lightbox -->
+<div id="lightbox" class="fixed inset-0 z-[9999] bg-black/90 hidden items-center justify-center p-4"
+    onclick="closeLightbox(event)">
+    <button onclick="closeLightbox()"
+        class="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white text-lg transition-colors">
+        <i class="fa-solid fa-xmark"></i>
+    </button>
+    <img id="lightboxImg" class="max-w-full max-h-[90vh] rounded-2xl shadow-2xl object-contain" src="">
+</div>
+
 <script>
+    function openLightbox(src) {
+        var lb = document.getElementById('lightbox');
+        document.getElementById('lightboxImg').src = src;
+        lb.classList.remove('hidden');
+        lb.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox(e) {
+        if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('fa-xmark') && e.target.id !== 'lightbox') return;
+        var lb = document.getElementById('lightbox');
+        lb.classList.add('hidden');
+        lb.classList.remove('flex');
+        document.body.style.overflow = '';
+        document.getElementById('lightboxImg').src = '';
+    }
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeLightbox({ target: document.getElementById('lightbox') });
+    });
+
     // Save selected student to localStorage on submit
     function saveActiveSiswa(siswaId) {
         localStorage.setItem('selected_siswa_id', siswaId);
