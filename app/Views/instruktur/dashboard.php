@@ -34,7 +34,7 @@
     <!-- Stats Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-white rounded-xl shadow p-5 cursor-pointer hover:shadow-md hover:bg-blue-50 transition-all"
-             onclick="document.getElementById('modalDaftarSiswa').classList.remove('hidden')">
+             onclick="window.location.href='<?= base_url('instruktur/jurnal-pkl'); ?>'">
             <div class="flex items-center space-x-3">
                 <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                     <i class="fas fa-users text-blue-600 text-lg"></i>
@@ -58,7 +58,7 @@
             </div>
         </div>
         <div class="bg-white rounded-xl shadow p-5 cursor-pointer hover:shadow-md hover:bg-yellow-50 transition-all"
-             onclick="openMenungguReview()">
+             onclick="window.location.href='<?= base_url('instruktur/jurnal-pkl/pending'); ?>'">
             <div class="flex items-center space-x-3">
                 <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
                     <i class="fas fa-clock text-yellow-600 text-lg"></i>

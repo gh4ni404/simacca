@@ -374,6 +374,7 @@ $routes->group('instruktur', ['filter' => 'role:instruktur'], function ($routes)
     $routes->get('jurnal-pkl', 'Instruktur\JurnalPklController::index');
     $routes->get('jurnal-pkl/siswa/(:num)', 'Instruktur\JurnalPklController::siswaDetail/$1');
     $routes->get('jurnal-pkl/task/(:num)', 'Instruktur\JurnalPklController::taskDetail/$1');
+    $routes->get('jurnal-pkl/pending', 'Instruktur\JurnalPklController::pendingReview');
     $routes->post('jurnal-pkl/catatan/(:num)', 'Instruktur\JurnalPklController::addCatatan/$1');
     $routes->post('jurnal-pkl/verifikasi-progress/(:num)', 'Instruktur\JurnalPklController::verifyProgress/$1');
     $routes->post('jurnal-pkl/batal-verifikasi-progress/(:num)', 'Instruktur\JurnalPklController::cancelVerifikasiProgress/$1');

@@ -73,9 +73,15 @@ $totalStats = [
 
 <?= $this->section('content') ?>
 <div class="h-full">
-    <div class="mb-4">
-        <h1 class="text-2xl font-bold text-gray-800">Review Jurnal PKL</h1>
-        <p class="text-sm text-gray-500">Instruktur PKL</p>
+    <div class="flex items-start gap-4 mb-4 px-4 md:px-0">
+        <a href="<?= base_url('instruktur/dashboard') ?>"
+           class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-white border border-gray-200 text-gray-500 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 shadow-sm transition-all flex-shrink-0 mt-0.5">
+            <i class="fas fa-arrow-left text-sm"></i>
+        </a>
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Review Jurnal PKL</h1>
+            <p class="text-sm text-gray-500">Instruktur PKL</p>
+        </div>
     </div>
     <?= view('components/alerts') ?>
 

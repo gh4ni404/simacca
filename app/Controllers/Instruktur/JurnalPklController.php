@@ -123,6 +123,40 @@ class JurnalPklController extends BaseController
         return view('instruktur/jurnal_pkl/index', $data);
     }
 
+    public function pendingReview()
+    {
+        $instruktur = $this->getInstruktur();
+        if (!$instruktur) {
+            return redirect()->to('/login')->with('error', 'Sesi Anda telah habis atau data instruktur tidak ditemukan.');
+        }
+
+        $tahunAjaran = get_active_tahun_ajaran();
+        $db = \Config\Database::connect();
+
+        $pendingProgress = $db->query("
+            SELECT pp.*, pt.siswa_id, pt.judul AS task_judul,
+                   s.nama_lengkap AS nama_siswa, s.nis, k.nama_kelas, users.profile_photo
+            FROM pkl_progress pp
+            JOIN pkl_tasks pt ON pt.id = pp.task_id AND pt.deleted_at IS NULL
+            JOIN siswa s ON s.id = pt.siswa_id AND s.deleted_at IS NULL
+            JOIN siswa_pkl sp ON sp.siswa_id = s.id AND sp.tahun_ajaran = ?
+            LEFT JOIN kelas k ON k.id = s.kelas_id
+            LEFT JOIN users ON users.id = s.user_id
+            WHERE sp.tempat_pkl_id = ?
+              AND pp.status = 'submitted'
+              AND pp.deleted_at IS NULL
+            ORDER BY pp.tanggal ASC
+        ", [$tahunAjaran, $instruktur['tempat_pkl_id']])->getResultArray();
+
+        $data = [
+            'title'           => 'Menunggu Review - Instruktur',
+            'pageTitle'       => 'Menunggu Review',
+            'pendingProgress' => $pendingProgress,
+        ];
+
+        return view('instruktur/jurnal_pkl/pending_review', $data);
+    }
+
     public function siswaDetail(int $siswaId)
     {
         $instruktur = $this->getInstruktur();
