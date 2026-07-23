@@ -65,7 +65,7 @@
                 </div>
                 <div>
                     <p class="text-2xl font-bold text-gray-900"><?= $statsProgress['submitted']; ?></p>
-                    <p class="text-xs text-gray-500">Menunggu Review</p>
+                    <p class="text-xs text-gray-500">Menunggu Catatan Instruktur</p>
                 </div>
             </div>
         </div>
