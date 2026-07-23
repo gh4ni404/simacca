@@ -331,7 +331,9 @@ $totalStats = [
                                         <!-- Description -->
                                         <div class="pt-4 md:pt-5 border-t border-gray-100">
                                             <div class="rounded-xl bg-gray-50 p-4">
-                                                <h4 class="text-sm font-semibold text-gray-700 mb-2">Deskripsi Pekerjaan</h4>
+                                                <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
+                                                    <i class="far fa-file-lines text-gray-400"></i> Deskripsi Pekerjaan
+                                                </h4>
                                                 <p class="text-sm leading-7 text-gray-600 whitespace-pre-wrap"><?= esc($p['deskripsi']) ?>
                                                 </p>
                                             </div>
