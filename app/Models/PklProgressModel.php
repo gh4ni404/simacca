@@ -43,6 +43,7 @@ class PklProgressModel extends Model
             ->join('pkl_categories', 'pkl_categories.id = pkl_tasks.kategori_id', 'left')
             ->whereIn('pkl_tasks.siswa_id', $siswaIds)
             ->orderBy('pkl_progress.tanggal', 'DESC')
+            ->orderBy('siswa.nama_lengkap', 'ASC')
             ->orderBy('pkl_progress.created_at', 'DESC')
             ->findAll();
     }

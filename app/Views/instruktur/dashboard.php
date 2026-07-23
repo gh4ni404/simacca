@@ -46,7 +46,7 @@
             </div>
         </div>
         <div class="bg-white rounded-xl shadow p-5 cursor-pointer hover:shadow-md hover:bg-purple-50 transition-all"
-             onclick="document.getElementById('modalTotalProgress').classList.remove('hidden')">
+             onclick="window.location.href='<?= base_url('instruktur/jurnal-pkl/semua-progress'); ?>'">
             <div class="flex items-center space-x-3">
                 <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                     <i class="fas fa-clipboard-list text-purple-600 text-lg"></i>
@@ -482,81 +482,6 @@ function closeMenungguReview() {
     setTimeout(() => modal.classList.add('hidden'), 280);
 }
 </script>
-
-<!-- Modal Total Progress -->
-<div id="modalTotalProgress"
-     class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-     onclick="if(event.target===this)this.classList.add('hidden')">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
-        <!-- Header -->
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <i class="fas fa-clipboard-list text-purple-600 text-sm"></i>
-                </div>
-                <div>
-                    <h3 class="text-base font-bold text-gray-900">Total Progress</h3>
-                    <p class="text-xs text-gray-500"><?= $statsProgress['total']; ?> entri progress</p>
-                </div>
-            </div>
-            <button onclick="document.getElementById('modalTotalProgress').classList.add('hidden')"
-                    class="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
-                <i class="fas fa-xmark text-lg"></i>
-            </button>
-        </div>
-        <!-- Body -->
-        <div class="overflow-y-auto flex-1 p-4">
-            <?php if (empty($allProgress)): ?>
-            <div class="text-center py-12">
-                <i class="fas fa-clipboard-list text-4xl text-gray-300 mb-3"></i>
-                <p class="text-gray-500 text-sm">Belum ada progress</p>
-            </div>
-            <?php else: ?>
-            <div class="space-y-2">
-                <?php foreach ($allProgress as $p):
-                    $dateObj = new DateTime($p['tanggal']);
-                    $statusColor = match($p['status']) {
-                        'approved'             => ['bg' => 'bg-green-100', 'text' => 'text-green-700', 'dot' => 'bg-green-500'],
-                        'submitted'            => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-700', 'dot' => 'bg-yellow-500'],
-                        'verified_by_instruktur' => ['bg' => 'bg-blue-100', 'text' => 'text-blue-700', 'dot' => 'bg-blue-500'],
-                        'revision'             => ['bg' => 'bg-orange-100', 'text' => 'text-orange-700', 'dot' => 'bg-orange-500'],
-                        default                => ['bg' => 'bg-gray-100', 'text' => 'text-gray-600', 'dot' => 'bg-gray-400'],
-                    };
-                    $statusLabel = match($p['status']) {
-                        'approved'             => 'Disetujui',
-                        'submitted'            => 'Menunggu',
-                        'verified_by_instruktur' => 'Terverifikasi',
-                        'revision'             => 'Revisi',
-                        default                => 'Draft',
-                    };
-                ?>
-                <div class="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 transition border border-transparent hover:border-gray-200">
-                    <div class="flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center text-white text-xs font-bold <?= $statusColor['dot'] ?>">
-                        <i class="fas fa-clipboard-check"></i>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center justify-between gap-2">
-                            <p class="text-sm font-semibold text-gray-900 truncate"><?= esc($p['nama_task']); ?></p>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium flex-shrink-0 <?= $statusColor['bg'] . ' ' . $statusColor['text'] ?>">
-                                <?= $statusLabel ?>
-                            </span>
-                        </div>
-                        <p class="text-xs text-gray-500 mt-0.5">
-                            <?= esc($p['nama_siswa']); ?>
-                            <?php if (!empty($p['nama_kelas'])): ?>&middot; <?= esc($p['nama_kelas']); ?><?php endif; ?>
-                            &middot; <?= $dateObj->format('d M Y'); ?>
-                        </p>
-                        <?php if (!empty($p['deskripsi'])): ?>
-                        <p class="text-xs text-gray-600 mt-1 line-clamp-2"><?= esc($p['deskripsi']); ?></p>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <?php endforeach; ?>
-            </div>
-            <?php endif; ?>
-        </div>
-    </div>
-</div>
 
 <!-- Modal Daftar Siswa PKL -->
 <div id="modalDaftarSiswa"

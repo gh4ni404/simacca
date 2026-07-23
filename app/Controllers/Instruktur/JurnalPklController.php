@@ -399,4 +399,51 @@ class JurnalPklController extends BaseController
         session()->setFlashdata('success', 'Verifikasi progress berhasil dibatalkan');
         return redirect()->back();
     }
+
+    public function allProgress()
+    {
+        $instruktur = $this->getInstruktur();
+        if (!$instruktur) {
+            return redirect()->to('/login')->with('error', 'Sesi Anda telah habis atau data instruktur tidak ditemukan.');
+        }
+
+        $tahunAjaran = get_active_tahun_ajaran();
+        $db = \Config\Database::connect();
+
+        $siswaRekap = $db->query("
+            SELECT
+                s.id AS siswa_id,
+                s.nama_lengkap,
+                s.nis,
+                k.nama_kelas,
+                users.profile_photo,
+                COUNT(pp.id) AS total_progress,
+                SUM(CASE WHEN pp.status = 'approved' THEN 1 ELSE 0 END) AS approved,
+                SUM(CASE WHEN pp.status = 'submitted' THEN 1 ELSE 0 END) AS submitted,
+                SUM(CASE WHEN pp.status = 'verified_by_instruktur' THEN 1 ELSE 0 END) AS verified,
+                SUM(CASE WHEN pp.status = 'revision' THEN 1 ELSE 0 END) AS revision,
+                MAX(pp.tanggal) AS last_activity
+            FROM siswa_pkl sp
+            JOIN siswa s ON s.id = sp.siswa_id AND s.deleted_at IS NULL
+            LEFT JOIN kelas k ON k.id = s.kelas_id
+            LEFT JOIN users ON users.id = s.user_id
+            LEFT JOIN pkl_tasks pt ON pt.siswa_id = s.id AND pt.deleted_at IS NULL
+            LEFT JOIN pkl_progress pp ON pp.task_id = pt.id AND pp.deleted_at IS NULL
+            WHERE sp.tempat_pkl_id = ?
+              AND sp.tahun_ajaran = ?
+            GROUP BY s.id
+            ORDER BY s.nama_lengkap ASC
+        ", [$instruktur['tempat_pkl_id'], $tahunAjaran])->getResultArray();
+
+        $total = array_sum(array_column($siswaRekap, 'total_progress'));
+
+        $data = [
+            'title'      => 'Rekapan Progress Siswa',
+            'pageTitle'  => 'Rekapan Progress',
+            'siswaRekap' => $siswaRekap,
+            'total'      => $total,
+        ];
+
+        return view('instruktur/jurnal_pkl/all_progress', $data);
+    }
 }
