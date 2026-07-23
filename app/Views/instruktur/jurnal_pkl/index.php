@@ -305,19 +305,16 @@ $totalStats = [
                                             </span>
                                         </div>
 
-                                        <!-- Langkah Kerja (Collapsible on Mobile & Desktop) -->
+                                        <!-- Langkah Kerja -->
                                         <?php if (!empty($langkahKerja)): ?>
                                             <div class="pt-4 md:pt-5 border-t border-gray-100">
-                                                <details class="group outline-none bg-gray-50/50 border border-gray-200 rounded-xl p-3.5 hover:bg-gray-50 transition-all duration-200">
-                                                    <summary class="list-none flex items-center justify-between cursor-pointer select-none outline-none focus:outline-none">
-                                                        <div class="flex items-center gap-2.5">
-                                                            <i class="fas fa-list-ol text-gray-400 group-hover:text-indigo-500 transition-colors"></i>
-                                                            <span class="text-sm font-semibold text-gray-700">Perencanaan dan Persiapan Kerja</span>
-                                                            <span class="text-xs text-gray-500 font-medium bg-gray-200/60 px-1.5 py-0.5 rounded-full">(<?= count($langkahKerja) ?>)</span>
-                                                        </div>
-                                                        <i class="fas fa-chevron-right text-xs text-gray-400 transition-transform duration-200 group-open:rotate-90"></i>
-                                                    </summary>
-                                                    <div class="mt-4 pl-1">
+                                                <div class="bg-gray-50/50 border border-gray-200 rounded-xl p-3.5">
+                                                    <div class="flex items-center gap-2.5 mb-4">
+                                                        <i class="fas fa-list-ol text-indigo-500"></i>
+                                                        <span class="text-sm font-semibold text-gray-700">Perencanaan dan Persiapan Kerja</span>
+                                                        <span class="text-xs text-gray-500 font-medium bg-gray-200/60 px-1.5 py-0.5 rounded-full">(<?= count($langkahKerja) ?>)</span>
+                                                    </div>
+                                                    <div class="pl-1">
                                                         <ol class="relative border-l border-gray-200 ml-2 space-y-4">
                                                             <?php foreach (array_values($langkahKerja) as $step): ?>
                                                                 <li class="ml-5">
@@ -327,14 +324,14 @@ $totalStats = [
                                                             <?php endforeach; ?>
                                                         </ol>
                                                     </div>
-                                                </details>
+                                                </div>
                                             </div>
                                         <?php endif; ?>
 
                                         <!-- Description -->
                                         <div class="pt-4 md:pt-5 border-t border-gray-100">
                                             <div class="rounded-xl bg-gray-50 p-4">
-                                                <h4 class="text-sm font-semibold text-gray-700 mb-2">Deskripsi</h4>
+                                                <h4 class="text-sm font-semibold text-gray-700 mb-2">Deskripsi Pekerjaan</h4>
                                                 <p class="text-sm leading-7 text-gray-600 whitespace-pre-wrap"><?= esc($p['deskripsi']) ?>
                                                 </p>
                                             </div>
@@ -533,12 +530,6 @@ $totalStats = [
         color: #4F46E5;
     }
 
-    summary::-webkit-details-marker {
-        display: none;
-    }
-    summary {
-        list-style: none;
-    }
 </style>
 
 <script>
