@@ -305,14 +305,6 @@ $totalStats = [
                                             </span>
                                         </div>
 
-                                        <!-- Description -->
-                                        <div class="pt-4 md:pt-5 border-t border-gray-100">
-                                            <div class="rounded-xl bg-gray-50 p-4">
-                                                <h4 class="text-sm font-semibold text-gray-700 mb-2">Deskripsi</h4>
-                                                <p class="text-sm leading-7 text-gray-600 whitespace-pre-wrap"><?= esc($p['deskripsi']) ?></p>
-                                            </div>
-                                        </div>
-
                                         <!-- Langkah Kerja (Collapsible on Mobile & Desktop) -->
                                         <?php if (!empty($langkahKerja)): ?>
                                             <div class="pt-4 md:pt-5 border-t border-gray-100">
@@ -338,6 +330,15 @@ $totalStats = [
                                                 </details>
                                             </div>
                                         <?php endif; ?>
+
+                                        <!-- Description -->
+                                        <div class="pt-4 md:pt-5 border-t border-gray-100">
+                                            <div class="rounded-xl bg-gray-50 p-4">
+                                                <h4 class="text-sm font-semibold text-gray-700 mb-2">Deskripsi</h4>
+                                                <p class="text-sm leading-7 text-gray-600 whitespace-pre-wrap"><?= esc($p['deskripsi']) ?>
+                                                </p>
+                                            </div>
+                                        </div>  
 
                                         <!-- Photo -->
                                         <?php if ($p['foto']): ?>

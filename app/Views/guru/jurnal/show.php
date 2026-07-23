@@ -177,7 +177,7 @@
                                 <h3 class="text-lg font-bold text-gray-800">Kegiatan Pembelajaran</h3>
                             </div>
                             <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-5 border-2 border-blue-200">
-                                <p class="text-gray-800 leading-relaxed whitespace-pre-wrap"><?= esc($jurnal['kegiatan_pembelajaran']) ?></p>
+                                <p class="text-gray-800 leading-relaxed"><?= esc($jurnal['kegiatan_pembelajaran']) ?></p>
                             </div>
                         </div>
 

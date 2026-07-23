@@ -65,7 +65,7 @@
 
                         <div class="mb-5">
                             <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Langkah Kerja <span class="text-gray-400 font-normal">(opsional)</span>
+                                Perencanaan dan Persiapan Kerja <span class="text-gray-400 font-normal">(opsional)</span>
                             </label>
                             <div id="langkahKerjaContainer" class="space-y-2">
                                 <?php
@@ -100,7 +100,7 @@
                                     class="mt-2 inline-flex items-center px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors text-xs font-medium">
                                 <i class="fas fa-plus mr-1"></i> Tambah Langkah
                             </button>
-                            <p class="text-xs text-gray-400 mt-1">Langkah kerja akan otomatis terisi untuk siswa</p>
+                            <p class="text-xs text-gray-400 mt-1">Perencanaan dan persiapan kerja akan otomatis terisi untuk siswa</p>
                         </div>
 
                         <button type="submit"
@@ -225,7 +225,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
-                        Langkah Kerja <span class="text-gray-400 font-normal">(opsional)</span>
+                        Perencanaan dan Persiapan Kerja <span class="text-gray-400 font-normal">(opsional)</span>
                     </label>
                     <div id="editLangkahKerjaContainer" class="space-y-2">
                         <div class="flex items-center gap-2 langkah-row">

@@ -752,10 +752,22 @@
                         </div>
                     </div>
 
+                    <!-- Detail Pengerjaan -->
+                    <div>
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <label class="block text-sm font-semibold text-gray-700">Detail Pengerjaan <span class="text-red-500">*</span></label>
+                            <span class="wajib-badge">* Wajib</span>
+                        </div>
+                        <textarea class="custom-textarea" id="description" name="deskripsi"
+                            placeholder="Ceritakan secara mendalam apa yang kamu kerjakan hari ini..."
+                            rows="4" required minlength="3"><?= old('deskripsi'); ?></textarea>
+                        <p style="font-size: 0.72rem; color: #b0b7c3; margin-top: 4px;">Minimal 3 karakter</p>
+                    </div>
+
                     <!-- Langkah Kerja -->
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            Langkah Kerja <span style="font-size: 0.78rem; color: #9ca3af; font-weight: 400;">(Perencanaan)</span>
+                            Perencanaan dan Persiapan Kerja
                         </label>
                         <div id="langkahKerjaContainer" style="display: flex; flex-direction: column; gap: 10px;">
                             <?php
@@ -788,18 +800,6 @@
                             style="margin-top: 12px; display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #eef0ff; color: #2036bd; border-radius: 10px; border: none; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: background 0.2s; font-family: 'Plus Jakarta Sans', sans-serif;">
                             <i class="fas fa-plus" style="font-size: 0.7rem;"></i> Tambah Langkah
                         </button>
-                    </div>
-
-                    <!-- Detail Pengerjaan -->
-                    <div>
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                            <label class="block text-sm font-semibold text-gray-700">Detail Pengerjaan <span class="text-red-500">*</span></label>
-                            <span class="wajib-badge">* Wajib</span>
-                        </div>
-                        <textarea class="custom-textarea" id="description" name="deskripsi"
-                            placeholder="Ceritakan secara mendalam apa yang kamu kerjakan hari ini..."
-                            rows="4" required minlength="3"><?= old('deskripsi'); ?></textarea>
-                        <p style="font-size: 0.72rem; color: #b0b7c3; margin-top: 4px;">Minimal 3 karakter</p>
                     </div>
 
                     <!-- Dokumentasi (Foto) -->
@@ -904,7 +904,7 @@
                         <li class="flex gap-3">
                             <span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-bold">3</span>
                             <div class="text-xs text-gray-600 leading-relaxed">
-                                <p class="font-bold text-gray-800">Langkah Kerja</p>
+                                <p class="font-bold text-gray-800">Perencanaan dan Persiapan Kerja</p>
                                 <p class="mt-0.5">Tuliskan rencana langkah/tahapan yang dirancang untuk menyelesaikan tugas tersebut.</p>
                             </div>
                         </li>
@@ -1253,7 +1253,7 @@
         let hasLangkah = false;
         langkahInputs.forEach(inp => { if (inp.value.trim().length > 0) hasLangkah = true; });
         if (!hasLangkah) {
-            showToast('Minimal isi 1 langkah kerja!', 'error');
+            showToast('Minimal isi 1 perencanaan dan persiapan kerja!', 'error');
             return;
         }
 

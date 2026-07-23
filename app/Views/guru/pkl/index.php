@@ -22,6 +22,14 @@ $hariIndo = [
     'Friday' => 'Jumat',
     'Saturday' => 'Sabtu'
 ];
+
+$formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
+    if (!$dateStr) return '-';
+    $dateObj = new DateTime($dateStr);
+    $dayName = $hariIndo[$dateObj->format('l')] ?? $dateObj->format('l');
+    $dateFormatted = $dateObj->format('j') . ' ' . $bulanIndo[(int) $dateObj->format('m')] . ' ' . $dateObj->format('Y');
+    return $dayName . ', ' . $dateFormatted;
+};
 ?>
 <?= $this->extend(get_device_layout()) ?>
 
@@ -247,10 +255,6 @@ $hariIndo = [
                             </h4>
 
                             <?php foreach ($student['progress'] as $p):
-                                $dateObj = new DateTime($p['tanggal']);
-                                $dayName = $hariIndo[$dateObj->format('l')] ?? $dateObj->format('l');
-                                $dateStr = $dateObj->format('d') . ' ' . $bulanIndo[(int) $dateObj->format('m')] . ' ' . $dateObj->format('Y');
-
                                 $statusBadge = match ($p['status']) {
                                     'approved' => ['bg' => 'bg-green-50 text-green-700 border-green-200', 'label' => 'Disetujui', 'icon' => 'fa-check-circle'],
                                     'verified_by_instruktur' => ['bg' => 'bg-blue-50 text-blue-700 border-blue-200', 'label' => 'Verified Instruktur', 'icon' => 'fa-check-double'],
@@ -260,86 +264,91 @@ $hariIndo = [
                                 };
                                 ?>
                                 <div
-                                    class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm space-y-4 hover:shadow-md transition-all duration-200">
-
+                                    class="bg-white rounded-2xl border border-gray-200 p-4 md:p-5 shadow-sm space-y-4 md:space-y-6 hover:shadow-md transition-all duration-200">
                                     <!-- Entry Header -->
-                                    <div class="flex items-start justify-between gap-4 flex-wrap">
-                                        <div class="flex items-start gap-3">
-                                            <div
-                                                class="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0">
-                                                <i class="fas fa-clipboard-list text-base"></i>
-                                            </div>
-                                            <div>
-                                                <h5 class="text-sm font-bold text-gray-900 leading-snug"><?= esc($p['nama_task']) ?>
-                                                </h5>
-                                                <div
-                                                    class="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-xs text-gray-500">
-                                                    <?php if (!empty($p['kategori_nama'])): ?>
-                                                        <span
-                                                            class="font-medium text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded"><?= esc($p['kategori_nama']) ?></span>
-                                                        <span class="text-gray-300">&bull;</span>
-                                                    <?php endif; ?>
-                                                    <span class="flex items-center gap-1"><i
-                                                            class="far fa-calendar text-gray-400"></i> <?= $dayName ?>,
-                                                        <?= $dateStr ?></span>
-                                                </div>
+                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4">
+                                        <div class="min-w-0">
+                                            <h3 class="text-base font-semibold text-gray-900 leading-snug">
+                                                <?= esc($p['nama_task']) ?>
+                                            </h3>
+                                            <div class="mt-1.5 flex flex-wrap items-center gap-2 text-xs md:text-sm text-gray-500">
+                                                <?php if (!empty($p['kategori_nama'])): ?>
+                                                    <span
+                                                        class="font-medium text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded"><?= esc($p['kategori_nama']) ?></span>
+                                                    <span class="text-gray-300">&bull;</span>
+                                                <?php endif; ?>
+                                                <span class="flex items-center gap-1">
+                                                    <i class="far fa-calendar"></i>
+                                                    <?= $formatIndoDate($p['tanggal']) ?>
+                                                </span>
+                                                <?php
+                                                $langkahKerja = [];
+                                                if (!empty($p['langkah_kerja'])) {
+                                                    $decoded = json_decode($p['langkah_kerja'], true);
+                                                    if (is_array($decoded)) {
+                                                        $langkahKerja = array_filter($decoded, fn($v) => trim($v) !== '');
+                                                    }
+                                                }
+                                                ?>
+                                                <?php if (!empty($langkahKerja)): ?>
+                                                    <span class="text-gray-300">&bull;</span>
+                                                    <span><?= count($langkahKerja) ?> langkah kerja</span>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
 
-                                        <!-- Status badge -->
-                                        <span
-                                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border <?= $statusBadge['bg'] ?>">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border self-start sm:self-auto flex-shrink-0 <?= $statusBadge['bg'] ?>">
                                             <i class="fas <?= $statusBadge['icon'] ?> text-[10px]"></i>
                                             <?= $statusBadge['label'] ?>
                                         </span>
                                     </div>
 
-                                    <!-- Description -->
-                                    <div class="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap pl-1 font-normal">
-                                        <?= esc($p['deskripsi']) ?>
-                                    </div>
-
-                                    <!-- Langkah Kerja -->
-                                    <?php
-                                    $langkahKerja = [];
-                                    if (!empty($p['langkah_kerja'])) {
-                                        $decoded = json_decode($p['langkah_kerja'], true);
-                                        if (is_array($decoded)) {
-                                            $langkahKerja = array_filter($decoded, fn($v) => trim($v) !== '');
-                                        }
-                                    }
-                                    ?>
+                                    <!-- Langkah Kerja (Collapsible) -->
                                     <?php if (!empty($langkahKerja)): ?>
-                                        <div class="pl-1">
-                                            <p
-                                                class="text-[10px] font-bold text-indigo-500 uppercase tracking-wider mb-2 flex items-center gap-1">
-                                                <i class="fas fa-list-ol text-[9px]"></i> Langkah Kerja
-                                            </p>
-                                            <ol class="space-y-1.5">
-                                                <?php foreach (array_values($langkahKerja) as $idx => $step): ?>
-                                                    <li class="flex items-start gap-2.5 text-xs text-gray-700">
-                                                        <span
-                                                            class="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-[10px]">
-                                                            <?= $idx + 1 ?>
-                                                        </span>
-                                                        <span class="pt-0.5 leading-snug">
-                                                            <?= esc($step) ?>
-                                                        </span>
-                                                    </li>
-                                                <?php endforeach; ?>
-                                            </ol>
+                                        <div class="pt-4 md:pt-5 border-t border-gray-100">
+                                            <details class="group outline-none bg-gray-50/50 border border-gray-200 rounded-xl p-3.5 hover:bg-gray-50 transition-all duration-200">
+                                                <summary class="list-none flex items-center justify-between cursor-pointer select-none outline-none focus:outline-none">
+                                                    <div class="flex items-center gap-2.5">
+                                                        <i class="fas fa-list-ol text-gray-400 group-hover:text-blue-500 transition-colors"></i>
+                                                        <span class="text-sm font-semibold text-gray-700">Perencanaan dan Persiapan Kerja</span>
+                                                        <span class="text-xs text-gray-500 font-medium bg-gray-200/60 px-1.5 py-0.5 rounded-full">(<?= count($langkahKerja) ?>)</span>
+                                                    </div>
+                                                    <i class="fas fa-chevron-right text-xs text-gray-400 transition-transform duration-200 group-open:rotate-90"></i>
+                                                </summary>
+                                                <div class="mt-4 pl-1">
+                                                    <ol class="relative border-l border-gray-200 ml-2 space-y-4">
+                                                        <?php foreach (array_values($langkahKerja) as $step): ?>
+                                                            <li class="ml-5">
+                                                                <div class="absolute -left-[5px] mt-1.5 w-2.5 h-2.5 rounded-full bg-blue-500"></div>
+                                                                <p class="text-sm text-gray-700 leading-relaxed"><?= esc($step) ?></p>
+                                                            </li>
+                                                        <?php endforeach; ?>
+                                                    </ol>
+                                                </div>
+                                            </details>
                                         </div>
                                     <?php endif; ?>
 
-                                    <!-- Photo attachment if available -->
+                                    <!-- Description -->
+                                    <div class="pt-4 md:pt-5 border-t border-gray-100">
+                                        <div class="rounded-xl bg-gray-50 p-4">
+                                            <h4 class="text-sm font-semibold text-gray-700 mb-2">Deskripsi</h4>
+                                            <p class="text-sm leading-7 text-gray-600 whitespace-pre-wrap"><?= esc($p['deskripsi']) ?>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Photo -->
                                     <?php if ($p['foto']): ?>
-                                        <div class="pl-1">
-                                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Dokumentasi</p>
+                                        <div class="pt-4 md:pt-5 border-t border-gray-100">
+                                            <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-3">
+                                                <i class="far fa-image text-gray-400"></i> Dokumentasi
+                                            </h4>
                                             <a href="<?= base_url('files/pkl-progress/' . $p['foto']); ?>" target="_blank"
-                                                class="group relative inline-block overflow-hidden rounded-xl border border-gray-200 hover:shadow-md transition-shadow">
+                                                class="group relative inline-block overflow-hidden rounded-xl border border-gray-200 hover:shadow-md transition-shadow w-full md:w-auto">
                                                 <img src="<?= base_url('files/pkl-progress/' . $p['foto']); ?>"
-                                                    class="max-h-40 object-cover transition-transform duration-300 group-hover:scale-105"
-                                                    alt="Dokumentasi">
+                                                    class="w-full h-48 md:h-40 md:w-auto object-cover transition-transform duration-300 group-hover:scale-105"
+                                                    loading="lazy" alt="Dokumentasi">
                                                 <div
                                                     class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold gap-1.5">
                                                     <i class="fas fa-search-plus"></i> Lihat Foto
@@ -348,37 +357,41 @@ $hariIndo = [
                                         </div>
                                     <?php endif; ?>
 
-                                    <!-- Feedback history (from Instructor & Advisor) -->
-                                    <?php if (!empty($p['catatan_instruktur']) || (!empty($p['catatan_pembimbing']) && $p['status'] !== 'approved')): ?>
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pl-1">
-                                            <?php if (!empty($p['catatan_instruktur'])): ?>
-                                                <div class="bg-indigo-50/50 border border-indigo-100 rounded-xl p-3 shadow-sm">
-                                                    <p
-                                                        class="text-[10px] font-bold text-indigo-700 uppercase tracking-wider flex items-center gap-1">
-                                                        <i class="fas fa-building text-[8px]"></i> Catatan Instruktur
-                                                    </p>
-                                                    <p class="text-xs text-indigo-900 mt-1"><?= esc($p['catatan_instruktur']) ?></p>
-                                                </div>
-                                            <?php endif; ?>
-
-                                            <?php if (!empty($p['catatan_pembimbing'])): ?>
-                                                <div class="bg-orange-50/50 border border-orange-100 rounded-xl p-3 shadow-sm">
-                                                    <p
-                                                        class="text-[10px] font-bold text-orange-700 uppercase tracking-wider flex items-center gap-1">
-                                                        <i class="fas fa-user-tie text-[8px]"></i> Catatan Pembimbing
-                                                    </p>
-                                                    <p class="text-xs text-orange-900 mt-1"><?= esc($p['catatan_pembimbing']) ?></p>
-                                                </div>
-                                            <?php endif; ?>
+                                    <!-- Catatan notes -->
+                                    <?php if (!empty($p['catatan_instruktur']) || !empty($p['catatan_pembimbing'])): ?>
+                                        <div class="pt-4 md:pt-5 border-t border-gray-100 space-y-3.5">
+                                            <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                                <i class="far fa-comment-dots text-gray-400"></i> Catatan Jurnal
+                                            </h4>
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                                                <?php if (!empty($p['catatan_instruktur'])): ?>
+                                                    <div class="bg-indigo-50 border-l-4 border-indigo-500 rounded-r-xl p-3.5 shadow-sm">
+                                                        <p
+                                                            class="text-[10px] font-bold text-indigo-700 uppercase tracking-wider flex items-center gap-1">
+                                                            <i class="fas fa-building text-[8px]"></i> Catatan Instruktur
+                                                        </p>
+                                                        <p class="text-xs text-indigo-900 mt-1 leading-relaxed"><?= esc($p['catatan_instruktur']) ?></p>
+                                                    </div>
+                                                <?php endif; ?>
+                                                <?php if (!empty($p['catatan_pembimbing'])): ?>
+                                                    <div class="bg-orange-50 border-l-4 border-orange-500 rounded-r-xl p-3.5 shadow-sm">
+                                                        <p
+                                                            class="text-[10px] font-bold text-orange-700 uppercase tracking-wider flex items-center gap-1">
+                                                            <i class="fas fa-user-tie text-[8px]"></i> Catatan Pembimbing
+                                                        </p>
+                                                        <p class="text-xs text-orange-900 mt-1 leading-relaxed"><?= esc($p['catatan_pembimbing']) ?></p>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
                                         </div>
                                     <?php endif; ?>
 
-                                    <!-- Form Section (Verify / Undo) -->
-                                    <div class="pt-3 border-t border-gray-100">
+                                    <!-- Action Section -->
+                                    <div class="pt-4 md:pt-5 border-t border-gray-100">
                                         <?php if ($p['status'] === 'approved'): ?>
-                                            <!-- Undo verification form -->
+                                            <!-- Undo verification -->
                                             <div
-                                                class="flex items-center justify-between gap-4 bg-green-50/40 border border-green-100 rounded-xl p-3.5 pl-4 shadow-inner">
+                                                class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-green-50/40 border border-green-100 rounded-xl p-3.5 pl-4 shadow-inner">
                                                 <div class="flex items-center gap-2.5 text-xs text-green-800">
                                                     <i class="fas fa-check-circle text-base text-green-500 flex-shrink-0"></i>
                                                     <div class="min-w-0">
@@ -393,15 +406,15 @@ $hariIndo = [
                                                     method="POST" onsubmit="saveActiveSiswa(<?= $student['siswa_id'] ?>)">
                                                     <?= csrf_field(); ?>
                                                     <button type="submit" onclick="return confirm('Batalkan verifikasi progress ini?')"
-                                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-orange-200 text-orange-700 font-semibold rounded-xl hover:bg-orange-50 hover:border-orange-300 text-xs shadow-sm transition-all active:scale-95 whitespace-nowrap">
+                                                        class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white border border-orange-200 text-orange-700 font-semibold rounded-xl hover:bg-orange-50 hover:border-orange-300 text-xs shadow-sm transition-all active:scale-95 whitespace-nowrap">
                                                         <i class="fas fa-undo text-[10px]"></i> Batalkan
                                                     </button>
                                                 </form>
                                             </div>
                                         <?php elseif ($p['status'] === 'revision' && (int)$p['verified_by'] === (int)session()->get('user_id')): ?>
-                                            <!-- Undo revision form -->
+                                            <!-- Undo revision by self -->
                                             <div
-                                                class="flex items-center justify-between gap-4 bg-orange-50/40 border border-orange-100 rounded-xl p-3.5 pl-4 shadow-inner">
+                                                class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-orange-50/40 border border-orange-100 rounded-xl p-3.5 pl-4 shadow-inner">
                                                 <div class="flex items-center gap-2.5 text-xs text-orange-850">
                                                     <i class="fas fa-edit text-base text-orange-500 flex-shrink-0"></i>
                                                     <div class="min-w-0">
@@ -416,7 +429,7 @@ $hariIndo = [
                                                     method="POST" onsubmit="saveActiveSiswa(<?= $student['siswa_id'] ?>)">
                                                     <?= csrf_field(); ?>
                                                     <button type="submit" onclick="return confirm('Batalkan permintaan revisi ini?')"
-                                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-orange-200 text-orange-700 font-semibold rounded-xl hover:bg-orange-50 hover:border-orange-300 text-xs shadow-sm transition-all active:scale-95 whitespace-nowrap">
+                                                        class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white border border-orange-200 text-orange-700 font-semibold rounded-xl hover:bg-orange-50 hover:border-orange-300 text-xs shadow-sm transition-all active:scale-95 whitespace-nowrap">
                                                         <i class="fas fa-undo text-[10px]"></i> Batalkan
                                                     </button>
                                                 </form>
@@ -445,16 +458,16 @@ $hariIndo = [
                                                     <textarea name="catatan" rows="2" required
                                                         class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none shadow-sm"
                                                         placeholder="Tulis catatan revisi atau catatan persetujuan..."><?= esc($p['catatan_pembimbing'] ?? '') ?></textarea>
- 
-                                                    <div class="flex justify-end gap-2.5 mt-3">
+
+                                                    <div class="flex flex-col sm:flex-row justify-end gap-2.5 mt-3">
                                                         <button type="submit" name="status" value="revision"
                                                             onclick="return confirm('Minta revisi progress ini?')"
-                                                            class="px-4 py-1.5 border border-orange-200 text-orange-700 font-bold text-xs hover:bg-orange-50 hover:border-orange-300 bg-white rounded-xl shadow-sm transition-all active:scale-95 flex items-center gap-1.5">
+                                                            class="w-full sm:w-auto px-4 py-2 border border-orange-200 text-orange-700 font-bold text-xs hover:bg-orange-50 hover:border-orange-300 bg-white rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5">
                                                             <i class="fas fa-edit text-[10px]"></i> Minta Revisi
                                                         </button>
                                                         <button type="submit" name="status" value="approved"
                                                             onclick="return confirm('Setujui progress ini?')"
-                                                            class="px-4 py-1.5 bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 rounded-xl shadow-sm transition-all active:scale-95 flex items-center gap-1.5">
+                                                            class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5">
                                                             <i class="fas fa-check text-[10px]"></i> Setujui
                                                         </button>
                                                     </div>
@@ -475,7 +488,6 @@ $hariIndo = [
 </div>
 
 <style>
-    /* Custom scrollbar helper */
     .custom-scrollbar::-webkit-scrollbar {
         width: 5px;
     }
@@ -493,7 +505,6 @@ $hariIndo = [
         background: #D1D5DB;
     }
 
-    /* Sidebar item active state */
     .student-item.active {
         background-color: #EFF6FF;
         border-color: #3B82F6;
@@ -501,6 +512,13 @@ $hariIndo = [
 
     .student-item.active h4 {
         color: #1D4ED8;
+    }
+
+    summary::-webkit-details-marker {
+        display: none;
+    }
+    summary {
+        list-style: none;
     }
 </style>
 

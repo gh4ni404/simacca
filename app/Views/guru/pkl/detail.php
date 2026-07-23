@@ -71,7 +71,7 @@
                 </div>
 
                 <div class="bg-gray-50 rounded-xl p-4">
-                    <p class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap"><?= esc($progress['deskripsi']) ?></p>
+                    <p class="text-sm text-gray-700 leading-relaxed"><?= esc($progress['deskripsi']) ?></p>
                 </div>
 
                 <?php if ($progress['foto']): ?>
