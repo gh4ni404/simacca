@@ -75,7 +75,7 @@ $totalStats = [
 <div class="h-full">
     <div class="flex items-start gap-4 mb-4 px-4 md:px-0">
         <a href="<?= base_url('instruktur/dashboard') ?>"
-           class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-white border border-gray-200 text-gray-500 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 shadow-sm transition-all flex-shrink-0 mt-0.5">
+           class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-white border border-gray-200 text-gray-500 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 shadow-sm transition-all active:scale-95 flex-shrink-0 mt-0.5">
             <i class="fas fa-arrow-left text-sm"></i>
         </a>
         <div>
@@ -211,7 +211,7 @@ $totalStats = [
                             <div class="flex items-center gap-3.5">
                                 <!-- Back button for mobile -->
                                 <button type="button" onclick="backToList()"
-                                    class="lg:hidden inline-flex items-center justify-center p-2.5 rounded-xl bg-white border border-gray-200 text-gray-600 hover:text-gray-900 shadow-sm transition-all hover:bg-gray-50">
+                                    class="lg:hidden inline-flex items-center justify-center p-2.5 rounded-xl bg-white border border-gray-200 text-gray-600 hover:text-gray-900 shadow-sm transition-all hover:bg-gray-50 active:scale-95">
                                     <i class="fas fa-arrow-left"></i>
                                 </button>
 

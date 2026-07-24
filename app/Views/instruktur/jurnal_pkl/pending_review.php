@@ -4,7 +4,7 @@
 <div class="p-4 md:p-6">
     <div class="flex items-start gap-4 mb-6">
         <a href="<?= base_url('instruktur/dashboard') ?>"
-           class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-white border border-gray-200 text-gray-500 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 shadow-sm transition-all flex-shrink-0 mt-0.5">
+           class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-white border border-gray-200 text-gray-500 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 shadow-sm transition-all active:scale-95 flex-shrink-0 mt-0.5">
             <i class="fas fa-arrow-left text-sm"></i>
         </a>
         <div>
