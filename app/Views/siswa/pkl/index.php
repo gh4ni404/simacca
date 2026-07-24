@@ -674,7 +674,7 @@ $kategoriBadge = [
 
                 for (var i = 0; i < visibleCount; i++) {
                     var row = rows[i];
-                    var icon = row.querySelector('.fa-check, .fa-check-double, .fa-clock, .fa-edit, .fa-pen');
+                    var icon = row.querySelector('.fa-circle-check, .fa-check, .fa-check-double, .fa-clock, .fa-edit, .fa-pen');
                     var taskEl = row.querySelector('.rounded-full.bg-blue-100');
                     var descEl = row.querySelector('.text-sm.text-gray-700');
                     var img = row.querySelector('img[src*="pkl-progress"]');

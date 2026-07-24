@@ -97,7 +97,7 @@
                         <div class="mt-3 flex gap-2">
                             <a href="<?= base_url('siswa/jurnal-pkl/edit-progress/' . $p['id']); ?>"
                                class="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-xs font-medium">
-                                <i class="fas fa-edit mr-1"></i>Edit
+                                <i class="fas fa-pen-to-square mr-1"></i>Edit
                             </a>
                             <form action="<?= base_url('siswa/jurnal-pkl/hapus-progress/' . $p['id']); ?>" method="POST" class="inline">
                                 <?= csrf_field(); ?>

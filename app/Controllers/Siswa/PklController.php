@@ -543,7 +543,11 @@ class PklController extends BaseController
         }
 
         if ($progressResult['data']['status'] === 'approved') {
-            session()->setFlashdata('error', 'Progress yang sudah disetujui tidak dapat dihapus');
+            $ds = get_pkl_progress_display_status($progressResult['data']);
+            $msg = $ds === 'pending_instruktur'
+                ? 'Progress ini menunggu verifikasi instruktur. Silakan hubungi Instruktur PKL Anda untuk verifikasi.'
+                : 'Progress yang sudah disetujui tidak dapat dihapus';
+            session()->setFlashdata('error', $msg);
             return redirect()->to('/siswa/jurnal-pkl');
         }
 
@@ -573,7 +577,11 @@ class PklController extends BaseController
         }
 
         if ($progressResult['data']['status'] === 'approved') {
-            session()->setFlashdata('error', 'Progress yang sudah disetujui tidak dapat diedit');
+            $ds = get_pkl_progress_display_status($progressResult['data']);
+            $msg = $ds === 'pending_instruktur'
+                ? 'Progress ini menunggu verifikasi instruktur. Silakan hubungi Instruktur PKL Anda untuk verifikasi.'
+                : 'Progress yang sudah disetujui tidak dapat diedit';
+            session()->setFlashdata('error', $msg);
             return redirect()->to('/siswa/jurnal-pkl');
         }
 
@@ -608,7 +616,11 @@ class PklController extends BaseController
         }
 
         if ($progressResult['data']['status'] === 'approved') {
-            session()->setFlashdata('error', 'Progress yang sudah disetujui tidak dapat diedit');
+            $ds = get_pkl_progress_display_status($progressResult['data']);
+            $msg = $ds === 'pending_instruktur'
+                ? 'Progress ini menunggu verifikasi instruktur. Silakan hubungi Instruktur PKL Anda untuk verifikasi.'
+                : 'Progress yang sudah disetujui tidak dapat diedit';
+            session()->setFlashdata('error', $msg);
             return redirect()->to('/siswa/jurnal-pkl');
         }
 
