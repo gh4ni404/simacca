@@ -33,8 +33,9 @@
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white rounded-xl shadow p-5 cursor-pointer hover:shadow-md hover:bg-blue-50 transition-all"
-             onclick="window.location.href='<?= base_url('instruktur/jurnal-pkl'); ?>'">
+        <button type="button"
+                onclick="window.location.href='<?= base_url('instruktur/jurnal-pkl'); ?>'"
+                class="bg-white rounded-xl shadow p-5 text-left cursor-pointer hover:shadow-md hover:bg-blue-50 active:scale-95 transition-all duration-150">
             <div class="flex items-center space-x-3">
                 <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                     <i class="fas fa-users text-blue-600 text-lg"></i>
@@ -44,9 +45,10 @@
                     <p class="text-xs text-gray-500">Siswa PKL</p>
                 </div>
             </div>
-        </div>
-        <div class="bg-white rounded-xl shadow p-5 cursor-pointer hover:shadow-md hover:bg-purple-50 transition-all"
-             onclick="window.location.href='<?= base_url('instruktur/jurnal-pkl/semua-progress'); ?>'">
+        </button>
+        <button type="button"
+                onclick="window.location.href='<?= base_url('instruktur/jurnal-pkl/semua-progress'); ?>'"
+                class="bg-white rounded-xl shadow p-5 text-left cursor-pointer hover:shadow-md hover:bg-purple-50 active:scale-95 transition-all duration-150">
             <div class="flex items-center space-x-3">
                 <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                     <i class="fas fa-clipboard-list text-purple-600 text-lg"></i>
@@ -56,9 +58,10 @@
                     <p class="text-xs text-gray-500">Total Progress</p>
                 </div>
             </div>
-        </div>
-        <div class="bg-white rounded-xl shadow p-5 cursor-pointer hover:shadow-md hover:bg-yellow-50 transition-all"
-             onclick="window.location.href='<?= base_url('instruktur/jurnal-pkl/pending'); ?>'">
+        </button>
+        <button type="button"
+                onclick="window.location.href='<?= base_url('instruktur/jurnal-pkl/pending'); ?>'"
+                class="bg-white rounded-xl shadow p-5 text-left cursor-pointer hover:shadow-md hover:bg-yellow-50 active:scale-95 transition-all duration-150">
             <div class="flex items-center space-x-3">
                 <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
                     <i class="fas fa-clock text-yellow-600 text-lg"></i>
@@ -68,8 +71,10 @@
                     <p class="text-xs text-gray-500">Menunggu Catatan Instruktur</p>
                 </div>
             </div>
-        </div>
-        <div class="bg-white rounded-xl shadow p-5">
+        </button>
+        <button type="button"
+                onclick="window.location.href='<?= base_url('instruktur/jurnal-pkl'); ?>'"
+                class="bg-white rounded-xl shadow p-5 text-left cursor-pointer hover:shadow-md hover:bg-green-50 active:scale-95 transition-all duration-150">
             <div class="flex items-center space-x-3">
                 <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                     <i class="fas fa-check-circle text-green-600 text-lg"></i>
@@ -79,7 +84,7 @@
                     <p class="text-xs text-gray-500">Disetujui</p>
                 </div>
             </div>
-        </div>
+        </button>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
