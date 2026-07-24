@@ -95,6 +95,7 @@ class Autoload extends AutoloadConfig
         'component',
         'security',
         'image',
-        'email'
+        'email',
+        'pesan_kasual'
     ];
 }
