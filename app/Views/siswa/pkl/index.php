@@ -220,12 +220,6 @@ $hariSingkat = [
 
 helper('setting');
 
-$kategoriBadge = [
-    'Desain' => 'bg-purple-100 text-purple-700',
-    'Programming' => 'bg-blue-100 text-blue-700',
-    'Administrasi' => 'bg-green-100 text-green-700',
-    'Marketing' => 'bg-orange-100 text-orange-700',
-];
 ?>
 
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 px-4">
@@ -236,137 +230,14 @@ $kategoriBadge = [
         <!-- Flash Messages -->
         <?= view('components/alerts') ?>
 
-        <!-- Hari Ini Section -->
-        <section class="space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div class="flex items-center gap-3">
-                    <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                        <i class="fa-solid fa-calendar-day text-primary"></i>
-                        Hari Ini
-                    </h2>
-                    <span class="px-3 py-1 bg-blue-50 rounded-full text-xs font-semibold text-gray-600">
-                        <?= $hariIndo[date('l')] . ', ' . date('d') . ' ' . $bulanIndo[(int) date('m')] . ' ' . date('Y') ?>
-                    </span>
-                </div>
-                <a href="<?= base_url('siswa/jurnal-pkl/tambah'); ?>"
-                    class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-xl font-semibold text-sm shadow-md hover:bg-blue-600 active:scale-95 transition-all flex-shrink-0">
-                    <i class="fa-solid fa-plus text-xs"></i>
-                    Tambah Aktivitas
-                </a>
-            </div>
-
-            <div class="rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                <div
-                    class="bg-white divide-y divide-gray-100 overflow-y-auto max-h-80 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-track]:rounded [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:hover:bg-gray-400 [&::-webkit-scrollbar-button]:hidden [&::-webkit-scrollbar-button]:h-0 [&::-webkit-scrollbar-button]:w-0">
-                    <?php if (empty($todayProgress)): ?>
-                        <div class="p-8 text-center">
-                            <div
-                                class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center pkl-empty-icon">
-                                <i class="fa-solid fa-clipboard-list text-3xl text-gray-400"></i>
-                            </div>
-                            <p class="text-gray-700 font-medium">Belum ada aktivitas hari ini</p>
-                            <p class="text-gray-400 text-sm mt-1">Mulai catat kegiatan PKL Anda</p>
-                        </div>
-                    <?php else: ?>
-                        <?php foreach ($todayProgress as $p): ?>
-                            <?php $ds = get_pkl_progress_display_status($p); $st = get_pkl_status_style($ds); ?>
-                            <div class="p-4 hover:bg-gray-50 transition-colors">
-                                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-                                    <div class="flex items-center gap-2 flex-1 min-w-0">
-                                        <div
-                                            class="flex-shrink-0 w-12 h-12 rounded-xl <?= $st['icon_bg'] ?> <?= $st['color'] ?> flex items-center justify-center">
-                                            <i class="fa-solid <?= $st['icon'] ?> text-lg"></i>
-                                        </div>
-                                        <div class="min-w-0 flex-1">
-                                            <div class="flex items-center gap-2 mb-1">
-                                                <span
-                                                    class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider <?= $kategoriBadge[$p['kategori_nama'] ?? ''] ?? 'bg-gray-100 text-gray-600' ?>">
-                                                    <?= esc($p['kategori_nama'] ?? 'Lainnya') ?>
-                                                </span>
-                                                <span class="text-xs text-gray-400">/</span>
-                                                <span class="text-xs font-medium text-gray-500"><?= esc($p['nama_task']) ?></span>
-                                            </div>
-                                            <p class="text-sm text-gray-700 line-clamp-2"><?= esc($p['deskripsi']) ?></p>
-                                        </div>
-                                        <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 flex-shrink-0">
-                                            <?php if ($p['foto']): ?>
-                                                <button type="button"
-                                                    onclick="openLightbox('<?= base_url('files/pkl-progress/' . $p['foto']); ?>')"
-                                                    title="Lihat Foto" class="block flex-shrink-0 cursor-zoom-in">
-                                                    <img src="<?= base_url('files/pkl-progress/' . $p['foto']); ?>"
-                                                        class="w-9 h-9 rounded-lg object-cover border border-gray-200 shadow-sm hover:scale-110 transition-transform"
-                                                        loading="lazy" alt="Foto aktivitas">
-                                                </button>
-                                            <?php endif; ?>
-                                            <?php if ($p['catatan_pembimbing']): ?>
-                                                <span
-                                                    class="hidden sm:flex items-center gap-1 max-w-[120px] bg-orange-50 border border-orange-100 text-orange-700 text-[10px] font-medium px-1.5 py-0.5 rounded-lg truncate"
-                                                    title="<?= esc($p['catatan_pembimbing']) ?>">
-                                                    <i class="fa-solid fa-comment text-orange-400 flex-shrink-0 text-[8px]"></i>
-                                                    <span
-                                                        class="truncate"><?= esc(mb_substr($p['catatan_pembimbing'], 0, 30)) . (mb_strlen($p['catatan_pembimbing']) > 30 ? '…' : '') ?></span>
-                                                </span>
-                                                <span
-                                                    class="sm:hidden inline-flex items-center justify-center w-7 h-7 rounded bg-orange-50 text-orange-400"
-                                                    title="<?= esc($p['catatan_pembimbing']) ?>"><i
-                                                        class="fa-solid fa-comment text-[9px]"></i></span>
-                                            <?php endif; ?>
-                                            <?php if (!empty($p['catatan_instruktur'])): ?>
-                                                <span
-                                                    class="hidden sm:flex items-center gap-1 max-w-[120px] bg-purple-50 border border-purple-100 text-purple-700 text-[10px] font-medium px-1.5 py-0.5 rounded-lg truncate"
-                                                    title="<?= esc($p['catatan_instruktur']) ?>">
-                                                    <i class="fa-solid fa-comment-dots text-purple-400 flex-shrink-0 text-[8px]"></i>
-                                                    <span
-                                                        class="truncate"><?= esc(mb_substr($p['catatan_instruktur'], 0, 30)) . (mb_strlen($p['catatan_instruktur']) > 30 ? '…' : '') ?></span>
-                                                </span>
-                                                <span
-                                                    class="sm:hidden inline-flex items-center justify-center w-7 h-7 rounded bg-purple-50 text-purple-400"
-                                                    title="<?= esc($p['catatan_instruktur']) ?>"><i
-                                                        class="fa-solid fa-comment-dots text-[9px]"></i></span>
-                                            <?php endif; ?>
-                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold <?= $st['bg'] ?>" title="<?= $st['label'] ?>">
-                                                <?php if ($st['badge_icon']): ?><i class="fa-solid <?= $st['badge_icon'] ?>"></i><?php else: ?><?= $st['label'] ?><?php endif; ?>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <?php if ($ds !== 'completed'): ?>
-                                    <div class="flex sm:hidden items-center gap-2">
-                                        <a href="<?= base_url('siswa/jurnal-pkl/edit-progress/' . $p['id']); ?>" title="Edit"
-                                            class="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-all active:scale-95 text-xs font-medium">
-                                            <i class="fa-solid fa-pen-to-square"></i>Edit
-                                        </a>
-                                        <form action="<?= base_url('siswa/jurnal-pkl/hapus-progress/' . $p['id']); ?>" method="POST"
-                                            class="flex-1">
-                                            <?= csrf_field(); ?>
-                                            <button type="button" onclick="confirmHapus(this)"
-                                                title="Hapus"
-                                                class="w-full flex items-center justify-center gap-1 px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all active:scale-95 text-xs font-medium">
-                                                <i class="fa-solid fa-trash"></i>Hapus
-                                            </button>
-                                        </form>
-                                    </div>
-                                    <div class="hidden sm:flex items-center gap-0 flex-shrink-0">
-                                        <a href="<?= base_url('siswa/jurnal-pkl/edit-progress/' . $p['id']); ?>" title="Edit"
-                                            class="text-gray-400 hover:text-blue-500 transition-colors p-2">
-                                            <i class="fa-solid fa-pen-to-square"></i>
-                                        </a>
-                                        <form action="<?= base_url('siswa/jurnal-pkl/hapus-progress/' . $p['id']); ?>" method="POST"
-                                            class="inline flex-shrink-0">
-                                            <?= csrf_field(); ?>
-                                            <button type="button" onclick="confirmHapus(this)"
-                                                title="Hapus" class="text-gray-400 hover:text-red-500 transition-colors p-2">
-                                                <i class="fa-solid fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </section>
+        <!-- Tambah Aktivitas -->
+        <div class="flex justify-end">
+            <a href="<?= base_url('siswa/jurnal-pkl/tambah'); ?>"
+                class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-xl font-semibold text-sm shadow-md hover:bg-blue-600 active:scale-95 transition-all">
+                <i class="fa-solid fa-plus text-xs"></i>
+                Tambah Aktivitas
+            </a>
+        </div>
 
         <!-- Riwayat Kegiatan (Timeline) -->
         <section class="space-y-3">
