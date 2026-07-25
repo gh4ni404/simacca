@@ -17,7 +17,7 @@ Login
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
-<form action="<?= base_url('login/process'); ?>" method="POST" class="space-y-6">
+<form id="loginForm" action="<?= base_url('login/process'); ?>" method="POST" class="space-y-6">
     <?= csrf_field(); ?>
     
     <div class="space-y-4">
@@ -97,10 +97,10 @@ Login
     <div>
         <button 
             type="submit"
+            id="loginBtn"
             class="group relative w-full flex justify-center items-center py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
         >
-            <i class="fas fa-sign-in-alt mr-2"></i>
-            Login
+            <span id="loginText"><i class="fas fa-sign-in-alt mr-2"></i>Login</span>
         </button>
     </div>
 </form>
@@ -108,4 +108,103 @@ Login
 
 <?= $this->section('footer') ?>
 <!-- Optional: Add demo credentials or other footer content -->
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<!-- SweetAlert2 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+const loginForm = document.getElementById('loginForm');
+const loginBtn = document.getElementById('loginBtn');
+const loginText = document.getElementById('loginText');
+
+loginForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    if (!username || !password) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Perhatian',
+            text: 'Username dan password harus diisi!',
+            timer: 2000,
+            showConfirmButton: false,
+        });
+        return;
+    }
+
+    setLoadingState(true);
+
+    try {
+        const formData = new URLSearchParams(new FormData(loginForm));
+
+        const response = await fetch('<?= base_url('login/process'); ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: formData.toString(),
+        });
+
+        const data = await response.json();
+
+        if (data.csrf_token) {
+            const csrfInput = loginForm.querySelector('input[name="csrf_test_name"]');
+            if (csrfInput) csrfInput.value = data.csrf_token;
+        }
+
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Login Berhasil!',
+                text: 'Selamat datang, ' + data.username + '!',
+                timer: 2000,
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+            });
+
+            setTimeout(() => {
+                window.location.href = data.redirect_url;
+            }, 2000);
+        } else {
+            setLoadingState(false);
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Gagal',
+                text: data.message || 'Username atau password salah',
+                timer: 2500,
+                showConfirmButton: false,
+            });
+        }
+    } catch (error) {
+        setLoadingState(false);
+        Swal.fire({
+            icon: 'error',
+            title: 'Kesalahan',
+            text: 'Terjadi kesalahan jaringan. Silakan coba lagi.',
+            timer: 2500,
+            showConfirmButton: false,
+        });
+    }
+});
+
+function setLoadingState(loading) {
+    if (loading) {
+        loginBtn.disabled = true;
+        loginBtn.classList.add('opacity-75', 'cursor-not-allowed');
+        loginBtn.classList.remove('hover:bg-indigo-700');
+        loginText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
+    } else {
+        loginBtn.disabled = false;
+        loginBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+        loginBtn.classList.add('hover:bg-indigo-700');
+        loginText.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Login';
+    }
+}
+</script>
 <?= $this->endSection() ?>
