@@ -56,7 +56,7 @@
                         <?= match($progress['status']) {
                             'approved' => '<i class="fas fa-check-circle mr-1"></i>Disetujui',
                             'verified_by_instruktur' => '<i class="fas fa-check-double mr-1"></i>Diverifikasi Instruktur',
-                            'submitted' => '<i class="fas fa-clock mr-1"></i>Menunggu Review',
+                            'submitted' => '<i class="fas fa-clock mr-1"></i>Menunggu Catatan',
                             'revision' => '<i class="fas fa-edit mr-1"></i>Revisi',
                             default => '<i class="fas fa-pen mr-1"></i>Draft'
                         } ?>

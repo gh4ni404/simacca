@@ -268,7 +268,7 @@
     </div>
 </div>
 
-<!-- Modal Menunggu Review -->
+<!-- Modal Menunggu Catatan -->
 <div id="modalMenungguReview"
      class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
      onclick="if(event.target===this)closeMenungguReview()">
@@ -288,7 +288,7 @@
                     <i class="fas fa-clock text-yellow-600"></i>
                 </div>
                 <div>
-                    <h3 class="text-base font-bold text-gray-900 leading-tight">Menunggu Review</h3>
+                    <h3 class="text-base font-bold text-gray-900 leading-tight">Menunggu Catatan</h3>
                     <p class="text-xs text-gray-400 mt-0.5">
                         <span class="inline-flex items-center gap-1">
                             <span class="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse inline-block"></span>

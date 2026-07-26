@@ -149,8 +149,8 @@ class JurnalPklController extends BaseController
         ", [$tahunAjaran, $instruktur['tempat_pkl_id']])->getResultArray();
 
         $data = [
-            'title'           => 'Menunggu Review - Instruktur',
-            'pageTitle'       => 'Menunggu Review',
+            'title'           => 'Menunggu Catatan - Instruktur',
+            'pageTitle'       => 'Menunggu Catatan',
             'pendingProgress' => $pendingProgress,
         ];
 

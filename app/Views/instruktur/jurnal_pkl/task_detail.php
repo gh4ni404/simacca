@@ -97,12 +97,12 @@ $formatIndoDate = function($dateStr) use ($hariIndo, $bulanIndo) {
         <!-- Kanban Board for Progress Reports -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
             
-            <!-- Column 1: Menunggu Review -->
+            <!-- Column 1: Menunggu Catatan -->
             <div class="flex flex-col bg-slate-100/60 rounded-2xl p-4 border border-slate-200/50">
                 <div class="flex items-center justify-between mb-4 px-1">
                     <div class="flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-yellow-500 animate-pulse"></span>
-                        <h4 class="font-bold text-sm tracking-wider text-gray-700 uppercase">Menunggu Review</h4>
+                        <h4 class="font-bold text-sm tracking-wider text-gray-700 uppercase">Menunggu Catatan</h4>
                         <span class="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full text-xs font-extrabold"><?= sprintf('%02d', count($pendingReview)) ?></span>
                     </div>
                 </div>

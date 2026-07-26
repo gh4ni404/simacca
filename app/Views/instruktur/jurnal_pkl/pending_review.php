@@ -8,7 +8,7 @@
             <i class="fas fa-arrow-left text-sm"></i>
         </a>
         <div>
-            <h1 class="text-2xl font-bold text-gray-800">Menunggu Review</h1>
+            <h1 class="text-2xl font-bold text-gray-800">Menunggu Catatan</h1>
             <p class="text-sm text-gray-500">
                 <span class="inline-flex items-center gap-1">
                     <span class="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse inline-block"></span>

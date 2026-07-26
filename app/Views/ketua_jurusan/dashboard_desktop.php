@@ -143,7 +143,7 @@
                 </div>
                 <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
                     <div class="text-3xl font-bold text-yellow-600 mb-1"><?= $stats['submitted'] ?></div>
-                    <div class="text-sm text-gray-600 font-medium">Menunggu Review</div>
+                    <div class="text-sm text-gray-600 font-medium">Menunggu Catatan</div>
                     <div class="w-full bg-yellow-200 rounded-full h-2 mt-2">
                         <div class="bg-yellow-500 h-2 rounded-full" style="width: <?= $stats['total_progress'] > 0 ? round(($stats['submitted'] / $stats['total_progress']) * 100) : 0 ?>%"></div>
                     </div>
