@@ -132,3 +132,8 @@ _modules/*
 
 error_log
 /error_log
+
+# -------------------------
+# Node.js
+# -------------------------
+node_modules/
