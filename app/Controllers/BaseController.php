@@ -101,7 +101,7 @@ abstract class BaseController extends Controller
     protected function requireRole($role)
     {
         if (!$this->hasRole($role)) {
-            return redirect()->to('/access-denied')->with('error', 'Akses ditolak');
+            return redirect()->to('/access-denied')->with('error', 'Akses ditolak ya 🔐');
         }
 
         return true;

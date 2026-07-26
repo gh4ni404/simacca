@@ -399,7 +399,7 @@ class DashboardController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            return redirect()->back()->with('error', 'Data guru tidak ditemukan.');
+            return redirect()->back()->with('error', 'Data guru nggak ketemu 🤔');
         }
 
         switch ($action) {
@@ -414,7 +414,7 @@ class DashboardController extends BaseController
                 $year = date('Y');
                 return redirect()->to("/guru/laporan?bulan={$month}&tahun={$year}");
             default:
-                return redirect()->back()->with('error', 'Aksi tidak valid.');
+                return redirect()->back()->with('error', 'Aksi nggak valid 🤔');
         }
     }
 

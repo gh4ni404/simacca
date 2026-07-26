@@ -41,7 +41,7 @@ class IzinGuruController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            return redirect()->to('/login')->with('error', 'Data guru tidak ditemukan');
+            return redirect()->to('/login')->with('error', 'Data guru nggak ketemu 🤔');
         }
 
         // Get all izin requests for this guru with approver info
@@ -72,7 +72,7 @@ class IzinGuruController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            return redirect()->to('/login')->with('error', 'Data guru tidak ditemukan');
+            return redirect()->to('/login')->with('error', 'Data guru nggak ketemu 🤔');
         }
 
         $data = [
@@ -94,7 +94,7 @@ class IzinGuruController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            return redirect()->to('/login')->with('error', 'Data guru tidak ditemukan');
+            return redirect()->to('/login')->with('error', 'Data guru nggak ketemu 🤔');
         }
 
         // Validation rules
@@ -139,9 +139,9 @@ class IzinGuruController extends BaseController
         ];
 
         if ($this->izinGuruModel->insert($data)) {
-            return redirect()->to('/guru/izin-guru')->with('success', 'Pengajuan izin berhasil dikirim dan menunggu persetujuan');
+            return redirect()->to('/guru/izin-guru')->with('success', 'Izin udah dikirim nih! Tunggu persetujuan ya 📨✨');
         } else {
-            return redirect()->back()->withInput()->with('error', 'Gagal mengajukan izin');
+            return redirect()->back()->withInput()->with('error', 'Gagal ajukan izin nih 😅');
         }
     }
 
@@ -154,7 +154,7 @@ class IzinGuruController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            return redirect()->to('/login')->with('error', 'Data guru tidak ditemukan');
+            return redirect()->to('/login')->with('error', 'Data guru nggak ketemu 🤔');
         }
 
         // Get izin with approver info
@@ -166,7 +166,7 @@ class IzinGuruController extends BaseController
             ->first();
 
         if (!$izin) {
-            return redirect()->to('/guru/izin-guru')->with('error', 'Data izin tidak ditemukan');
+            return redirect()->to('/guru/izin-guru')->with('error', 'Data izin nggak ketemu 🤔');
         }
 
         $data = [
@@ -189,7 +189,7 @@ class IzinGuruController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            return redirect()->to('/login')->with('error', 'Data guru tidak ditemukan');
+            return redirect()->to('/login')->with('error', 'Data guru nggak ketemu 🤔');
         }
 
         // Get izin
@@ -199,12 +199,12 @@ class IzinGuruController extends BaseController
             ->first();
 
         if (!$izin) {
-            return redirect()->to('/guru/izin-guru')->with('error', 'Data izin tidak ditemukan');
+            return redirect()->to('/guru/izin-guru')->with('error', 'Data izin nggak ketemu 🤔');
         }
 
         // Only pending requests can be deleted
         if ($izin['status'] !== 'pending') {
-            return redirect()->to('/guru/izin-guru')->with('error', 'Hanya izin yang masih pending yang dapat dihapus');
+            return redirect()->to('/guru/izin-guru')->with('error', 'Cuma izin yang masih pending yang bisa dihapus ya 😊');
         }
 
         // Delete file if exists
@@ -213,9 +213,9 @@ class IzinGuruController extends BaseController
         }
 
         if ($this->izinGuruModel->delete($id)) {
-            return redirect()->to('/guru/izin-guru')->with('success', 'Pengajuan izin berhasil dihapus');
+            return redirect()->to('/guru/izin-guru')->with('success', 'Izin udah dihapus ✓');
         } else {
-            return redirect()->to('/guru/izin-guru')->with('error', 'Gagal menghapus pengajuan izin');
+            return redirect()->to('/guru/izin-guru')->with('error', 'Gagal hapus izin nih 😅');
         }
     }
 }

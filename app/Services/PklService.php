@@ -234,17 +234,6 @@ class PklService extends BaseService
         }
     }
 
-    public function getTodayProgress(int $siswaId): array
-    {
-        try {
-            $data = $this->progressModel->getTodayProgress($siswaId);
-            return $this->success($data);
-        } catch (\Exception $e) {
-            $this->logError('getTodayProgress', $e);
-            return $this->error('Gagal mengambil data progress hari ini');
-        }
-    }
-
     public function getTimeline(int $siswaId): array
     {
         try {

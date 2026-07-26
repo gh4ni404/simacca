@@ -30,14 +30,14 @@ class AbsensiController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru || !$guru['is_wali_kelas']) {
-            return redirect()->to('/access-denied')->with('error', 'Anda bukan wali kelas');
+            return redirect()->to('/access-denied')->with('error', 'Kamu bukan wali kelas nih 🤔');
         }
 
         // Get kelas data
         $kelas = $this->kelasModel->getByWaliKelas($guru['id'], get_active_tahun_ajaran());
 
         if (!$kelas) {
-            return redirect()->to('/access-denied')->with('error', 'Anda belum ditugaskan sebagai wali kelas');
+            return redirect()->to('/access-denied')->with('error', 'Kamu belum ditugaskan sebagai wali kelas ya 🤔');
         }
 
         // Get filter params

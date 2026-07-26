@@ -326,7 +326,7 @@ class AbsensiPklController extends BaseController
         if (!$guru) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Data guru tidak ditemukan',
+                'message' => 'Data guru nggak ketemu nih 🤔',
             ]);
         }
 

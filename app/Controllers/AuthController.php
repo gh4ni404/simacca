@@ -64,7 +64,8 @@ class AuthController extends BaseController
      */
     public function processLogin()
     {
-        // Validasi input
+        $isAjax = $this->request->isAJAX();
+
         $rules = [
             'username' => 'required',
             'password' => 'required',
@@ -72,36 +73,38 @@ class AuthController extends BaseController
 
         $messages = [
             'username' => [
-                'required' => 'Username harus diisi'
+                'required' => 'Username wajib diisi ya 😊'
             ],
             'password' => [
-                'required' => 'Password harus diisi'
+                'required' => 'Password wajib diisi ya 😊'
             ]
         ];
 
         if (!$this->validate($rules, $messages)) {
+            if ($isAjax) {
+                return $this->response->setJSON([
+                    'success'    => false,
+                    'message'    => $this->validator->getErrors()[0] ?? 'Validasi gagal',
+                    'csrf_token' => csrf_hash(),
+                ]);
+            }
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
-        // Get Input
         $username = $this->request->getPost('username');
         $password = $this->request->getPost('password');
 
-        // Check login
         $user = $this->userModel->checkLogin($username, $password);
 
         if ($user) {
-            // Load all roles for this user (multi-role support)
             $allRoles = $this->userRoleModel->getRolesByUserId($user['id']);
             if (empty($allRoles)) {
-                // Fallback: if user_roles not populated yet, use primary role
                 $allRoles = [$user['role']];
             }
 
-            // Set session data
             $sessionData = [
                 'user_id'       => $user['id'],
-                'userId'        => $user['id'], // Keep for backward compatibility
+                'userId'        => $user['id'],
                 'username'      => $user['username'],
                 'role'          => $user['role'],
                 'all_roles'     => $allRoles,
@@ -111,8 +114,6 @@ class AuthController extends BaseController
                 'loginTime'     => time(),
             ];
 
-            // Get Additional data based on role
-            // Check if user has any guru-related role
             $guruRoles = ['guru_mapel', 'wali_kelas', 'wakakur', 'ketua_jurusan'];
             $hasGuruRole = count(array_intersect($guruRoles, $allRoles)) > 0;
 
@@ -125,7 +126,6 @@ class AuthController extends BaseController
                     $sessionData['jurusan'] = $guru['jurusan'] ?? null;
                     $sessionData['is_ketua_jurusan'] = $guru['is_ketua_jurusan'] ?? false;
 
-                    // Jika Wali Kelas, simpan kelas_id
                     if (in_array('wali_kelas', $allRoles) && $guru['kelas_id']) {
                         $sessionData['kelas_id'] = $guru['kelas_id'];
                     }
@@ -155,26 +155,59 @@ class AuthController extends BaseController
                 }
             }
 
-            // Set session first
             session()->set($sessionData);
-            
-            // Set initial last activity time
             session()->set('last_activity', time());
-            
-            // Then regenerate session ID to prevent session fixation attacks
-            // Do this AFTER setting session data to prevent data loss
             session()->regenerate(false);
 
-            // Update last login (jika ada field di database)
-            // $this->userModel->updateLastLogin($user['id']);
+            if ($isAjax) {
+                return $this->response->setJSON([
+                    'success'      => true,
+                    'message'      => 'Login berhasil!',
+                    'redirect_url' => $this->getRedirectUrl(),
+                    'username'     => $sessionData['nama_lengkap'] ?? $user['username'],
+                    'csrf_token'   => csrf_hash(),
+                ]);
+            }
 
-            // Redirect to dashboard
             return $this->redirectToDashboard();
-        } else {
-            // Login Failed
-            session()->setFlashdata('error', 'Hmm, username atau password kayaknya salah deh 🤔');
-            return redirect()->to('/login')->withInput();
         }
+
+        if ($isAjax) {
+            return $this->response->setJSON([
+                'success'    => false,
+                'message'    => 'Hmm, username atau password kayaknya salah deh',
+                'csrf_token' => csrf_hash(),
+            ]);
+        }
+
+        session()->setFlashdata('error', 'Hmm, username atau password kayaknya salah deh 🤔');
+        return redirect()->to('/login')->withInput();
+    }
+
+    /**
+     * Get redirect URL based on user roles (for AJAX response)
+     */
+    private function getRedirectUrl()
+    {
+        $allRoles = session()->get('all_roles') ?? [session()->get('role')];
+
+        $priority = [
+            'admin'          => '/admin/dashboard',
+            'wakakur'        => '/wakakur/dashboard',
+            'ketua_jurusan'  => '/ketua-jurusan/dashboard',
+            'wali_kelas'     => '/walikelas/dashboard',
+            'guru_mapel'     => '/guru/dashboard',
+            'instruktur'     => '/instruktur/dashboard',
+            'siswa'          => '/siswa/jurnal-pkl',
+        ];
+
+        foreach ($priority as $role => $url) {
+            if (in_array($role, $allRoles)) {
+                return $url;
+            }
+        }
+
+        return '/';
     }
 
     /**
@@ -237,7 +270,7 @@ class AuthController extends BaseController
         session()->destroy();
 
         // Redirect to login page
-        return redirect()->to('/login')->with('success', 'Anda telah berhasil logout');
+        return redirect()->to('/login')->with('success', 'Logout berhasil ya! 👋');
     }
 
     /**
@@ -264,8 +297,8 @@ class AuthController extends BaseController
 
         $messages = [
             'email' => [
-                'required' => 'Email harus diisi',
-                'valid_email' => 'Format email tidak valid'
+                'required' => 'Email wajib diisi ya 😊',
+                'valid_email' => 'Format email nggak valid 🤔'
             ]
         ];
 
@@ -295,11 +328,11 @@ class AuthController extends BaseController
                 session()->setFlashdata('success', 'Cek email ya! Instruksi reset sudah dikirim 📧✨');
             } else {
                 log_message('error', 'Failed to send password reset email to: ' . $email);
-                session()->setFlashdata('error', 'Gagal mengirim email. Silakan hubungi administrator.');
+                session()->setFlashdata('error', 'Gagal mengirim email nih 😅 Hubungi admin ya!');
             }
         } catch (\Exception $e) {
             log_message('error', 'Password reset error: ' . $e->getMessage());
-            session()->setFlashdata('error', 'Terjadi kesalahan. Silakan coba lagi nanti.');
+            session()->setFlashdata('error', 'Ups, ada kesalahan nih 😅 Coba lagi nanti ya.');
         }
 
         return redirect()->to('/login');
@@ -311,7 +344,7 @@ class AuthController extends BaseController
     public function resetPassword($token = null)
     {
         if (!$token) {
-            return redirect()->to('/forgot-password')->with('error', 'Token tidak valid');
+            return redirect()->to('/forgot-password')->with('error', 'Token nggak valid nih 🤔');
         }
 
         $data = [
@@ -336,15 +369,15 @@ class AuthController extends BaseController
 
         $messages = [
             'token' => [
-                'required' => 'Token tidak valid'
+                'required' => 'Token nggak valid nih 🤔'
             ],
             'password' => [
-                'required' => 'Password baru harus diisi',
-                'min_length' => 'Password minimal 6 karakter'
+                'required' => 'Password baru wajib diisi ya 😊',
+                'min_length' => 'Password baru minimal 6 karakter ya'
             ],
             'confirm_password' => [
-                'required' => 'Konfirmasi password harus diisi',
-                'matches' => 'Konfirmasi password tidak sama'
+                'required' => 'Konfirmasi password wajib diisi ya 😊',
+                'matches' => 'Konfirmasi password nggak sama 🤔'
             ]
         ];
 
@@ -359,7 +392,7 @@ class AuthController extends BaseController
         $tokenData = $this->passwordResetTokenModel->verifyToken($token);
 
         if (!$tokenData) {
-            session()->setFlashdata('error', 'Token tidak valid atau sudah expired. Silakan request reset password lagi.');
+            session()->setFlashdata('error', 'Token nggak valid atau udah expired. Request reset password lagi ya 🔄');
             return redirect()->to('/forgot-password');
         }
 
@@ -367,7 +400,7 @@ class AuthController extends BaseController
         $user = $this->userModel->where('email', $tokenData['email'])->first();
 
         if (!$user) {
-            session()->setFlashdata('error', 'User tidak ditemukan.');
+            session()->setFlashdata('error', 'User nggak ketemu nih 🤔');
             return redirect()->to('/login');
         }
 
@@ -382,7 +415,7 @@ class AuthController extends BaseController
             return redirect()->to('/login');
         } catch (\Exception $e) {
             log_message('error', 'Password reset update error: ' . $e->getMessage());
-            session()->setFlashdata('error', 'Terjadi kesalahan saat mereset password. Silakan coba lagi.');
+            session()->setFlashdata('error', 'Ups, gagal reset password nih 😅 Coba lagi ya.');
             return redirect()->back();
         }
     }
@@ -422,15 +455,15 @@ class AuthController extends BaseController
 
         $messages = [
             'current_password' => [
-                'required' => 'Password saat ini harus diisi'
+                'required' => 'Password lama wajib diisi ya 😊'
             ],
             'new_password' => [
-                'required' => 'Password baru harus diisi',
-                'min_length' => 'Password baru minimal 6 karakter'
+                'required' => 'Password baru wajib diisi ya 😊',
+                'min_length' => 'Password baru minimal 6 karakter ya'
             ],
             'confirm_password' => [
-                'required' => 'Konfirmasi Password harus diisi',
-                'min_length' => 'Konfirmasi password tidak sama dengan password baru'
+                'required' => 'Konfirmasi password wajib diisi ya 😊',
+                'min_length' => 'Konfirmasi password nggak sama dengan password baru 🤔'
             ]
         ];
 
@@ -446,7 +479,7 @@ class AuthController extends BaseController
         $user = $this->userModel->find($userId);
 
         if (!$user || !password_verify($currentPassword, $user['password'])) {
-            return redirect()->back()->withInput()->with('error', 'Passworword saat ini salah');
+            return redirect()->back()->withInput()->with('error', 'Password salah nih 🤔');
         }
 
         // Update password - let Model's beforeUpdate callback handle hashing

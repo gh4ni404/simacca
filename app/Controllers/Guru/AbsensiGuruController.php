@@ -29,7 +29,7 @@ class AbsensiGuruController extends BaseController
         // Get guru data
         $guru = $this->guruModel->where('user_id', $userId)->first();
         if (!$guru) {
-            return redirect()->to('/guru/dashboard')->with('error', 'Data guru tidak ditemukan');
+            return redirect()->to('/guru/dashboard')->with('error', 'Data guru nggak ketemu 🤔');
         }
 
         // Get today's absensi status
@@ -81,7 +81,7 @@ class AbsensiGuruController extends BaseController
         if (!$this->request->isAJAX()) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Invalid request'
+                'message' => 'Request nggak valid nih 🤔'
             ]);
         }
 
@@ -91,7 +91,7 @@ class AbsensiGuruController extends BaseController
         if (!$guru) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Data guru tidak ditemukan'
+                'message' => 'Data guru nggak ketemu nih 🤔'
             ]);
         }
 
@@ -103,7 +103,7 @@ class AbsensiGuruController extends BaseController
         if (empty($fotoBase64) && (!$fotoFile || !$fotoFile->isValid())) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Foto wajib diupload atau diambil menggunakan kamera'
+                'message' => 'Foto wajib diupload atau diambil pake kamera ya 📷'
             ]);
         }
 
@@ -137,7 +137,7 @@ class AbsensiGuruController extends BaseController
         if (!$this->request->isAJAX()) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Invalid request'
+                'message' => 'Request nggak valid nih 🤔'
             ]);
         }
 
@@ -147,7 +147,7 @@ class AbsensiGuruController extends BaseController
         if (!$guru) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Data guru tidak ditemukan'
+                'message' => 'Data guru nggak ketemu nih 🤔'
             ]);
         }
 
@@ -199,7 +199,7 @@ class AbsensiGuruController extends BaseController
         // Get guru data
         $guru = $this->guruModel->where('user_id', $userId)->first();
         if (!$guru) {
-            return redirect()->to('/guru/dashboard')->with('error', 'Data guru tidak ditemukan');
+            return redirect()->to('/guru/dashboard')->with('error', 'Data guru nggak ketemu 🤔');
         }
 
         // Get absensi record
@@ -210,7 +210,7 @@ class AbsensiGuruController extends BaseController
             ->first();
 
         if (!$absensi) {
-            return redirect()->to('/guru/absensi-guru/history')->with('error', 'Data absensi tidak ditemukan');
+            return redirect()->to('/guru/absensi-guru/history')->with('error', 'Data absensi nggak ketemu 🤔');
         }
 
         $data = [

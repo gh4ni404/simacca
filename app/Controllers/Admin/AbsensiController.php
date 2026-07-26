@@ -33,7 +33,7 @@ class AbsensiController extends BaseController
     {
         // Check if user is admin
         if (!$this->hasRole('admin')) {
-            return redirect()->to('/access-denied')->with('error', 'Akses ditolak');
+            return redirect()->to('/access-denied')->with('error', 'Akses ditolak ya 🔐');
         }
 
         // Get filters from request
@@ -133,13 +133,13 @@ class AbsensiController extends BaseController
     {
         // Check if user is admin
         if (!$this->hasRole('admin')) {
-            return redirect()->to('/access-denied')->with('error', 'Akses ditolak');
+            return redirect()->to('/access-denied')->with('error', 'Akses ditolak ya 🔐');
         }
 
         $absensi = $this->absensiModel->find($absensiId);
 
         if (!$absensi) {
-            $this->session->setFlashdata('error', 'Absensi tidak ditemukan');
+            $this->session->setFlashdata('error', 'Absensi nggak ketemu nih 🤔');
             return redirect()->back();
         }
 
@@ -159,7 +159,7 @@ class AbsensiController extends BaseController
                 ->find($absensiId);
 
             $message = sprintf(
-                'Absensi berhasil di-unlock! Guru "%s" sekarang bisa edit absensi %s - %s untuk kelas %s selama 24 jam ke depan.',
+                'Absensi udah di-unlock nih! Guru "%s" sekarang bisa edit absensi %s - %s untuk kelas %s selama 24 jam ke depan ya 📝✨',
                 $absensiDetail['nama_guru'],
                 $absensiDetail['nama_mapel'],
                 date('d M Y', strtotime($absensiDetail['tanggal'])),
@@ -168,7 +168,7 @@ class AbsensiController extends BaseController
 
             $this->session->setFlashdata('success', $message);
         } else {
-            $this->session->setFlashdata('error', 'Gagal unlock absensi');
+            $this->session->setFlashdata('error', 'Gagal unlock absensi nih 😅 Coba lagi ya.');
         }
 
         return redirect()->back();
@@ -183,7 +183,7 @@ class AbsensiController extends BaseController
         if (!$this->hasRole('admin')) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Akses ditolak'
+                'message' => 'Akses ditolak ya 🔐'
             ]);
         }
 
@@ -192,7 +192,7 @@ class AbsensiController extends BaseController
         if (empty($absensiIds) || !is_array($absensiIds)) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Pilih minimal satu absensi untuk di-unlock'
+                'message' => 'Pilih minimal satu absensi dulu ya untuk di-unlock 📋'
             ]);
         }
 
@@ -208,7 +208,7 @@ class AbsensiController extends BaseController
 
         return $this->response->setJSON([
             'success' => true,
-            'message' => "Berhasil unlock {$successCount} absensi"
+            'message' => "Keren! {$successCount} absensi udah di-unlock nih 🎉"
         ]);
     }
 }

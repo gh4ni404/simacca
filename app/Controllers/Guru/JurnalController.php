@@ -27,7 +27,7 @@ class JurnalController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            return redirect()->to('/guru/dashboard')->with('error', 'Data guru tidak ditemukan');
+            return redirect()->to('/guru/dashboard')->with('error', 'Data guru nggak ketemu 🤔');
         }
 
         // Get filter dari request
@@ -80,14 +80,14 @@ class JurnalController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            return redirect()->to('/guru/dashboard')->with('error', 'Data guru tidak ditemukan');
+            return redirect()->to('/guru/dashboard')->with('error', 'Data guru nggak ketemu 🤔');
         }
 
         // Get absensi detail
         $absensi = $this->absensiModel->getAbsensiWithDetail($absensiId);
 
         if (!$absensi) {
-            return redirect()->to('/guru/jurnal')->with('error', 'Data absensi tidak ditemukan');
+            return redirect()->to('/guru/jurnal')->with('error', 'Data absensi nggak ketemu 🤔');
         }
 
         // Cek apakah sudah ada jurnal untuk absensi ini
@@ -95,7 +95,7 @@ class JurnalController extends BaseController
             $existingResult = $this->jurnalService->getJurnalByAbsensi($absensiId);
             if ($existingResult['success']) {
                 return redirect()->to('/guru/jurnal/edit/' . $existingResult['data']['id'])
-                    ->with('info', 'Jurnal untuk pertemuan ini sudah ada. Anda dapat mengeditnya di sini.');
+                    ->with('info', 'Jurnal pertemuan ini udah ada nih. Edit aja ya! 📝');
             }
         }
 
@@ -104,7 +104,7 @@ class JurnalController extends BaseController
         // 1. Guru mengajar jadwal sendiri (normal mode)
         // 2. Guru pengganti yang input absensi (substitute mode)
         if ($absensi['created_by'] != $userId) {
-            return redirect()->to('/guru/jurnal')->with('error', 'Anda tidak memiliki akses ke absensi ini');
+            return redirect()->to('/guru/jurnal')->with('error', 'Kamu nggak punya akses ke absensi ini 🔐');
         }
 
         $data = [
@@ -190,11 +190,11 @@ class JurnalController extends BaseController
             } catch (\Exception $e) {
                 log_message('error', 'Failed to upload jurnal foto: ' . $e->getMessage());
                 
-                $userMessage = '📷 Gagal menyimpan foto dokumentasi. ';
+                $userMessage = '📷 Gagal simpan foto nih 😅 ';
                 if (ENVIRONMENT === 'development') {
                     $userMessage .= 'Detail: ' . $e->getMessage();
                 } else {
-                    $userMessage .= 'Silakan coba lagi atau gunakan foto yang berbeda.';
+                    $userMessage .= 'Coba lagi ya atau pakai foto lain.';
                 }
                 
                 session()->setFlashdata('error', $userMessage);
@@ -237,7 +237,7 @@ class JurnalController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            return redirect()->to('/guru/dashboard')->with('error', 'Data guru tidak ditemukan');
+            return redirect()->to('/guru/dashboard')->with('error', 'Data guru nggak ketemu 🤔');
         }
 
         // Get jurnal using service
@@ -253,7 +253,7 @@ class JurnalController extends BaseController
         // Check via absensi's created_by to support substitute teacher mode
         $absensi = $this->absensiModel->find($jurnal['absensi_id']);
         if ($absensi && $absensi['created_by'] != $userId) {
-            return redirect()->to('/guru/jurnal')->with('error', 'Anda tidak memiliki akses ke jurnal ini');
+            return redirect()->to('/guru/jurnal')->with('error', 'Kamu nggak punya akses ke jurnal ini 🔐');
         }
 
         $data = [
@@ -272,14 +272,14 @@ class JurnalController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            return redirect()->to('/guru/dashboard')->with('error', 'Data guru tidak ditemukan');
+            return redirect()->to('/guru/dashboard')->with('error', 'Data guru nggak ketemu 🤔');
         }
 
         // Get jurnal for this kelas AND this guru only (security-safe)
         $result = $this->jurnalService->getJurnalByGuruAndKelas($guru['id'], $kelasId);
 
         if (!$result['success'] || empty($result['data'])) {
-            return redirect()->to('/guru/jurnal')->with('error', 'Data jurnal tidak ditemukan untuk kelas ini');
+            return redirect()->to('/guru/jurnal')->with('error', 'Data jurnal nggak ketemu untuk kelas ini 🤔');
         }
 
         $jurnalList = $result['data'];
@@ -314,7 +314,7 @@ class JurnalController extends BaseController
         if (!$this->validate($rules)) {
             $errors = $this->validator->getErrors();
             log_message('error', '[JURNAL UPDATE] Validation failed: ' . json_encode($errors));
-            session()->setFlashdata('error', 'Validasi gagal: ' . implode(', ', $errors));
+            session()->setFlashdata('error', 'Validasi gagal nih 😅 ' . implode(', ', $errors));
             return redirect()->back()->withInput();
         }
 
@@ -364,7 +364,7 @@ class JurnalController extends BaseController
             if ($file->getSize() > 5242880) {
                 $sizeMB = round($file->getSize() / 1048576, 2);
                 log_message('error', '[JURNAL UPDATE] File too large: ' . $file->getSize());
-                session()->setFlashdata('error', '📦 Ukuran file terlalu besar (' . $sizeMB . 'MB). Maksimal yang diperbolehkan adalah 5MB. Silakan kompres atau pilih file yang lebih kecil.');
+                session()->setFlashdata('error', '📦 File kegedean nih (' . $sizeMB . 'MB). Maks 5MB ya. Kompres atau pilih file lain 😅');
                 return redirect()->back()->withInput();
             }
             
@@ -424,11 +424,11 @@ class JurnalController extends BaseController
                 log_message('error', '[JURNAL UPDATE] Failed to upload foto: ' . $e->getMessage());
                 log_message('error', '[JURNAL UPDATE] Stack trace: ' . $e->getTraceAsString());
                 
-                $userMessage = '📷 Gagal menyimpan foto dokumentasi. ';
+                $userMessage = '📷 Gagal simpan foto nih 😅 ';
                 if (ENVIRONMENT === 'development') {
                     $userMessage .= 'Detail: ' . $e->getMessage();
                 } else {
-                    $userMessage .= 'Silakan coba lagi atau gunakan foto yang berbeda.';
+                    $userMessage .= 'Coba lagi ya atau pakai foto lain.';
                 }
                 
                 session()->setFlashdata('error', $userMessage);
@@ -453,7 +453,7 @@ class JurnalController extends BaseController
             // Get kelas_id for redirect from jurnal data
             $kelasId = $jurnal['kelas_id'] ?? null;
             
-            session()->setFlashdata('success', '✅ Jurnal KBM berhasil diperbarui! Perubahan telah disimpan.');
+            session()->setFlashdata('success', '✅ Jurnal KBM udah diperbarui! Perubahan tersimpan 👍');
             
             if ($kelasId) {
                 return redirect()->to('/guru/jurnal/show/' . $kelasId);
@@ -481,7 +481,7 @@ class JurnalController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            return redirect()->to('/guru/dashboard')->with('error', 'Data guru tidak ditemukan');
+            return redirect()->to('/guru/dashboard')->with('error', 'Data guru nggak ketemu 🤔');
         }
 
         // Get filters from query params or URL segment
@@ -498,7 +498,7 @@ class JurnalController extends BaseController
 
         // Validate kelas parameter
         if (!$kelasId) {
-            return redirect()->to('/guru/jurnal')->with('error', 'Pilih kelas untuk mencetak jurnal');
+            return redirect()->to('/guru/jurnal')->with('error', 'Pilih kelas dulu ya buat cetak jurnal 😊');
         }
 
         // SECURITY FIX: Get jurnal filtered by BOTH guru AND kelas
@@ -524,7 +524,7 @@ class JurnalController extends BaseController
         $mapelInfo = !empty($jurnalList) ? ['nama_mapel' => $jurnalList[0]['nama_mapel']] : null;
 
         if (empty($jurnalList)) {
-            return redirect()->to('/guru/jurnal')->with('error', 'Tidak ada data jurnal untuk dicetak');
+            return redirect()->to('/guru/jurnal')->with('error', 'Nggak ada data jurnal yang bisa dicetak 🤔');
         }
 
         $data = [

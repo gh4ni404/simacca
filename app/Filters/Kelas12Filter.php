@@ -22,7 +22,7 @@ class Kelas12Filter implements FilterInterface
             
             // Jika data siswa tidak ada atau tingkatnya bukan '12', batasi akses
             if (!$siswa || ($siswa['tingkat'] ?? '') !== '12') {
-                return redirect()->to('/siswa/dashboard')->with('error', 'Akses Jurnal PKL hanya untuk siswa kelas 12 🔐');
+                return redirect()->to('/siswa/dashboard')->with('error', 'Jurnal PKL khusus siswa kelas 12 aja ya 🔐');
             }
         }
         

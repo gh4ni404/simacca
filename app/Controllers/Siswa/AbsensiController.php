@@ -24,7 +24,7 @@ class AbsensiController extends BaseController
         $siswa = $this->siswaModel->getByUserId($userId);
 
         if (!$siswa) {
-            return redirect()->to('/access-denied')->with('error', 'Data siswa tidak ditemukan');
+            return redirect()->to('/access-denied')->with('error', 'Data siswa nggak ketemu nih 🤔');
         }
 
         // Get filter params

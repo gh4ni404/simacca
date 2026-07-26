@@ -37,7 +37,7 @@ class LaporanController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            return redirect()->to('/guru/dashboard')->with('error', 'Data guru tidak ditemukan');
+            return redirect()->to('/guru/dashboard')->with('error', 'Data guru nggak ketemu 🤔');
         }
 
         // Get filter dari request
@@ -167,7 +167,7 @@ class LaporanController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            return redirect()->to('/guru/dashboard')->with('error', '❌ Data guru tidak ditemukan');
+            return redirect()->to('/guru/dashboard')->with('error', '❌ Data guru nggak ketemu 🤔');
         }
 
         // Get filter dari request
@@ -177,13 +177,13 @@ class LaporanController extends BaseController
 
         // Validate parameters
         if (!$kelasId || !$startDate || !$endDate) {
-            return redirect()->to('/guru/laporan')->with('error', '❌ Parameter tidak lengkap. Silakan pilih filter terlebih dahulu.');
+            return redirect()->to('/guru/laporan')->with('error', '❌ Parameter belum lengkap nih 😅 Pilih filter dulu ya.');
         }
 
         // Get kelas name
         $kelas = $this->kelasModel->find($kelasId);
         if (!$kelas) {
-            return redirect()->to('/guru/laporan')->with('error', '❌ Data kelas tidak ditemukan');
+            return redirect()->to('/guru/laporan')->with('error', '❌ Data kelas nggak ketemu 🤔');
         }
 
         // Get absensi data

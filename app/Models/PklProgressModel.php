@@ -100,11 +100,6 @@ class PklProgressModel extends Model
             ->findAll(); // Mengembalikan data dalam bentuk array (sesuai setelan returnType model)
     }
 
-    public function getTodayProgress($siswaId)
-    {
-        return $this->getByTanggal($siswaId, date('Y-m-d'));
-    }
-
     public function getTimeline($siswaId, int $limit = 30)
     {
         $db = \Config\Database::connect();

@@ -23,7 +23,7 @@ class PklController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            return redirect()->to('/access-denied')->with('error', 'Data guru tidak ditemukan');
+            return redirect()->to('/access-denied')->with('error', 'Data guru nggak ketemu 🤔');
         }
 
         $result = $this->pklService->getGroupedBySiswaForPembimbing();
@@ -46,19 +46,19 @@ class PklController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            return redirect()->to('/access-denied')->with('error', 'Data guru tidak ditemukan');
+            return redirect()->to('/access-denied')->with('error', 'Data guru nggak ketemu 🤔');
         }
 
         $status = $this->request->getPost('status');
         $catatan = trim($this->request->getPost('catatan') ?? '');
 
         if (!in_array($status, ['approved', 'revision'])) {
-            session()->setFlashdata('error', 'Status verifikasi tidak valid');
+            session()->setFlashdata('error', 'Status verifikasi nggak valid 🤔');
             return redirect()->to('/guru/jurnal-pkl');
         }
 
         if ($catatan === '') {
-            session()->setFlashdata('error', 'Catatan pembimbing wajib diisi');
+            session()->setFlashdata('error', 'Catatan pembimbing wajib diisi ya 😊');
             return redirect()->back()->withInput();
         }
 
@@ -66,8 +66,8 @@ class PklController extends BaseController
 
         if ($result['success']) {
             $messages = [
-                'approved' => 'Progress berhasil disetujui',
-                'revision' => 'Progress direvisi',
+                'approved' => 'Progress udah disetujui nih 👍',
+                'revision' => 'Progress udah direvisi ✓',
             ];
             session()->setFlashdata('success', $messages[$status]);
         } else {
@@ -83,12 +83,12 @@ class PklController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            return redirect()->to('/access-denied')->with('error', 'Data guru tidak ditemukan');
+            return redirect()->to('/access-denied')->with('error', 'Data guru nggak ketemu 🤔');
         }
 
         $result = $this->pklService->getProgressById($id);
         if (!$result['success']) {
-            session()->setFlashdata('error', 'Progress tidak ditemukan');
+            session()->setFlashdata('error', 'Progress nggak ketemu 🤔');
             return redirect()->to('/guru/jurnal-pkl');
         }
 
@@ -107,13 +107,13 @@ class PklController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            return redirect()->to('/access-denied')->with('error', 'Data guru tidak ditemukan');
+            return redirect()->to('/access-denied')->with('error', 'Data guru nggak ketemu 🤔');
         }
 
         $result = $this->pklService->cancelVerification($id);
 
         if ($result['success']) {
-            session()->setFlashdata('success', 'Verifikasi progress berhasil dibatalkan');
+            session()->setFlashdata('success', 'Verifikasi progress udah dibatalkan ✓');
         } else {
             session()->setFlashdata('error', $result['message']);
         }

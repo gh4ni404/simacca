@@ -36,9 +36,6 @@ class PklController extends BaseController
             return redirect()->to('/access-denied')->with('error', 'Data siswa tidak ditemukan');
         }
 
-        $todayResult = $this->pklService->getTodayProgress($siswa['id']);
-        $todayProgress = $todayResult['success'] ? $todayResult['data'] : [];
-
         $timelineResult = $this->pklService->getTimeline($siswa['id']);
         $timeline = $timelineResult['success'] ? $timelineResult['data'] : [];
 
@@ -54,7 +51,6 @@ class PklController extends BaseController
         $data = [
             'title' => 'Jurnal PKL',
             'siswa' => $siswa,
-            'todayProgress' => $todayProgress,
             'timeline' => $timeline,
             'stats' => $stats,
             'tasks' => $tasks,

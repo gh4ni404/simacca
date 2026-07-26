@@ -42,7 +42,7 @@ class RoleFilter implements FilterInterface
 
         // Check if user has any of the allowed roles
         if (count(array_intersect($allRoles, $arguments)) === 0) {
-            return redirect()->to('/access-denied')->with('error', 'Anda tidak memiliki akses ke halaman ini');
+            return redirect()->to('/access-denied')->with('error', 'Kamu nggak punya akses ke halaman ini 🔐');
         }
 
         return $request;

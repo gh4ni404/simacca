@@ -25,7 +25,7 @@ class JadwalController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            return redirect()->to('/guru/dashboard')->with('error', 'Data guru tidak ditemukan');
+            return redirect()->to('/guru/dashboard')->with('error', 'Data guru nggak ketemu 🤔');
         }
 
         // Get jadwal mengajar untuk guru yang sedang login

@@ -133,8 +133,8 @@ class AbsensiController extends BaseController
 
                     // Show friendly message for substitute teacher
                     $this->session->setFlashdata('success_custom', [
-                        'title' => 'Sudah Beres! ⚡',
-                        'message' => "Ternyata absen sudah diisi <strong>{$namaGuruAsli}</strong>. Bapak/Ibu tidak perlu input ulang. Terima kasih bantuannya!"
+                        'title' => 'Udah Beres Nih! ⚡',
+                        'message' => "Ternyata absen udah diisi sama <strong>{$namaGuruAsli}</strong>. Nggak perlu input ulang kok. Makasih ya udah mau bantu! 🙏"
                     ]);
                     return redirect()->to('/guru/absensi');
                 }
@@ -276,7 +276,7 @@ class AbsensiController extends BaseController
             ->countAllResults() > 0;
 
         if (!$teachesThisClass) {
-            $this->session->setFlashdata('error', 'Sorry, kamu tidak mengajar di kelas ini.');
+            $this->session->setFlashdata('error', 'Sorry, kamu nggak mengajar di kelas ini 🤔');
             return redirect()->to('/guru/absensi');
         }
 
@@ -470,7 +470,7 @@ class AbsensiController extends BaseController
         $updateCount = $result['data']['updated'] ?? 0;
         $insertCount = $result['data']['inserted'] ?? 0;
 
-        $this->session->setFlashdata('success', 'Nice! Absen sudah diupdate, (Diubah: ' . $updateCount . ', Ditambah: ' . $insertCount . ')');
+        $this->session->setFlashdata('success', 'Keren! Absen udah diupdate nih (Diubah: ' . $updateCount . ', Ditambah: ' . $insertCount . ') 📝');
 
         // Check next action from form
         $nextAction = $this->request->getPost('next_action');
@@ -558,7 +558,7 @@ class AbsensiController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Data guru tidak ditemukan']);
+            return $this->response->setJSON(['success' => false, 'message' => 'Data guru nggak ketemu nih 🤔']);
         }
 
         $hari = $this->request->getGet('hari');
@@ -612,7 +612,7 @@ class AbsensiController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
         
         if (!$guru) {
-            return $this->response->setJSON(['success' => false, 'message' => 'Data guru tidak ditemukan']);
+            return $this->response->setJSON(['success' => false, 'message' => 'Data guru nggak ketemu nih 🤔']);
         }
         
         $result = $this->absensiService->getNextPertemuan($guru['id'], null, $jadwalId);

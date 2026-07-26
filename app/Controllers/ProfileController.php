@@ -309,9 +309,9 @@ class ProfileController extends BaseController
         
         if ($isFirstProfileEdit && $isPasswordChanged) {
             // Special message for first time profile completion with email check reminder
-            session()->setFlashdata('success', 'Selamat datang di SIMACCA! 🎉 Profil Anda telah diperbarui. Silakan periksa email Bapak/Ibu untuk informasi akun lengkap (username, email, dan password). 📧✨');
+            session()->setFlashdata('success', 'Yeay! Profil udah diperbarui nih 🎉 Cek email ya buat info akun lengkapnya 📧✨');
         } else {
-            session()->setFlashdata('success', 'Profil berhasil diperbarui! 🎉✨');
+            session()->setFlashdata('success', 'Profil udah diperbarui nih 🎉✨');
         }
         
         return redirect()->to($dashboardUrl);
@@ -335,10 +335,10 @@ class ProfileController extends BaseController
                 'label' => 'Foto Profil',
                 'rules' => 'uploaded[profile_photo]|max_size[profile_photo,5120]|is_image[profile_photo]|mime_in[profile_photo,image/jpg,image/jpeg,image/png]',
                 'errors' => [
-                    'uploaded' => 'Pilih foto terlebih dahulu',
-                    'max_size' => 'Ukuran foto maksimal 5MB',
-                    'is_image' => 'File harus berupa gambar',
-                    'mime_in' => 'Format foto harus JPG, JPEG, atau PNG'
+                    'uploaded' => 'Pilih foto dulu ya 📷',
+                    'max_size' => 'Ukuran foto maksimal 5MB ya',
+                    'is_image' => 'File harusnya gambar nih 🤔',
+                    'mime_in' => 'Format foto harus JPG, JPEG, atau PNG ya'
                 ]
             ]
         ];
@@ -409,13 +409,13 @@ class ProfileController extends BaseController
                     }
                 }
 
-                session()->setFlashdata('success', 'Foto profil berhasil diupdate! 📸✨');
+                session()->setFlashdata('success', 'Foto profil udah diupdate nih 📸✨');
             } catch (\Exception $e) {
                 log_message('error', 'Profile photo upload error: ' . $e->getMessage());
-                session()->setFlashdata('error', 'Gagal mengupload foto. Silakan coba lagi.');
+                session()->setFlashdata('error', 'Gagal upload foto nih 😅 Coba lagi ya.');
             }
         } else {
-            session()->setFlashdata('error', 'File tidak valid atau sudah dipindahkan.');
+            session()->setFlashdata('error', 'File nggak valid atau udah dipindahkan 🤔');
         }
 
         return redirect()->back();
@@ -454,9 +454,9 @@ class ProfileController extends BaseController
             // Update session
             session()->set('profile_photo', null);
 
-            session()->setFlashdata('success', 'Foto profil berhasil dihapus.');
+            session()->setFlashdata('success', 'Foto profil udah dihapus ya 📸');
         } else {
-            session()->setFlashdata('error', 'Tidak ada foto profil untuk dihapus.');
+            session()->setFlashdata('error', 'Nggak ada foto profil yang bisa dihapus 🤔');
         }
 
         return redirect()->back();

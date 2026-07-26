@@ -16,11 +16,15 @@
         </div>
 
         <?php if (session()->getFlashdata('error')): ?>
-            <?= render_alert(session()->getFlashdata('error'), 'danger') ?>
+            <div class="p-4 mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg">
+                <?= session()->getFlashdata('error') ?>
+            </div>
         <?php endif; ?>
 
         <?php if (session()->getFlashdata('success')): ?>
-            <?= render_alert(session()->getFlashdata('success'), 'success') ?>
+            <div class="p-4 mb-4 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg">
+                <?= session()->getFlashdata('success') ?>
+            </div>
         <?php endif; ?>
 
         <!-- Form -->
