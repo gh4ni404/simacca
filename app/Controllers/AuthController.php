@@ -80,6 +80,13 @@ class AuthController extends BaseController
         ];
 
         if (!$this->validate($rules, $messages)) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'success'    => false,
+                    'message'    => implode(' ', $this->validator->getErrors()),
+                    'csrf_token' => csrf_hash(),
+                ]);
+            }
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         }
 
@@ -168,10 +175,31 @@ class AuthController extends BaseController
             // Update last login (jika ada field di database)
             // $this->userModel->updateLastLogin($user['id']);
 
-            // Redirect to dashboard
-            return $this->redirectToDashboard();
+            // Determine redirect URL
+            $redirectUrl = $this->getDashboardUrl();
+
+            // Return JSON for AJAX requests
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'success'      => true,
+                    'username'     => $user['username'],
+                    'redirect_url' => base_url($redirectUrl),
+                    'csrf_token'   => csrf_hash(),
+                ]);
+            }
+
+            // Regular form submission fallback
+            return redirect()->to($redirectUrl);
         } else {
             // Login Failed
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'success'    => false,
+                    'message'    => 'Hmm, username atau password kayaknya salah deh 🤔',
+                    'csrf_token' => csrf_hash(),
+                ]);
+            }
+
             session()->setFlashdata('error', 'Hmm, username atau password kayaknya salah deh 🤔');
             return redirect()->to('/login')->withInput();
         }
@@ -182,6 +210,14 @@ class AuthController extends BaseController
      * Multi-role: uses role priority order
      */
     private function redirectToDashboard()
+    {
+        return redirect()->to($this->getDashboardUrl());
+    }
+
+    /**
+     * Get dashboard URL based on role (returns string, not redirect)
+     */
+    private function getDashboardUrl(): string
     {
         $allRoles = session()->get('all_roles') ?? [session()->get('role')];
 
@@ -198,11 +234,11 @@ class AuthController extends BaseController
 
         foreach ($priority as $role => $url) {
             if (in_array($role, $allRoles)) {
-                return redirect()->to($url);
+                return $url;
             }
         }
 
-        return redirect()->to('/');
+        return '/';
     }
 
     /**
