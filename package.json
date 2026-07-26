@@ -1,0 +1,27 @@
+{
+  "name": "simacca",
+  "version": "1.0.0",
+  "description": "Sistem informasi manajemen absensi dan catatan cara ajar",
+  "homepage": "https://github.com/gh4ni404/simacca#readme",
+  "bugs": {
+    "url": "https://github.com/gh4ni404/simacca/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gh4ni404/simacca.git"
+  },
+  "license": "ISC",
+  "author": "gh4ni404",
+  "type": "commonjs",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "cypress": "^15.19.0"
+  }
+}
