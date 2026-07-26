@@ -65,9 +65,9 @@
         <?php if (empty($izinData)): ?>
             <?= empty_state('inbox', 'Tidak ada data izin',
                 ($status == 'pending' ? 'Tidak ada izin yang menunggu persetujuan' :
-                 $status == 'disetujui' ? 'Belum ada izin yang disetujui' :
-                 $status == 'ditolak' ? 'Belum ada izin yang ditolak' :
-                 'Anda belum pernah mengajukan izin'),
+                 ($status == 'disetujui' ? 'Belum ada izin yang disetujui' :
+                 ($status == 'ditolak' ? 'Belum ada izin yang ditolak' :
+                 'Anda belum pernah mengajukan izin'))),
                 'Ajukan Izin Sekarang', base_url('siswa/izin/tambah')) ?>
         <?php else: ?>
             <?php foreach ($izinData as $izin): ?>

@@ -216,6 +216,14 @@ class AuthController extends BaseController
      */
     private function redirectToDashboard()
     {
+        return redirect()->to($this->getDashboardUrl());
+    }
+
+    /**
+     * Get dashboard URL based on role (returns string, not redirect)
+     */
+    private function getDashboardUrl(): string
+    {
         $allRoles = session()->get('all_roles') ?? [session()->get('role')];
 
         // Priority order for redirect
@@ -231,11 +239,11 @@ class AuthController extends BaseController
 
         foreach ($priority as $role => $url) {
             if (in_array($role, $allRoles)) {
-                return redirect()->to($url);
+                return $url;
             }
         }
 
-        return redirect()->to('/');
+        return '/';
     }
 
     /**
