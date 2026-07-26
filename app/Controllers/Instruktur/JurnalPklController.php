@@ -400,6 +400,105 @@ class JurnalPklController extends BaseController
         return redirect()->back();
     }
 
+    public function getTasksBySiswa(int $siswaId)
+    {
+        $instruktur = $this->getInstruktur();
+        if (!$instruktur) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
+        }
+
+        $week = $this->request->getGet('week');
+        $db = \Config\Database::connect();
+
+        $sql = "
+            SELECT DISTINCT pt.id, pt.judul, MIN(pp.tanggal) AS tanggal
+            FROM pkl_tasks pt
+            JOIN siswa_pkl sp ON sp.siswa_id = pt.siswa_id AND sp.tahun_ajaran = ?
+            JOIN pkl_progress pp ON pp.task_id = pt.id AND pp.deleted_at IS NULL
+            WHERE pt.siswa_id = ? AND pt.deleted_at IS NULL AND sp.tempat_pkl_id = ?
+        ";
+        $params = [get_active_tahun_ajaran(), $siswaId, $instruktur['tempat_pkl_id']];
+
+        if (!empty($week)) {
+            $startDate = get_jurnal_pkl_start_date();
+            $weekRange = get_week_range($startDate, (int) $week);
+            $sql .= " AND pp.tanggal >= ? AND pp.tanggal <= ?";
+            $params[] = $weekRange['start'];
+            $params[] = $weekRange['end'];
+        }
+
+        $sql .= " GROUP BY pt.id, pt.judul ORDER BY tanggal ASC";
+
+        $tasks = $db->query($sql, $params)->getResultArray();
+
+        return $this->response->setJSON(['success' => true, 'data' => $tasks]);
+    }
+
+    public function getFilteredProgress(int $siswaId)
+    {
+        $instruktur = $this->getInstruktur();
+        if (!$instruktur) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Unauthorized']);
+        }
+
+        $week = $this->request->getGet('week');
+        $taskId = $this->request->getGet('task_id');
+
+        if (empty($week) || empty($taskId)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Filter week dan task wajib dipilih']);
+        }
+
+        $db = \Config\Database::connect();
+        $startDate = get_jurnal_pkl_start_date();
+        $weekRange = get_week_range($startDate, (int) $week);
+
+        $progress = $db->query("
+            SELECT pp.*, pt.judul AS task_judul, pt.siswa_id
+            FROM pkl_progress pp
+            JOIN pkl_tasks pt ON pt.id = pp.task_id AND pt.deleted_at IS NULL
+            JOIN siswa_pkl sp ON sp.siswa_id = pt.siswa_id AND sp.tahun_ajaran = ?
+            WHERE pt.siswa_id = ?
+              AND pp.task_id = ?
+              AND pp.tanggal >= ? AND pp.tanggal <= ?
+              AND pp.deleted_at IS NULL
+              AND sp.tempat_pkl_id = ?
+            ORDER BY pp.tanggal DESC
+        ", [get_active_tahun_ajaran(), $siswaId, $taskId, $weekRange['start'], $weekRange['end'], $instruktur['tempat_pkl_id']])->getResultArray();
+
+        return $this->response->setJSON(['success' => true, 'data' => $progress]);
+    }
+
+    public function getWeekInfo()
+    {
+        $startDate = get_jurnal_pkl_start_date();
+        $endDate = get_jurnal_pkl_end_date();
+        $pklEndDate = $endDate ?: date('Y-m-d');
+
+        if (!$startDate) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Tanggal mulai PKL belum diatur']);
+        }
+
+        $start = new \DateTime($startDate);
+        $end = new \DateTime($pklEndDate);
+        $totalDays = (int) $start->diff($end)->days;
+        $totalWeeks = max(1, (int) ceil(($totalDays + 1) / 7));
+
+        $weeks = [];
+        for ($i = 1; $i <= $totalWeeks; $i++) {
+            $range = get_week_range($startDate, $i);
+            $weekStart = new \DateTime($range['start']);
+            $weekEnd = new \DateTime($range['end']);
+            $weeks[] = [
+                'week' => $i,
+                'start' => $range['start'],
+                'end' => $range['end'],
+                'label' => 'Minggu ' . $i . ' (' . $weekStart->format('j M') . ' - ' . $weekEnd->format('j M') . ')',
+            ];
+        }
+
+        return $this->response->setJSON(['success' => true, 'data' => $weeks]);
+    }
+
     public function allProgress()
     {
         $instruktur = $this->getInstruktur();

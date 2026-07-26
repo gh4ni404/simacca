@@ -196,8 +196,7 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
                         class="student-detail-panel hidden flex flex-col h-full overflow-hidden">
 
                         <!-- Panel Header -->
-                        <div
-                            class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 flex-shrink-0">
+                        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex-shrink-0">
                             <div class="flex items-center gap-3.5">
                                 <!-- Back button for mobile -->
                                 <button type="button" onclick="backToList()"
@@ -217,7 +216,7 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
                                     </div>
                                 <?php endif; ?>
 
-                                <div>
+                                <div class="flex-grow min-w-0">
                                     <h3 class="text-base font-bold text-gray-900 leading-tight">
                                         <?= esc($student['nama_siswa']) ?>
                                     </h3>
@@ -236,248 +235,61 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
                                         <?php endif; ?>
                                     </div>
                                 </div>
+
+                                <div class="flex items-center gap-3 flex-shrink-0">
+                                    <div
+                                        class="text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-xl font-semibold border border-blue-100 flex items-center gap-1.5 shadow-sm">
+                                        <i class="fas fa-check-circle"></i>
+                                        Progress: <?= $approvedCount ?>/<?= $totalProgress ?> Disetujui
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="flex items-center gap-3">
-                                <div
-                                    class="text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-xl font-semibold border border-blue-100 flex items-center gap-1.5 shadow-sm">
-                                    <i class="fas fa-check-circle"></i>
-                                    Progress: <?= $approvedCount ?>/<?= $totalProgress ?> Disetujui
+                            <!-- Filter Dropdowns -->
+                            <div class="grid grid-cols-2 gap-3 mt-4">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Filter Minggu</label>
+                                    <select id="weekFilter-<?= $student['siswa_id'] ?>"
+                                        class="week-filter"
+                                        data-siswa-id="<?= $student['siswa_id'] ?>">
+                                        <option value="">-- Pilih Minggu --</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Filter Task</label>
+                                    <select id="taskFilter-<?= $student['siswa_id'] ?>"
+                                        class="task-filter"
+                                        disabled
+                                        data-siswa-id="<?= $student['siswa_id'] ?>">
+                                        <option value="">-- Pilih Task --</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Panel Content: Scrollable list of entries -->
                         <div class="flex-grow overflow-y-auto p-6 bg-gray-50/40 space-y-5 custom-scrollbar">
-
-                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 mb-2">
-                                <i class="fas fa-calendar-day text-xs"></i> Riwayat Progress Harian
-                            </h4>
-
-                            <?php foreach ($student['progress'] as $p):
-                                $statusBadge = match ($p['status']) {
-                                    'approved' => ['bg' => 'bg-green-50 text-green-700 border-green-200', 'label' => 'Disetujui', 'icon' => 'fa-check-circle'],
-                                    'verified_by_instruktur' => ['bg' => 'bg-blue-50 text-blue-700 border-blue-200', 'label' => 'Verified Instruktur', 'icon' => 'fa-check-double'],
-                                    'submitted' => ['bg' => 'bg-yellow-50 text-yellow-700 border-yellow-200', 'label' => 'Menunggu', 'icon' => 'fa-clock'],
-                                    'revision' => ['bg' => 'bg-orange-50 text-orange-700 border-orange-200', 'label' => 'Revisi', 'icon' => 'fa-edit'],
-                                    default => ['bg' => 'bg-gray-50 text-gray-600 border-gray-200', 'label' => 'Draft', 'icon' => 'fa-pen']
-                                };
-                                ?>
-                                <div
-                                    class="bg-white rounded-2xl border border-gray-200 p-4 md:p-5 shadow-sm space-y-4 md:space-y-6 hover:shadow-md transition-all duration-200">
-                                    <!-- Entry Header -->
-                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4">
-                                        <div class="min-w-0">
-                                            <h3 class="text-base font-semibold text-gray-900 leading-snug">
-                                                <?= esc($p['nama_task']) ?>
-                                            </h3>
-                                            <div class="mt-1.5 flex flex-wrap items-center gap-2 text-xs md:text-sm text-gray-500">
-                                                <?php if (!empty($p['kategori_nama'])): ?>
-                                                    <span
-                                                        class="font-medium text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded"><?= esc($p['kategori_nama']) ?></span>
-                                                    <span class="text-gray-300">&bull;</span>
-                                                <?php endif; ?>
-                                                <span class="flex items-center gap-1">
-                                                    <i class="far fa-calendar"></i>
-                                                    <?= $formatIndoDate($p['tanggal']) ?>
-                                                </span>
-                                                <?php
-                                                $langkahKerja = [];
-                                                if (!empty($p['langkah_kerja'])) {
-                                                    $decoded = json_decode($p['langkah_kerja'], true);
-                                                    if (is_array($decoded)) {
-                                                        $langkahKerja = array_filter($decoded, fn($v) => trim($v) !== '');
-                                                    }
-                                                }
-                                                ?>
-                                                <?php if (!empty($langkahKerja)): ?>
-                                                    <span class="text-gray-300">&bull;</span>
-                                                    <span><?= count($langkahKerja) ?> langkah kerja</span>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border self-start sm:self-auto flex-shrink-0 <?= $statusBadge['bg'] ?>">
-                                            <i class="fas <?= $statusBadge['icon'] ?> text-[10px]"></i>
-                                            <?= $statusBadge['label'] ?>
-                                        </span>
-                                    </div>
-
-                                    <!-- Langkah Kerja -->
-                                    <?php if (!empty($langkahKerja)): ?>
-                                        <div class="pt-4 md:pt-5 border-t border-gray-100">
-                                            <div class="bg-gray-50/50 border border-gray-200 rounded-xl p-3.5">
-                                                <div class="flex items-center gap-2.5 mb-4">
-                                                    <i class="fas fa-list-ol text-blue-500"></i>
-                                                    <span class="text-sm font-semibold text-gray-700">Perencanaan dan Persiapan Kerja</span>
-                                                    <span class="text-xs text-gray-500 font-medium bg-gray-200/60 px-1.5 py-0.5 rounded-full">(<?= count($langkahKerja) ?>)</span>
-                                                </div>
-                                                <div class="pl-1">
-                                                    <ol class="relative border-l border-gray-200 ml-2 space-y-4">
-                                                        <?php foreach (array_values($langkahKerja) as $step): ?>
-                                                            <li class="ml-5">
-                                                                <div class="absolute -left-[5px] mt-1.5 w-2.5 h-2.5 rounded-full bg-blue-500"></div>
-                                                                <p class="text-sm text-gray-700 leading-relaxed"><?= esc($step) ?></p>
-                                                            </li>
-                                                        <?php endforeach; ?>
-                                                    </ol>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    <?php endif; ?>
-
-                                    <!-- Description -->
-                                    <div class="pt-4 md:pt-5 border-t border-gray-100">
-                                        <div class="rounded-xl bg-gray-50 border border-gray-200 p-4">
-                                            <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
-                                                <i class="far fa-file-lines text-gray-400"></i> Deskripsi Pekerjaan
-                                            </h4>
-                                            <p class="text-sm leading-7 text-gray-600 whitespace-pre-wrap"><?= esc($p['deskripsi']) ?>
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <!-- Photo -->
-                                    <?php if ($p['foto']): ?>
-                                        <div class="pt-4 md:pt-5 border-t border-gray-100">
-                                            <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-3">
-                                                <i class="far fa-image text-gray-400"></i> Dokumentasi
-                                            </h4>
-                                            <a href="<?= base_url('files/pkl-progress/' . $p['foto']); ?>"
-                                                onclick="openLightbox(this.href); return false;"
-                                                class="group relative inline-block overflow-hidden rounded-xl border border-gray-200 hover:shadow-md transition-shadow w-full md:w-auto cursor-pointer">
-                                                <img src="<?= base_url('files/pkl-progress/' . $p['foto']); ?>"
-                                                    class="w-full h-48 md:h-40 md:w-auto object-cover transition-transform duration-300 group-hover:scale-105"
-                                                    loading="lazy" alt="Dokumentasi">
-                                                <div
-                                                    class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold gap-1.5">
-                                                    <i class="fas fa-search-plus"></i> Lihat Foto
-                                                </div>
-                                            </a>
-                                        </div>
-                                    <?php endif; ?>
-
-                                    <!-- Catatan notes -->
-                                    <?php if (!empty($p['catatan_instruktur']) || !empty($p['catatan_pembimbing'])): ?>
-                                        <div class="pt-4 md:pt-5 border-t border-gray-100 space-y-3.5">
-                                            <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                                <i class="far fa-comment-dots text-gray-400"></i> Catatan Jurnal
-                                            </h4>
-                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                                                <?php if (!empty($p['catatan_instruktur'])): ?>
-                                                    <div class="bg-indigo-50 border-l-4 border-indigo-500 rounded-r-xl p-3.5 shadow-sm">
-                                                        <p
-                                                            class="text-[10px] font-bold text-indigo-700 uppercase tracking-wider flex items-center gap-1">
-                                                            <i class="fas fa-building text-[8px]"></i> Catatan Instruktur
-                                                        </p>
-                                                        <p class="text-xs text-indigo-900 mt-1 leading-relaxed"><?= esc($p['catatan_instruktur']) ?></p>
-                                                    </div>
-                                                <?php endif; ?>
-                                                <?php if (!empty($p['catatan_pembimbing'])): ?>
-                                                    <div class="bg-orange-50 border-l-4 border-orange-500 rounded-r-xl p-3.5 shadow-sm">
-                                                        <p
-                                                            class="text-[10px] font-bold text-orange-700 uppercase tracking-wider flex items-center gap-1">
-                                                            <i class="fas fa-user-tie text-[8px]"></i> Catatan Pembimbing
-                                                        </p>
-                                                        <p class="text-xs text-orange-900 mt-1 leading-relaxed"><?= esc($p['catatan_pembimbing']) ?></p>
-                                                    </div>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-                                    <?php endif; ?>
-
-                                    <!-- Action Section -->
-                                    <div class="pt-4 md:pt-5 border-t border-gray-100">
-                                        <?php if ($p['status'] === 'approved'): ?>
-                                            <!-- Undo verification -->
-                                            <div
-                                                class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-green-50/40 border border-green-100 rounded-xl p-3.5 pl-4 shadow-inner">
-                                                <div class="flex items-center gap-2.5 text-xs text-green-800">
-                                                    <i class="fas fa-check-circle text-base text-green-500 flex-shrink-0"></i>
-                                                    <div class="min-w-0">
-                                                        <span class="font-bold">Progress disetujui</span>
-                                                        <?php if (!empty($p['catatan_pembimbing'])): ?>
-                                                            <p class="text-green-700 mt-0.5 italic break-words">
-                                                                "<?= esc($p['catatan_pembimbing']) ?>"</p>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                </div>
-                                                <form action="<?= base_url('guru/jurnal-pkl/batal-verifikasi/' . $p['id']); ?>"
-                                                    method="POST" onsubmit="saveActiveSiswa(<?= $student['siswa_id'] ?>)">
-                                                    <?= csrf_field(); ?>
-                                                    <button type="submit" onclick="return confirm('Batalkan verifikasi progress ini?')"
-                                                        class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white border border-orange-200 text-orange-700 font-semibold rounded-xl hover:bg-orange-50 hover:border-orange-300 text-xs shadow-sm transition-all active:scale-95 whitespace-nowrap">
-                                                        <i class="fas fa-undo text-[10px]"></i> Batalkan
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        <?php elseif ($p['status'] === 'revision' && (int)$p['verified_by'] === (int)session()->get('user_id')): ?>
-                                            <!-- Undo revision by self -->
-                                            <div
-                                                class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-orange-50/40 border border-orange-100 rounded-xl p-3.5 pl-4 shadow-inner">
-                                                <div class="flex items-center gap-2.5 text-xs text-orange-850">
-                                                    <i class="fas fa-edit text-base text-orange-500 flex-shrink-0"></i>
-                                                    <div class="min-w-0">
-                                                        <span class="font-bold">Minta revisi (oleh Anda)</span>
-                                                        <?php if (!empty($p['catatan_pembimbing'])): ?>
-                                                            <p class="text-orange-700 mt-0.5 italic break-words">
-                                                                "<?= esc($p['catatan_pembimbing']) ?>"</p>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                </div>
-                                                <form action="<?= base_url('guru/jurnal-pkl/batal-verifikasi/' . $p['id']); ?>"
-                                                    method="POST" onsubmit="saveActiveSiswa(<?= $student['siswa_id'] ?>)">
-                                                    <?= csrf_field(); ?>
-                                                    <button type="submit" onclick="return confirm('Batalkan permintaan revisi ini?')"
-                                                        class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white border border-orange-200 text-orange-700 font-semibold rounded-xl hover:bg-orange-50 hover:border-orange-300 text-xs shadow-sm transition-all active:scale-95 whitespace-nowrap">
-                                                        <i class="fas fa-undo text-[10px]"></i> Batalkan
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        <?php elseif ($p['status'] === 'revision'): ?>
-                                            <!-- Revision requested by Instructor -->
-                                            <div
-                                                class="flex items-center gap-2.5 text-xs text-orange-850 bg-orange-50/40 border border-orange-100 rounded-xl p-3.5 pl-4 shadow-inner">
-                                                <i class="fas fa-exclamation-triangle text-base text-orange-500 flex-shrink-0"></i>
-                                                <div class="min-w-0">
-                                                    <span class="font-bold">Menunggu revisi dari siswa (diminta oleh Instruktur)</span>
-                                                    <?php if (!empty($p['catatan_instruktur'])): ?>
-                                                        <p class="text-orange-700 mt-0.5 italic break-words">"<?= esc($p['catatan_instruktur']) ?>"</p>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </div>
-                                        <?php else: ?>
-                                            <!-- Verification form -->
-                                            <form action="<?= base_url('guru/jurnal-pkl/verify/' . $p['id']); ?>" method="POST"
-                                                onsubmit="saveActiveSiswa(<?= $student['siswa_id'] ?>)" class="space-y-3">
-                                                <?= csrf_field(); ?>
-                                                <div class="bg-gray-50 border border-gray-200 rounded-xl p-3.5 shadow-inner">
-                                                    <label
-                                                        class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Catatan
-                                                        Pembimbing <span class="text-red-500">*</span></label>
-                                                    <textarea name="catatan" rows="2" required
-                                                        class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none shadow-sm"
-                                                        placeholder="Tulis catatan revisi atau catatan persetujuan..."><?= esc($p['catatan_pembimbing'] ?? '') ?></textarea>
-
-                                                    <div class="flex flex-col sm:flex-row justify-end gap-2.5 mt-3">
-                                                        <button type="submit" name="status" value="revision"
-                                                            onclick="return confirm('Minta revisi progress ini?')"
-                                                            class="w-full sm:w-auto px-4 py-2 border border-orange-200 text-orange-700 font-bold text-xs hover:bg-orange-50 hover:border-orange-300 bg-white rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5">
-                                                            <i class="fas fa-edit text-[10px]"></i> Minta Revisi
-                                                        </button>
-                                                        <button type="submit" name="status" value="approved"
-                                                            onclick="return confirm('Setujui progress ini?')"
-                                                            class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5">
-                                                            <i class="fas fa-check text-[10px]"></i> Setujui
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </form>
-                                        <?php endif; ?>
-                                    </div>
-
+                            <div id="filter-placeholder-<?= $student['siswa_id'] ?>" class="flex flex-col items-center justify-center py-12 text-center">
+                                <div class="w-16 h-16 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center mb-3">
+                                    <i class="fas fa-filter text-2xl"></i>
                                 </div>
-                            <?php endforeach; ?>
+                                <h3 class="text-base font-semibold text-gray-700">Pilih Filter</h3>
+                                <p class="text-sm text-gray-500 mt-1">Pilih minggu dan task untuk menampilkan data progress</p>
+                            </div>
+                            <div id="filter-loading-<?= $student['siswa_id'] ?>" class="hidden flex flex-col items-center justify-center py-12 text-center">
+                                <div class="w-16 h-16 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center mb-3">
+                                    <i class="fas fa-spinner fa-spin text-2xl"></i>
+                                </div>
+                                <h3 class="text-base font-semibold text-gray-700">Memuat data...</h3>
+                            </div>
+                            <div id="filter-empty-<?= $student['siswa_id'] ?>" class="hidden flex flex-col items-center justify-center py-12 text-center">
+                                <div class="w-16 h-16 rounded-full bg-yellow-50 text-yellow-500 flex items-center justify-center mb-3">
+                                    <i class="fas fa-inbox text-2xl"></i>
+                                </div>
+                                <h3 class="text-base font-semibold text-gray-700">Tidak Ada Data</h3>
+                                <p class="text-sm text-gray-500 mt-1">Tidak ada progress untuk filter yang dipilih</p>
+                            </div>
+                            <div id="filter-result-<?= $student['siswa_id'] ?>" class="hidden space-y-5"></div>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -597,6 +409,29 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
                 document.getElementById('list-panel').classList.remove('hidden');
             }
         }
+
+        // Load week info for this student if not already loaded
+        var weekFilter = $('#weekFilter-' + siswaId);
+        var taskFilter = $('#taskFilter-' + siswaId);
+
+        if (weekFilter.length && !weekFilter.data('select2-loaded')) {
+            weekFilter.data('select2-loaded', true);
+            weekFilter.select2({
+                placeholder: '-- Pilih Minggu --',
+                width: '100%',
+                dropdownAutoWidth: true
+            });
+            loadWeekInfo(siswaId);
+        }
+
+        if (taskFilter.length && !taskFilter.data('select2-loaded')) {
+            taskFilter.data('select2-loaded', true);
+            taskFilter.select2({
+                placeholder: '-- Pilih Task --',
+                width: '100%',
+                dropdownAutoWidth: true
+            });
+        }
     }
 
     // Back to student list in mobile view
@@ -646,6 +481,251 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
                 selectStudent(id);
             }
         }
+    });
+</script>
+
+<!-- Select2 CSS & JS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+    var BASE_URL = '<?= base_url() ?>';
+
+    function formatIndoDate(dateStr) {
+        if (!dateStr) return '-';
+        var days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+        var months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+        var d = new Date(dateStr);
+        return days[d.getDay()] + ', ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+    }
+
+    function getStatusBadge(status) {
+        var badges = {
+            'approved': {bg: 'bg-green-50 text-green-700 border-green-200', label: 'Disetujui', icon: 'fa-check-circle'},
+            'verified_by_instruktur': {bg: 'bg-blue-50 text-blue-700 border-blue-200', label: 'Verified Instruktur', icon: 'fa-check-double'},
+            'submitted': {bg: 'bg-yellow-50 text-yellow-700 border-yellow-200', label: 'Menunggu', icon: 'fa-clock'},
+            'revision': {bg: 'bg-orange-50 text-orange-700 border-orange-200', label: 'Revisi', icon: 'fa-edit'}
+        };
+        return badges[status] || {bg: 'bg-gray-50 text-gray-600 border-gray-200', label: 'Draft', icon: 'fa-pen'};
+    }
+
+    function renderProgressCard(p, siswaId) {
+        var badge = getStatusBadge(p.status);
+        var langkahKerja = [];
+        if (p.langkah_kerja) {
+            try {
+                var decoded = JSON.parse(p.langkah_kerja);
+                if (Array.isArray(decoded)) {
+                    langkahKerja = decoded.filter(function(v) { return v.trim() !== ''; });
+                }
+            } catch(e) {}
+        }
+
+        var langkahHtml = '';
+        if (langkahKerja.length > 0) {
+            var stepsHtml = langkahKerja.map(function(step) {
+                return '<li class="ml-5"><div class="absolute -left-[5px] mt-1.5 w-2.5 h-2.5 rounded-full bg-blue-500"></div><p class="text-sm text-gray-700 leading-relaxed">' + step.replace(/</g, '&lt;') + '</p></li>';
+            }).join('');
+            langkahHtml = '<div class="pt-4 md:pt-5 border-t border-gray-100"><div class="bg-gray-50/50 border border-gray-200 rounded-xl p-3.5"><div class="flex items-center gap-2.5 mb-4"><i class="fas fa-list-ol text-blue-500"></i><span class="text-sm font-semibold text-gray-700">Perencanaan dan Persiapan Kerja</span><span class="text-xs text-gray-500 font-medium bg-gray-200/60 px-1.5 py-0.5 rounded-full">(' + langkahKerja.length + ')</span></div><div class="pl-1"><ol class="relative border-l border-gray-200 ml-2 space-y-4">' + stepsHtml + '</ol></div></div></div>';
+        }
+
+        var kategoriHtml = '';
+        if (p.kategori_nama) {
+            kategoriHtml = '<span class="font-medium text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded">' + (p.kategori_nama || '').replace(/</g, '&lt;') + '</span><span class="text-gray-300">&bull;</span>';
+        }
+
+        var photoHtml = '';
+        if (p.foto) {
+            photoHtml = '<div class="pt-4 md:pt-5 border-t border-gray-100"><h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-3"><i class="far fa-image text-gray-400"></i> Dokumentasi</h4><a href="' + BASE_URL + '/files/pkl-progress/' + p.foto + '" onclick="openLightbox(this.href); return false;" class="group relative inline-block overflow-hidden rounded-xl border border-gray-200 hover:shadow-md transition-shadow w-full md:w-auto cursor-pointer"><img src="' + BASE_URL + '/files/pkl-progress/' + p.foto + '" class="w-full h-48 md:h-40 md:w-auto object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" alt="Dokumentasi"><div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold gap-1.5"><i class="fas fa-search-plus"></i> Lihat Foto</div></a></div>';
+        }
+
+        var catatanHtml = '';
+        if (p.catatan_instruktur || p.catatan_pembimbing) {
+            var innerCat = '';
+            if (p.catatan_instruktur) {
+                innerCat += '<div class="bg-indigo-50 border-l-4 border-indigo-500 rounded-r-xl p-3.5 shadow-sm"><p class="text-[10px] font-bold text-indigo-700 uppercase tracking-wider flex items-center gap-1"><i class="fas fa-building text-[8px]"></i> Catatan Instruktur</p><p class="text-xs text-indigo-900 mt-1 leading-relaxed">' + (p.catatan_instruktur || '').replace(/</g, '&lt;') + '</p></div>';
+            }
+            if (p.catatan_pembimbing) {
+                innerCat += '<div class="bg-orange-50 border-l-4 border-orange-500 rounded-r-xl p-3.5 shadow-sm"><p class="text-[10px] font-bold text-orange-700 uppercase tracking-wider flex items-center gap-1"><i class="fas fa-user-tie text-[8px]"></i> Catatan Pembimbing</p><p class="text-xs text-orange-900 mt-1 leading-relaxed">' + (p.catatan_pembimbing || '').replace(/</g, '&lt;') + '</p></div>';
+            }
+            catatanHtml = '<div class="pt-4 md:pt-5 border-t border-gray-100 space-y-3.5"><h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2"><i class="far fa-comment-dots text-gray-400"></i> Catatan Jurnal</h4><div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">' + innerCat + '</div></div>';
+        }
+
+        var actionHtml = '';
+        var csrfName = '<?= csrf_token() ?>';
+        var csrfHash = '<?= csrf_hash() ?>';
+        if (p.status === 'approved') {
+            actionHtml = '<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-green-50/40 border border-green-100 rounded-xl p-3.5 pl-4 shadow-inner"><div class="flex items-center gap-2.5 text-xs text-green-800"><i class="fas fa-check-circle text-base text-green-500 flex-shrink-0"></i><div class="min-w-0"><span class="font-bold">Progress disetujui</span>' + (p.catatan_pembimbing ? '<p class="text-green-700 mt-0.5 italic break-words">"' + (p.catatan_pembimbing || '').replace(/</g, '&lt;') + '"</p>' : '') + '</div></div><form action="' + BASE_URL + '/guru/jurnal-pkl/batal-verifikasi/' + p.id + '" method="POST" onsubmit="saveActiveSiswa(' + siswaId + ')"><input type="hidden" name="' + csrfName + '" value="' + csrfHash + '"><button type="submit" onclick="return confirm(\'Batalkan verifikasi progress ini?\')" class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white border border-orange-200 text-orange-700 font-semibold rounded-xl hover:bg-orange-50 hover:border-orange-300 text-xs shadow-sm transition-all active:scale-95 whitespace-nowrap"><i class="fas fa-undo text-[10px]"></i> Batalkan</button></form></div>';
+        } else if (p.status === 'revision') {
+            actionHtml = '<div class="flex items-center gap-2.5 text-xs text-orange-850 bg-orange-50/40 border border-orange-100 rounded-xl p-3.5 pl-4 shadow-inner"><i class="fas fa-exclamation-triangle text-base text-orange-500 flex-shrink-0"></i><div class="min-w-0"><span class="font-bold">Menunggu revisi dari siswa</span>' + (p.catatan_instruktur ? '<p class="text-orange-700 mt-0.5 italic break-words">"' + (p.catatan_instruktur || '').replace(/</g, '&lt;') + '"</p>' : '') + '</div></div>';
+        } else {
+            actionHtml = '<form action="' + BASE_URL + '/guru/jurnal-pkl/verify/' + p.id + '" method="POST" onsubmit="saveActiveSiswa(' + siswaId + ')" class="space-y-3"><input type="hidden" name="' + csrfName + '" value="' + csrfHash + '"><div class="bg-gray-50 border border-gray-200 rounded-xl p-3.5 shadow-inner"><label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Catatan Pembimbing <span class="text-red-500">*</span></label><textarea name="catatan" rows="2" required class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none shadow-sm" placeholder="Tulis catatan revisi atau catatan persetujuan..."></textarea><div class="flex flex-col sm:flex-row justify-end gap-2.5 mt-3"><button type="submit" name="status" value="revision" onclick="return confirm(\'Minta revisi progress ini?\')" class="w-full sm:w-auto px-4 py-2 border border-orange-200 text-orange-700 font-bold text-xs hover:bg-orange-50 hover:border-orange-300 bg-white rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="fas fa-edit text-[10px]"></i> Minta Revisi</button><button type="submit" name="status" value="approved" onclick="return confirm(\'Setujui progress ini?\')" class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="fas fa-check text-[10px]"></i> Setujui</button></div></div></form>';
+        }
+
+        var langkahCount = langkahKerja.length > 0 ? '<span class="text-gray-300">&bull;</span><span>' + langkahKerja.length + ' langkah kerja</span>' : '';
+
+        return '<div class="bg-white rounded-2xl border border-gray-200 p-4 md:p-5 shadow-sm space-y-4 md:space-y-6 hover:shadow-md transition-all duration-200">' +
+            '<div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4"><div class="min-w-0"><h3 class="text-base font-semibold text-gray-900 leading-snug">' + (p.task_judul || p.nama_task || '').replace(/</g, '&lt;') + '</h3><div class="mt-1.5 flex flex-wrap items-center gap-2 text-xs md:text-sm text-gray-500">' + kategoriHtml + '<span class="flex items-center gap-1"><i class="far fa-calendar"></i> ' + formatIndoDate(p.tanggal) + '</span>' + langkahCount + '</div></div><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border self-start sm:self-auto flex-shrink-0 ' + badge.bg + '"><i class="fas ' + badge.icon + ' text-[10px]"></i> ' + badge.label + '</span></div>' +
+            langkahHtml +
+            '<div class="pt-4 md:pt-5 border-t border-gray-100"><div class="rounded-xl bg-gray-50 border border-gray-200 p-4"><h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2"><i class="far fa-file-lines text-gray-400"></i> Deskripsi Pekerjaan</h4><p class="text-sm leading-7 text-gray-600 whitespace-pre-wrap">' + (p.deskripsi || '').replace(/</g, '&lt;') + '</p></div></div>' +
+            photoHtml + catatanHtml +
+            '<div class="pt-4 md:pt-5 border-t border-gray-100">' + actionHtml + '</div></div>';
+    }
+
+    function loadFilteredProgress(siswaId) {
+        var weekVal = $('#weekFilter-' + siswaId).val();
+        var taskVal = $('#taskFilter-' + siswaId).val();
+
+        var placeholder = $('#filter-placeholder-' + siswaId);
+        var loading = $('#filter-loading-' + siswaId);
+        var empty = $('#filter-empty-' + siswaId);
+        var result = $('#filter-result-' + siswaId);
+
+        if (!weekVal || !taskVal) {
+            placeholder.removeClass('hidden');
+            loading.addClass('hidden');
+            empty.addClass('hidden');
+            result.addClass('hidden').html('');
+            return;
+        }
+
+        placeholder.addClass('hidden');
+        loading.removeClass('hidden');
+        empty.addClass('hidden');
+        result.addClass('hidden').html('');
+
+        $.ajax({
+            url: BASE_URL + '/guru/jurnal-pkl/filtered-progress/' + siswaId,
+            type: 'GET',
+            data: { week: weekVal, task_id: taskVal },
+            dataType: 'json',
+            success: function(response) {
+                loading.addClass('hidden');
+                if (response.success && response.data.length > 0) {
+                    var html = '<h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 mb-2"><i class="fas fa-calendar-day text-xs"></i> Riwayat Progress Harian</h4>';
+                    response.data.forEach(function(p) {
+                        html += renderProgressCard(p, siswaId);
+                    });
+                    result.html(html).removeClass('hidden');
+                } else {
+                    empty.removeClass('hidden');
+                }
+            },
+            error: function() {
+                loading.addClass('hidden');
+                empty.removeClass('hidden');
+            }
+        });
+    }
+
+    function loadTasks(siswaId, week) {
+        var taskFilter = $('#taskFilter-' + siswaId);
+
+        // Show loading state
+        if (taskFilter.data('select2')) {
+            taskFilter.select2('destroy');
+        }
+        taskFilter.html('<option value="">Memuat task...</option>').prop('disabled', true);
+        taskFilter.select2({
+            placeholder: 'Memuat task...',
+            width: '100%',
+            dropdownAutoWidth: true,
+            minimumResultsForSearch: -1
+        });
+
+        $.ajax({
+            url: BASE_URL + '/guru/jurnal-pkl/tasks/' + siswaId,
+            type: 'GET',
+            data: { week: week },
+            dataType: 'json',
+            success: function(response) {
+                // Destroy loading state
+                taskFilter.select2('destroy');
+                taskFilter.html('<option value="">-- Pilih Task --</option>');
+
+                if (response.success && response.data.length > 0) {
+                    response.data.forEach(function(task) {
+                        var label = task.judul;
+                        if (task.tanggal) {
+                            label += ' (' + formatIndoDate(task.tanggal) + ')';
+                        }
+                        taskFilter.append('<option value="' + task.id + '">' + label + '</option>');
+                    });
+                }
+
+                taskFilter.prop('disabled', false);
+                taskFilter.select2({
+                    placeholder: '-- Pilih Task --',
+                    width: '100%',
+                    dropdownAutoWidth: true
+                });
+            },
+            error: function() {
+                taskFilter.select2('destroy');
+                taskFilter.html('<option value="">-- Pilih Task --</option>').prop('disabled', true);
+                taskFilter.select2({
+                    placeholder: '-- Pilih Task --',
+                    width: '100%',
+                    dropdownAutoWidth: true,
+                    minimumResultsForSearch: -1
+                });
+            }
+        });
+    }
+
+    function loadWeekInfo(siswaId) {
+        $.ajax({
+            url: BASE_URL + '/guru/jurnal-pkl/week-info',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.success && response.data.length > 0) {
+                    var weekFilter = $('#weekFilter-' + siswaId);
+                    response.data.forEach(function(week) {
+                        weekFilter.append('<option value="' + week.week + '">' + week.label + '</option>');
+                    });
+                    weekFilter.select2({
+                        placeholder: '-- Pilih Minggu --',
+                        width: '100%',
+                        dropdownAutoWidth: true
+                    });
+                }
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        $('.week-filter').on('change', function() {
+            var siswaId = $(this).data('siswa-id');
+            var taskFilter = $('#taskFilter-' + siswaId);
+            var weekVal = $(this).val();
+
+            if (weekVal) {
+                loadTasks(siswaId, weekVal);
+            } else {
+                // Reset task filter
+                if (taskFilter.data('select2')) {
+                    taskFilter.select2('destroy');
+                }
+                taskFilter.html('<option value="">-- Pilih Task --</option>').prop('disabled', true);
+                taskFilter.select2({
+                    placeholder: '-- Pilih Task --',
+                    width: '100%',
+                    dropdownAutoWidth: true
+                });
+            }
+
+            $('#filter-placeholder-' + siswaId).removeClass('hidden');
+            $('#filter-loading-' + siswaId).addClass('hidden');
+            $('#filter-empty-' + siswaId).addClass('hidden');
+            $('#filter-result-' + siswaId).addClass('hidden').html('');
+        });
+
+        $('.task-filter').on('change', function() {
+            var siswaId = $(this).data('siswa-id');
+            loadFilteredProgress(siswaId);
+        });
     });
 </script>
 <?= $this->endSection() ?>

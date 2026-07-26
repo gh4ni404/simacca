@@ -275,6 +275,9 @@ $routes->group('guru', ['filter' => 'role:guru_mapel,wakakur'], function ($route
     $routes->post('jurnal-pkl/verify/(:num)', 'Guru\PklController::verify/$1');
     $routes->post('jurnal-pkl/batal-verifikasi/(:num)', 'Guru\PklController::cancelVerification/$1');
     $routes->get('jurnal-pkl/detail/(:num)', 'Guru\PklController::detail/$1');
+    $routes->get('jurnal-pkl/tasks/(:num)', 'Guru\PklController::getTasksBySiswa/$1');
+    $routes->get('jurnal-pkl/filtered-progress/(:num)', 'Guru\PklController::getFilteredProgress/$1');
+    $routes->get('jurnal-pkl/week-info', 'Guru\PklController::getWeekInfo');
 
     // Absensi PKL (Pembimbing)
     $routes->get('absensi-pkl', 'Guru\AbsensiPklController::index');
@@ -379,6 +382,9 @@ $routes->group('instruktur', ['filter' => 'role:instruktur'], function ($routes)
     $routes->post('jurnal-pkl/verifikasi-progress/(:num)', 'Instruktur\JurnalPklController::verifyProgress/$1');
     $routes->post('jurnal-pkl/batal-verifikasi-progress/(:num)', 'Instruktur\JurnalPklController::cancelVerifikasiProgress/$1');
     $routes->get('jurnal-pkl/semua-progress', 'Instruktur\JurnalPklController::allProgress');
+    $routes->get('jurnal-pkl/tasks/(:num)', 'Instruktur\JurnalPklController::getTasksBySiswa/$1');
+    $routes->get('jurnal-pkl/filtered-progress/(:num)', 'Instruktur\JurnalPklController::getFilteredProgress/$1');
+    $routes->get('jurnal-pkl/week-info', 'Instruktur\JurnalPklController::getWeekInfo');
 
     // Task Template (Master Task)
     $routes->get('task-template', 'Instruktur\TaskTemplateController::index');
