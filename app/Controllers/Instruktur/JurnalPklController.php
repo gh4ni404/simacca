@@ -439,7 +439,25 @@ class JurnalPklController extends BaseController
 
         $sql .= " GROUP BY pt.id, pt.judul ORDER BY tanggal ASC";
 
+        // Add status_label based on whether catatan_instruktur exists
         $tasks = $db->query($sql, $params)->getResultArray();
+        foreach ($tasks as &$task) {
+            $progressSql = "
+                SELECT 
+                    SUM(CASE WHEN pp.catatan_instruktur IS NOT NULL AND pp.catatan_instruktur != '' THEN 1 ELSE 0 END) AS ada_catatan,
+                    COUNT(*) AS total
+                FROM pkl_progress pp
+                WHERE pp.task_id = ? AND pp.deleted_at IS NULL
+            ";
+            $row = $db->query($progressSql, [$task['id']])->getRowArray();
+
+            if ($row && $row['ada_catatan'] > 0) {
+                $task['status_label'] = 'Sudah Ada Catatan';
+            } else {
+                $task['status_label'] = 'Belum Ada Catatan';
+            }
+        }
+        unset($task);
 
         return $this->response->setJSON(['success' => true, 'data' => $tasks]);
     }

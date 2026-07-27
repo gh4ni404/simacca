@@ -652,6 +652,9 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
                         if (task.tanggal) {
                             label = formatIndoDate(task.tanggal) + ' - ' + task.judul;
                         }
+                        if (task.status_label) {
+                            label += ' [' + task.status_label + ']';
+                        }
                         taskFilter.append('<option value="' + task.id + '">' + label + '</option>');
                     });
                 }
