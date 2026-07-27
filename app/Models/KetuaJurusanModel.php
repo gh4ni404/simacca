@@ -161,7 +161,7 @@ class KetuaJurusanModel extends Model
             'total_progress' => 0,
             'draft' => 0,
             'submitted' => 0,
-            'verified_by_instruktur' => 0,
+            'verified' => 0,
             'approved' => 0,
             'revision' => 0,
         ];
@@ -187,7 +187,7 @@ class KetuaJurusanModel extends Model
 
             $grouped[$siswaId]['progress'][] = $row;
 
-            if (in_array($row['status'], ['submitted', 'draft', 'verified_by_instruktur'])) {
+            if (in_array($row['status'], ['submitted', 'draft', 'verified'])) {
                 $grouped[$siswaId]['pending_count']++;
             }
         }
@@ -280,7 +280,7 @@ class KetuaJurusanModel extends Model
             'total_progress' => 0,
             'draft' => 0,
             'submitted' => 0,
-            'verified_by_instruktur' => 0,
+            'verified' => 0,
             'approved' => 0,
             'revision' => 0,
             'persentase_approval' => 0,
@@ -297,7 +297,7 @@ class KetuaJurusanModel extends Model
                     COUNT(pp.id) AS total_progress,
                     SUM(CASE WHEN pp.status = 'draft' THEN 1 ELSE 0 END) AS draft,
                     SUM(CASE WHEN pp.status = 'submitted' THEN 1 ELSE 0 END) AS submitted,
-                    SUM(CASE WHEN pp.status = 'verified_by_instruktur' THEN 1 ELSE 0 END) AS verified_by_instruktur,
+                    SUM(CASE WHEN pp.status = 'verified' THEN 1 ELSE 0 END) AS verified,
                     SUM(CASE WHEN pp.status = 'approved' THEN 1 ELSE 0 END) AS approved,
                     SUM(CASE WHEN pp.status = 'revision' THEN 1 ELSE 0 END) AS revision
                 FROM pkl_progress pp
@@ -311,7 +311,7 @@ class KetuaJurusanModel extends Model
             $stats['total_progress'] = (int) $result['total_progress'];
             $stats['draft'] = (int) $result['draft'];
             $stats['submitted'] = (int) $result['submitted'];
-            $stats['verified_by_instruktur'] = (int) $result['verified_by_instruktur'];
+            $stats['verified'] = (int) $result['verified'];
             $stats['approved'] = (int) $result['approved'];
             $stats['revision'] = (int) $result['revision'];
 

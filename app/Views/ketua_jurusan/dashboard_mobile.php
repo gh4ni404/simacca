@@ -73,7 +73,7 @@
             <div class="text-xs text-gray-600">Menunggu</div>
         </div>
         <div class="bg-blue-50 rounded-lg p-3 text-center border border-blue-200">
-            <div class="text-xl font-bold text-blue-600"><?= $stats['verified_by_instruktur'] ?></div>
+            <div class="text-xl font-bold text-blue-600"><?= $stats['verified'] ?></div>
             <div class="text-xs text-gray-600">Verified Instruktur</div>
         </div>
         <div class="bg-orange-50 rounded-lg p-3 text-center border border-orange-200">

@@ -420,7 +420,7 @@
                         <!-- Setujui -->
                         <form action="<?= base_url('instruktur/jurnal-pkl/verifikasi-progress/' . $p['id']); ?>" method="POST">
                             <?= csrf_field(); ?>
-                            <input type="hidden" name="status" value="verified_by_instruktur">
+                            <input type="hidden" name="status" value="approved">
                             <div class="flex gap-2">
                                 <input type="text" name="catatan_instruktur" required
                                        placeholder="Tulis catatan persetujuan..."

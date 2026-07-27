@@ -335,7 +335,7 @@ class PklService extends BaseService
 
     // ─── Verification ────────────────────────────────────
 
-    public function verify(int $id, int $userId, string $status, ?string $catatan = null): array
+    public function verify(int $id, int $userId, string $status, ?string $catatan = null, string $role = 'pembimbing'): array
     {
         try {
             $this->db->transStart();
@@ -345,15 +345,118 @@ class PklService extends BaseService
                 return $this->error('Progress tidak ditemukan', 404);
             }
 
-            if ($progress['status'] !== 'submitted' && $progress['status'] !== 'draft' && $progress['status'] !== 'verified_by_instruktur') {
-                return $this->error('Progress ini sudah diverifikasi sebelumnya');
+            if (!in_array($status, ['approved', 'revision'])) {
+                return $this->error('Status verifikasi tidak valid');
             }
 
+            $verifiedByField = ($role === 'instruktur') ? 'instruktur_verified_by' : 'verified_by';
+            $verifiedAtField = ($role === 'instruktur') ? 'instruktur_verified_at' : 'verified_at';
+            $catatanField = ($role === 'instruktur') ? 'catatan_instruktur' : 'catatan_pembimbing';
+
+            // ── Revision ──
+            if ($status === 'revision') {
+                $data = [
+                    'status' => 'revision',
+                    'revision_requested_by' => $role,
+                    $catatanField => $catatan ?? '',
+                    // Clear this party's verification when requesting revision
+                    $verifiedByField => null,
+                    $verifiedAtField => null,
+                ];
+                if (!empty($progress['revision_requested_by']) && $progress['revision_requested_by'] !== $role) {
+                    $data['revision_requested_by'] = 'both';
+                }
+
+                $success = $this->progressModel->update($id, $data);
+                if (!$success) {
+                    $this->db->transRollback();
+                    return $this->error('Gagal merevisi progress');
+                }
+
+                $task = $this->db->table('pkl_tasks')->where('id', $progress['task_id'])->where('deleted_at IS NULL', null, false)->get()->getRowArray();
+                if ($task && $task['status'] === 'completed') {
+                    $this->db->table('pkl_tasks')->where('id', $progress['task_id'])->update(['status' => 'active']);
+                }
+
+                $this->db->transComplete();
+                return $this->success(['id' => $id, 'message' => 'Progress direvisi']);
+            }
+
+            // ── Approval (status === 'approved') ──
+            if (!empty($progress[$verifiedByField])) {
+                return $this->error('Progress ini sudah diverifikasi oleh ' . $role);
+            }
+
+            // Handle revision status specially
+            if ($progress['status'] === 'revision') {
+                $revisionRequestedBy = $progress['revision_requested_by'];
+
+                // If this party didn't request revision (and it's not 'both'),
+                // save their verification but keep status as 'revision'
+                if ($revisionRequestedBy !== $role && $revisionRequestedBy !== 'both') {
+                    $data = [
+                        $verifiedByField => $userId,
+                        $verifiedAtField => date('Y-m-d H:i:s'),
+                        $catatanField => $catatan ?? '',
+                    ];
+
+                    $success = $this->progressModel->update($id, $data);
+                    if (!$success) {
+                        $this->db->transRollback();
+                        return $this->error('Gagal memverifikasi progress');
+                    }
+
+                    $this->db->transComplete();
+                    if ($this->db->transStatus() === false) {
+                        return $this->error('Gagal memverifikasi progress');
+                    }
+
+                    return $this->success(['id' => $id, 'message' => 'Verifikasi disimpan. Menunggu revisi dari siswa.']);
+                }
+
+                // This party requested revision and is now approving the revision
+                // Check if the other party has verified
+                $otherVerified = ($role === 'instruktur')
+                    ? (!empty($progress['verified_by']) && !empty($progress['catatan_pembimbing']))
+                    : (!empty($progress['instruktur_verified_by']) && !empty($progress['catatan_instruktur']));
+
+                $newStatus = $otherVerified ? 'approved' : 'verified';
+
+                $data = [
+                    'status' => $newStatus,
+                    $verifiedByField => $userId,
+                    $verifiedAtField => date('Y-m-d H:i:s'),
+                    $catatanField => $catatan ?? '',
+                    'revision_requested_by' => null,
+                ];
+
+                $success = $this->progressModel->update($id, $data);
+                if (!$success) {
+                    $this->db->transRollback();
+                    return $this->error('Gagal memverifikasi progress');
+                }
+
+                $this->db->transComplete();
+                if ($this->db->transStatus() === false) {
+                    return $this->error('Gagal memverifikasi progress');
+                }
+
+                return $this->success(['id' => $id, 'message' => 'Progress berhasil diverifikasi']);
+            }
+
+            // Normal approval flow (not revision status)
+            $pembimbingVerified = !empty($progress['verified_by']) && !empty($progress['catatan_pembimbing']);
+            $instrukturVerified = !empty($progress['instruktur_verified_by']) && !empty($progress['catatan_instruktur']);
+
+            $verifiedCount = ($pembimbingVerified ? 1 : 0) + ($instrukturVerified ? 1 : 0);
+            $newStatus = ($verifiedCount >= 1) ? 'approved' : 'verified';
+
             $data = [
-                'status' => $status,
-                'verified_by' => $userId,
-                'verified_at' => date('Y-m-d H:i:s'),
-                'catatan_pembimbing' => $catatan ?? '',
+                'status' => $newStatus,
+                $verifiedByField => $userId,
+                $verifiedAtField => date('Y-m-d H:i:s'),
+                $catatanField => $catatan ?? '',
+                'revision_requested_by' => null,
             ];
 
             $success = $this->progressModel->update($id, $data);
@@ -362,19 +465,12 @@ class PklService extends BaseService
                 return $this->error('Gagal memverifikasi progress');
             }
 
-            if ($status === 'revision') {
-                $task = $this->db->table('pkl_tasks')->where('id', $progress['task_id'])->where('deleted_at IS NULL', null, false)->get()->getRowArray();
-                if ($task && $task['status'] === 'completed') {
-                    $this->db->table('pkl_tasks')->where('id', $progress['task_id'])->update(['status' => 'active']);
-                }
-            }
-
             $this->db->transComplete();
             if ($this->db->transStatus() === false) {
                 return $this->error('Gagal memverifikasi progress');
             }
 
-            return $this->success(['id' => $id, 'message' => 'Progress berhasil ' . $status]);
+            return $this->success(['id' => $id, 'message' => 'Progress berhasil diverifikasi']);
         } catch (\Exception $e) {
             $this->db->transRollback();
             $this->logError('verify', $e);
@@ -382,7 +478,7 @@ class PklService extends BaseService
         }
     }
 
-    public function cancelVerification(int $id): array
+    public function cancelVerification(int $id, string $role = 'pembimbing'): array
     {
         try {
             $this->db->transStart();
@@ -392,16 +488,73 @@ class PklService extends BaseService
                 return $this->error('Progress tidak ditemukan', 404);
             }
 
-            if ($progress['status'] === 'draft') {
-                return $this->error('Progress ini belum diverifikasi');
+            $verifiedByField = ($role === 'instruktur') ? 'instruktur_verified_by' : 'verified_by';
+            $verifiedAtField = ($role === 'instruktur') ? 'instruktur_verified_at' : 'verified_at';
+            $catatanField = ($role === 'instruktur') ? 'catatan_instruktur' : 'catatan_pembimbing';
+
+            $hasVerified = !empty($progress[$verifiedByField]);
+            $hasRequestedRevision = ($progress['revision_requested_by'] === $role || $progress['revision_requested_by'] === 'both');
+
+            if (!$hasVerified && !$hasRequestedRevision) {
+                return $this->error('Tidak ada verifikasi atau revisi yang dapat dibatalkan');
             }
 
+            // ── Cancel revision request ──
+            if ($hasRequestedRevision && !$hasVerified) {
+                if ($progress['revision_requested_by'] === 'both') {
+                    $newRevisionBy = $role;
+                } else {
+                    $newRevisionBy = null;
+                }
+
+                $data = ['revision_requested_by' => $newRevisionBy];
+
+                $otherVerified = ($role === 'instruktur')
+                    ? (!empty($progress['verified_by']) && !empty($progress['catatan_pembimbing']))
+                    : (!empty($progress['instruktur_verified_by']) && !empty($progress['catatan_instruktur']));
+                $otherRequestedRevision = ($role === 'instruktur')
+                    ? ($progress['revision_requested_by'] === 'pembimbing')
+                    : ($progress['revision_requested_by'] === 'instruktur');
+
+                if ($otherVerified) {
+                    $data['status'] = 'verified';
+                } elseif (!$otherRequestedRevision && $newRevisionBy === null) {
+                    $data['status'] = 'submitted';
+                }
+
+                $success = $this->progressModel->update($id, $data);
+                if (!$success) {
+                    $this->db->transRollback();
+                    return $this->error('Gagal membatalkan revisi');
+                }
+
+                $this->db->transComplete();
+                return $this->success(['message' => 'Revisi berhasil dibatalkan']);
+            }
+
+            // ── Cancel verification ──
             $data = [
-                'status' => $progress['instruktur_verified_by'] ? 'verified_by_instruktur' : 'submitted',
-                'verified_by' => null,
-                'verified_at' => null,
-                'catatan_pembimbing' => '',
+                $verifiedByField => null,
+                $verifiedAtField => null,
+                $catatanField => '',
             ];
+
+            $otherVerified = ($role === 'instruktur')
+                ? (!empty($progress['verified_by']) && !empty($progress['catatan_pembimbing']))
+                : (!empty($progress['instruktur_verified_by']) && !empty($progress['catatan_instruktur']));
+
+            $otherRequestedRevision = ($role === 'instruktur')
+                ? ($progress['revision_requested_by'] === 'pembimbing')
+                : ($progress['revision_requested_by'] === 'instruktur');
+
+            if ($otherVerified) {
+                $data['status'] = 'verified';
+            } elseif ($otherRequestedRevision) {
+                // Other party has an active revision request — keep revision status
+                $data['status'] = 'revision';
+            } else {
+                $data['status'] = 'submitted';
+            }
 
             $success = $this->progressModel->update($id, $data);
             if (!$success) {
@@ -537,7 +690,7 @@ class PklService extends BaseService
                         COUNT(pp.id) AS total_progress,
                         SUM(CASE WHEN pp.status = 'draft' THEN 1 ELSE 0 END) AS draft,
                         SUM(CASE WHEN pp.status = 'submitted' THEN 1 ELSE 0 END) AS submitted,
-                        SUM(CASE WHEN pp.status = 'verified_by_instruktur' THEN 1 ELSE 0 END) AS verified_by_instruktur,
+                        SUM(CASE WHEN pp.status = 'verified' THEN 1 ELSE 0 END) AS verified,
                         SUM(CASE WHEN pp.status = 'approved' THEN 1 ELSE 0 END) AS approved,
                         SUM(CASE WHEN pp.status = 'revision' THEN 1 ELSE 0 END) AS revision,
                         SUM(CASE WHEN pp.status = 'approved'
@@ -553,7 +706,7 @@ class PklService extends BaseService
             $result = $db->query($sql, [$siswaId])->getRowArray();
             return $this->success($result ?: [
                 'total_tasks' => 0, 'total_progress' => 0,
-                'draft' => 0, 'submitted' => 0, 'verified_by_instruktur' => 0, 'approved' => 0, 'revision' => 0, 'fully_verified' => 0,
+                'draft' => 0, 'submitted' => 0, 'verified' => 0, 'approved' => 0, 'revision' => 0, 'fully_verified' => 0,
             ]);
         } catch (\Exception $e) {
             $this->logError('getStatistics', $e);

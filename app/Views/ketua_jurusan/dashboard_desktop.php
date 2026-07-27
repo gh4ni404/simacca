@@ -149,10 +149,10 @@
                     </div>
                 </div>
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
-                    <div class="text-3xl font-bold text-blue-600 mb-1"><?= $stats['verified_by_instruktur'] ?></div>
+                    <div class="text-3xl font-bold text-blue-600 mb-1"><?= $stats['verified'] ?></div>
                     <div class="text-sm text-gray-600 font-medium">Verified Instruktur</div>
                     <div class="w-full bg-blue-200 rounded-full h-2 mt-2">
-                        <div class="bg-blue-500 h-2 rounded-full" style="width: <?= $stats['total_progress'] > 0 ? round(($stats['verified_by_instruktur'] / $stats['total_progress']) * 100) : 0 ?>%"></div>
+                        <div class="bg-blue-500 h-2 rounded-full" style="width: <?= $stats['total_progress'] > 0 ? round(($stats['verified'] / $stats['total_progress']) * 100) : 0 ?>%"></div>
                     </div>
                 </div>
                 <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 text-center">
@@ -300,14 +300,14 @@
                                     'approved' => 'bg-green-100 text-green-800',
                                     'submitted' => 'bg-yellow-100 text-yellow-800',
                                     'revision' => 'bg-red-100 text-red-800',
-                                    'verified_by_instruktur' => 'bg-blue-100 text-blue-800',
+                                    'verified' => 'bg-blue-100 text-blue-800',
                                     default => 'bg-gray-100 text-gray-800',
                                 };
                                 $statusLabel = match($jurnal['status']) {
                                     'approved' => 'Disetujui',
                                     'submitted' => 'Menunggu',
                                     'revision' => 'Revisi',
-                                    'verified_by_instruktur' => 'Verified',
+                                    'verified' => 'Terverifikasi',
                                     default => ucfirst($jurnal['status']),
                                 };
                                 ?>

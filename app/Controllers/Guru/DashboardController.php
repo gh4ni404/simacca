@@ -495,13 +495,13 @@ class DashboardController extends BaseController
             ->where('YEAR(absensi_pkl.tanggal)', $currentYear)
             ->countAllResults();
 
-        // Get pending jurnal (submitted/verified_by_instruktur status)
+        // Get pending jurnal (submitted/verified status)
         $pendingJurnal = $this->pklProgressModel
             ->join('pkl_tasks', 'pkl_tasks.id = pkl_progress.task_id AND pkl_tasks.deleted_at IS NULL')
             ->join('siswa_pkl', 'siswa_pkl.siswa_id = pkl_tasks.siswa_id AND siswa_pkl.deleted_at IS NULL')
             ->join('pembimbing_pkl', 'pembimbing_pkl.id = siswa_pkl.pembimbing_pkl_id AND pembimbing_pkl.deleted_at IS NULL')
             ->where('pembimbing_pkl.guru_id', $guruId)
-            ->whereIn('pkl_progress.status', ['submitted', 'verified_by_instruktur'])
+            ->whereIn('pkl_progress.status', ['submitted', 'verified'])
             ->countAllResults();
 
         // Get kehadiran percentage
@@ -564,7 +564,7 @@ class DashboardController extends BaseController
             ->join('tempat_pkl', 'tempat_pkl.id = siswa_pkl.tempat_pkl_id AND tempat_pkl.deleted_at IS NULL', 'left')
             ->join('pembimbing_pkl', 'pembimbing_pkl.id = siswa_pkl.pembimbing_pkl_id AND pembimbing_pkl.deleted_at IS NULL')
             ->where('pembimbing_pkl.guru_id', $guruId)
-            ->whereIn('pkl_progress.status', ['submitted', 'verified_by_instruktur', 'revision'])
+            ->whereIn('pkl_progress.status', ['submitted', 'verified', 'revision'])
             ->orderBy('pkl_progress.tanggal', 'DESC')
             ->limit(5)
             ->findAll();

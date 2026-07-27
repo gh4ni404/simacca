@@ -48,14 +48,14 @@
                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium
                         <?= match($progress['status']) {
                             'approved' => 'bg-green-100 text-green-700',
-                            'verified_by_instruktur' => 'bg-blue-100 text-blue-700',
+                            'verified' => 'bg-blue-100 text-blue-700',
                             'submitted' => 'bg-yellow-100 text-yellow-700',
                             'revision' => 'bg-orange-100 text-orange-700',
                             default => 'bg-gray-100 text-gray-600'
                         } ?>">
                         <?= match($progress['status']) {
                             'approved' => '<i class="fas fa-check-circle mr-1"></i>Disetujui',
-                            'verified_by_instruktur' => '<i class="fas fa-check-double mr-1"></i>Diverifikasi Instruktur',
+                            'verified' => '<i class="fas fa-check-double mr-1"></i>Terverifikasi',
                             'submitted' => '<i class="fas fa-clock mr-1"></i>Menunggu Catatan',
                             'revision' => '<i class="fas fa-edit mr-1"></i>Revisi',
                             default => '<i class="fas fa-pen mr-1"></i>Draft'

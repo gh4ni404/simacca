@@ -60,9 +60,9 @@
                         <i class="far fa-calendar text-gray-400 text-[10px]"></i>
                         <?= date('d M Y', strtotime($p['tanggal'])); ?>
                     </span>
-                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-yellow-700 bg-yellow-50 border border-yellow-200 px-2 py-1 rounded-lg">
-                        <span class="w-1.5 h-1.5 bg-yellow-400 rounded-full animate-pulse"></span>
-                        Menunggu
+                    <span class="inline-flex items-center gap-1 text-[10px] font-bold <?= $p['status'] === 'verified' ? 'text-blue-700 bg-blue-50 border-blue-200' : 'text-yellow-700 bg-yellow-50 border-yellow-200'; ?> border px-2 py-1 rounded-lg">
+                        <span class="w-1.5 h-1.5 <?= $p['status'] === 'verified' ? 'bg-blue-400' : 'bg-yellow-400'; ?> rounded-full animate-pulse"></span>
+                        <?= $p['status'] === 'verified' ? 'Terverifikasi' : 'Menunggu'; ?>
                     </span>
                 </div>
             </div>
@@ -142,7 +142,7 @@
 
                     <form action="<?= base_url('instruktur/jurnal-pkl/verifikasi-progress/' . $p['id']); ?>" method="POST">
                         <?= csrf_field(); ?>
-                        <input type="hidden" name="status" value="verified_by_instruktur">
+                        <input type="hidden" name="status" value="approved">
                         <div class="flex gap-2">
                              <input type="text" name="catatan_instruktur" required
                                     placeholder="Tulis catatan persetujuan..."

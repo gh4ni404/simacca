@@ -3,6 +3,7 @@
 namespace App\Controllers\Instruktur;
 
 use App\Controllers\BaseController;
+use App\Services\PklService;
 use App\Models\InstrukturPklModel;
 use App\Models\SiswaPklModel;
 use App\Models\PklTaskModel;
@@ -16,6 +17,7 @@ class JurnalPklController extends BaseController
     protected $taskModel;
     protected $progressModel;
     protected $pembimbingPklModel;
+    protected $pklService;
 
     public function __construct()
     {
@@ -24,6 +26,7 @@ class JurnalPklController extends BaseController
         $this->taskModel = new PklTaskModel();
         $this->progressModel = new PklProgressModel();
         $this->pembimbingPklModel = new PembimbingPklModel();
+        $this->pklService = new PklService();
     }
 
     private function getInstruktur()
@@ -60,7 +63,7 @@ class JurnalPklController extends BaseController
                        COUNT(DISTINCT pt.id) AS total_tasks,
                        COUNT(pp.id) AS total_progress,
                        SUM(CASE WHEN pp.status = 'submitted' THEN 1 ELSE 0 END) AS submitted,
-                       SUM(CASE WHEN pp.status = 'verified_by_instruktur' THEN 1 ELSE 0 END) AS verified_by_instruktur,
+                       SUM(CASE WHEN pp.status = 'verified' THEN 1 ELSE 0 END) AS verified,
                        SUM(CASE WHEN pp.status = 'approved' THEN 1 ELSE 0 END) AS approved,
                        SUM(CASE WHEN pp.status = 'revision' THEN 1 ELSE 0 END) AS revision,
                        MAX(pp.tanggal) AS last_activity
@@ -85,7 +88,7 @@ class JurnalPklController extends BaseController
                 LEFT JOIN kelas k ON k.id = s.kelas_id
                 LEFT JOIN users ON users.id = s.user_id
                 WHERE sp.tempat_pkl_id = ?
-                  AND pp.status = 'submitted'
+                  AND ((pp.status = 'submitted') OR (pp.status = 'verified' AND pp.instruktur_verified_by IS NULL))
                   AND pp.deleted_at IS NULL
                   AND pt.deleted_at IS NULL
                 ORDER BY pp.tanggal ASC
@@ -143,7 +146,7 @@ class JurnalPklController extends BaseController
             LEFT JOIN kelas k ON k.id = s.kelas_id
             LEFT JOIN users ON users.id = s.user_id
             WHERE sp.tempat_pkl_id = ?
-              AND pp.status = 'submitted'
+              AND ((pp.status = 'submitted') OR (pp.status = 'verified' AND pp.instruktur_verified_by IS NULL))
               AND pp.deleted_at IS NULL
             ORDER BY pp.tanggal ASC
         ", [$tahunAjaran, $instruktur['tempat_pkl_id']])->getResultArray();
@@ -182,7 +185,7 @@ class JurnalPklController extends BaseController
             SELECT pt.*, pc.nama AS kategori_nama,
                    COUNT(pp.id) AS total_progress,
                    SUM(CASE WHEN pp.status = 'approved' THEN 1 ELSE 0 END) AS approved_count,
-                   SUM(CASE WHEN pp.status = 'verified_by_instruktur' THEN 1 ELSE 0 END) AS verified_count
+                   SUM(CASE WHEN pp.status = 'verified' THEN 1 ELSE 0 END) AS verified_count
             FROM pkl_tasks pt
             LEFT JOIN pkl_categories pc ON pc.id = pt.kategori_id
             LEFT JOIN pkl_progress pp ON pp.task_id = pt.id AND pp.deleted_at IS NULL
@@ -298,7 +301,7 @@ class JurnalPklController extends BaseController
         $status = $this->request->getPost('status');
         $catatan = trim($this->request->getPost('catatan_instruktur') ?? '');
 
-        if (!in_array($status, ['verified_by_instruktur', 'revision'])) {
+        if (!in_array($status, ['approved', 'revision'])) {
             session()->setFlashdata('error', 'Status verifikasi tidak valid');
             return redirect()->back();
         }
@@ -331,33 +334,22 @@ class JurnalPklController extends BaseController
             return redirect()->to('/instruktur/jurnal-pkl');
         }
 
-        if (!in_array($progress['status'], ['submitted', 'approved'])) {
-            session()->setFlashdata('error', 'Progress ini sudah diverifikasi sebelumnya');
+        if (!in_array($progress['status'], ['submitted', 'verified', 'approved', 'revision'])) {
+            session()->setFlashdata('error', 'Progress ini tidak dapat diverifikasi');
             return redirect()->back();
         }
 
         $userId = session()->get('user_id');
-        $updateData = [
-            'instruktur_verified_by' => $userId,
-            'instruktur_verified_at' => date('Y-m-d H:i:s'),
-            'catatan_instruktur' => $catatan,
-        ];
 
-        if ($progress['status'] !== 'approved' || $status === 'revision') {
-            $updateData['status'] = $status;
-        }
+        $result = $this->pklService->verify($progressId, $userId, $status, $catatan, 'instruktur');
 
-        $this->progressModel->update($progressId, $updateData);
-
-        if ($status === 'revision') {
-            $task = $db->table('pkl_tasks')->where('id', $progress['task_id'])->where('deleted_at IS NULL', null, false)->get()->getRowArray();
-            if ($task && $task['status'] === 'completed') {
-                $db->table('pkl_tasks')->where('id', $progress['task_id'])->update(['status' => 'active']);
-            }
+        if (!$result['success']) {
+            session()->setFlashdata('error', $result['message']);
+            return redirect()->back();
         }
 
         $messages = [
-            'verified_by_instruktur' => 'Progress berhasil diverifikasi',
+            'approved' => 'Progress berhasil diverifikasi',
             'revision' => 'Progress direvisi',
         ];
         session()->setFlashdata('success', $messages[$status]);
@@ -389,24 +381,14 @@ class JurnalPklController extends BaseController
             return redirect()->to('/instruktur/jurnal-pkl');
         }
 
-        if (!in_array($progress['status'], ['verified_by_instruktur', 'revision']) && !$progress['instruktur_verified_by']) {
-            session()->setFlashdata('error', 'Progress ini belum diverifikasi oleh instruktur');
-            return redirect()->back();
+        $result = $this->pklService->cancelVerification($progressId, 'instruktur');
+
+        if ($result['success']) {
+            session()->setFlashdata('success', 'Verifikasi progress berhasil dibatalkan');
+        } else {
+            session()->setFlashdata('error', $result['message']);
         }
 
-        $updateData = [
-            'instruktur_verified_by' => null,
-            'instruktur_verified_at' => null,
-            'catatan_instruktur' => '',
-        ];
-
-        if ($progress['status'] !== 'approved') {
-            $updateData['status'] = 'submitted';
-        }
-
-        $this->progressModel->update($progressId, $updateData);
-
-        session()->setFlashdata('success', 'Verifikasi progress berhasil dibatalkan');
         return redirect()->back();
     }
 
@@ -547,7 +529,7 @@ class JurnalPklController extends BaseController
                 COUNT(pp.id) AS total_progress,
                 SUM(CASE WHEN pp.status = 'approved' THEN 1 ELSE 0 END) AS approved,
                 SUM(CASE WHEN pp.status = 'submitted' THEN 1 ELSE 0 END) AS submitted,
-                SUM(CASE WHEN pp.status = 'verified_by_instruktur' THEN 1 ELSE 0 END) AS verified,
+                SUM(CASE WHEN pp.status = 'verified' THEN 1 ELSE 0 END) AS verified,
                 SUM(CASE WHEN pp.status = 'revision' THEN 1 ELSE 0 END) AS revision,
                 MAX(pp.tanggal) AS last_activity
             FROM siswa_pkl sp

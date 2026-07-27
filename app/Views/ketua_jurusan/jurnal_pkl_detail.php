@@ -120,7 +120,7 @@ $bulanIndo = [
                                     'approved' => 'bg-green-500',
                                     'submitted' => 'bg-yellow-500',
                                     'revision' => 'bg-red-500',
-                                    'verified_by_instruktur' => 'bg-blue-500',
+                                    'verified' => 'bg-blue-500',
                                     default => 'bg-gray-400',
                                 };
                                 ?>
@@ -136,14 +136,14 @@ $bulanIndo = [
                                         'approved' => 'bg-green-100 text-green-800',
                                         'submitted' => 'bg-yellow-100 text-yellow-800',
                                         'revision' => 'bg-red-100 text-red-800',
-                                        'verified_by_instruktur' => 'bg-blue-100 text-blue-800',
+                                        'verified' => 'bg-blue-100 text-blue-800',
                                         default => 'bg-gray-100 text-gray-800',
                                     };
                                     $statusLabel = match($prog['status']) {
                                         'approved' => 'Disetujui',
                                         'submitted' => 'Menunggu',
                                         'revision' => 'Revisi',
-                                        'verified_by_instruktur' => 'Verified Instruktur',
+                                        'verified' => 'Terverifikasi',
                                         default => ucfirst($prog['status']),
                                     };
                                     ?>

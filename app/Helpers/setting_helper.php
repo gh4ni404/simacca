@@ -177,17 +177,7 @@ if (!function_exists('get_pkl_progress_display_status')) {
     {
         $status = $progress['status'] ?? 'draft';
         if (in_array($status, ['draft', 'submitted', 'revision'])) return $status;
-
-        $pembimbingOk = $status === 'approved'
-            && !empty($progress['verified_by'])
-            && !empty($progress['catatan_pembimbing']);
-        $instrukturOk = !empty($progress['instruktur_verified_by'])
-            && !empty($progress['catatan_instruktur']);
-
-        if ($pembimbingOk && $instrukturOk) return 'completed';
-        if ($pembimbingOk) return 'pending_instruktur';
-        if ($status === 'verified_by_instruktur') return 'pending_pembimbing';
-
+        if ($status === 'verified') return 'verified';
         return $status;
     }
 }
@@ -196,7 +186,7 @@ if (!function_exists('get_pkl_status_style')) {
     function get_pkl_status_style(string $displayStatus): array
     {
         return match ($displayStatus) {
-            'completed' => [
+            'completed', 'approved' => [
                 'label' => 'Selesai',
                 'icon' => 'fa-check',
                 'color' => 'text-green-500',
@@ -204,21 +194,13 @@ if (!function_exists('get_pkl_status_style')) {
                 'icon_bg' => 'bg-green-100 text-green-600',
                 'badge_icon' => null,
             ],
-            'approved', 'pending_instruktur' => [
-                'label' => 'Proses Instruktur',
-                'icon' => 'fa-circle-check',
-                'color' => 'text-orange-500',
-                'bg' => 'bg-orange-100 text-orange-700',
-                'icon_bg' => 'bg-orange-100 text-orange-600',
-                'badge_icon' => 'fa-industry',
-            ],
-            'verified_by_instruktur', 'pending_pembimbing' => [
-                'label' => 'Proses Pembimbing',
+            'verified' => [
+                'label' => 'Terverifikasi',
                 'icon' => 'fa-check-double',
                 'color' => 'text-blue-500',
                 'bg' => 'bg-blue-100 text-blue-700',
                 'icon_bg' => 'bg-blue-100 text-blue-600',
-                'badge_icon' => 'fa-chalkboard',
+                'badge_icon' => null,
             ],
             'submitted' => [
                 'label' => 'Menunggu',
@@ -233,7 +215,7 @@ if (!function_exists('get_pkl_status_style')) {
                 'icon' => 'fa-edit',
                 'color' => 'text-red-500',
                 'bg' => 'bg-red-100 text-red-700',
-                'icon_bg' => 'bg-orange-100 text-orange-600',
+                'icon_bg' => 'bg-red-100 text-red-600',
                 'badge_icon' => null,
             ],
             default => [

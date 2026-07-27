@@ -51,7 +51,7 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
         </div>
         <div>
             <span
-                class="block text-xs font-bold text-yellow-600"><?= ($stats['submitted'] ?? 0) + ($stats['verified_by_instruktur'] ?? 0) ?></span>
+                class="block text-xs font-bold text-yellow-600"><?= ($stats['submitted'] ?? 0) + ($stats['verified'] ?? 0) ?></span>
             <span class="block text-[8px] text-gray-500 font-medium uppercase tracking-wider">Menunggu</span>
         </div>
         <div>
@@ -280,14 +280,14 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
                                         'approved' => 'bg-green-100 text-green-700',
                                         'submitted' => 'bg-yellow-100 text-yellow-700',
                                         'revision' => 'bg-red-100 text-red-700',
-                                        'verified_by_instruktur' => 'bg-indigo-100 text-indigo-700',
+                                        'verified' => 'bg-blue-100 text-blue-700',
                                         default => 'bg-gray-100 text-gray-600',
                                     };
                                     $statusLabel = match($prog['status']) {
                                         'approved' => 'Disetujui',
                                         'submitted' => 'Menunggu',
                                         'revision' => 'Revisi',
-                                        'verified_by_instruktur' => 'Verified',
+                                        'verified' => 'Terverifikasi',
                                         default => ucfirst($prog['status']),
                                     };
                                 ?>
@@ -308,7 +308,7 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
                                         'approved' => 'bg-green-500',
                                         'submitted' => 'bg-yellow-500',
                                         'revision' => 'bg-red-500',
-                                        'verified_by_instruktur' => 'bg-indigo-500',
+                                        'verified' => 'bg-blue-500',
                                         default => 'bg-gray-400',
                                     } ?>"></div>
                                     <div class="flex-grow min-w-0">
@@ -445,7 +445,7 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
 
         var badges = {
             'approved': {bg: 'bg-green-50 text-green-700 border border-green-200', icon: 'fa-check-circle'},
-            'verified_by_instruktur': {bg: 'bg-indigo-50 text-indigo-700 border border-indigo-200', icon: 'fa-check-double'},
+            'verified': {bg: 'bg-blue-50 text-blue-700 border border-blue-200', icon: 'fa-check-double'},
             'submitted': {bg: 'bg-yellow-50 text-yellow-700 border border-yellow-200', icon: 'fa-clock'},
             'revision': {bg: 'bg-orange-50 text-orange-700 border border-orange-200', icon: 'fa-edit'}
         };

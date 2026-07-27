@@ -14,6 +14,7 @@ class PklProgressModel extends Model
     protected $protectFields    = true;
     protected $allowedFields    = [
         'task_id', 'tanggal', 'deskripsi', 'langkah_kerja', 'foto', 'status',
+        'revision_requested_by',
         'catatan_pembimbing', 'catatan_instruktur',
         'verified_by', 'verified_at',
         'instruktur_verified_by', 'instruktur_verified_at',
@@ -106,7 +107,7 @@ class PklProgressModel extends Model
         $sql = "SELECT pp.tanggal,
                        COUNT(*) AS total_aktivitas,
                        SUM(CASE WHEN pp.status = 'approved' THEN 1 ELSE 0 END) AS approved,
-                       SUM(CASE WHEN pp.status = 'verified_by_instruktur' THEN 1 ELSE 0 END) AS verified_by_instruktur,
+                       SUM(CASE WHEN pp.status = 'verified' THEN 1 ELSE 0 END) AS verified,
                        SUM(CASE WHEN pp.status = 'submitted' THEN 1 ELSE 0 END) AS submitted,
                        SUM(CASE WHEN pp.status = 'revision' THEN 1 ELSE 0 END) AS revision,
                        SUM(CASE WHEN pp.status = 'draft' THEN 1 ELSE 0 END) AS draft,
@@ -153,7 +154,7 @@ class PklProgressModel extends Model
             ->join('pembimbing_pkl', 'pembimbing_pkl.id = siswa_pkl.pembimbing_pkl_id AND pembimbing_pkl.deleted_at IS NULL')
             ->where('pembimbing_pkl.guru_id', $guruId)
             ->orderBy('siswa.nama_lengkap', 'ASC')
-            ->orderBy('FIELD(pkl_progress.status, "revision", "submitted", "verified_by_instruktur", "draft", "approved")', '', false)
+            ->orderBy('FIELD(pkl_progress.status, "revision", "submitted", "verified", "draft", "approved")', '', false)
             ->orderBy('pkl_progress.tanggal', 'ASC')
             ->findAll();
 
@@ -163,7 +164,7 @@ class PklProgressModel extends Model
             'total_progress' => 0,
             'draft' => 0,
             'submitted' => 0,
-            'verified_by_instruktur' => 0,
+            'verified' => 0,
             'approved' => 0,
             'revision' => 0,
         ];
@@ -189,7 +190,7 @@ class PklProgressModel extends Model
 
             $grouped[$siswaId]['progress'][] = $row;
 
-            if ($row['status'] === 'submitted' || $row['status'] === 'draft' || $row['status'] === 'verified_by_instruktur') {
+            if ($row['status'] === 'submitted' || $row['status'] === 'draft' || $row['status'] === 'verified') {
                 $grouped[$siswaId]['pending_count']++;
             }
         }

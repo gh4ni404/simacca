@@ -67,7 +67,7 @@ class PklController extends BaseController
             return redirect()->back()->withInput();
         }
 
-        $result = $this->pklService->verify($id, $userId, $status, $catatan);
+        $result = $this->pklService->verify($id, $userId, $status, $catatan, 'pembimbing');
 
         if ($result['success']) {
             $messages = [
@@ -115,7 +115,7 @@ class PklController extends BaseController
             return redirect()->to('/access-denied')->with('error', 'Data guru nggak ketemu 🤔');
         }
 
-        $result = $this->pklService->cancelVerification($id);
+        $result = $this->pklService->cancelVerification($id, 'pembimbing');
 
         if ($result['success']) {
             session()->setFlashdata('success', 'Verifikasi progress udah dibatalkan ✓');

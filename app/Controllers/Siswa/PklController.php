@@ -699,6 +699,7 @@ class PklController extends BaseController
 
         if ($progressResult['data']['status'] === 'revision') {
             $updateData['status'] = 'submitted';
+            $updateData['revision_requested_by'] = null;
         }
 
         $result = $this->pklService->updateProgress($id, $updateData);

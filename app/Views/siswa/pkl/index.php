@@ -411,7 +411,7 @@ helper('setting');
                     <p class="text-[11px] font-bold text-gray-500 uppercase mb-1">Antrean</p>
                     <div class="flex items-end justify-between">
                         <span
-                            class="text-2xl font-bold text-gray-900 leading-none pkl-stat-number"><?= str_pad(($stats['submitted'] ?? 0) + ($stats['draft'] ?? 0) + ($stats['verified_by_instruktur'] ?? 0), 2, '0', STR_PAD_LEFT) ?></span>
+                            class="text-2xl font-bold text-gray-900 leading-none pkl-stat-number"><?= str_pad(($stats['submitted'] ?? 0) + ($stats['draft'] ?? 0) + ($stats['verified'] ?? 0), 2, '0', STR_PAD_LEFT) ?></span>
                         <i class="fa-solid fa-clock text-gray-300"></i>
                     </div>
                 </div>
