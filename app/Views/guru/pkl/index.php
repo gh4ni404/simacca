@@ -256,12 +256,12 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Filter Task</label>
+                                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Filter Aktivitas</label>
                                     <select id="taskFilter-<?= $student['siswa_id'] ?>"
                                         class="task-filter"
                                         disabled
                                         data-siswa-id="<?= $student['siswa_id'] ?>">
-                                        <option value="">-- Pilih Task --</option>
+                                        <option value="">-- Pilih Aktivitas --</option>
                                     </select>
                                 </div>
                             </div>
@@ -427,7 +427,7 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
         if (taskFilter.length && !taskFilter.data('select2-loaded')) {
             taskFilter.data('select2-loaded', true);
             taskFilter.select2({
-                placeholder: '-- Pilih Task --',
+                placeholder: '-- Pilih Aktivitas --',
                 width: '100%',
                 dropdownAutoWidth: true
             });
@@ -642,7 +642,7 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
             success: function(response) {
                 // Destroy loading state
                 taskFilter.select2('destroy');
-                taskFilter.html('<option value="">-- Pilih Task --</option>');
+                taskFilter.html('<option value="">-- Pilih Aktivitas --</option>');
 
                 if (response.success && response.data.length > 0) {
                     response.data.forEach(function(task) {
@@ -656,16 +656,16 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
 
                 taskFilter.prop('disabled', false);
                 taskFilter.select2({
-                    placeholder: '-- Pilih Task --',
+                    placeholder: '-- Pilih Aktivitas --',
                     width: '100%',
                     dropdownAutoWidth: true
                 });
             },
             error: function() {
                 taskFilter.select2('destroy');
-                taskFilter.html('<option value="">-- Pilih Task --</option>').prop('disabled', true);
+                taskFilter.html('<option value="">-- Pilih Aktivitas --</option>').prop('disabled', true);
                 taskFilter.select2({
-                    placeholder: '-- Pilih Task --',
+                    placeholder: '-- Pilih Aktivitas --',
                     width: '100%',
                     dropdownAutoWidth: true,
                     minimumResultsForSearch: -1
@@ -708,9 +708,9 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
                 if (taskFilter.data('select2')) {
                     taskFilter.select2('destroy');
                 }
-                taskFilter.html('<option value="">-- Pilih Task --</option>').prop('disabled', true);
+                taskFilter.html('<option value="">-- Pilih Aktivitas --</option>').prop('disabled', true);
                 taskFilter.select2({
-                    placeholder: '-- Pilih Task --',
+                    placeholder: '-- Pilih Aktivitas --',
                     width: '100%',
                     dropdownAutoWidth: true
                 });

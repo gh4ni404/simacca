@@ -688,7 +688,7 @@
                             </label>
                         </div>
 
-                        <!-- Conditional: Pilih Task yang Sudah Ada -->
+                        <!-- Conditional: Pilih Aktivitas yang Sudah Ada -->
                         <div class="<?= old('task_choice') === 'new' ? 'hidden-section' : '' ?>" id="section-continue"
                             style="margin-top: 16px;">
                             <p style="font-size: 0.8rem; color: #6b7280; margin-bottom: 6px; font-weight: 500;">Pilih pekerjaan yang sedang berjalan</p>

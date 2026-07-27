@@ -335,7 +335,7 @@ class PklController extends BaseController
         } else {
             $taskId = (int) $this->request->getPost('task_id');
             if (!$taskId) {
-                session()->setFlashdata('error', 'Pilih task terlebih dahulu');
+                session()->setFlashdata('error', 'Pilih aktivitas terlebih dahulu');
                 return redirect()->back()->withInput();
             }
 
