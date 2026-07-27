@@ -197,48 +197,50 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
 
                         <!-- Panel Header -->
                         <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex-shrink-0">
-                            <div class="flex items-center gap-3.5">
-                                <!-- Back button for mobile -->
-                                <button type="button" onclick="backToList()"
-                                    class="lg:hidden inline-flex items-center justify-center p-2.5 rounded-xl bg-white border border-gray-200 text-gray-600 hover:text-gray-900 shadow-sm transition-all hover:bg-gray-50">
-                                    <i class="fas fa-arrow-left"></i>
-                                </button>
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                <div class="flex items-center gap-3.5">
+                                    <!-- Back button for mobile -->
+                                    <button type="button" onclick="backToList()"
+                                        class="lg:hidden inline-flex items-center justify-center p-2.5 rounded-xl bg-white border border-gray-200 text-gray-600 hover:text-gray-900 shadow-sm transition-all hover:bg-gray-50 active:scale-95">
+                                        <i class="fas fa-arrow-left"></i>
+                                    </button>
 
-                                <!-- Avatar -->
-                                <?php if ($student['profile_photo']): ?>
-                                    <img src="<?= base_url('profile-photo/' . esc($student['profile_photo'])); ?>"
-                                        class="w-12 h-12 rounded-2xl object-cover border-2 border-white shadow-md"
-                                        alt="<?= esc($student['nama_siswa']) ?>">
-                                <?php else: ?>
-                                    <div
-                                        class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg border-2 border-white shadow-md">
-                                        <?= strtoupper(substr(esc($student['nama_siswa']), 0, 2)) ?>
-                                    </div>
-                                <?php endif; ?>
+                                    <!-- Avatar -->
+                                    <?php if ($student['profile_photo']): ?>
+                                        <img src="<?= base_url('profile-photo/' . esc($student['profile_photo'])); ?>"
+                                            class="w-12 h-12 rounded-2xl object-cover border-2 border-white shadow-md"
+                                            alt="<?= esc($student['nama_siswa']) ?>">
+                                    <?php else: ?>
+                                        <div
+                                            class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg border-2 border-white shadow-md">
+                                            <?= strtoupper(substr(esc($student['nama_siswa']), 0, 2)) ?>
+                                        </div>
+                                    <?php endif; ?>
 
-                                <div class="flex-grow min-w-0">
-                                    <h3 class="text-base font-bold text-gray-900 leading-tight">
-                                        <?= esc($student['nama_siswa']) ?>
-                                    </h3>
-                                    <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-xs text-gray-500">
-                                        <span class="font-medium text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded">NIS:
-                                            <?= esc($student['nis']) ?></span>
-                                        <span class="text-gray-300">&bull;</span>
-                                        <span
-                                            class="flex items-center gap-1 font-medium text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded"><i
-                                                class="fas fa-school text-[10px]"></i> <?= esc($student['nama_kelas']) ?></span>
-                                        <?php if (!empty($student['nama_perusahaan'])): ?>
+                                    <div class="flex-grow min-w-0">
+                                        <h3 class="text-base font-bold text-gray-900 leading-tight">
+                                            <?= esc($student['nama_siswa']) ?>
+                                        </h3>
+                                        <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-xs text-gray-500">
+                                            <span class="font-medium text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded">NIS:
+                                                <?= esc($student['nis']) ?></span>
                                             <span class="text-gray-300">&bull;</span>
-                                            <span class="flex items-center gap-1 text-gray-600"><i
-                                                    class="fas fa-building text-[10px] text-gray-400"></i>
-                                                <?= esc($student['nama_perusahaan']) ?></span>
-                                        <?php endif; ?>
+                                            <span
+                                                class="flex items-center gap-1 font-medium text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded"><i
+                                                    class="fas fa-school text-[10px]"></i> <?= esc($student['nama_kelas']) ?></span>
+                                            <?php if (!empty($student['nama_perusahaan'])): ?>
+                                                <span class="text-gray-300">&bull;</span>
+                                                <span class="flex items-center gap-1 text-gray-600"><i
+                                                        class="fas fa-building text-[10px] text-gray-400"></i>
+                                                    <?= esc($student['nama_perusahaan']) ?></span>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="flex items-center gap-3 flex-shrink-0">
+                                <div class="sm:flex-shrink-0">
                                     <div
-                                        class="text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-xl font-semibold border border-blue-100 flex items-center gap-1.5 shadow-sm">
+                                        class="text-xs bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-xl font-semibold border border-indigo-100 flex items-center gap-1.5 shadow-sm">
                                         <i class="fas fa-check-circle"></i>
                                         Progress: <?= $approvedCount ?>/<?= $totalProgress ?> Disetujui
                                     </div>
@@ -246,7 +248,7 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
                             </div>
 
                             <!-- Filter Dropdowns -->
-                            <div class="grid grid-cols-2 gap-3 mt-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
                                 <div>
                                     <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Filter Minggu</label>
                                     <select id="weekFilter-<?= $student['siswa_id'] ?>"
@@ -318,12 +320,12 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
     }
 
     .student-item.active {
-        background-color: #EFF6FF;
-        border-color: #3B82F6;
+        background-color: #EEF2FF;
+        border-color: #6366F1;
     }
 
     .student-item.active h4 {
-        color: #1D4ED8;
+        color: #4F46E5;
     }
 
     @keyframes lightboxIn {
@@ -503,7 +505,7 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
     function getStatusBadge(status) {
         var badges = {
             'approved': {bg: 'bg-green-50 text-green-700 border-green-200', label: 'Disetujui', icon: 'fa-check-circle'},
-            'verified_by_instruktur': {bg: 'bg-blue-50 text-blue-700 border-blue-200', label: 'Verified Instruktur', icon: 'fa-check-double'},
+            'verified_by_instruktur': {bg: 'bg-indigo-50 text-indigo-700 border-indigo-200', label: 'Verified', icon: 'fa-check-double'},
             'submitted': {bg: 'bg-yellow-50 text-yellow-700 border-yellow-200', label: 'Menunggu', icon: 'fa-clock'},
             'revision': {bg: 'bg-orange-50 text-orange-700 border-orange-200', label: 'Revisi', icon: 'fa-edit'}
         };
