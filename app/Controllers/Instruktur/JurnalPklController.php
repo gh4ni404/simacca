@@ -256,6 +256,11 @@ class JurnalPklController extends BaseController
             return redirect()->back()->withInput();
         }
 
+        if (mb_strlen($catatan) > 200) {
+            session()->setFlashdata('error', 'Catatan instruktur maksimal 200 karakter');
+            return redirect()->back()->withInput();
+        }
+
         $progress = $this->progressModel->find($progressId);
 
         if (!$progress) {
@@ -300,6 +305,11 @@ class JurnalPklController extends BaseController
 
         if ($catatan === '') {
             session()->setFlashdata('error', 'Catatan instruktur wajib diisi');
+            return redirect()->back()->withInput();
+        }
+
+        if (mb_strlen($catatan) > 200) {
+            session()->setFlashdata('error', 'Catatan instruktur maksimal 200 karakter');
             return redirect()->back()->withInput();
         }
 

@@ -145,9 +145,10 @@ $formatIndoDate = function($dateStr) use ($hariIndo, $bulanIndo) {
                                         <?= csrf_field(); ?>
                                         <input type="hidden" name="status" value="verified_by_instruktur">
                                         <div class="flex gap-2">
-                                            <input type="text" name="catatan_instruktur" required placeholder="Catatan persetujuan..." class="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
-                                            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all"><i class="fas fa-check mr-1"></i>Setujui</button>
-                                        </div>
+                                             <input type="text" name="catatan_instruktur" required placeholder="Catatan persetujuan..." maxlength="200" oninput="updateCharCount(this)" class="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
+                                             <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all"><i class="fas fa-check mr-1"></i>Setujui</button>
+                                         </div>
+                                         <div class="text-right text-[10px] text-gray-400 char-count">0/200 karakter</div>
                                     </form>
 
                                     <!-- Revisi Form -->
@@ -155,9 +156,10 @@ $formatIndoDate = function($dateStr) use ($hariIndo, $bulanIndo) {
                                         <?= csrf_field(); ?>
                                         <input type="hidden" name="status" value="revision">
                                         <div class="flex gap-2">
-                                            <input type="text" name="catatan_instruktur" required placeholder="Alasan revisi..." class="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-orange-500 focus:border-transparent">
-                                            <button type="submit" onclick="return confirm('Minta revisi progress ini?')" class="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all"><i class="fas fa-edit mr-1"></i>Revisi</button>
-                                        </div>
+                                             <input type="text" name="catatan_instruktur" required placeholder="Alasan revisi..." maxlength="200" oninput="updateCharCount(this)" class="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-orange-500 focus:border-transparent">
+                                             <button type="submit" onclick="return confirm('Minta revisi progress ini?')" class="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all"><i class="fas fa-edit mr-1"></i>Revisi</button>
+                                         </div>
+                                         <div class="text-right text-[10px] text-gray-400 char-count">0/200 karakter</div>
                                     </form>
                                 </div>
                             </div>
@@ -282,16 +284,16 @@ $formatIndoDate = function($dateStr) use ($hariIndo, $bulanIndo) {
                                                 <?= csrf_field(); ?>
                                                 <input type="hidden" name="status" value="verified_by_instruktur">
                                                 <div class="flex gap-2">
-                                                    <input type="text" name="catatan_instruktur" required placeholder="Catatan verifikasi..." class="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
-                                                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all"><i class="fas fa-check mr-1"></i>Verifikasi</button>
+                                                     <input type="text" name="catatan_instruktur" required placeholder="Catatan verifikasi..." maxlength="200" oninput="updateCharCount(this)" class="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
+                                                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all"><i class="fas fa-check mr-1"></i>Verifikasi</button>
                                                 </div>
                                             </form>
                                             <form action="<?= base_url('instruktur/jurnal-pkl/verifikasi-progress/' . $p['id']); ?>" method="POST" class="space-y-2">
                                                 <?= csrf_field(); ?>
                                                 <input type="hidden" name="status" value="revision">
                                                 <div class="flex gap-2">
-                                                    <input type="text" name="catatan_instruktur" required placeholder="Alasan revisi..." class="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-orange-500 focus:border-transparent">
-                                                    <button type="submit" onclick="return confirm('Minta revisi progress ini?')" class="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all"><i class="fas fa-edit mr-1"></i>Revisi</button>
+                                                     <input type="text" name="catatan_instruktur" required placeholder="Alasan revisi..." maxlength="200" oninput="updateCharCount(this)" class="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-orange-500 focus:border-transparent">
+                                                     <button type="submit" onclick="return confirm('Minta revisi progress ini?')" class="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all"><i class="fas fa-edit mr-1"></i>Revisi</button>
                                                 </div>
                                             </form>
                                         </div>
@@ -301,9 +303,10 @@ $formatIndoDate = function($dateStr) use ($hariIndo, $bulanIndo) {
                                             <form action="<?= base_url('instruktur/jurnal-pkl/catatan/' . $p['id']); ?>" method="POST" class="flex-1">
                                                 <?= csrf_field(); ?>
                                                 <div class="flex gap-2">
-                                                    <input type="text" name="catatan_instruktur" value="<?= esc($p['catatan_instruktur'] ?? ''); ?>" required placeholder="Perbarui catatan..." class="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
-                                                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all" title="Simpan Catatan"><i class="fas fa-save"></i></button>
-                                                </div>
+                                                     <input type="text" name="catatan_instruktur" value="<?= esc($p['catatan_instruktur'] ?? ''); ?>" required placeholder="Perbarui catatan..." maxlength="200" oninput="updateCharCount(this)" class="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
+                                                     <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all" title="Simpan Catatan"><i class="fas fa-save"></i></button>
+                                                 </div>
+                                                 <div class="text-right text-[10px] text-gray-400 char-count">0/200 karakter</div>
                                             </form>
                                             <form action="<?= base_url('instruktur/jurnal-pkl/batal-verifikasi-progress/' . $p['id']); ?>" method="POST" class="inline">
                                                 <?= csrf_field(); ?>
@@ -314,10 +317,11 @@ $formatIndoDate = function($dateStr) use ($hariIndo, $bulanIndo) {
                                         <!-- Already verified by both: Only update catatan -->
                                         <form action="<?= base_url('instruktur/jurnal-pkl/catatan/' . $p['id']); ?>" method="POST" class="w-full flex justify-end">
                                             <?= csrf_field(); ?>
-                                            <div class="flex gap-2">
-                                                <input type="text" name="catatan_instruktur" value="<?= esc($p['catatan_instruktur'] ?? ''); ?>" required placeholder="Perbarui catatan..." class="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
-                                                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all" title="Simpan Catatan"><i class="fas fa-save"></i></button>
-                                            </div>
+                                             <div class="flex gap-2">
+                                                 <input type="text" name="catatan_instruktur" value="<?= esc($p['catatan_instruktur'] ?? ''); ?>" required placeholder="Perbarui catatan..." maxlength="200" oninput="updateCharCount(this)" class="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-indigo-500 focus:border-transparent">
+                                                 <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all" title="Simpan Catatan"><i class="fas fa-save"></i></button>
+                                             </div>
+                                             <div class="text-right text-[10px] text-gray-400 char-count">0/200 karakter</div>
                                         </form>
                                     <?php endif; ?>
                                 </div>
@@ -330,4 +334,30 @@ $formatIndoDate = function($dateStr) use ($hariIndo, $bulanIndo) {
         </div>
     <?php endif; ?>
 </div>
+
+<script>
+function updateCharCount(el) {
+    var max = 200;
+    var len = el.value.length;
+    var container = el.closest('form') || el.parentElement;
+    var counter = container.querySelector('.char-count');
+    if (!counter && container.parentElement) {
+        counter = container.parentElement.querySelector('.char-count');
+    }
+    if (counter) {
+        counter.textContent = len + '/' + max + ' karakter';
+        if (len >= max) {
+            counter.className = 'text-right text-[10px] font-bold text-red-500 char-count';
+        } else if (len >= 160) {
+            counter.className = 'text-right text-[10px] text-orange-500 char-count';
+        } else {
+            counter.className = 'text-right text-[10px] text-gray-400 char-count';
+        }
+    }
+}
+document.querySelectorAll('input[name="catatan_instruktur"], textarea[name="catatan_instruktur"]').forEach(function(el) {
+    updateCharCount(el);
+    el.addEventListener('input', function() { updateCharCount(this); });
+});
+</script>
 <?= $this->endSection() ?>

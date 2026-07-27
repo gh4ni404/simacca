@@ -144,32 +144,36 @@
                         <?= csrf_field(); ?>
                         <input type="hidden" name="status" value="verified_by_instruktur">
                         <div class="flex gap-2">
-                            <input type="text" name="catatan_instruktur" required
-                                   placeholder="Tulis catatan persetujuan..."
-                                   class="flex-1 min-w-0 border border-gray-200 bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent placeholder:text-gray-400 transition-all">
-                            <button type="submit"
-                                    class="flex-shrink-0 inline-flex items-center gap-1.5 bg-green-600 hover:bg-green-700 active:scale-95 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm shadow-green-200">
-                                <i class="fas fa-check text-xs"></i>
-                                <span class="hidden sm:inline">Setujui</span>
-                                <span class="sm:hidden">OK</span>
-                            </button>
-                        </div>
+                             <input type="text" name="catatan_instruktur" required
+                                    placeholder="Tulis catatan persetujuan..."
+                                    maxlength="200" oninput="updateCharCount(this)"
+                                    class="flex-1 min-w-0 border border-gray-200 bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent placeholder:text-gray-400 transition-all">
+                             <button type="submit"
+                                     class="flex-shrink-0 inline-flex items-center gap-1.5 bg-green-600 hover:bg-green-700 active:scale-95 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm shadow-green-200">
+                                 <i class="fas fa-check text-xs"></i>
+                                 <span class="hidden sm:inline">Setujui</span>
+                                 <span class="sm:hidden">OK</span>
+                             </button>
+                         </div>
+                         <div class="text-right text-[10px] text-gray-400 char-count mt-1">0/200 karakter</div>
                     </form>
 
                     <form action="<?= base_url('instruktur/jurnal-pkl/verifikasi-progress/' . $p['id']); ?>" method="POST">
                         <?= csrf_field(); ?>
                         <input type="hidden" name="status" value="revision">
                         <div class="flex gap-2">
-                            <input type="text" name="catatan_instruktur" required
-                                   placeholder="Tulis alasan revisi..."
-                                   class="flex-1 min-w-0 border border-gray-200 bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent placeholder:text-gray-400 transition-all">
-                            <button type="submit"
-                                    onclick="return confirm('Minta siswa merevisi progress ini?')"
-                                    class="flex-shrink-0 inline-flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm shadow-orange-200">
-                                <i class="fas fa-undo text-xs"></i>
-                                <span>Revisi</span>
-                            </button>
-                        </div>
+                             <input type="text" name="catatan_instruktur" required
+                                    placeholder="Tulis alasan revisi..."
+                                    maxlength="200" oninput="updateCharCount(this)"
+                                    class="flex-1 min-w-0 border border-gray-200 bg-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent placeholder:text-gray-400 transition-all">
+                             <button type="submit"
+                                     onclick="return confirm('Minta siswa merevisi progress ini?')"
+                                     class="flex-shrink-0 inline-flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm shadow-orange-200">
+                                 <i class="fas fa-undo text-xs"></i>
+                                 <span>Revisi</span>
+                             </button>
+                         </div>
+                         <div class="text-right text-[10px] text-gray-400 char-count mt-1">0/200 karakter</div>
                     </form>
                 </div>
             </div>
@@ -204,5 +208,29 @@ function closeLightbox(e) {
     document.body.style.overflow = '';
 }
 document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLightbox(); });
+
+function updateCharCount(el) {
+    var max = 200;
+    var len = el.value.length;
+    var container = el.closest('form') || el.parentElement;
+    var counter = container.querySelector('.char-count');
+    if (!counter && container.parentElement) {
+        counter = container.parentElement.querySelector('.char-count');
+    }
+    if (counter) {
+        counter.textContent = len + '/' + max + ' karakter';
+        if (len >= max) {
+            counter.className = 'text-right text-[10px] font-bold text-red-500 char-count mt-1';
+        } else if (len >= 160) {
+            counter.className = 'text-right text-[10px] text-orange-500 char-count mt-1';
+        } else {
+            counter.className = 'text-right text-[10px] text-gray-400 char-count mt-1';
+        }
+    }
+}
+document.querySelectorAll('input[name="catatan_instruktur"], textarea[name="catatan_instruktur"]').forEach(function(el) {
+    updateCharCount(el);
+    el.addEventListener('input', function() { updateCharCount(this); });
+});
 </script>
 <?= $this->endSection() ?>

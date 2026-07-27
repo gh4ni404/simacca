@@ -205,7 +205,7 @@ $totalStats = [
 
                         <!-- Panel Header -->
                         <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex-shrink-0">
-                            <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                                 <div class="flex items-center gap-3.5">
                                     <!-- Back button for mobile -->
                                     <button type="button" onclick="backToList()"
@@ -537,7 +537,7 @@ $totalStats = [
 
         var actionHtml = '';
         if (p.status === 'submitted') {
-            actionHtml = '<form action="' + BASE_URL + '/instruktur/jurnal-pkl/verifikasi-progress/' + p.id + '" method="POST" class="space-y-3"><input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>"><div class="bg-gray-50 border border-gray-200 rounded-xl p-3.5 shadow-inner"><label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Catatan Instruktur <span class="text-red-500">*</span></label><textarea name="catatan_instruktur" rows="2" required class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none shadow-sm" placeholder="Tulis catatan revisi atau catatan persetujuan..."></textarea><div class="flex flex-col sm:flex-row justify-end gap-2.5 mt-3"><button type="submit" name="status" value="revision" onclick="return confirm(\'Minta revisi progress ini?\')" class="w-full sm:w-auto px-4 py-2 border border-orange-200 text-orange-700 font-bold text-xs hover:bg-orange-50 hover:border-orange-300 bg-white rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="fas fa-edit text-[10px]"></i> Minta Revisi</button><button type="submit" name="status" value="verified_by_instruktur" onclick="return confirm(\'Setujui progress ini?\')" class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="fas fa-check text-[10px]"></i> Setujui</button></div></div></form>';
+            actionHtml = '<form action="' + BASE_URL + '/instruktur/jurnal-pkl/verifikasi-progress/' + p.id + '" method="POST" class="space-y-3"><input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>"><div class="bg-gray-50 border border-gray-200 rounded-xl p-3.5 shadow-inner"><label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Catatan Instruktur <span class="text-red-500">*</span></label><textarea name="catatan_instruktur" rows="2" required maxlength="200" oninput="updateCharCount(this)" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none shadow-sm" placeholder="Tulis catatan revisi atau catatan persetujuan..."></textarea><div class="text-right text-[10px] text-gray-400 char-count">0/200 karakter</div><div class="flex flex-col sm:flex-row justify-end gap-2.5 mt-3"><button type="submit" name="status" value="revision" onclick="return confirm(\'Minta revisi progress ini?\')" class="w-full sm:w-auto px-4 py-2 border border-orange-200 text-orange-700 font-bold text-xs hover:bg-orange-50 hover:border-orange-300 bg-white rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="fas fa-edit text-[10px]"></i> Minta Revisi</button><button type="submit" name="status" value="verified_by_instruktur" onclick="return confirm(\'Setujui progress ini?\')" class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="fas fa-check text-[10px]"></i> Setujui</button></div></div></form>';
         } else if (p.status === 'verified_by_instruktur' || p.status === 'revision') {
             var labelText = p.status === 'verified_by_instruktur' ? 'diverifikasi' : 'direvisi';
             var catatan = p.status === 'verified_by_instruktur' ? (p.catatan_instruktur || '') : (p.catatan_instruktur || '');
@@ -546,7 +546,7 @@ $totalStats = [
             if (p.instruktur_verified_by) {
                 actionHtml = '<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-green-50/40 border border-green-100 rounded-xl p-3.5 pl-4 shadow-inner"><div class="flex items-center gap-2.5 text-xs text-green-800"><i class="fas fa-check-circle text-base text-green-500 flex-shrink-0"></i><div class="min-w-0"><span class="font-bold">Disetujui Pembimbing</span>' + (p.catatan_instruktur ? '<p class="text-green-700 mt-0.5 italic break-words">"' + p.catatan_instruktur.replace(/</g, '&lt;') + '"</p>' : '') + '</div></div><form action="' + BASE_URL + '/instruktur/jurnal-pkl/batal-verifikasi-progress/' + p.id + '" method="POST" onsubmit="saveActiveSiswa(' + siswaId + ')" class="w-full sm:w-auto"><input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>"><button type="submit" onclick="return confirm(\'Batalkan verifikasi progress ini?\')" class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-white border border-orange-200 text-orange-700 font-semibold rounded-xl hover:bg-orange-50 hover:border-orange-300 text-xs shadow-sm transition-all active:scale-95 whitespace-nowrap"><i class="fas fa-undo text-[10px]"></i> Batalkan</button></form></div>';
             } else {
-                actionHtml = '<div class="bg-gray-50 border border-gray-200 rounded-xl p-3.5 shadow-inner"><p class="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-1.5 flex items-center gap-1"><i class="fas fa-check-circle text-[9px]"></i> Disetujui Pembimbing — Verifikasi Instruktur</p><form action="' + BASE_URL + '/instruktur/jurnal-pkl/verifikasi-progress/' + p.id + '" method="POST"><input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>"><textarea name="catatan_instruktur" rows="2" required class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none shadow-sm" placeholder="Tulis catatan revisi atau catatan persetujuan..."></textarea><div class="flex flex-col sm:flex-row justify-end gap-2.5 mt-3"><button type="submit" name="status" value="revision" onclick="return confirm(\'Minta revisi progress ini?\')" class="w-full sm:w-auto px-4 py-2 border border-orange-200 text-orange-700 font-bold text-xs hover:bg-orange-50 hover:border-orange-300 bg-white rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="fas fa-edit text-[10px]"></i> Minta Revisi</button><button type="submit" name="status" value="verified_by_instruktur" onclick="return confirm(\'Setujui progress ini?\')" class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="fas fa-check text-[10px]"></i> Verifikasi</button></div></form></div>';
+                actionHtml = '<div class="bg-gray-50 border border-gray-200 rounded-xl p-3.5 shadow-inner"><p class="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-1.5 flex items-center gap-1"><i class="fas fa-check-circle text-[9px]"></i> Disetujui Pembimbing — Verifikasi Instruktur</p><form action="' + BASE_URL + '/instruktur/jurnal-pkl/verifikasi-progress/' + p.id + '" method="POST"><input type="hidden" name="<?= csrf_token() ?>" value="<?= csrf_hash() ?>"><textarea name="catatan_instruktur" rows="2" required maxlength="200" oninput="updateCharCount(this)" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all resize-none shadow-sm" placeholder="Tulis catatan revisi atau catatan persetujuan..."></textarea><div class="text-right text-[10px] text-gray-400 char-count">0/200 karakter</div><div class="flex flex-col sm:flex-row justify-end gap-2.5 mt-3"><button type="submit" name="status" value="revision" onclick="return confirm(\'Minta revisi progress ini?\')" class="w-full sm:w-auto px-4 py-2 border border-orange-200 text-orange-700 font-bold text-xs hover:bg-orange-50 hover:border-orange-300 bg-white rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="fas fa-edit text-[10px]"></i> Minta Revisi</button><button type="submit" name="status" value="verified_by_instruktur" onclick="return confirm(\'Setujui progress ini?\')" class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 rounded-xl shadow-sm transition-all active:scale-95 flex items-center justify-center gap-1.5"><i class="fas fa-check text-[10]"></i> Verifikasi</button></div></form></div>';
             }
         }
 
@@ -647,6 +647,13 @@ $totalStats = [
                     width: '100%',
                     dropdownAutoWidth: true
                 });
+
+                // Restore saved task filter
+                var savedTask = localStorage.getItem('filter_task_' + siswaId);
+                if (savedTask && taskFilter.find('option[value="' + savedTask + '"]').length) {
+                    taskFilter.val(savedTask).trigger('change');
+                    loadFilteredProgress(siswaId);
+                }
             },
             error: function() {
                 taskFilter.select2('destroy');
@@ -677,6 +684,13 @@ $totalStats = [
                         width: '100%',
                         dropdownAutoWidth: true
                     });
+
+                    // Restore saved week filter
+                    var savedWeek = localStorage.getItem('filter_week_' + siswaId);
+                    if (savedWeek && weekFilter.find('option[value="' + savedWeek + '"]').length) {
+                        weekFilter.val(savedWeek).trigger('change');
+                        loadTasks(siswaId, savedWeek);
+                    }
                 }
             }
         });
@@ -687,6 +701,18 @@ $totalStats = [
             var siswaId = $(this).data('siswa-id');
             var taskFilter = $('#taskFilter-' + siswaId);
             var weekVal = $(this).val();
+
+            // Save week filter to localStorage
+            if (weekVal) {
+                var prevWeek = localStorage.getItem('filter_week_' + siswaId);
+                if (prevWeek !== weekVal) {
+                    localStorage.removeItem('filter_task_' + siswaId);
+                }
+                localStorage.setItem('filter_week_' + siswaId, weekVal);
+            } else {
+                localStorage.removeItem('filter_week_' + siswaId);
+                localStorage.removeItem('filter_task_' + siswaId);
+            }
 
             if (weekVal) {
                 loadTasks(siswaId, weekVal);
@@ -711,8 +737,37 @@ $totalStats = [
 
         $('.task-filter').on('change', function() {
             var siswaId = $(this).data('siswa-id');
+            var taskVal = $(this).val();
+
+            // Save task filter to localStorage
+            if (taskVal) {
+                localStorage.setItem('filter_task_' + siswaId, taskVal);
+            } else {
+                localStorage.removeItem('filter_task_' + siswaId);
+            }
+
             loadFilteredProgress(siswaId);
         });
     });
+
+    function updateCharCount(el) {
+        var max = 200;
+        var len = el.value.length;
+        var container = el.closest('form') || el.parentElement;
+        var counter = container.querySelector('.char-count');
+        if (!counter && container.parentElement) {
+            counter = container.parentElement.querySelector('.char-count');
+        }
+        if (counter) {
+            counter.textContent = len + '/' + max + ' karakter';
+            if (len >= max) {
+                counter.className = 'text-right text-[10px] font-bold text-red-500 char-count';
+            } else if (len >= 160) {
+                counter.className = 'text-right text-[10px] text-orange-500 char-count';
+            } else {
+                counter.className = 'text-right text-[10px] text-gray-400 char-count';
+            }
+        }
+    }
 </script>
 <?= $this->endSection() ?>

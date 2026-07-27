@@ -131,8 +131,10 @@
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Catatan Pembimbing <span class="text-red-500">*</span></label>
                         <textarea name="catatan" rows="4" required
+                                  maxlength="200" oninput="updateCharCount(this)"
                                   class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                   placeholder="Tambahkan catatan untuk siswa..."><?= esc($progress['catatan_pembimbing'] ?? '') ?></textarea>
+                        <div class="text-right text-xs text-gray-400 mt-1 char-count">0/200 karakter</div>
                     </div>
 
                     <div class="flex gap-3">
@@ -153,4 +155,30 @@
         </div>
     </div>
 </div>
+
+<script>
+function updateCharCount(el) {
+    var max = 200;
+    var len = el.value.length;
+    var container = el.closest('form') || el.parentElement;
+    var counter = container.querySelector('.char-count');
+    if (!counter && container.parentElement) {
+        counter = container.parentElement.querySelector('.char-count');
+    }
+    if (counter) {
+        counter.textContent = len + '/' + max + ' karakter';
+        if (len >= max) {
+            counter.className = 'text-right text-xs font-bold text-red-500 mt-1 char-count';
+        } else if (len >= 160) {
+            counter.className = 'text-right text-xs text-orange-500 mt-1 char-count';
+        } else {
+            counter.className = 'text-right text-xs text-gray-400 mt-1 char-count';
+        }
+    }
+}
+document.querySelectorAll('textarea[name="catatan"], input[name="catatan"]').forEach(function(el) {
+    updateCharCount(el);
+    el.addEventListener('input', function() { updateCharCount(this); });
+});
+</script>
 <?= $this->endSection() ?>

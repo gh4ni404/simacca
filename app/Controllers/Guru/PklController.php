@@ -58,7 +58,12 @@ class PklController extends BaseController
         }
 
         if ($catatan === '') {
-            session()->setFlashdata('error', 'Catatan pembimbing wajib diisi ya 😊');
+            session()->setFlashdata('error', 'Catatan pembimbing wajib diisi ya');
+            return redirect()->back()->withInput();
+        }
+
+        if (mb_strlen($catatan) > 200) {
+            session()->setFlashdata('error', 'Catatan pembimbing maksimal 200 karakter');
             return redirect()->back()->withInput();
         }
 
