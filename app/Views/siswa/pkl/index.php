@@ -63,6 +63,7 @@
         max-width: 400px;
         pointer-events: none;
     }
+
     .toast {
         display: flex;
         align-items: center;
@@ -74,19 +75,48 @@
         color: #fff;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         pointer-events: all;
-        animation: toastIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
+        animation: toastIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
     }
-    .toast.toast-error  { background: #ef4444; }
-    .toast.toast-success { background: #10b981; }
-    .toast.toast-info   { background: #3b82f6; }
-    .toast-icon { font-size: 1rem; flex-shrink: 0; }
+
+    .toast.toast-error {
+        background: #ef4444;
+    }
+
+    .toast.toast-success {
+        background: #10b981;
+    }
+
+    .toast.toast-info {
+        background: #3b82f6;
+    }
+
+    .toast-icon {
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
     @keyframes toastIn {
-        from { opacity: 0; transform: translateY(-20px) scale(0.95); }
-        to   { opacity: 1; transform: translateY(0)   scale(1); }
+        from {
+            opacity: 0;
+            transform: translateY(-20px) scale(0.95);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
     }
+
     @keyframes toastOut {
-        from { opacity: 1; transform: translateY(0)   scale(1); }
-        to   { opacity: 0; transform: translateY(-12px) scale(0.95); }
+        from {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        to {
+            opacity: 0;
+            transform: translateY(-12px) scale(0.95);
+        }
     }
 
     /* ── Confirm Modal ── */
@@ -104,10 +134,12 @@
         pointer-events: none;
         padding: 16px;
     }
+
     #confirmOverlay.show {
         opacity: 1;
         pointer-events: all;
     }
+
     #confirmBox {
         background: #fff;
         border-radius: 20px;
@@ -115,13 +147,15 @@
         width: 100%;
         max-width: 400px;
         transform: scale(0.95);
-        transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         text-align: center;
         box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     }
+
     #confirmOverlay.show #confirmBox {
         transform: scale(1);
     }
+
     .confirm-icon-wrap {
         width: 56px;
         height: 56px;
@@ -134,22 +168,26 @@
         font-size: 1.5rem;
         color: #ef4444;
     }
+
     .confirm-title {
         font-size: 1.125rem;
         font-weight: 700;
         color: #111827;
         margin-bottom: 8px;
     }
+
     .confirm-desc {
         font-size: 0.875rem;
         color: #6b7280;
         margin-bottom: 24px;
         line-height: 1.5;
     }
+
     .confirm-actions {
         display: flex;
         gap: 12px;
     }
+
     .confirm-cancel {
         flex: 1;
         padding: 10px 16px;
@@ -163,7 +201,11 @@
         font-family: inherit;
         transition: background 0.2s;
     }
-    .confirm-cancel:hover { background: #f3f4f6; }
+
+    .confirm-cancel:hover {
+        background: #f3f4f6;
+    }
+
     .confirm-ok {
         flex: 1;
         padding: 10px 16px;
@@ -178,8 +220,14 @@
         box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         transition: background 0.2s, transform 0.15s;
     }
-    .confirm-ok:hover  { background: #dc2626; }
-    .confirm-ok:active { transform: scale(0.97); }
+
+    .confirm-ok:hover {
+        background: #dc2626;
+    }
+
+    .confirm-ok:active {
+        transform: scale(0.97);
+    }
 </style>
 <?= $this->endSection() ?>
 
@@ -230,21 +278,21 @@ helper('setting');
         <!-- Flash Messages -->
         <?= view('components/alerts') ?>
 
-        <!-- Tambah Aktivitas -->
-        <div class="flex justify-end">
-            <a href="<?= base_url('siswa/jurnal-pkl/tambah'); ?>"
-                class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-xl font-semibold text-sm shadow-md hover:bg-blue-600 active:scale-95 transition-all">
-                <i class="fa-solid fa-plus text-xs"></i>
-                Tambah Aktivitas
-            </a>
-        </div>
-
         <!-- Riwayat Kegiatan (Timeline) -->
         <section class="space-y-3">
-            <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <i class="fa-solid fa-clock-rotate-left text-primary"></i>
-                Riwayat Kegiatan
-            </h2>
+            <!-- Tambah Aktivitas -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-primary"></i>
+                    Riwayat Kegiatan
+                </h2>
+                <a href="<?= base_url('siswa/jurnal-pkl/tambah'); ?>"
+                    class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-xl font-semibold text-sm shadow-md hover:bg-blue-600 active:scale-95 transition-all w-full sm:w-auto">
+                    <i class="fa-solid fa-plus text-xs"></i>
+                    Tambah Aktivitas
+                </a>
+            </div>
+
 
             <?php if (empty($timeline)): ?>
                 <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 text-center">
@@ -295,7 +343,8 @@ helper('setting');
                                             <p class="text-[11px] font-semibold text-gray-500 uppercase"><?= $dayShort ?></p>
                                             <p
                                                 class="text-2xl font-bold leading-none <?= $isToday ? 'text-primary' : 'text-gray-900' ?>">
-                                                <?= $dateDay ?></p>
+                                                <?= $dateDay ?>
+                                            </p>
                                         </div>
                                         <div>
                                             <p class="font-semibold text-gray-800 mb-1"><?= $day['total_aktivitas'] ?> Aktivitas
@@ -963,7 +1012,8 @@ helper('setting');
         <p class="confirm-desc"></p>
         <div class="confirm-actions">
             <button class="confirm-cancel" id="confirmCancelBtn">Batal</button>
-            <button class="confirm-ok" id="confirmOkBtn"><i class="fa-solid fa-trash" style="margin-right:6px;"></i>Ya, Hapus!</button>
+            <button class="confirm-ok" id="confirmOkBtn"><i class="fa-solid fa-trash" style="margin-right:6px;"></i>Ya,
+                Hapus!</button>
         </div>
     </div>
 </div>
