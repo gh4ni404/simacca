@@ -116,9 +116,26 @@
                             }
                         }
 
-                        // Menggabungkan array menjadi satu kalimat dipisahkan dengan koma
-                        $activitiesHtml = !empty($activitiesArray) ? implode(', ', $activitiesArray) . '.' : '';
-                        $catatanHtml = !empty($catatanArray) ? implode(', ', $catatanArray) : '';
+                        // membuat aktivitas dalam bentuk numbering
+                        if (!empty($activitiesArray)) {
+                            $activitiesHtml = '<ol class="list-decimal list-inside space-y-1">';
+                            foreach ($activitiesArray as $act) {
+                                $activitiesHtml .= '<li>' . $act . '</li>';
+                            }
+                            $activitiesHtml .= '</ol>';
+                        } else {
+                            $activitiesHtml = '';
+                        }
+
+                        if (!empty($catatanArray)) {
+                            $catatanHtml = '<ol class="list-decimal list-inside space-y-1">';
+                            foreach ($catatanArray as $cat) {
+                                $catatanHtml .= '<li>' . $cat . '</li>';
+                            }
+                            $catatanHtml .= '</ol>';
+                        } else {
+                            $catatanHtml = '';
+                        }
                     }
             ?>
             <tr>
