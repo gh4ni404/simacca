@@ -265,7 +265,7 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
                         </div>
 
                         <!-- Panel Content: Scrollable list of progress entries -->
-                        <div class="flex-grow overflow-y-auto p-6 bg-gray-50/40 space-y-4 custom-scrollbar">
+                        <div class="flex-grow overflow-y-auto p-6 bg-gray-50/40 space-y-2 custom-scrollbar">
                             <?php if (empty($student['progress'])): ?>
                                 <div class="flex flex-col items-center justify-center py-12 text-center">
                                     <div class="w-16 h-16 rounded-full bg-gray-50 text-gray-400 flex items-center justify-center mb-3 border border-gray-100">
@@ -275,23 +275,13 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
                                     <p class="text-sm text-gray-500 mt-1">Siswa belum mengirim progress jurnal</p>
                                 </div>
                             <?php else: ?>
-                                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 mb-2">
-                                    <i class="fas fa-calendar-day text-xs"></i> Riwayat Progress
-                                </h4>
                                 <?php foreach ($student['progress'] as $prog):
                                     $statusBadge = match($prog['status']) {
-                                        'approved' => 'bg-green-50 text-green-700 border-green-200',
-                                        'submitted' => 'bg-yellow-50 text-yellow-700 border-yellow-200',
-                                        'revision' => 'bg-orange-50 text-orange-700 border-orange-200',
-                                        'verified_by_instruktur' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
-                                        default => 'bg-gray-50 text-gray-600 border-gray-200',
-                                    };
-                                    $statusIcon = match($prog['status']) {
-                                        'approved' => 'fa-check-circle',
-                                        'submitted' => 'fa-clock',
-                                        'revision' => 'fa-edit',
-                                        'verified_by_instruktur' => 'fa-check-double',
-                                        default => 'fa-pen',
+                                        'approved' => 'bg-green-100 text-green-700',
+                                        'submitted' => 'bg-yellow-100 text-yellow-700',
+                                        'revision' => 'bg-red-100 text-red-700',
+                                        'verified_by_instruktur' => 'bg-indigo-100 text-indigo-700',
+                                        default => 'bg-gray-100 text-gray-600',
                                     };
                                     $statusLabel = match($prog['status']) {
                                         'approved' => 'Disetujui',
@@ -301,47 +291,33 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
                                         default => ucfirst($prog['status']),
                                     };
                                 ?>
-                                <div class="bg-white rounded-2xl border border-gray-200 p-4 md:p-5 shadow-sm space-y-3 hover:shadow-md transition-all duration-200">
-                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
-                                        <div class="min-w-0">
-                                            <h3 class="text-base font-semibold text-gray-900 leading-snug"><?= esc($prog['nama_task']) ?></h3>
-                                            <div class="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-gray-500">
-                                                <span class="flex items-center gap-1">
-                                                    <i class="far fa-calendar"></i> <?= $formatIndoDate($prog['tanggal']) ?>
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border self-start sm:self-auto flex-shrink-0 <?= $statusBadge ?>">
-                                            <i class="fas <?= $statusIcon ?> text-[10px]"></i> <?= $statusLabel ?>
-                                        </span>
+                                <button type="button" onclick="showProgressDetail(this)"
+                                    data-nama="<?= esc($prog['nama_task']) ?>"
+                                    data-tanggal="<?= $prog['tanggal'] ?>"
+                                    data-tanggal-display="<?= $formatIndoDate($prog['tanggal']) ?>"
+                                    data-status="<?= $prog['status'] ?>"
+                                    data-status-label="<?= $statusLabel ?>"
+                                    data-deskripsi="<?= esc($prog['deskripsi'] ?? '') ?>"
+                                    data-langkah="<?= esc($prog['langkah_kerja'] ?? '') ?>"
+                                    data-kategori="<?= esc($prog['kategori_nama'] ?? '') ?>"
+                                    data-catatan-instruktur="<?= esc($prog['catatan_instruktur'] ?? '') ?>"
+                                    data-catatan-pembimbing="<?= esc($prog['catatan_pembimbing'] ?? '') ?>"
+                                    data-foto="<?= esc($prog['foto'] ?? '') ?>"
+                                    class="w-full text-left bg-white rounded-xl border border-gray-200 px-4 py-3 flex items-center gap-3 hover:shadow-md hover:border-indigo-200 transition-all duration-200 cursor-pointer group">
+                                    <div class="w-2 h-2 rounded-full flex-shrink-0 <?= match($prog['status']) {
+                                        'approved' => 'bg-green-500',
+                                        'submitted' => 'bg-yellow-500',
+                                        'revision' => 'bg-red-500',
+                                        'verified_by_instruktur' => 'bg-indigo-500',
+                                        default => 'bg-gray-400',
+                                    } ?>"></div>
+                                    <div class="flex-grow min-w-0">
+                                        <p class="text-sm font-medium text-gray-800 truncate group-hover:text-indigo-600 transition-colors"><?= esc($prog['nama_task']) ?></p>
+                                        <p class="text-xs text-gray-400 mt-0.5"><?= $formatIndoDate($prog['tanggal']) ?></p>
                                     </div>
-                                    <div class="rounded-xl bg-gray-50 border border-gray-200 p-4">
-                                        <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
-                                            <i class="far fa-file-lines text-gray-400"></i> Deskripsi Pekerjaan
-                                        </h4>
-                                        <p class="text-sm leading-7 text-gray-600 whitespace-pre-wrap"><?= esc(mb_strimwidth($prog['deskripsi'], 0, 300, '...')) ?></p>
-                                    </div>
-                                    <?php if (!empty($prog['catatan_instruktur']) || !empty($prog['catatan_pembimbing'])): ?>
-                                    <div class="space-y-2">
-                                        <?php if (!empty($prog['catatan_instruktur'])): ?>
-                                        <div class="bg-indigo-50 border-l-4 border-indigo-500 rounded-r-xl p-3 shadow-sm">
-                                            <p class="text-[10px] font-bold text-indigo-700 uppercase tracking-wider flex items-center gap-1">
-                                                <i class="fas fa-building text-[8px]"></i> Catatan Instruktur
-                                            </p>
-                                            <p class="text-xs text-indigo-900 mt-1 leading-relaxed"><?= esc($prog['catatan_instruktur']) ?></p>
-                                        </div>
-                                        <?php endif; ?>
-                                        <?php if (!empty($prog['catatan_pembimbing'])): ?>
-                                        <div class="bg-emerald-50 border-l-4 border-emerald-500 rounded-r-xl p-3 shadow-sm">
-                                            <p class="text-[10px] font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-1">
-                                                <i class="fas fa-user-tie text-[8px]"></i> Catatan Pembimbing
-                                            </p>
-                                            <p class="text-xs text-emerald-900 mt-1 leading-relaxed"><?= esc($prog['catatan_pembimbing']) ?></p>
-                                        </div>
-                                        <?php endif; ?>
-                                    </div>
-                                    <?php endif; ?>
-                                </div>
+                                    <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full flex-shrink-0 <?= $statusBadge ?>"><?= $statusLabel ?></span>
+                                    <i class="fas fa-chevron-right text-gray-300 text-xs group-hover:text-indigo-400 transition-colors flex-shrink-0"></i>
+                                </button>
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </div>
@@ -352,6 +328,8 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
         </div>
     <?php endif; ?>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
     .custom-scrollbar::-webkit-scrollbar {
@@ -379,7 +357,25 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
     .student-item.active h4 {
         color: #4F46E5;
     }
+
+    @keyframes lightboxIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    #lightboxImg {
+        animation: lightboxIn 0.25s ease-out;
+    }
 </style>
+
+<!-- Lightbox -->
+<div id="lightbox" class="fixed inset-0 z-[9999] bg-black/90 hidden items-center justify-center p-4"
+    onclick="closeLightbox(event)">
+    <button onclick="closeLightbox()"
+        class="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white text-lg transition-colors">
+        <i class="fa-solid fa-xmark"></i>
+    </button>
+    <img id="lightboxImg" class="max-w-full max-h-[90vh] rounded-2xl shadow-2xl object-contain" src="">
+</div>
 
 <script>
     function saveActiveSiswa(siswaId) {
@@ -432,6 +428,132 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
             }
         });
     }
+
+    function showProgressDetail(el) {
+        var nama = el.getAttribute('data-nama');
+        var tanggalRaw = el.getAttribute('data-tanggal');
+        var tanggal = el.getAttribute('data-tanggal-display');
+        var status = el.getAttribute('data-status');
+        var statusLabel = el.getAttribute('data-status-label');
+        var deskripsi = el.getAttribute('data-deskripsi');
+        var langkah = el.getAttribute('data-langkah');
+        var kategori = el.getAttribute('data-kategori');
+        var catatanInstruktur = el.getAttribute('data-catatan-instruktur');
+        var catatanPembimbing = el.getAttribute('data-catatan-pembimbing');
+        var foto = el.getAttribute('data-foto');
+        var BASE_URL = '<?= base_url() ?>';
+
+        var badges = {
+            'approved': {bg: 'bg-green-50 text-green-700 border border-green-200', icon: 'fa-check-circle'},
+            'verified_by_instruktur': {bg: 'bg-indigo-50 text-indigo-700 border border-indigo-200', icon: 'fa-check-double'},
+            'submitted': {bg: 'bg-yellow-50 text-yellow-700 border border-yellow-200', icon: 'fa-clock'},
+            'revision': {bg: 'bg-orange-50 text-orange-700 border border-orange-200', icon: 'fa-edit'}
+        };
+        var badge = badges[status] || {bg: 'bg-gray-50 text-gray-600 border border-gray-200', icon: 'fa-pen'};
+
+        var html = '<div class="text-left swal2-html-container" style="margin:0;padding:0;text-align:left;">';
+
+        // Header: title + meta + badge
+        html += '<div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4 mb-4">';
+        html += '<div class="min-w-0"><h3 style="font-size:1rem;font-weight:600;color:#111827;line-height:1.4;margin:0">' + nama.replace(/</g, '&lt;') + '</h3>';
+        html += '<div style="margin-top:6px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:0.8rem;color:#6b7280">';
+        if (kategori) {
+            html += '<span style="font-weight:500;color:#374151;background:#f3f4f6;padding:2px 6px;border-radius:4px">' + kategori.replace(/</g, '&lt;') + '</span>';
+            html += '<span style="color:#d1d5db">&bull;</span>';
+        }
+        html += '<span style="display:flex;align-items:center;gap:4px"><i class="far fa-calendar"></i> ' + tanggal + '</span>';
+        html += '</div></div>';
+        html += '<span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:9999px;font-size:0.75rem;font-weight:600;flex-shrink:0;white-space:nowrap" class="' + badge.bg + '"><i class="fas ' + badge.icon + '" style="font-size:10px"></i> ' + statusLabel + '</span>';
+        html += '</div>';
+
+        // Langkah kerja
+        if (langkah) {
+            try {
+                var decoded = JSON.parse(langkah);
+                if (Array.isArray(decoded)) {
+                    var validSteps = decoded.filter(function(v) { return v.trim() !== ''; });
+                    if (validSteps.length > 0) {
+                        html += '<div style="padding-top:16px;border-top:1px solid #f3f4f6">';
+                        html += '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:14px">';
+                        html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><i class="fas fa-list-ol" style="color:#6366f1"></i><span style="font-size:0.875rem;font-weight:600;color:#374151">Perencanaan dan Persiapan Kerja</span><span style="font-size:0.75rem;color:#6b7280;font-weight:500;background:rgba(229,231,235,0.6);padding:2px 6px;border-radius:9999px">(' + validSteps.length + ')</span></div>';
+                        html += '<ol style="position:relative;border-left:2px solid #e5e7eb;margin-left:8px;padding-left:20px">';
+                        validSteps.forEach(function(step) {
+                            html += '<li style="position:relative;padding-bottom:16px"><div style="position:absolute;left:-25px;top:5px;width:10px;height:10px;border-radius:50%;background:#6366f1"></div><p style="font-size:0.875rem;color:#374151;line-height:1.6;margin:0">' + step.replace(/</g, '&lt;') + '</p></li>';
+                        });
+                        html += '</ol></div></div>';
+                    }
+                }
+            } catch(e) {}
+        }
+
+        // Deskripsi
+        html += '<div style="padding-top:16px;border-top:1px solid #f3f4f6">';
+        html += '<div style="border-radius:12px;background:#f9fafb;border:1px solid #e5e7eb;padding:16px">';
+        html += '<h4 style="font-size:0.875rem;font-weight:600;color:#374151;display:flex;align-items:center;gap:8px;margin:0 0 8px 0"><i class="far fa-file-lines" style="color:#9ca3af"></i> Deskripsi Pekerjaan</h4>';
+        html += '<p style="font-size:0.875rem;line-height:1.75;color:#4b5563;white-space:pre-wrap;margin:0">' + (deskripsi || '<span style="color:#9ca3af;font-style:italic">Tidak ada deskripsi</span>').replace(/</g, '&lt;') + '</p>';
+        html += '</div></div>';
+
+        // Foto
+        if (foto) {
+            html += '<div style="padding-top:16px;border-top:1px solid #f3f4f6">';
+            html += '<h4 style="font-size:0.875rem;font-weight:600;color:#374151;display:flex;align-items:center;gap:8px;margin:0 0 12px 0"><i class="far fa-image" style="color:#9ca3af"></i> Dokumentasi</h4>';
+            html += '<a href="' + BASE_URL + '/files/pkl-progress/' + foto + '" onclick="openLightbox(this.href); return false;" style="position:relative;display:inline-block;overflow:hidden;border-radius:12px;border:1px solid #e5e7eb;cursor:pointer;text-decoration:none">';
+            html += '<img src="' + BASE_URL + '/files/pkl-progress/' + foto + '" style="width:100%;max-height:300px;object-fit:cover;display:block" loading="lazy" alt="Dokumentasi">';
+            html += '</a></div>';
+        }
+
+        // Catatan
+        if (catatanInstruktur || catatanPembimbing) {
+            html += '<div style="padding-top:16px;border-top:1px solid #f3f4f6">';
+            html += '<h4 style="font-size:0.875rem;font-weight:600;color:#374151;display:flex;align-items:center;gap:8px;margin:0 0 12px 0"><i class="far fa-comment-dots" style="color:#9ca3af"></i> Catatan Jurnal</h4>';
+            html += '<div style="display:grid;grid-template-columns:1fr;gap:12px">';
+            if (catatanInstruktur) {
+                html += '<div style="background:#eef2ff;border-left:4px solid #6366f1;border-radius:0 12px 12px 0;padding:14px;box-shadow:0 1px 2px rgba(0,0,0,0.05)"><p style="font-size:10px;font-weight:700;color:#4f46e5;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:4px;margin:0 0 4px 0"><i class="fas fa-building" style="font-size:8px"></i> Catatan Instruktur</p><p style="font-size:0.75rem;color:#312e81;line-height:1.6;margin:0">' + catatanInstruktur.replace(/</g, '&lt;') + '</p></div>';
+            }
+            if (catatanPembimbing) {
+                html += '<div style="background:#ecfdf5;border-left:4px solid #10b981;border-radius:0 12px 12px 0;padding:14px;box-shadow:0 1px 2px rgba(0,0,0,0.05)"><p style="font-size:10px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:4px;margin:0 0 4px 0"><i class="fas fa-user-tie" style="font-size:8px"></i> Catatan Pembimbing</p><p style="font-size:0.75rem;color:#064e3b;line-height:1.6;margin:0">' + catatanPembimbing.replace(/</g, '&lt;') + '</p></div>';
+            }
+            html += '</div></div>';
+        }
+
+        html += '</div>';
+
+        Swal.fire({
+            title: '',
+            html: html,
+            showCloseButton: true,
+            showConfirmButton: false,
+            width: '640px',
+            customClass: { popup: 'swal-custom-popup' },
+            scrollbarPadding: false
+        });
+    }
+
+    function openLightbox(src) {
+        var lb = document.getElementById('lightbox');
+        document.getElementById('lightboxImg').src = src;
+        lb.classList.remove('hidden');
+        lb.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox(e) {
+        if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('fa-xmark') && e.target.id !== 'lightbox') return;
+        var lb = document.getElementById('lightbox');
+        lb.classList.add('hidden');
+        lb.classList.remove('flex');
+        document.body.style.overflow = '';
+        document.getElementById('lightboxImg').src = '';
+    }
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            var lb = document.getElementById('lightbox');
+            if (lb && lb.classList.contains('flex')) {
+                closeLightbox({ target: document.getElementById('lightbox') });
+            }
+        }
+    });
 
     document.addEventListener('DOMContentLoaded', function () {
         var savedSiswaId = localStorage.getItem('selected_siswa_id');
