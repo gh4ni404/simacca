@@ -650,7 +650,7 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
                     response.data.forEach(function(task) {
                         var label = task.judul;
                         if (task.tanggal) {
-                            label += ' (' + formatIndoDate(task.tanggal) + ')';
+                            label = formatIndoDate(task.tanggal) + ' - ' + task.judul;
                         }
                         taskFilter.append('<option value="' + task.id + '">' + label + '</option>');
                     });
