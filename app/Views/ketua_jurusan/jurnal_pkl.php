@@ -76,52 +76,6 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
     </div>
     <?= render_flash_message() ?>
 
-    <!-- Filters -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6 mx-4 md:mx-0">
-        <form method="GET" action="<?= base_url('ketua-jurusan/jurnal-pkl') ?>" class="grid grid-cols-1 md:grid-cols-5 gap-3">
-            <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Kelas</label>
-                <select name="kelas_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Semua Kelas</option>
-                    <?php foreach ($kelasList as $k): ?>
-                        <option value="<?= $k['id'] ?>" <?= ($filters['kelas_id'] ?? '') == $k['id'] ? 'selected' : '' ?>>
-                            <?= esc($k['nama_kelas']) ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Status</label>
-                <select name="status" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Semua Status</option>
-                    <option value="draft" <?= ($filters['status'] ?? '') === 'draft' ? 'selected' : '' ?>>Draft</option>
-                    <option value="submitted" <?= ($filters['status'] ?? '') === 'submitted' ? 'selected' : '' ?>>Menunggu</option>
-                    <option value="verified_by_instruktur" <?= ($filters['status'] ?? '') === 'verified_by_instruktur' ? 'selected' : '' ?>>Verified Instruktur</option>
-                    <option value="approved" <?= ($filters['status'] ?? '') === 'approved' ? 'selected' : '' ?>>Disetujui</option>
-                    <option value="revision" <?= ($filters['status'] ?? '') === 'revision' ? 'selected' : '' ?>>Revisi</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Dari Tanggal</label>
-                <input type="date" name="tanggal_start" value="<?= $filters['tanggal_start'] ?? '' ?>"
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Sampai Tanggal</label>
-                <input type="date" name="tanggal_end" value="<?= $filters['tanggal_end'] ?? '' ?>"
-                       class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div class="flex items-end gap-2">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex-1">
-                    <i class="fas fa-filter mr-1"></i> Filter
-                </button>
-                <a href="<?= base_url('ketua-jurusan/jurnal-pkl') ?>" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium">
-                    <i class="fas fa-times"></i>
-                </a>
-            </div>
-        </form>
-    </div>
-
     <?php if (empty($grouped)): ?>
         <div class="bg-white rounded-2xl shadow-sm p-12 text-center border border-gray-200 mx-4 md:mx-0">
             <div
@@ -135,7 +89,7 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
 
         <!-- Master-Detail Container -->
         <div id="master-detail-container"
-            class="flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-20rem)] lg:overflow-hidden mx-4 md:mx-0">
+            class="flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-12rem)] lg:overflow-hidden mx-4 md:mx-0">
 
             <!-- Left Panel: Student List (Master) -->
             <div id="list-panel"
