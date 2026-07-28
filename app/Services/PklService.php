@@ -215,14 +215,12 @@ class PklService extends BaseService
     public function getProgressById(int $id): array
     {
         try {
-            $db = \Config\Database::connect();
-            $sql = "SELECT pp.*, pt.judul AS nama_task, pt.siswa_id,
-                           pc.nama AS kategori_nama
-                    FROM pkl_progress pp
-                    JOIN pkl_tasks pt ON pt.id = pp.task_id
-                    LEFT JOIN pkl_categories pc ON pc.id = pt.kategori_id
-                    WHERE pp.id = ? AND pp.deleted_at IS NULL";
-            $data = $db->query($sql, [$id])->getRowArray();
+            $data = $this->progressModel
+                ->select('pkl_progress.*, pkl_tasks.judul AS nama_task, pkl_tasks.siswa_id, pkl_categories.nama AS kategori_nama')
+                ->join('pkl_tasks', 'pkl_tasks.id = pkl_progress.task_id AND pkl_tasks.deleted_at IS NULL')
+                ->join('pkl_categories', 'pkl_categories.id = pkl_tasks.kategori_id', 'left')
+                ->where('pkl_progress.id', $id)
+                ->first();
 
             if (!$data) {
                 return $this->error('Progress tidak ditemukan', 404);
@@ -278,31 +276,27 @@ class PklService extends BaseService
     public function getJurnalByTanggal(int $siswaId, ?string $startDate = null, ?string $endDate = null, ?array $statuses = null): array
     {
         try {
-            $db = \Config\Database::connect();
-            $sql = "SELECT pp.*, pt.judul AS nama_task, pc.nama AS kategori_nama
-                    FROM pkl_progress pp
-                    JOIN pkl_tasks pt ON pt.id = pp.task_id
-                    LEFT JOIN pkl_categories pc ON pc.id = pt.kategori_id
-                    WHERE pt.siswa_id = ? AND pp.deleted_at IS NULL AND pt.deleted_at IS NULL";
-            $binds = [$siswaId];
+            $builder = $this->progressModel
+                ->select('pkl_progress.*, pkl_tasks.judul AS nama_task, pkl_categories.nama AS kategori_nama')
+                ->join('pkl_tasks', 'pkl_tasks.id = pkl_progress.task_id AND pkl_tasks.deleted_at IS NULL')
+                ->join('pkl_categories', 'pkl_categories.id = pkl_tasks.kategori_id', 'left')
+                ->where('pkl_tasks.siswa_id', $siswaId);
 
             if ($startDate) {
-                $sql .= ' AND pp.tanggal >= ?';
-                $binds[] = $startDate;
+                $builder->where('pkl_progress.tanggal >=', $startDate);
             }
             if ($endDate) {
-                $sql .= ' AND pp.tanggal <= ?';
-                $binds[] = $endDate;
+                $builder->where('pkl_progress.tanggal <=', $endDate);
             }
 
             if (!empty($statuses)) {
-                $placeholders = implode(',', array_fill(0, count($statuses), '?'));
-                $sql .= " AND pp.status IN ($placeholders)";
-                $binds = array_merge($binds, $statuses);
+                $builder->whereIn('pkl_progress.status', $statuses);
             }
 
-            $sql .= ' ORDER BY pp.tanggal ASC, pp.created_at ASC';
-            $data = $db->query($sql, $binds)->getResultArray();
+            $data = $builder->orderBy('pkl_progress.tanggal', 'ASC')
+                ->orderBy('pkl_progress.created_at', 'ASC')
+                ->findAll();
+
             return $this->success($data);
         } catch (\Exception $e) {
             $this->logError('getJurnalByTanggal', $e);
@@ -313,19 +307,21 @@ class PklService extends BaseService
     public function getCatatanByTask(int $siswaId): array
     {
         try {
-            $db = \Config\Database::connect();
-            $sql = "SELECT pt.id, pt.judul, pc.nama AS kategori_nama,
-                           COUNT(pp.id) AS total_progress,
-                           MIN(pp.tanggal) AS tanggal_mulai,
-                           MAX(pp.tanggal) AS tanggal_selesai,
-                           SUM(CASE WHEN pp.status = 'approved' THEN 1 ELSE 0 END) AS approved_count
-                    FROM pkl_tasks pt
-                    LEFT JOIN pkl_categories pc ON pc.id = pt.kategori_id
-                    LEFT JOIN pkl_progress pp ON pp.task_id = pt.id AND pp.deleted_at IS NULL
-                    WHERE pt.siswa_id = ? AND pt.deleted_at IS NULL
-                    GROUP BY pt.id, pt.judul, pc.nama
-                    ORDER BY pt.created_at ASC";
-            $data = $db->query($sql, [$siswaId])->getResultArray();
+            $data = $this->progressModel
+                ->select('
+                    pkl_tasks.id, pkl_tasks.judul, pkl_categories.nama AS kategori_nama,
+                    COUNT(pkl_progress.id) AS total_progress,
+                    MIN(pkl_progress.tanggal) AS tanggal_mulai,
+                    MAX(pkl_progress.tanggal) AS tanggal_selesai,
+                    SUM(CASE WHEN pkl_progress.status = \'approved\' THEN 1 ELSE 0 END) AS approved_count
+                ', false)
+                ->join('pkl_tasks', 'pkl_tasks.id = pkl_progress.task_id AND pkl_tasks.deleted_at IS NULL')
+                ->join('pkl_categories', 'pkl_categories.id = pkl_tasks.kategori_id', 'left')
+                ->where('pkl_tasks.siswa_id', $siswaId)
+                ->groupBy('pkl_tasks.id, pkl_tasks.judul, pkl_categories.nama')
+                ->orderBy('pkl_tasks.created_at', 'ASC')
+                ->findAll();
+
             return $this->success($data);
         } catch (\Exception $e) {
             $this->logError('getCatatanByTask', $e);
@@ -684,29 +680,36 @@ class PklService extends BaseService
     public function getStatistics(int $siswaId): array
     {
         try {
-            $db = \Config\Database::connect();
-            $sql = "SELECT
-                        COUNT(DISTINCT pp.task_id) AS total_tasks,
-                        COUNT(pp.id) AS total_progress,
-                        SUM(CASE WHEN pp.status = 'draft' THEN 1 ELSE 0 END) AS draft,
-                        SUM(CASE WHEN pp.status = 'submitted' THEN 1 ELSE 0 END) AS submitted,
-                        SUM(CASE WHEN pp.status = 'verified' THEN 1 ELSE 0 END) AS verified,
-                        SUM(CASE WHEN pp.status = 'approved' THEN 1 ELSE 0 END) AS approved,
-                        SUM(CASE WHEN pp.status = 'revision' THEN 1 ELSE 0 END) AS revision,
-                        SUM(CASE WHEN pp.status = 'approved'
-                            AND pp.instruktur_verified_by IS NOT NULL
-                            AND pp.verified_by IS NOT NULL
-                            AND pp.catatan_instruktur IS NOT NULL AND pp.catatan_instruktur != ''
-                            AND pp.catatan_pembimbing IS NOT NULL AND pp.catatan_pembimbing != ''
-                            THEN 1 ELSE 0 END) AS fully_verified
-                    FROM pkl_tasks pt
-                    LEFT JOIN pkl_progress pp ON pp.task_id = pt.id AND pp.deleted_at IS NULL
-                    WHERE pt.siswa_id = ? AND pt.deleted_at IS NULL";
+            $totalTasks = $this->taskModel->where('siswa_id', $siswaId)->countAllResults();
 
-            $result = $db->query($sql, [$siswaId])->getRowArray();
-            return $this->success($result ?: [
-                'total_tasks' => 0, 'total_progress' => 0,
-                'draft' => 0, 'submitted' => 0, 'verified' => 0, 'approved' => 0, 'revision' => 0, 'fully_verified' => 0,
+            $stats = $this->progressModel
+                ->select('
+                    COUNT(pkl_progress.id) AS total_progress,
+                    SUM(CASE WHEN pkl_progress.status = \'draft\' THEN 1 ELSE 0 END) AS draft,
+                    SUM(CASE WHEN pkl_progress.status = \'submitted\' THEN 1 ELSE 0 END) AS submitted,
+                    SUM(CASE WHEN pkl_progress.status = \'verified\' THEN 1 ELSE 0 END) AS verified,
+                    SUM(CASE WHEN pkl_progress.status = \'approved\' THEN 1 ELSE 0 END) AS approved,
+                    SUM(CASE WHEN pkl_progress.status = \'revision\' THEN 1 ELSE 0 END) AS revision,
+                    SUM(CASE WHEN pkl_progress.status = \'approved\'
+                        AND pkl_progress.instruktur_verified_by IS NOT NULL
+                        AND pkl_progress.verified_by IS NOT NULL
+                        AND pkl_progress.catatan_instruktur IS NOT NULL AND pkl_progress.catatan_instruktur != \'\'
+                        AND pkl_progress.catatan_pembimbing IS NOT NULL AND pkl_progress.catatan_pembimbing != \'\'
+                        THEN 1 ELSE 0 END) AS fully_verified
+                ', false)
+                ->join('pkl_tasks', 'pkl_tasks.id = pkl_progress.task_id AND pkl_tasks.deleted_at IS NULL')
+                ->where('pkl_tasks.siswa_id', $siswaId)
+                ->first();
+
+            return $this->success([
+                'total_tasks' => $totalTasks,
+                'total_progress' => (int)($stats['total_progress'] ?? 0),
+                'draft' => (int)($stats['draft'] ?? 0),
+                'submitted' => (int)($stats['submitted'] ?? 0),
+                'verified' => (int)($stats['verified'] ?? 0),
+                'approved' => (int)($stats['approved'] ?? 0),
+                'revision' => (int)($stats['revision'] ?? 0),
+                'fully_verified' => (int)($stats['fully_verified'] ?? 0),
             ]);
         } catch (\Exception $e) {
             $this->logError('getStatistics', $e);

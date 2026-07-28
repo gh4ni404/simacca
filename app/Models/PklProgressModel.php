@@ -93,37 +93,37 @@ class PklProgressModel extends Model
     public function getByTanggal($siswaId, string $tanggal)
     {
         return $this->select('pkl_progress.*, pkl_tasks.judul AS nama_task, pkl_tasks.siswa_id, pkl_categories.nama AS kategori_nama')
-            ->join('pkl_tasks', 'pkl_tasks.id = pkl_progress.task_id')
+            ->join('pkl_tasks', 'pkl_tasks.id = pkl_progress.task_id AND pkl_tasks.deleted_at IS NULL')
             ->join('pkl_categories', 'pkl_categories.id = pkl_tasks.kategori_id', 'left')
             ->where('pkl_tasks.siswa_id', $siswaId)
             ->where('pkl_progress.tanggal', $tanggal)
             ->orderBy('pkl_progress.created_at', 'ASC')
-            ->findAll(); // Mengembalikan data dalam bentuk array (sesuai setelan returnType model)
+            ->findAll();
     }
 
     public function getTimeline($siswaId, int $limit = 30)
     {
-        $db = \Config\Database::connect();
-        $sql = "SELECT pp.tanggal,
-                       COUNT(*) AS total_aktivitas,
-                       SUM(CASE WHEN pp.status = 'approved' THEN 1 ELSE 0 END) AS approved,
-                       SUM(CASE WHEN pp.status = 'verified' THEN 1 ELSE 0 END) AS verified,
-                       SUM(CASE WHEN pp.status = 'submitted' THEN 1 ELSE 0 END) AS submitted,
-                       SUM(CASE WHEN pp.status = 'revision' THEN 1 ELSE 0 END) AS revision,
-                       SUM(CASE WHEN pp.status = 'draft' THEN 1 ELSE 0 END) AS draft,
-                       SUM(CASE WHEN pp.status = 'approved'
-                           AND pp.instruktur_verified_by IS NOT NULL
-                           AND pp.verified_by IS NOT NULL
-                           AND pp.catatan_instruktur IS NOT NULL AND pp.catatan_instruktur != ''
-                           AND pp.catatan_pembimbing IS NOT NULL AND pp.catatan_pembimbing != ''
-                           THEN 1 ELSE 0 END) AS fully_verified
-                FROM pkl_progress pp
-                JOIN pkl_tasks pt ON pt.id = pp.task_id
-                WHERE pt.siswa_id = ? AND pp.deleted_at IS NULL AND pt.deleted_at IS NULL
-                GROUP BY pp.tanggal
-                ORDER BY pp.tanggal DESC
-                LIMIT ?";
-        return $db->query($sql, [$siswaId, $limit])->getResultArray();
+        return $this->select('
+                pkl_progress.tanggal,
+                COUNT(*) AS total_aktivitas,
+                SUM(CASE WHEN pkl_progress.status = \'approved\' THEN 1 ELSE 0 END) AS approved,
+                SUM(CASE WHEN pkl_progress.status = \'verified\' THEN 1 ELSE 0 END) AS verified,
+                SUM(CASE WHEN pkl_progress.status = \'submitted\' THEN 1 ELSE 0 END) AS submitted,
+                SUM(CASE WHEN pkl_progress.status = \'revision\' THEN 1 ELSE 0 END) AS revision,
+                SUM(CASE WHEN pkl_progress.status = \'draft\' THEN 1 ELSE 0 END) AS draft,
+                SUM(CASE WHEN pkl_progress.status = \'approved\'
+                    AND pkl_progress.instruktur_verified_by IS NOT NULL
+                    AND pkl_progress.verified_by IS NOT NULL
+                    AND pkl_progress.catatan_instruktur IS NOT NULL AND pkl_progress.catatan_instruktur != \'\'
+                    AND pkl_progress.catatan_pembimbing IS NOT NULL AND pkl_progress.catatan_pembimbing != \'\'
+                    THEN 1 ELSE 0 END) AS fully_verified
+            ', false)
+            ->join('pkl_tasks', 'pkl_tasks.id = pkl_progress.task_id AND pkl_tasks.deleted_at IS NULL')
+            ->where('pkl_tasks.siswa_id', $siswaId)
+            ->groupBy('pkl_progress.tanggal')
+            ->orderBy('pkl_progress.tanggal', 'DESC')
+            ->limit($limit)
+            ->findAll();
     }
 
     public function getGroupedBySiswaForPembimbing(): array
