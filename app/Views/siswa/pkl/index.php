@@ -347,8 +347,9 @@ helper('setting');
                                             </p>
                                         </div>
                                         <div>
-                                            <p class="font-semibold text-gray-800 mb-1"><?= $day['total_aktivitas'] ?> Aktivitas
-                                                Tercatat</p>
+                                            <p class="font-semibold text-gray-800 mb-1"><?= $day['total_aktivitas'] ?>
+                                                Aktivitas Tercatat
+                                            </p>
                                             <div
                                                 class="flex items-center gap-1.5 text-sm <?= $hasRevision ? 'text-red-600' : 'text-gray-500' ?>">
                                                 <i class="fa-solid <?= $statusIcon ?> text-xs"></i>
