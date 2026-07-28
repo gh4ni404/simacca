@@ -75,7 +75,7 @@
         table.data-table th,
         table.data-table td {
             border: 1px solid #000;
-            padding: 8px;
+            padding: 8px 12px;
             text-align: left;
             font-size: 10pt;
             vertical-align: top;
@@ -108,13 +108,14 @@
 
         table.data-table td ol {
             margin: 0;
-            padding-left: 10px;
+            padding-left: 18px;
             list-style-type: decimal;
         }
 
         table.data-table td ol li {
             /* margin-bottom: 2px; */
             line-height: 1.4;
+            padding-left: 4px;
         }
 
         .notes-section {
