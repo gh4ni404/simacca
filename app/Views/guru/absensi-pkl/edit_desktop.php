@@ -164,6 +164,8 @@
                                     <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">NIS</th>
                                     <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Nama Siswa</th>
                                     <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Status Kehadiran</th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Jam Masuk</th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Jam Pulang</th>
                                     <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Keterangan</th>
                                 </tr>
                             </thead>
@@ -180,6 +182,14 @@
                                     $detail = $existingDetails[$sid] ?? null;
                                     $currentStatus = $detail ? strtolower($detail['status']) : 'hadir';
                                     $currentKeterangan = $detail ? ($detail['keterangan'] ?? '') : '';
+                                    $waktuAbsenVal = '';
+                                    if (!empty($detail['waktu_absen'])) {
+                                        $waktuAbsenVal = date('H:i', strtotime($detail['waktu_absen']));
+                                    }
+                                    $waktuPulangVal = '';
+                                    if (!empty($detail['waktu_pulang'])) {
+                                        $waktuPulangVal = date('H:i', strtotime($detail['waktu_pulang']));
+                                    }
                                 ?>
                                 <tr class="hover:bg-gray-50" data-siswa-id="<?= $sid ?>">
                                     <td class="px-4 py-4 text-sm text-gray-500"><?= $no++ ?></td>
@@ -205,6 +215,30 @@
                                                 <i class="fas <?= $opt['icon'] ?> mr-1"></i><?= $opt['label'] ?>
                                             </button>
                                             <?php endforeach; ?>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-4">
+                                        <div class="flex items-center gap-1.5">
+                                            <input type="time" name="siswa[<?= $sid ?>][waktu_absen]" id="waktu_absen_<?= $sid ?>" value="<?= $waktuAbsenVal ?>"
+                                                   class="px-2 py-1.5 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all time-input"
+                                                   data-siswa-id="<?= $sid ?>" <?= $currentStatus !== 'hadir' ? 'disabled' : '' ?>>
+                                            <button type="button" onclick="setTimeNow('<?= $sid ?>', 'waktu_absen')"
+                                                    class="p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all shadow-sm flex items-center justify-center btn-time"
+                                                    data-siswa-id="<?= $sid ?>" title="Set Waktu Sekarang" <?= $currentStatus !== 'hadir' ? 'disabled' : '' ?>>
+                                                <i class="fas fa-clock text-xs"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-4">
+                                        <div class="flex items-center gap-1.5">
+                                            <input type="time" name="siswa[<?= $sid ?>][waktu_pulang]" id="waktu_pulang_<?= $sid ?>" value="<?= $waktuPulangVal ?>"
+                                                   class="px-2 py-1.5 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all time-input"
+                                                   data-siswa-id="<?= $sid ?>" <?= $currentStatus !== 'hadir' ? 'disabled' : '' ?>>
+                                            <button type="button" onclick="setTimeNow('<?= $sid ?>', 'waktu_pulang')"
+                                                    class="p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all shadow-sm flex items-center justify-center btn-time"
+                                                    data-siswa-id="<?= $sid ?>" title="Set Waktu Sekarang" <?= $currentStatus !== 'hadir' ? 'disabled' : '' ?>>
+                                                <i class="fas fa-clock text-xs"></i>
+                                            </button>
                                         </div>
                                     </td>
                                     <td class="px-4 py-4">
@@ -248,6 +282,16 @@ const statusStyles = {
     'alpa':   { active: 'bg-red-500 text-white border-red-600 shadow-md',     inactive: 'bg-white text-red-700 border-red-300 hover:bg-red-50',    icon: 'fa-times-circle' }
 };
 
+function setTimeNow(siswaId, field) {
+    const input = document.getElementById(`${field}_${siswaId}`);
+    if (input) {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        input.value = `${hours}:${minutes}`;
+    }
+}
+
 function selectStatus(siswaId, status) {
     const hiddenInput = document.querySelector(`.status-input[data-siswa-id="${siswaId}"]`);
     if (hiddenInput) {
@@ -261,6 +305,29 @@ function selectStatus(siswaId, status) {
         const s = statusStyles[btnStatus];
         btn.className = EDIT_BTN_BASE + ' ' + (btnStatus === status ? s.active : s.inactive);
     });
+
+    const waktuAbsenInput = document.getElementById(`waktu_absen_${siswaId}`);
+    const waktuPulangInput = document.getElementById(`waktu_pulang_${siswaId}`);
+    const timeButtons = document.querySelectorAll(`button[data-siswa-id="${siswaId}"].btn-time`);
+    if (waktuAbsenInput && waktuPulangInput) {
+        if (status === 'hadir') {
+            waktuAbsenInput.disabled = false;
+            waktuPulangInput.disabled = false;
+            timeButtons.forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            });
+        } else {
+            waktuAbsenInput.value = '';
+            waktuPulangInput.value = '';
+            waktuAbsenInput.disabled = true;
+            waktuPulangInput.disabled = true;
+            timeButtons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+            });
+        }
+    }
 
     updateProgress();
 }

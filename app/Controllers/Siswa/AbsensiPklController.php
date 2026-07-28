@@ -160,7 +160,7 @@ class AbsensiPklController extends BaseController
         // Fetch attendance specifically for the logged-in student
         $attendanceLookup = [];
         $attendanceRows = $db->table('absensi_pkl_detail')
-            ->select('absensi_pkl_detail.status, absensi_pkl_detail.keterangan, absensi_pkl.tanggal, absensi_pkl_detail.waktu_absen, absensi_pkl.keterangan_umum')
+            ->select('absensi_pkl_detail.status, absensi_pkl_detail.keterangan, absensi_pkl.tanggal, absensi_pkl_detail.waktu_absen, absensi_pkl_detail.waktu_pulang, absensi_pkl.keterangan_umum')
             ->join('absensi_pkl', 'absensi_pkl.id = absensi_pkl_detail.absensi_pkl_id')
             ->where('absensi_pkl_detail.siswa_id', $siswa['id'])
             ->where('absensi_pkl.tanggal >=', $weekStartDate)
@@ -175,6 +175,7 @@ class AbsensiPklController extends BaseController
                 'keterangan'       => $row['keterangan'],
                 'keterangan_umum'  => $row['keterangan_umum'],
                 'waktu_absen'      => $row['waktu_absen'],
+                'waktu_pulang'     => $row['waktu_pulang'],
             ];
         }
 

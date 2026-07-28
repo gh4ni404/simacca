@@ -92,6 +92,8 @@
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">NIS</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Nama Siswa</th>
                             <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Jam Masuk</th>
+                            <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Jam Pulang</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Keterangan</th>
                         </tr>
                     </thead>
@@ -105,6 +107,8 @@
                         ];
                         $no = 1;
                         foreach ($details as $d):
+                            $jamMasuk = ($d['waktu_absen'] && $d['status'] === 'hadir') ? date('H:i', strtotime($d['waktu_absen'])) : '-';
+                            $jamPulang = ($d['waktu_pulang'] && $d['status'] === 'hadir') ? date('H:i', strtotime($d['waktu_pulang'])) : '-';
                         ?>
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 text-sm text-gray-500"><?= $no++ ?></td>
@@ -115,6 +119,8 @@
                                     <?= ucfirst($d['status']) ?>
                                 </span>
                             </td>
+                            <td class="px-6 py-4 text-center text-sm text-gray-600"><?= $jamMasuk ?></td>
+                            <td class="px-6 py-4 text-center text-sm text-gray-600"><?= $jamPulang ?></td>
                             <td class="px-6 py-4 text-sm text-gray-600"><?= esc($d['keterangan'] ?? '-') ?></td>
                         </tr>
                         <?php endforeach; ?>

@@ -137,6 +137,34 @@ class AbsensiPklService extends BaseService
                     throw new \RuntimeException('Gagal menyimpan absensi PKL header');
                 }
 
+                // Format waktu_absen and waktu_pulang
+                if (!empty($data['siswa'])) {
+                    $tanggal = $data['tanggal'];
+                    foreach ($data['siswa'] as $siswaId => &$siswaData) {
+                        if (($siswaData['status'] ?? 'alpa') === 'hadir') {
+                            if (!empty($siswaData['waktu_absen'])) {
+                                $timeAbsen = trim($siswaData['waktu_absen']);
+                                if (strlen($timeAbsen) === 5) $timeAbsen .= ':00';
+                                $siswaData['waktu_absen'] = $tanggal . ' ' . $timeAbsen;
+                            } else {
+                                $siswaData['waktu_absen'] = null;
+                            }
+
+                            if (!empty($siswaData['waktu_pulang'])) {
+                                $timePulang = trim($siswaData['waktu_pulang']);
+                                if (strlen($timePulang) === 5) $timePulang .= ':00';
+                                $siswaData['waktu_pulang'] = $tanggal . ' ' . $timePulang;
+                            } else {
+                                $siswaData['waktu_pulang'] = null;
+                            }
+                        } else {
+                            $siswaData['waktu_absen'] = null;
+                            $siswaData['waktu_pulang'] = null;
+                        }
+                    }
+                    unset($siswaData);
+                }
+
                 // Insert/Update detail
                 $inserted = $this->absensiPklDetailModel->insertBatchAbsensi($absensiPklId, $data['siswa']);
 
@@ -177,14 +205,33 @@ class AbsensiPklService extends BaseService
 
             // Update details
             if (!empty($data['siswa'])) {
+                $tanggal = $data['tanggal'] ?? $absensi['tanggal'];
                 foreach ($data['siswa'] as $siswaId => $siswaData) {
                     if (empty($siswaId)) {
                         continue;
                     }
+                    
+                    $waktuAbsen = null;
+                    $waktuPulang = null;
+                    
+                    if (($siswaData['status'] ?? 'alpa') === 'hadir') {
+                        if (!empty($siswaData['waktu_absen'])) {
+                            $timeAbsen = trim($siswaData['waktu_absen']);
+                            if (strlen($timeAbsen) === 5) $timeAbsen .= ':00';
+                            $waktuAbsen = $tanggal . ' ' . $timeAbsen;
+                        }
+                        if (!empty($siswaData['waktu_pulang'])) {
+                            $timePulang = trim($siswaData['waktu_pulang']);
+                            if (strlen($timePulang) === 5) $timePulang .= ':00';
+                            $waktuPulang = $tanggal . ' ' . $timePulang;
+                        }
+                    }
+                    
                     $this->absensiPklDetailModel->upsertAbsensi($id, (int) $siswaId, [
-                        'status'     => $siswaData['status'] ?? 'alpa',
-                        'keterangan' => $siswaData['keterangan'] ?? null,
-                        'waktu_absen' => date('Y-m-d H:i:s'),
+                        'status'       => $siswaData['status'] ?? 'alpa',
+                        'keterangan'   => $siswaData['keterangan'] ?? null,
+                        'waktu_absen'  => $waktuAbsen,
+                        'waktu_pulang' => $waktuPulang,
                     ]);
                 }
             }

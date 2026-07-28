@@ -170,6 +170,46 @@
                                 </button>
                             </div>
 
+                            <?php
+                            $waktuAbsenVal = '';
+                            if (!empty($detail['waktu_absen'])) {
+                                $waktuAbsenVal = date('H:i', strtotime($detail['waktu_absen']));
+                            }
+                            $waktuPulangVal = '';
+                            if (!empty($detail['waktu_pulang'])) {
+                                $waktuPulangVal = date('H:i', strtotime($detail['waktu_pulang']));
+                            }
+                            ?>
+                            <!-- Waktu Absen & Waktu Pulang -->
+                            <div class="grid grid-cols-2 gap-3 mt-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 mb-1">Jam Masuk</label>
+                                    <div class="flex items-center gap-1.5">
+                                        <input type="time" name="siswa[<?= $sid ?>][waktu_absen]" id="waktu_absen_<?= $sid ?>" value="<?= $waktuAbsenVal ?>"
+                                               class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all time-input"
+                                               data-siswa-id="<?= $sid ?>" <?= $currentStatus !== 'hadir' ? 'disabled' : '' ?>>
+                                        <button type="button" onclick="setTimeNow('<?= $sid ?>', 'waktu_absen')"
+                                                class="p-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl transition-all shadow-sm flex items-center justify-center btn-time"
+                                                data-siswa-id="<?= $sid ?>" title="Set Waktu Sekarang" <?= $currentStatus !== 'hadir' ? 'disabled' : '' ?>>
+                                            <i class="fas fa-clock"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 mb-1">Jam Pulang</label>
+                                    <div class="flex items-center gap-1.5">
+                                        <input type="time" name="siswa[<?= $sid ?>][waktu_pulang]" id="waktu_pulang_<?= $sid ?>" value="<?= $waktuPulangVal ?>"
+                                               class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all time-input"
+                                               data-siswa-id="<?= $sid ?>" <?= $currentStatus !== 'hadir' ? 'disabled' : '' ?>>
+                                        <button type="button" onclick="setTimeNow('<?= $sid ?>', 'waktu_pulang')"
+                                                class="p-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-all shadow-sm flex items-center justify-center btn-time"
+                                                data-siswa-id="<?= $sid ?>" title="Set Waktu Sekarang" <?= $currentStatus !== 'hadir' ? 'disabled' : '' ?>>
+                                            <i class="fas fa-clock"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Keterangan Field -->
                             <div class="mt-3">
                                 <textarea name="siswa[<?= $sid ?>][keterangan]"
@@ -240,6 +280,16 @@
 </style>
 
 <script>
+function setTimeNow(siswaId, field) {
+    const input = document.getElementById(`${field}_${siswaId}`);
+    if (input) {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        input.value = `${hours}:${minutes}`;
+    }
+}
+
 function selectStatus(siswaId, status) {
     const hiddenInput = document.querySelector(`.status-input[data-siswa-id="${siswaId}"]`);
     if (hiddenInput) {
@@ -255,6 +305,29 @@ function selectStatus(siswaId, status) {
             btn.classList.add(`active-${status}`);
         }
     });
+
+    const waktuAbsenInput = document.getElementById(`waktu_absen_${siswaId}`);
+    const waktuPulangInput = document.getElementById(`waktu_pulang_${siswaId}`);
+    const timeButtons = document.querySelectorAll(`button[data-siswa-id="${siswaId}"].btn-time`);
+    if (waktuAbsenInput && waktuPulangInput) {
+        if (status === 'hadir') {
+            waktuAbsenInput.disabled = false;
+            waktuPulangInput.disabled = false;
+            timeButtons.forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            });
+        } else {
+            waktuAbsenInput.value = '';
+            waktuPulangInput.value = '';
+            waktuAbsenInput.disabled = true;
+            waktuPulangInput.disabled = true;
+            timeButtons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+            });
+        }
+    }
 
     updateProgress();
 }

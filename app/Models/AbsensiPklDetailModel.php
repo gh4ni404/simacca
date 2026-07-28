@@ -18,6 +18,7 @@ class AbsensiPklDetailModel extends Model
         'status',
         'keterangan',
         'waktu_absen',
+        'waktu_pulang',
     ];
 
     protected bool $allowEmptyInserts = false;
@@ -84,7 +85,8 @@ class AbsensiPklDetailModel extends Model
                 'siswa_id'       => $siswaId,
                 'status'         => $data['status'] ?? 'alpa',
                 'keterangan'     => $data['keterangan'] ?? null,
-                'waktu_absen'    => date('Y-m-d H:i:s'),
+                'waktu_absen'    => (!empty($data['waktu_absen']) && ($data['status'] ?? 'alpa') === 'hadir') ? $data['waktu_absen'] : null,
+                'waktu_pulang'   => (!empty($data['waktu_pulang']) && ($data['status'] ?? 'alpa') === 'hadir') ? $data['waktu_pulang'] : null,
             ];
         }
 

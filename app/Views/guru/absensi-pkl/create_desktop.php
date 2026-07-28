@@ -135,12 +135,14 @@
                                     <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Nama Siswa</th>
                                     <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Kelas</th>
                                     <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Status Kehadiran</th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Jam Masuk</th>
+                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Jam Pulang</th>
                                     <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Keterangan</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200" id="siswaTableBody">
                                 <tr>
-                                    <td colspan="6" class="px-6 py-12 text-center">
+                                    <td colspan="8" class="px-6 py-12 text-center">
                                         <div class="flex flex-col items-center justify-center">
                                             <div class="p-4 bg-gray-100 rounded-full mb-3">
                                                 <i class="fas fa-hand-pointer text-gray-400 text-3xl"></i>
@@ -202,7 +204,7 @@ document.getElementById('pembimbing_pkl_id')?.addEventListener('change', functio
 function renderSiswaTable(siswaList) {
     const tbody = document.getElementById('siswaTableBody');
     if (!siswaList || siswaList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-12 text-center text-gray-500">
+        tbody.innerHTML = `<tr><td colspan="8" class="px-6 py-12 text-center text-gray-500">
             <i class="fas fa-users-slash text-3xl mb-3 block text-gray-300"></i>
             <p class="font-medium">Tidak ada siswa untuk pembimbing ini</p></td></tr>`;
         document.getElementById('filledCount').textContent = '0';
@@ -235,6 +237,30 @@ function renderSiswaTable(siswaList) {
 
         html += `</div></td>
             <td class="px-4 py-4">
+                <div class="flex items-center gap-1.5">
+                    <input type="time" name="siswa[${sid}][waktu_absen]" id="waktu_absen_${sid}"
+                           class="px-2 py-1.5 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all time-input"
+                           data-siswa-id="${sid}">
+                    <button type="button" onclick="setTimeNow('${sid}', 'waktu_absen')"
+                            class="p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all shadow-sm flex items-center justify-center btn-time"
+                            data-siswa-id="${sid}" title="Set Waktu Sekarang">
+                        <i class="fas fa-clock text-xs"></i>
+                    </button>
+                </div>
+            </td>
+            <td class="px-4 py-4">
+                <div class="flex items-center gap-1.5">
+                    <input type="time" name="siswa[${sid}][waktu_pulang]" id="waktu_pulang_${sid}"
+                           class="px-2 py-1.5 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all time-input"
+                           data-siswa-id="${sid}">
+                    <button type="button" onclick="setTimeNow('${sid}', 'waktu_pulang')"
+                            class="p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all shadow-sm flex items-center justify-center btn-time"
+                            data-siswa-id="${sid}" title="Set Waktu Sekarang">
+                        <i class="fas fa-clock text-xs"></i>
+                    </button>
+                </div>
+            </td>
+            <td class="px-4 py-4">
                 <input type="text" name="siswa[${sid}][keterangan]" placeholder="Opsional"
                        class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
             </td></tr>`;
@@ -243,6 +269,16 @@ function renderSiswaTable(siswaList) {
     tbody.innerHTML = html;
     document.getElementById('totalCount').textContent = siswaList.length;
     document.getElementById('filledCount').textContent = '0';
+}
+
+function setTimeNow(siswaId, field) {
+    const input = document.getElementById(`${field}_${siswaId}`);
+    if (input) {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        input.value = `${hours}:${minutes}`;
+    }
 }
 
 function selectStatus(siswaId, status) {
@@ -258,6 +294,29 @@ function selectStatus(siswaId, status) {
         const s = statusStyles[btnStatus];
         btn.className = DESKTOP_BTN_BASE + ' ' + (btnStatus === status ? s.active : s.inactive);
     });
+
+    const waktuAbsenInput = document.getElementById(`waktu_absen_${siswaId}`);
+    const waktuPulangInput = document.getElementById(`waktu_pulang_${siswaId}`);
+    const timeButtons = document.querySelectorAll(`button[data-siswa-id="${siswaId}"].btn-time`);
+    if (waktuAbsenInput && waktuPulangInput) {
+        if (status === 'hadir') {
+            waktuAbsenInput.disabled = false;
+            waktuPulangInput.disabled = false;
+            timeButtons.forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            });
+        } else {
+            waktuAbsenInput.value = '';
+            waktuPulangInput.value = '';
+            waktuAbsenInput.disabled = true;
+            waktuPulangInput.disabled = true;
+            timeButtons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+            });
+        }
+    }
 
     updateProgress();
 }

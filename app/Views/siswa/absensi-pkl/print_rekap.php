@@ -423,7 +423,10 @@
                             $jamDatang = ($waktuAbsen && $status === 'hadir')
                                 ? date('H:i', strtotime($waktuAbsen))
                                 : '';
-                            $jamPulang = '';
+                            $waktuPulang = $absensi['waktu_pulang'] ?? '';
+                            $jamPulang = ($waktuPulang && $status === 'hadir')
+                                ? date('H:i', strtotime($waktuPulang))
+                                : '';
 
                             // Catatan priority:
                             // 1. absensi_pkl.keterangan_umum
