@@ -365,6 +365,153 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
     #lightboxImg {
         animation: lightboxIn 0.25s ease-out;
     }
+
+    /* Progress Detail Modal */
+    .progress-modal-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        background: rgba(0,0,0,0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        backdrop-filter: blur(4px);
+        animation: modalFadeIn 0.2s ease-out;
+    }
+    .progress-modal-overlay.active {
+        display: flex;
+    }
+    @keyframes modalFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes modalSlideUp {
+        from { opacity: 0; transform: translateY(20px) scale(0.98); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .progress-modal {
+        background: white;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 600px;
+        height: 75vh;
+        max-height: 640px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        animation: modalSlideUp 0.25s ease-out;
+    }
+    .progress-modal-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f3f4f6;
+        background: #f9fafb;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+    }
+    .progress-modal-header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+    }
+    .progress-modal-header-right {
+        flex-shrink: 0;
+    }
+    .progress-modal-close {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #6b7280;
+        transition: all 0.15s;
+    }
+    .progress-modal-close:hover {
+        background: #f3f4f6;
+        color: #111827;
+        border-color: #d1d5db;
+    }
+    .progress-modal-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        background: #fafafa;
+    }
+    .progress-modal-body.custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+    .progress-modal-body.custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .progress-modal-body.custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #d1d5db;
+        border-radius: 10px;
+    }
+    .progress-modal-nav {
+        padding: 12px 20px;
+        border-top: 1px solid #f3f4f6;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+    }
+    .progress-modal-nav-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s;
+        border: 1px solid #c7d2fe;
+        background: #eef2ff;
+        color: #4f46e5;
+    }
+    .progress-modal-nav-btn:hover:not(:disabled) {
+        background: #e0e7ff;
+        border-color: #a5b4fc;
+        color: #4338ca;
+    }
+    .progress-modal-nav-btn:disabled {
+        border-color: #e5e7eb;
+        background: #f9fafb;
+        color: #9ca3af;
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .progress-modal-counter {
+        font-size: 0.75rem;
+        color: #6b7280;
+        font-weight: 500;
+        background: #f3f4f6;
+        padding: 4px 14px;
+        border-radius: 9999px;
+    }
+
+    @media (max-width: 640px) {
+        .progress-modal {
+            height: 85vh;
+            max-height: none;
+            border-radius: 12px;
+        }
+        .progress-modal-body {
+            padding: 16px;
+        }
+        .progress-modal-nav {
+            padding: 10px 16px;
+        }
+    }
 </style>
 
 <!-- Lightbox -->
@@ -375,6 +522,37 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
         <i class="fa-solid fa-xmark"></i>
     </button>
     <img id="lightboxImg" class="max-w-full max-h-[90vh] rounded-2xl shadow-2xl object-contain" src="">
+</div>
+
+<!-- Progress Detail Modal -->
+<div id="progressModal" class="progress-modal-overlay" onclick="closeProgressModal(event)">
+    <div class="progress-modal" onclick="event.stopPropagation()">
+        <div class="progress-modal-header">
+            <div class="progress-modal-header-left">
+                <div id="pm-status-dot" class="w-3 h-3 rounded-full flex-shrink-0"></div>
+                <div class="min-w-0">
+                    <h3 id="pm-title" class="text-sm font-bold text-gray-900 truncate"></h3>
+                    <div id="pm-meta" class="text-xs text-gray-500 mt-0.5 flex items-center gap-2"></div>
+                </div>
+            </div>
+            <div class="progress-modal-header-right flex items-center gap-2">
+                <span id="pm-badge" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold"></span>
+                <button onclick="closeProgressModal()" class="progress-modal-close">
+                    <i class="fas fa-xmark text-sm"></i>
+                </button>
+            </div>
+        </div>
+        <div id="pm-body" class="progress-modal-body custom-scrollbar"></div>
+        <div id="pm-nav" class="progress-modal-nav">
+            <button id="pm-btn-prev" class="progress-modal-nav-btn" onclick="navigateProgress(-1)">
+                <i class="fas fa-chevron-left text-[10px]"></i> Sebelumnya
+            </button>
+            <span id="pm-counter" class="progress-modal-counter">1 / 1</span>
+            <button id="pm-btn-next" class="progress-modal-nav-btn" onclick="navigateProgress(1)">
+                Selanjutnya <i class="fas fa-chevron-right text-[10px]"></i>
+            </button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -429,9 +607,30 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
         });
     }
 
+    var allProgressItems = [];
+    var currentProgressIndex = 0;
+    var BASE_URL_GLOBAL = '<?= base_url() ?>';
+    var progressModalOpen = false;
+
+    function collectProgressItems(el) {
+        var panel = el.closest('.student-detail-panel');
+        if (!panel) return [];
+        var items = panel.querySelectorAll('button[onclick="showProgressDetail(this)"]');
+        return Array.from(items);
+    }
+
     function showProgressDetail(el) {
+        allProgressItems = collectProgressItems(el);
+        currentProgressIndex = allProgressItems.indexOf(el);
+        renderProgressModal();
+        openProgressModal();
+    }
+
+    function renderProgressModal() {
+        var el = allProgressItems[currentProgressIndex];
+        if (!el) return;
+
         var nama = el.getAttribute('data-nama');
-        var tanggalRaw = el.getAttribute('data-tanggal');
         var tanggal = el.getAttribute('data-tanggal-display');
         var status = el.getAttribute('data-status');
         var statusLabel = el.getAttribute('data-status-label');
@@ -441,30 +640,37 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
         var catatanInstruktur = el.getAttribute('data-catatan-instruktur');
         var catatanPembimbing = el.getAttribute('data-catatan-pembimbing');
         var foto = el.getAttribute('data-foto');
-        var BASE_URL = '<?= base_url() ?>';
+        var BASE_URL = BASE_URL_GLOBAL;
 
-        var badges = {
-            'approved': {bg: 'bg-green-50 text-green-700 border border-green-200', icon: 'fa-check-circle'},
-            'verified': {bg: 'bg-blue-50 text-blue-700 border border-blue-200', icon: 'fa-check-double'},
-            'submitted': {bg: 'bg-yellow-50 text-yellow-700 border border-yellow-200', icon: 'fa-clock'},
-            'revision': {bg: 'bg-orange-50 text-orange-700 border border-orange-200', icon: 'fa-edit'}
+        var statusColors = {
+            'approved': {dot: 'bg-green-500', badge: 'bg-green-50 text-green-700 border border-green-200', icon: 'fa-check-circle'},
+            'verified': {dot: 'bg-blue-500', badge: 'bg-blue-50 text-blue-700 border border-blue-200', icon: 'fa-check-double'},
+            'submitted': {dot: 'bg-yellow-500', badge: 'bg-yellow-50 text-yellow-700 border border-yellow-200', icon: 'fa-clock'},
+            'revision': {dot: 'bg-red-500', badge: 'bg-orange-50 text-orange-700 border border-orange-200', icon: 'fa-edit'}
         };
-        var badge = badges[status] || {bg: 'bg-gray-50 text-gray-600 border border-gray-200', icon: 'fa-pen'};
+        var sc = statusColors[status] || {dot: 'bg-gray-400', badge: 'bg-gray-50 text-gray-600 border border-gray-200', icon: 'fa-pen'};
 
-        var html = '<div class="text-left swal2-html-container" style="margin:0;padding:0;text-align:left;">';
+        // Header
+        var dot = document.getElementById('pm-status-dot');
+        dot.className = 'w-3 h-3 rounded-full flex-shrink-0 ' + sc.dot;
 
-        // Header: title + meta + badge
-        html += '<div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4 mb-4">';
-        html += '<div class="min-w-0"><h3 style="font-size:1rem;font-weight:600;color:#111827;line-height:1.4;margin:0">' + nama.replace(/</g, '&lt;') + '</h3>';
-        html += '<div style="margin-top:6px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:0.8rem;color:#6b7280">';
+        var title = document.getElementById('pm-title');
+        title.textContent = nama;
+
+        var metaHtml = '';
         if (kategori) {
-            html += '<span style="font-weight:500;color:#374151;background:#f3f4f6;padding:2px 6px;border-radius:4px">' + kategori.replace(/</g, '&lt;') + '</span>';
-            html += '<span style="color:#d1d5db">&bull;</span>';
+            metaHtml += '<span class="font-medium text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded">' + kategori.replace(/</g, '&lt;') + '</span>';
+            metaHtml += '<span class="text-gray-300">&bull;</span>';
         }
-        html += '<span style="display:flex;align-items:center;gap:4px"><i class="far fa-calendar"></i> ' + tanggal + '</span>';
-        html += '</div></div>';
-        html += '<span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:9999px;font-size:0.75rem;font-weight:600;flex-shrink:0;white-space:nowrap" class="' + badge.bg + '"><i class="fas ' + badge.icon + '" style="font-size:10px"></i> ' + statusLabel + '</span>';
-        html += '</div>';
+        metaHtml += '<span class="flex items-center gap-1"><i class="far fa-calendar text-gray-400"></i> ' + tanggal + '</span>';
+        document.getElementById('pm-meta').innerHTML = metaHtml;
+
+        var badge = document.getElementById('pm-badge');
+        badge.className = 'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold ' + sc.badge;
+        badge.innerHTML = '<i class="fas ' + sc.icon + '" style="font-size:9px"></i> ' + statusLabel;
+
+        // Body
+        var bodyHtml = '';
 
         // Langkah kerja
         if (langkah) {
@@ -473,60 +679,130 @@ $formatIndoDate = function ($dateStr) use ($hariIndo, $bulanIndo) {
                 if (Array.isArray(decoded)) {
                     var validSteps = decoded.filter(function(v) { return v.trim() !== ''; });
                     if (validSteps.length > 0) {
-                        html += '<div style="padding-top:16px;border-top:1px solid #f3f4f6">';
-                        html += '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:14px">';
-                        html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><i class="fas fa-list-ol" style="color:#6366f1"></i><span style="font-size:0.875rem;font-weight:600;color:#374151">Perencanaan dan Persiapan Kerja</span><span style="font-size:0.75rem;color:#6b7280;font-weight:500;background:rgba(229,231,235,0.6);padding:2px 6px;border-radius:9999px">(' + validSteps.length + ')</span></div>';
-                        html += '<ol style="position:relative;border-left:2px solid #e5e7eb;margin-left:8px;padding-left:20px">';
+                        bodyHtml += '<div style="background:white;border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin-bottom:16px">';
+                        bodyHtml += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><i class="fas fa-list-ol" style="color:#6366f1"></i><span style="font-size:0.875rem;font-weight:600;color:#374151">Perencanaan dan Persiapan Kerja</span><span style="font-size:0.7rem;color:#6b7280;font-weight:500;background:#f3f4f6;padding:2px 8px;border-radius:9999px">' + validSteps.length + '</span></div>';
+                        bodyHtml += '<ol style="position:relative;border-left:2px solid #e5e7eb;margin-left:8px;padding-left:20px">';
                         validSteps.forEach(function(step) {
-                            html += '<li style="position:relative;padding-bottom:16px"><div style="position:absolute;left:-25px;top:5px;width:10px;height:10px;border-radius:50%;background:#6366f1"></div><p style="font-size:0.875rem;color:#374151;line-height:1.6;margin:0">' + step.replace(/</g, '&lt;') + '</p></li>';
+                            bodyHtml += '<li style="position:relative;padding-bottom:14px"><div style="position:absolute;left:-25px;top:5px;width:10px;height:10px;border-radius:50%;background:#6366f1"></div><p style="font-size:0.85rem;color:#374151;line-height:1.6;margin:0">' + step.replace(/</g, '&lt;') + '</p></li>';
                         });
-                        html += '</ol></div></div>';
+                        bodyHtml += '</ol></div>';
                     }
                 }
             } catch(e) {}
         }
 
         // Deskripsi
-        html += '<div style="padding-top:16px;border-top:1px solid #f3f4f6">';
-        html += '<div style="border-radius:12px;background:#f9fafb;border:1px solid #e5e7eb;padding:16px">';
-        html += '<h4 style="font-size:0.875rem;font-weight:600;color:#374151;display:flex;align-items:center;gap:8px;margin:0 0 8px 0"><i class="far fa-file-lines" style="color:#9ca3af"></i> Deskripsi Pekerjaan</h4>';
-        html += '<p style="font-size:0.875rem;line-height:1.75;color:#4b5563;white-space:pre-wrap;margin:0">' + (deskripsi || '<span style="color:#9ca3af;font-style:italic">Tidak ada deskripsi</span>').replace(/</g, '&lt;') + '</p>';
-        html += '</div></div>';
+        bodyHtml += '<div style="background:white;border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin-bottom:16px">';
+        bodyHtml += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><i class="far fa-file-lines" style="color:#9ca3af"></i><span style="font-size:0.875rem;font-weight:600;color:#374151">Deskripsi Pekerjaan</span></div>';
+        bodyHtml += '<p style="font-size:0.85rem;line-height:1.75;color:#4b5563;white-space:pre-wrap;margin:0">' + (deskripsi || '<span style="color:#9ca3af;font-style:italic">Tidak ada deskripsi</span>').replace(/</g, '&lt;') + '</p>';
+        bodyHtml += '</div>';
 
         // Foto
         if (foto) {
-            html += '<div style="padding-top:16px;border-top:1px solid #f3f4f6">';
-            html += '<h4 style="font-size:0.875rem;font-weight:600;color:#374151;display:flex;align-items:center;gap:8px;margin:0 0 12px 0"><i class="far fa-image" style="color:#9ca3af"></i> Dokumentasi</h4>';
-            html += '<a href="' + BASE_URL + '/files/pkl-progress/' + foto + '" onclick="openLightbox(this.href); return false;" style="position:relative;display:inline-block;overflow:hidden;border-radius:12px;border:1px solid #e5e7eb;cursor:pointer;text-decoration:none">';
-            html += '<img src="' + BASE_URL + '/files/pkl-progress/' + foto + '" style="width:100%;max-height:300px;object-fit:cover;display:block" loading="lazy" alt="Dokumentasi">';
-            html += '</a></div>';
+            bodyHtml += '<div style="margin-bottom:16px">';
+            bodyHtml += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><i class="far fa-image" style="color:#9ca3af"></i><span style="font-size:0.875rem;font-weight:600;color:#374151">Dokumentasi</span></div>';
+            bodyHtml += '<a href="' + BASE_URL + '/files/pkl-progress/' + foto + '" onclick="openLightbox(this.href); return false;" style="display:inline-block;overflow:hidden;border-radius:12px;border:1px solid #e5e7eb;cursor:pointer;text-decoration:none">';
+            bodyHtml += '<img src="' + BASE_URL + '/files/pkl-progress/' + foto + '" style="width:100%;max-height:280px;object-fit:cover;display:block" loading="lazy" alt="Dokumentasi">';
+            bodyHtml += '</a></div>';
         }
 
         // Catatan
         if (catatanInstruktur || catatanPembimbing) {
-            html += '<div style="padding-top:16px;border-top:1px solid #f3f4f6">';
-            html += '<h4 style="font-size:0.875rem;font-weight:600;color:#374151;display:flex;align-items:center;gap:8px;margin:0 0 12px 0"><i class="far fa-comment-dots" style="color:#9ca3af"></i> Catatan Jurnal</h4>';
-            html += '<div style="display:grid;grid-template-columns:1fr;gap:12px">';
+            bodyHtml += '<div>';
+            bodyHtml += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><i class="far fa-comment-dots" style="color:#9ca3af"></i><span style="font-size:0.875rem;font-weight:600;color:#374151">Catatan Jurnal</span></div>';
+            bodyHtml += '<div style="display:grid;gap:10px">';
             if (catatanInstruktur) {
-                html += '<div style="background:#eef2ff;border-left:4px solid #6366f1;border-radius:0 12px 12px 0;padding:14px;box-shadow:0 1px 2px rgba(0,0,0,0.05)"><p style="font-size:10px;font-weight:700;color:#4f46e5;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:4px;margin:0 0 4px 0"><i class="fas fa-building" style="font-size:8px"></i> Catatan Instruktur</p><p style="font-size:0.75rem;color:#312e81;line-height:1.6;margin:0">' + catatanInstruktur.replace(/</g, '&lt;') + '</p></div>';
+                bodyHtml += '<div style="background:#eef2ff;border-left:4px solid #6366f1;border-radius:0 10px 10px 0;padding:12px"><p style="font-size:10px;font-weight:700;color:#4f46e5;text-transform:uppercase;letter-spacing:0.05em;margin:0 0 4px 0"><i class="fas fa-building" style="font-size:8px"></i> Catatan Instruktur</p><p style="font-size:0.75rem;color:#312e81;line-height:1.6;margin:0">' + catatanInstruktur.replace(/</g, '&lt;') + '</p></div>';
             }
             if (catatanPembimbing) {
-                html += '<div style="background:#ecfdf5;border-left:4px solid #10b981;border-radius:0 12px 12px 0;padding:14px;box-shadow:0 1px 2px rgba(0,0,0,0.05)"><p style="font-size:10px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.05em;display:flex;align-items:center;gap:4px;margin:0 0 4px 0"><i class="fas fa-user-tie" style="font-size:8px"></i> Catatan Pembimbing</p><p style="font-size:0.75rem;color:#064e3b;line-height:1.6;margin:0">' + catatanPembimbing.replace(/</g, '&lt;') + '</p></div>';
+                bodyHtml += '<div style="background:#ecfdf5;border-left:4px solid #10b981;border-radius:0 10px 10px 0;padding:12px"><p style="font-size:10px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.05em;margin:0 0 4px 0"><i class="fas fa-user-tie" style="font-size:8px"></i> Catatan Pembimbing</p><p style="font-size:0.75rem;color:#064e3b;line-height:1.6;margin:0">' + catatanPembimbing.replace(/</g, '&lt;') + '</p></div>';
             }
-            html += '</div></div>';
+            bodyHtml += '</div></div>';
         }
 
-        html += '</div>';
+        document.getElementById('pm-body').innerHTML = bodyHtml;
 
-        Swal.fire({
-            title: '',
-            html: html,
-            showCloseButton: true,
-            showConfirmButton: false,
-            width: '640px',
-            customClass: { popup: 'swal-custom-popup' },
-            scrollbarPadding: false
-        });
+        // Navigation
+        var total = allProgressItems.length;
+        var hasPrev = currentProgressIndex > 0;
+        var hasNext = currentProgressIndex < total - 1;
+
+        var nav = document.getElementById('pm-nav');
+        nav.style.display = total > 1 ? 'flex' : 'none';
+
+        var btnPrev = document.getElementById('pm-btn-prev');
+        btnPrev.disabled = !hasPrev;
+
+        var btnNext = document.getElementById('pm-btn-next');
+        btnNext.disabled = !hasNext;
+
+        document.getElementById('pm-counter').textContent = (currentProgressIndex + 1) + ' / ' + total;
+
+        // Scroll to top
+        document.getElementById('pm-body').scrollTop = 0;
+    }
+
+    var swipeStartX = 0;
+    var swipeStartY = 0;
+
+    function openProgressModal() {
+        progressModalOpen = true;
+        var modal = document.getElementById('progressModal');
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        document.addEventListener('keydown', progressKeyHandler);
+
+        var body = document.getElementById('pm-body');
+        body.addEventListener('touchstart', handleTouchStart, {passive: true});
+        body.addEventListener('touchend', handleTouchEnd, {passive: true});
+    }
+
+    function closeProgressModal(e) {
+        if (e && e.target !== document.getElementById('progressModal')) return;
+        progressModalOpen = false;
+        var modal = document.getElementById('progressModal');
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+        document.removeEventListener('keydown', progressKeyHandler);
+
+        var body = document.getElementById('pm-body');
+        body.removeEventListener('touchstart', handleTouchStart);
+        body.removeEventListener('touchend', handleTouchEnd);
+    }
+
+    function handleTouchStart(e) {
+        swipeStartX = e.changedTouches[0].screenX;
+        swipeStartY = e.changedTouches[0].screenY;
+    }
+
+    function handleTouchEnd(e) {
+        var diffX = e.changedTouches[0].screenX - swipeStartX;
+        var diffY = e.changedTouches[0].screenY - swipeStartY;
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 60) {
+            if (diffX > 0) navigateProgress(-1);
+            else navigateProgress(1);
+        }
+    }
+
+    function navigateProgress(direction) {
+        var newIndex = currentProgressIndex + direction;
+        if (newIndex < 0 || newIndex >= allProgressItems.length) return;
+        currentProgressIndex = newIndex;
+        renderProgressModal();
+    }
+
+    function progressKeyHandler(e) {
+        if (!progressModalOpen) return;
+        if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            navigateProgress(-1);
+        } else if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            navigateProgress(1);
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            closeProgressModal();
+        }
     }
 
     function openLightbox(src) {
