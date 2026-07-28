@@ -405,12 +405,12 @@
                     <tbody>
                         <?php foreach ($week['days'] as $day): ?>
                             <?php
-                            $dateStr     = $day['date_str'];
-                            $absensi     = $attendanceLookup[$dateStr] ?? null;
-                            $status      = $absensi['status'] ?? '';
-                            $keterangan  = $absensi['keterangan'] ?? '';
-                            $waktuAbsen  = $absensi['waktu_absen'] ?? '';
-                            $catatan     = $progressLookup[$dateStr] ?? '';
+                            $dateStr         = $day['date_str'];
+                            $absensi         = $attendanceLookup[$dateStr] ?? null;
+                            $status          = $absensi['status'] ?? '';
+                            $keterangan      = $absensi['keterangan'] ?? '';
+                            $keteranganUmum  = $absensi['keterangan_umum'] ?? '';
+                            $waktuAbsen      = $absensi['waktu_absen'] ?? '';
 
                             // Count totals
                             if ($status === 'sakit') $totalSakit++;
@@ -419,27 +419,21 @@
 
                             $rowNum++;
 
-                            // Display jam datang / jam pulang only if present
-                            $jamDatang = '';
+                            // Jam datang only when hadir
+                            $jamDatang = ($waktuAbsen && $status === 'hadir')
+                                ? date('H:i', strtotime($waktuAbsen))
+                                : '';
                             $jamPulang = '';
-                            if ($waktuAbsen && $status === 'hadir') {
-                                $jamDatang = date('H:i', strtotime($waktuAbsen));
-                            }
 
-                            // Build catatan cell content
-                            $catatanDisplay = '';
-                            if ($status && $status !== 'hadir') {
-                                $statusLabels = [
-                                    'sakit' => 'Sakit',
-                                    'izin'  => 'Izin',
-                                    'alpa'  => 'Tanpa Keterangan',
-                                ];
-                                $catatanDisplay = $statusLabels[$status] ?? ucfirst($status);
-                                if ($keterangan) {
-                                    $catatanDisplay .= ' – ' . $keterangan;
-                                }
-                            } elseif ($catatan) {
-                                $catatanDisplay = $catatan;
+                            // Catatan priority:
+                            // 1. absensi_pkl.keterangan_umum
+                            // 2. absensi_pkl_detail.keterangan (hanya jika sakit/izin/alpa)
+                            if (!empty($keteranganUmum)) {
+                                $catatanDisplay = $keteranganUmum;
+                            } elseif (in_array($status, ['sakit', 'izin', 'alpa']) && !empty($keterangan)) {
+                                $catatanDisplay = $keterangan;
+                            } else {
+                                $catatanDisplay = '';
                             }
                             ?>
                             <tr>
