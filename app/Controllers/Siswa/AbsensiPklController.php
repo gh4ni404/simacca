@@ -94,10 +94,10 @@ class AbsensiPklController extends BaseController
     }
 
     /**
-     * Print weekly attendance recap for PKL group
-     * @param int|null $minggu Week number (null = all weeks)
+     * Print monthly attendance recap for PKL group
+     * @param string|null $bulan Month in "Y-m" format (null = all months)
      */
-    public function printRekap($minggu = null)
+    public function printRekap($bulan = null)
     {
         $userId = $this->session->get('userId');
         $siswa = $this->siswaModel->getByUserId($userId);
@@ -139,20 +139,18 @@ class AbsensiPklController extends BaseController
             ]);
         }
 
-        // Determine date range based on selected week
-        $weekStartDate = $startDate;
-        $weekEndDate = $endDate ?: date('Y-m-d');
+        // Determine date range based on selected month
+        $filterStartDate = $startDate;
+        $filterEndDate = $endDate ?: date('Y-m-d');
 
-        if ($minggu !== null) {
-            $minggu = (int) $minggu;
-            $range = get_week_range($startDate, $minggu);
-            $weekStartDate = $range['start'];
-            $weekEndDate = $range['end'];
+        if ($bulan !== null && preg_match('/^\d{4}-\d{2}$/', $bulan)) {
+            // Get first and last day of the selected month
+            $monthStart = $bulan . '-01';
+            $monthEnd = date('Y-m-t', strtotime($monthStart));
 
-            // Clamp end date to PKL end date
-            if ($endDate && $weekEndDate > $endDate) {
-                $weekEndDate = $endDate;
-            }
+            // Clamp to PKL date range
+            $filterStartDate = max($monthStart, $startDate);
+            $filterEndDate = $endDate ? min($monthEnd, $endDate) : $monthEnd;
         }
 
         $db = \Config\Database::connect();
@@ -163,8 +161,8 @@ class AbsensiPklController extends BaseController
             ->select('absensi_pkl_detail.status, absensi_pkl_detail.keterangan, absensi_pkl.tanggal, absensi_pkl_detail.waktu_absen, absensi_pkl_detail.waktu_pulang, absensi_pkl.keterangan_umum')
             ->join('absensi_pkl', 'absensi_pkl.id = absensi_pkl_detail.absensi_pkl_id')
             ->where('absensi_pkl_detail.siswa_id', $siswa['id'])
-            ->where('absensi_pkl.tanggal >=', $weekStartDate)
-            ->where('absensi_pkl.tanggal <=', $weekEndDate)
+            ->where('absensi_pkl.tanggal >=', $filterStartDate)
+            ->where('absensi_pkl.tanggal <=', $filterEndDate)
             ->where('absensi_pkl.deleted_at', null)
             ->get()
             ->getResultArray();
@@ -192,7 +190,7 @@ class AbsensiPklController extends BaseController
             $progressLookup[$row['tanggal']] = $row['judul'] . ': ' . $row['deskripsi'];
         }
 
-        // Generate weekly calendar blocks grouped by week
+        // Generate monthly calendar blocks
         $weeks = [];
         $indonesianMonth = [
             1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -213,60 +211,59 @@ class AbsensiPklController extends BaseController
             return $map[$dayEnglish] ?? $dayEnglish;
         };
 
-        // Helper: week-of-month based on Monday's date
-        $weekOfMonth = function (\DateTime $monday) {
-            $first = new \DateTime($monday->format('Y-m-01'));
-            $firstDow = (int) $first->format('N');
-            $firstMonday = clone $first;
-            if ($firstDow > 1) {
-                $firstMonday->modify('+' . (8 - $firstDow) . ' days');
+        // Determine which months to render
+        $startDt = new \DateTime($startDate);
+        $endDt = new \DateTime($endDate ?: date('Y-m-d'));
+
+        $monthsToRender = [];
+        if ($bulan !== null && preg_match('/^\d{4}-\d{2}$/', $bulan)) {
+            $monthsToRender[] = $bulan;
+        } else {
+            // Generate all months between start and end date
+            $current = new \DateTime($startDate);
+            $current->modify('first day of this month');
+            $lastMonth = new \DateTime($endDate ?: date('Y-m-d'));
+            $lastMonth->modify('last day of this month');
+
+            while ($current <= $lastMonth) {
+                $monthsToRender[] = $current->format('Y-m');
+                $current->modify('first day of next month');
             }
-            $diff = $firstMonday->diff($monday)->days;
-            return (int) floor($diff / 7) + 1;
-        };
+        }
 
-        // Use the setting week-base to determine total weeks
-        $end = new \DateTime($endDate ?: date('Y-m-d'));
-        $weekBaseStr = get_jurnal_pkl_week_base();
-        $weekBase    = new \DateTime($weekBaseStr ?: $startDate);
-        $totalWeeks  = (int) floor($weekBase->diff($end)->days / 7) + 1;
+        // Generate days for each month
+        foreach ($monthsToRender as $monthStr) {
+            $monthStart = new \DateTime($monthStr . '-01');
+            $monthEnd = new \DateTime(date('Y-m-t', strtotime($monthStr . '-01')));
 
-        // Determine which weeks to render
-        $weeksToRender = ($minggu !== null) ? [$minggu] : range(1, $totalWeeks);
-
-        foreach ($weeksToRender as $w) {
-            $range  = get_week_range($startDate, $w);
-            $wStart = new \DateTime($range['start']);
+            // Clamp to PKL date range
+            if ($monthStart < $startDt) $monthStart = clone $startDt;
+            if ($monthEnd > $endDt) $monthEnd = clone $endDt;
 
             $days = [];
-            for ($i = 0; $i < 6; $i++) { // Mon(0)–Sat(5), skip Sunday
-                $dayDt   = clone $wStart;
-                $dayDt->modify("+$i days");
-                $dateStr = $dayDt->format('Y-m-d');
+            $currentDay = clone $monthStart;
 
-                if ($dateStr >= $weekStartDate && $dateStr <= $weekEndDate) {
-                    $mn = (int) $dayDt->format('m');
-                    $yr = (int) $dayDt->format('Y');
+            while ($currentDay <= $monthEnd) {
+                $dayOfWeek = (int) $currentDay->format('N'); // 1=Mon, 7=Sun
+                if ($dayOfWeek <= 6) { // Skip Sunday (7)
+                    $dateStr = $currentDay->format('Y-m-d');
+                    $mn = (int) $currentDay->format('m');
+                    $yr = (int) $currentDay->format('Y');
                     $days[] = [
                         'date_str'     => $dateStr,
-                        'day_name'     => $getIndonesianDayName($dayDt->format('l')),
-                        'display_date' => $dayDt->format('d') . ' ' . $indonesianMonth[$mn] . ' ' . $yr,
+                        'day_name'     => $getIndonesianDayName($currentDay->format('l')),
+                        'display_date' => $currentDay->format('d') . ' ' . $indonesianMonth[$mn] . ' ' . $yr,
                     ];
                 }
+                $currentDay->modify('+1 day');
             }
 
-            if (empty($days)) {
-                continue;
+            if (!empty($days)) {
+                $weeks[] = [
+                    'week_label' => $indonesianMonth[(int) $monthStart->format('m')] . ' ' . $monthStart->format('Y'),
+                    'days'       => $days,
+                ];
             }
-
-            $monMonth = (int) $wStart->format('m');
-            $monYear  = (int) $wStart->format('Y');
-            $wNum     = $weekOfMonth($wStart);
-
-            $weeks[] = [
-                'week_label' => $indonesianMonth[$monMonth] . ' (Minggu ke-' . $wNum . ') ' . $monYear,
-                'days'       => $days,
-            ];
         }
 
         $data = [

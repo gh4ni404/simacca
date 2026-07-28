@@ -24,7 +24,7 @@
         </div>
         <div>
             <button onclick="openRekapCetakModal()" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5">
-                <i class="fas fa-print"></i> Cetak Rekap Mingguan
+                <i class="fas fa-print"></i> Cetak Rekap Bulanan
             </button>
         </div>
     </div>
@@ -223,7 +223,7 @@
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 overflow-hidden">
         <div class="px-5 pt-5 pb-4 border-b border-gray-100">
             <div class="flex items-center justify-between">
-                <h3 class="text-base font-bold text-gray-900">Pilih Minggu</h3>
+                <h3 class="text-base font-bold text-gray-900">Pilih Bulan</h3>
                 <button onclick="document.getElementById('modalCetakRekap').classList.add('hidden')"
                     class="text-gray-400 hover:text-gray-600 transition-colors">
                     <i class="fa-solid fa-xmark text-lg"></i>
@@ -247,11 +247,11 @@ var REKAP_END_DATE = '<?= get_jurnal_pkl_end_date() ?>';
 
 function openRekapCetakModal() {
     document.getElementById('modalCetakRekap').classList.remove('hidden');
-    renderRekapWeekList();
+    renderRekapMonthList();
 }
 
-function buildRekapCetakUrl(weekNum) {
-    var url = REKAP_CETAK_BASE_URL + '/' + weekNum;
+function buildRekapCetakUrl(monthStr) {
+    var url = REKAP_CETAK_BASE_URL + '/' + monthStr;
     printRekapCetak(url);
 }
 
@@ -278,7 +278,7 @@ function printRekapCetak(url) {
     iframe.src = url;
 }
 
-function renderRekapWeekList() {
+function renderRekapMonthList() {
     var container = document.getElementById('weekListRekap');
     if (!container) return;
 
@@ -292,44 +292,45 @@ function renderRekapWeekList() {
     var end = REKAP_END_DATE ? new Date(REKAP_END_DATE + 'T00:00:00') : new Date(start);
     if (end < start) end = new Date(start);
 
-    var weekBase = new Date(start);
-    var dow = weekBase.getDay();
-    if (dow === 0) dow = 7;
-    if (dow > 1) weekBase.setDate(weekBase.getDate() - (dow - 1));
+    var months = [];
+    var current = new Date(start.getFullYear(), start.getMonth(), 1);
+    var lastMonth = new Date(end.getFullYear(), end.getMonth(), 1);
 
-    var totalDays = Math.floor((end - weekBase) / (1000 * 60 * 60 * 24));
-    var totalWeeks = Math.floor(totalDays / 7) + 1;
+    while (current <= lastMonth) {
+        var monthStart = new Date(current.getFullYear(), current.getMonth(), 1);
+        var monthEnd = new Date(current.getFullYear(), current.getMonth() + 1, 0);
 
-    var opts = { day: 'numeric', month: 'short' };
+        if (monthStart < start) monthStart = new Date(start);
+        if (monthEnd > end) monthEnd = new Date(end);
+
+        months.push({
+            str: current.getFullYear() + '-' + String(current.getMonth() + 1).padStart(2, '0'),
+            label: current.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }),
+            start: monthStart,
+            end: monthEnd
+        });
+
+        current.setMonth(current.getMonth() + 1);
+    }
+
     var html = '';
+    months.forEach(function(month) {
+        var isCurrentMonth = (today.getMonth() === month.start.getMonth() && today.getFullYear() === month.start.getFullYear());
 
-    for (var w = 1; w <= totalWeeks; w++) {
-        var wStart = new Date(weekBase);
-        wStart.setDate(wStart.getDate() + (w - 1) * 7);
-        var wEnd = new Date(wStart);
-        wEnd.setDate(wEnd.getDate() + 6);
-
-        if (w === 1 && wStart < start) wStart = new Date(start);
-        if (w === totalWeeks && REKAP_END_DATE && wEnd > end) wEnd = new Date(end);
-
-        var isCurrentWeek = (today >= wStart && today <= wEnd);
-        var labelStart = wStart.toLocaleDateString('id-ID', opts);
-        var labelEnd = wEnd.toLocaleDateString('id-ID', opts);
-
-        html += '<a href="javascript:void(0)" onclick="buildRekapCetakUrl(' + w + ')" ' +
+        html += '<a href="javascript:void(0)" onclick="buildRekapCetakUrl(\'' + month.str + '\')" ' +
             'class="block p-3 rounded-xl border transition-all cursor-pointer hover:border-blue-500/50 hover:bg-gray-50 ' +
-            (isCurrentWeek ? 'border-blue-500 bg-blue-50' : 'border-gray-200') + '">' +
+            (isCurrentMonth ? 'border-blue-500 bg-blue-50' : 'border-gray-200') + '">' +
             '<div class="flex items-center justify-between">' +
             '<div>' +
-            '<p class="text-sm font-semibold text-gray-800">Minggu ' + w + '</p>' +
-            '<p class="text-xs text-gray-500">' + labelStart + ' – ' + labelEnd + '</p>' +
+            '<p class="text-sm font-semibold text-gray-800">' + month.label + '</p>' +
+            '<p class="text-xs text-gray-500">' + month.start.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) + ' – ' + month.end.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) + '</p>' +
             '</div>' +
-            (isCurrentWeek
-                ? '<span class="text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">Minggu Ini</span>'
+            (isCurrentMonth
+                ? '<span class="text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">Bulan Ini</span>'
                 : '<i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>') +
             '</div>' +
             '</a>';
-    }
+    });
 
     container.innerHTML = html;
 }

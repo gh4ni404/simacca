@@ -370,7 +370,7 @@ $routes->group('siswa', ['filter' => 'role:siswa'], function ($routes) {
     $routes->get('absensi-pkl', 'Siswa\AbsensiPklController::index');
     $routes->get('absensi-pkl/detail/(:num)', 'Siswa\AbsensiPklController::detail/$1');
     $routes->get('absensi-pkl/cetak-rekap', 'Siswa\AbsensiPklController::printRekap');
-    $routes->get('absensi-pkl/cetak-rekap/(:num)', 'Siswa\AbsensiPklController::printRekap/$1');
+    $routes->get('absensi-pkl/cetak-rekap/(:segment)', 'Siswa\AbsensiPklController::printRekap/$1');
 });
 
 // Instruktur PKL Routes
