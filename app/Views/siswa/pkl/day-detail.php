@@ -93,7 +93,13 @@
                         </div>
                         <?php endif; ?>
 
-                        <?php if (get_pkl_progress_display_status($p) !== 'completed'): ?>
+                        <?php if ($p['status'] === 'approved'): ?>
+                        <div class="mt-3">
+                            <span class="inline-flex items-center px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-xs font-medium border border-green-200">
+                                <i class="fas fa-lock mr-1.5"></i>Tidak dapat diedit
+                            </span>
+                        </div>
+                        <?php else: ?>
                         <div class="mt-3 flex gap-2">
                             <a href="<?= base_url('siswa/jurnal-pkl/edit-progress/' . $p['id']); ?>"
                                class="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-xs font-medium">

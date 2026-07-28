@@ -147,7 +147,13 @@ $hariIndo = [
                         </div>
                         <?php endif; ?>
 
-                        <?php if (get_pkl_progress_display_status($p) !== 'completed'): ?>
+                        <?php if ($p['status'] === 'approved'): ?>
+                        <div class="mt-3 pt-3 border-t border-gray-100">
+                            <span class="inline-flex items-center px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-xs font-medium border border-green-200">
+                                <i class="fas fa-lock mr-1.5"></i>Tidak dapat dihapus
+                            </span>
+                        </div>
+                        <?php else: ?>
                         <div class="mt-3 pt-3 border-t border-gray-100 flex items-center gap-2">
                             <form action="<?= base_url('siswa/jurnal-pkl/hapus-progress/' . $p['id']); ?>" method="POST" class="inline">
                                 <?= csrf_field(); ?>
