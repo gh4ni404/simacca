@@ -8,8 +8,8 @@
 </style>
 
 <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
-    <div class="mb-8">
-        <div class="flex items-center gap-3 mb-2">
+    <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="flex items-center gap-3">
             <div class="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
                 <i class="fas fa-clipboard-check text-white text-2xl"></i>
             </div>
@@ -21,6 +21,11 @@
                     <i class="fas fa-info-circle mr-1"></i> Riwayat kehadiran PKL Anda
                 </p>
             </div>
+        </div>
+        <div>
+            <button onclick="openRekapCetakModal()" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5">
+                <i class="fas fa-print"></i> Cetak Rekap Mingguan
+            </button>
         </div>
     </div>
 
@@ -211,10 +216,124 @@
     </div>
 </div>
 
+<!-- Modal Cetak Rekap -->
+<div id="modalCetakRekap"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+    onclick="if(event.target===this)this.classList.add('hidden')">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 overflow-hidden">
+        <div class="px-5 pt-5 pb-4 border-b border-gray-100">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-bold text-gray-900">Pilih Minggu</h3>
+                <button onclick="document.getElementById('modalCetakRekap').classList.add('hidden')"
+                    class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">
+                <?= get_jurnal_pkl_start_date() ? date('d M Y', strtotime(get_jurnal_pkl_start_date())) . ' – ' . (get_jurnal_pkl_end_date() ? date('d M Y', strtotime(get_jurnal_pkl_end_date())) : '...') : 'Belum diatur' ?>
+            </p>
+        </div>
+        <div id="weekListRekap" class="p-4 space-y-2 max-h-80 overflow-y-auto"></div>
+    </div>
+</div>
+
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
 <script>
+var REKAP_CETAK_BASE_URL = '<?= base_url('siswa/absensi-pkl/cetak-rekap') ?>';
+var REKAP_START_DATE = '<?= get_jurnal_pkl_start_date() ?>';
+var REKAP_END_DATE = '<?= get_jurnal_pkl_end_date() ?>';
+
+function openRekapCetakModal() {
+    document.getElementById('modalCetakRekap').classList.remove('hidden');
+    renderRekapWeekList();
+}
+
+function buildRekapCetakUrl(weekNum) {
+    var url = REKAP_CETAK_BASE_URL + '/' + weekNum;
+    printRekapCetak(url);
+}
+
+function printRekapCetak(url) {
+    document.getElementById('modalCetakRekap').classList.add('hidden');
+    var iframe = document.getElementById('printFrameRekap');
+    if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.id = 'printFrameRekap';
+        iframe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:0;border:none;opacity:0';
+        document.body.appendChild(iframe);
+    }
+    iframe.onload = function () {
+        iframe.onload = null;
+        setTimeout(function () {
+            try {
+                var win = iframe.contentWindow;
+                win.print();
+            } catch (e) {
+                window.open(url, '_blank');
+            }
+        }, 300);
+    };
+    iframe.src = url;
+}
+
+function renderRekapWeekList() {
+    var container = document.getElementById('weekListRekap');
+    if (!container) return;
+
+    if (!REKAP_START_DATE) {
+        container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">Belum ada pengaturan tanggal PKL</p>';
+        return;
+    }
+
+    var start = new Date(REKAP_START_DATE + 'T00:00:00');
+    var today = new Date(new Date().toISOString().split('T')[0] + 'T00:00:00');
+    var end = REKAP_END_DATE ? new Date(REKAP_END_DATE + 'T00:00:00') : new Date(start);
+    if (end < start) end = new Date(start);
+
+    var weekBase = new Date(start);
+    var dow = weekBase.getDay();
+    if (dow === 0) dow = 7;
+    if (dow > 1) weekBase.setDate(weekBase.getDate() - (dow - 1));
+
+    var totalDays = Math.floor((end - weekBase) / (1000 * 60 * 60 * 24));
+    var totalWeeks = Math.floor(totalDays / 7) + 1;
+
+    var opts = { day: 'numeric', month: 'short' };
+    var html = '';
+
+    for (var w = 1; w <= totalWeeks; w++) {
+        var wStart = new Date(weekBase);
+        wStart.setDate(wStart.getDate() + (w - 1) * 7);
+        var wEnd = new Date(wStart);
+        wEnd.setDate(wEnd.getDate() + 6);
+
+        if (w === 1 && wStart < start) wStart = new Date(start);
+        if (w === totalWeeks && REKAP_END_DATE && wEnd > end) wEnd = new Date(end);
+
+        var isCurrentWeek = (today >= wStart && today <= wEnd);
+        var labelStart = wStart.toLocaleDateString('id-ID', opts);
+        var labelEnd = wEnd.toLocaleDateString('id-ID', opts);
+
+        html += '<a href="javascript:void(0)" onclick="buildRekapCetakUrl(' + w + ')" ' +
+            'class="block p-3 rounded-xl border transition-all cursor-pointer hover:border-blue-500/50 hover:bg-gray-50 ' +
+            (isCurrentWeek ? 'border-blue-500 bg-blue-50' : 'border-gray-200') + '">' +
+            '<div class="flex items-center justify-between">' +
+            '<div>' +
+            '<p class="text-sm font-semibold text-gray-800">Minggu ' + w + '</p>' +
+            '<p class="text-xs text-gray-500">' + labelStart + ' – ' + labelEnd + '</p>' +
+            '</div>' +
+            (isCurrentWeek
+                ? '<span class="text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">Minggu Ini</span>'
+                : '<i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>') +
+            '</div>' +
+            '</a>';
+    }
+
+    container.innerHTML = html;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const rows = document.querySelectorAll('.table-row-hover');
     rows.forEach((row, index) => {
