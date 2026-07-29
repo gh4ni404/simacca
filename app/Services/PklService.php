@@ -691,6 +691,56 @@ class PklService extends BaseService
     }
 
     /**
+     * Edit existing catatan on behalf of pembimbing or instruktur by ketua jurusan
+     */
+    public function editCatatanOnBehalf(int $id, string $role, string $catatan): array
+    {
+        try {
+            $this->db->transStart();
+
+            $progress = $this->progressModel->find($id);
+            if (!$progress) {
+                return $this->error('Progress tidak ditemukan', 404);
+            }
+
+            if ($progress['status'] !== 'approved') {
+                return $this->error('Hanya jurnal dengan status approved yang dapat diedit');
+            }
+
+            if (!in_array($role, ['pembimbing', 'instruktur'])) {
+                return $this->error('Role tidak valid');
+            }
+
+            $catatanField = ($role === 'instruktur') ? 'catatan_instruktur' : 'catatan_pembimbing';
+
+            if (empty($progress[$catatanField])) {
+                return $this->error('Tidak ada catatan yang dapat diedit');
+            }
+
+            $data = [
+                $catatanField => $catatan,
+            ];
+
+            $success = $this->progressModel->update($id, $data);
+            if (!$success) {
+                $this->db->transRollback();
+                return $this->error('Gagal mengedit catatan');
+            }
+
+            $this->db->transComplete();
+            if ($this->db->transStatus() === false) {
+                return $this->error('Gagal mengedit catatan');
+            }
+
+            return $this->success(['message' => 'Catatan berhasil diedit oleh Ketua Jurusan']);
+        } catch (\Exception $e) {
+            $this->db->transRollback();
+            $this->logError('editCatatanOnBehalf', $e);
+            return $this->error('Gagal mengedit catatan: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Verify on behalf of pembimbing or instruktur by ketua jurusan
      */
     public function verifyOnBehalf(int $id, string $role, string $catatan, int $userId): array

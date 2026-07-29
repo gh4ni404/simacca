@@ -161,8 +161,26 @@ class JurnalPklController extends BaseController
         $result = $this->pklService->cancelVerificationForKetuaJurusan($progressId);
 
         if ($result['success']) {
+            $updatedProgress = $this->progressModel->find($progressId);
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => $result['data']['message'] ?? 'Berhasil',
+                    'csrf_token' => csrf_hash(),
+                    'progress' => [
+                        'status' => $updatedProgress['status'] ?? null,
+                        'verified_by' => $updatedProgress['verified_by'] ?? null,
+                        'catatan_pembimbing' => $updatedProgress['catatan_pembimbing'] ?? null,
+                        'instruktur_verified_by' => $updatedProgress['instruktur_verified_by'] ?? null,
+                        'catatan_instruktur' => $updatedProgress['catatan_instruktur'] ?? null,
+                    ]
+                ]);
+            }
             session()->setFlashdata('success', 'Verifikasi progress berhasil dibatalkan');
         } else {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => $result['message']]);
+            }
             session()->setFlashdata('error', $result['message']);
         }
 
@@ -178,6 +196,9 @@ class JurnalPklController extends BaseController
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru || empty($guru['jurusan'])) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Akses ditolak']);
+            }
             return redirect()->to('/access-denied')->with('error', 'Akses ditolak');
         }
 
@@ -186,33 +207,51 @@ class JurnalPklController extends BaseController
         $catatan = trim($this->request->getPost('catatan') ?? '');
 
         if (!in_array($role, ['pembimbing', 'instruktur'])) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Role tidak valid']);
+            }
             session()->setFlashdata('error', 'Role tidak valid');
             return redirect()->back();
         }
 
-        if (!in_array($action, ['verify', 'add_catatan'])) {
+        if (!in_array($action, ['verify', 'add_catatan', 'edit_catatan'])) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Action tidak valid']);
+            }
             session()->setFlashdata('error', 'Action tidak valid');
             return redirect()->back();
         }
 
         if ($catatan === '') {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Catatan wajib diisi']);
+            }
             session()->setFlashdata('error', 'Catatan wajib diisi');
             return redirect()->back()->withInput();
         }
 
         if (mb_strlen($catatan) > 200) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Catatan maksimal 200 karakter']);
+            }
             session()->setFlashdata('error', 'Catatan maksimal 200 karakter');
             return redirect()->back()->withInput();
         }
 
         $progress = $this->progressModel->find($progressId);
         if (!$progress) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Progress tidak ditemukan']);
+            }
             session()->setFlashdata('error', 'Progress tidak ditemukan');
             return redirect()->back();
         }
 
         $task = $this->taskModel->find($progress['task_id']);
         if (!$task) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Task tidak ditemukan']);
+            }
             session()->setFlashdata('error', 'Task tidak ditemukan');
             return redirect()->back();
         }
@@ -227,21 +266,43 @@ class JurnalPklController extends BaseController
             ->getRowArray();
 
         if (!$siswa) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Siswa tidak ditemukan di jurusan ini']);
+            }
             session()->setFlashdata('error', 'Siswa tidak ditemukan di jurusan ini');
             return redirect()->back();
         }
 
         if ($action === 'verify') {
             $result = $this->pklService->verifyOnBehalf($progressId, $role, $catatan, $userId);
+        } elseif ($action === 'edit_catatan') {
+            $result = $this->pklService->editCatatanOnBehalf($progressId, $role, $catatan);
         } else {
             $result = $this->pklService->addCatatanOnBehalf($progressId, $role, $catatan);
         }
 
         if ($result['success']) {
+            $updatedProgress = $this->progressModel->find($progressId);
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON([
+                    'success' => true,
+                    'message' => $result['data']['message'] ?? 'Berhasil',
+                    'csrf_token' => csrf_hash(),
+                    'progress' => [
+                        'verified_by' => $updatedProgress['verified_by'] ?? null,
+                        'catatan_pembimbing' => $updatedProgress['catatan_pembimbing'] ?? null,
+                        'instruktur_verified_by' => $updatedProgress['instruktur_verified_by'] ?? null,
+                        'catatan_instruktur' => $updatedProgress['catatan_instruktur'] ?? null,
+                    ]
+                ]);
+            }
             $roleLabel = ($role === 'pembimbing') ? 'Pembimbing' : 'Instruktur';
-            $actionLabel = ($action === 'verify') ? 'Verifikasi' : 'Catatan';
+            $actionLabel = ($action === 'verify') ? 'Verifikasi' : (($action === 'edit_catatan') ? 'Edit catatan' : 'Catatan');
             session()->setFlashdata('success', $actionLabel . ' ' . $roleLabel . ' berhasil ditambahkan');
         } else {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => $result['message']]);
+            }
             session()->setFlashdata('error', $result['message']);
         }
 

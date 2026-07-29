@@ -224,22 +224,50 @@ $bulanIndo = [
                                                         </div>
                                                     </form>
                                                 <?php elseif (!$pembimbingHasRecord && !empty($prog['catatan_pembimbing'])): ?>
-                                                    <!-- Belum ada verifikasi tapi catatan sudah ada → Verifikasi saja -->
-                                                    <form action="<?= base_url('ketua-jurusan/jurnal-pkl/tambah-catatan/' . $prog['id']) ?>" method="POST">
-                                                        <?= csrf_field() ?>
-                                                        <input type="hidden" name="role" value="pembimbing">
-                                                        <input type="hidden" name="action" value="verify">
-                                                        <input type="hidden" name="catatan" value="<?= esc($prog['catatan_pembimbing']) ?>">
+                                                    <!-- Belum ada verifikasi tapi catatan sudah ada → Verifikasi atau Edit -->
+                                                    <div id="pembimbing-view-<?= $prog['id'] ?>">
                                                         <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                                                             <span class="text-xs text-orange-700 font-medium flex items-center gap-1">
                                                                 <i class="fas fa-user-tie"></i> Pembimbing:
                                                             </span>
-                                                            <span class="flex-1 text-xs text-gray-500 italic">Catatan sudah ada, cukup verifikasi</span>
-                                                            <button type="submit" onclick="return confirm('Verifikasi jurnal ini atas nama pembimbing?')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap">
-                                                                <i class="fas fa-check mr-1"></i> Verifikasi
-                                                            </button>
+                                                            <span class="flex-1 text-xs text-gray-700"><?= esc($prog['catatan_pembimbing']) ?></span>
+                                                            <div class="flex gap-1">
+                                                                <form action="<?= base_url('ketua-jurusan/jurnal-pkl/tambah-catatan/' . $prog['id']) ?>" method="POST" style="display:inline">
+                                                                    <?= csrf_field() ?>
+                                                                    <input type="hidden" name="role" value="pembimbing">
+                                                                    <input type="hidden" name="action" value="verify">
+                                                                    <input type="hidden" name="catatan" value="<?= esc($prog['catatan_pembimbing']) ?>">
+                                                                    <button type="submit" onclick="return confirm('Verifikasi jurnal ini atas nama pembimbing?')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap">
+                                                                        <i class="fas fa-check mr-1"></i> Verifikasi
+                                                                    </button>
+                                                                </form>
+                                                                <button type="button" onclick="document.getElementById('pembimbing-view-<?= $prog['id'] ?>').style.display='none';document.getElementById('pembimbing-edit-<?= $prog['id'] ?>').style.display='block'" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap">
+                                                                    <i class="fas fa-edit mr-1"></i> Edit
+                                                                </button>
+                                                            </div>
                                                         </div>
-                                                    </form>
+                                                    </div>
+                                                    <div id="pembimbing-edit-<?= $prog['id'] ?>" style="display:none">
+                                                        <form action="<?= base_url('ketua-jurusan/jurnal-pkl/tambah-catatan/' . $prog['id']) ?>" method="POST">
+                                                            <?= csrf_field() ?>
+                                                            <input type="hidden" name="role" value="pembimbing">
+                                                            <input type="hidden" name="action" value="edit_catatan">
+                                                            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                                                <span class="text-xs text-orange-700 font-medium flex items-center gap-1">
+                                                                    <i class="fas fa-user-tie"></i> Pembimbing:
+                                                                </span>
+                                                                <input type="text" name="catatan" required maxlength="200" value="<?= esc($prog['catatan_pembimbing']) ?>" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                                                                <div class="flex gap-1">
+                                                                    <button type="submit" onclick="return confirm('Simpan catatan pembimbing?')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap">
+                                                                        <i class="fas fa-save mr-1"></i> Simpan
+                                                                    </button>
+                                                                    <button type="button" onclick="document.getElementById('pembimbing-edit-<?= $prog['id'] ?>').style.display='none';document.getElementById('pembimbing-view-<?= $prog['id'] ?>').style.display='block'" class="bg-gray-400 hover:bg-gray-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap">
+                                                                        Batal
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
                                                 <?php else: ?>
                                                     <!-- Sudah verifikasi tapi belum ada catatan → Tambah Catatan -->
                                                     <form action="<?= base_url('ketua-jurusan/jurnal-pkl/tambah-catatan/' . $prog['id']) ?>" method="POST">
@@ -278,22 +306,50 @@ $bulanIndo = [
                                                         </div>
                                                     </form>
                                                 <?php elseif (!$instrukturHasRecord && !empty($prog['catatan_instruktur'])): ?>
-                                                    <!-- Belum ada verifikasi tapi catatan sudah ada → Verifikasi saja -->
-                                                    <form action="<?= base_url('ketua-jurusan/jurnal-pkl/tambah-catatan/' . $prog['id']) ?>" method="POST">
-                                                        <?= csrf_field() ?>
-                                                        <input type="hidden" name="role" value="instruktur">
-                                                        <input type="hidden" name="action" value="verify">
-                                                        <input type="hidden" name="catatan" value="<?= esc($prog['catatan_instruktur']) ?>">
+                                                    <!-- Belum ada verifikasi tapi catatan sudah ada → Verifikasi atau Edit -->
+                                                    <div id="instruktur-view-<?= $prog['id'] ?>">
                                                         <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                                                             <span class="text-xs text-indigo-700 font-medium flex items-center gap-1">
                                                                 <i class="fas fa-building"></i> Instruktur:
                                                             </span>
-                                                            <span class="flex-1 text-xs text-gray-500 italic">Catatan sudah ada, cukup verifikasi</span>
-                                                            <button type="submit" onclick="return confirm('Verifikasi jurnal ini atas nama instruktur?')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap">
-                                                                <i class="fas fa-check mr-1"></i> Verifikasi
-                                                            </button>
+                                                            <span class="flex-1 text-xs text-gray-700"><?= esc($prog['catatan_instruktur']) ?></span>
+                                                            <div class="flex gap-1">
+                                                                <form action="<?= base_url('ketua-jurusan/jurnal-pkl/tambah-catatan/' . $prog['id']) ?>" method="POST" style="display:inline">
+                                                                    <?= csrf_field() ?>
+                                                                    <input type="hidden" name="role" value="instruktur">
+                                                                    <input type="hidden" name="action" value="verify">
+                                                                    <input type="hidden" name="catatan" value="<?= esc($prog['catatan_instruktur']) ?>">
+                                                                    <button type="submit" onclick="return confirm('Verifikasi jurnal ini atas nama instruktur?')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap">
+                                                                        <i class="fas fa-check mr-1"></i> Verifikasi
+                                                                    </button>
+                                                                </form>
+                                                                <button type="button" onclick="document.getElementById('instruktur-view-<?= $prog['id'] ?>').style.display='none';document.getElementById('instruktur-edit-<?= $prog['id'] ?>').style.display='block'" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap">
+                                                                    <i class="fas fa-edit mr-1"></i> Edit
+                                                                </button>
+                                                            </div>
                                                         </div>
-                                                    </form>
+                                                    </div>
+                                                    <div id="instruktur-edit-<?= $prog['id'] ?>" style="display:none">
+                                                        <form action="<?= base_url('ketua-jurusan/jurnal-pkl/tambah-catatan/' . $prog['id']) ?>" method="POST">
+                                                            <?= csrf_field() ?>
+                                                            <input type="hidden" name="role" value="instruktur">
+                                                            <input type="hidden" name="action" value="edit_catatan">
+                                                            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                                                <span class="text-xs text-indigo-700 font-medium flex items-center gap-1">
+                                                                    <i class="fas fa-building"></i> Instruktur:
+                                                                </span>
+                                                                <input type="text" name="catatan" required maxlength="200" value="<?= esc($prog['catatan_instruktur']) ?>" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                                                                <div class="flex gap-1">
+                                                                    <button type="submit" onclick="return confirm('Simpan catatan instruktur?')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap">
+                                                                        <i class="fas fa-save mr-1"></i> Simpan
+                                                                    </button>
+                                                                    <button type="button" onclick="document.getElementById('instruktur-edit-<?= $prog['id'] ?>').style.display='none';document.getElementById('instruktur-view-<?= $prog['id'] ?>').style.display='block'" class="bg-gray-400 hover:bg-gray-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap">
+                                                                        Batal
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
                                                 <?php else: ?>
                                                     <!-- Sudah verifikasi tapi belum ada catatan → Tambah Catatan -->
                                                     <form action="<?= base_url('ketua-jurusan/jurnal-pkl/tambah-catatan/' . $prog['id']) ?>" method="POST">
