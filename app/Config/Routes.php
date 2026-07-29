@@ -402,6 +402,8 @@ $routes->group('ketua-jurusan', ['filter' => 'role:ketua_jurusan'], function ($r
     // Jurnal PKL Monitoring
     $routes->get('jurnal-pkl', 'KetuaJurusan\JurnalPklController::index', ['as' => 'ketuajurusan.jurnal_pkl']);
     $routes->get('jurnal-pkl/detail/(:num)', 'KetuaJurusan\JurnalPklController::detail/$1');
+    $routes->post('jurnal-pkl/batal-verifikasi/(:num)', 'KetuaJurusan\JurnalPklController::cancelVerification/$1');
+    $routes->post('jurnal-pkl/tambah-catatan/(:num)', 'KetuaJurusan\JurnalPklController::addCatatan/$1');
 
     // Siswa PKL Monitoring
     $routes->get('siswa-pkl', 'KetuaJurusan\SiswaPklController::index', ['as' => 'ketuajurusan.siswa_pkl']);

@@ -174,6 +174,155 @@ $bulanIndo = [
                                         <p class="text-xs text-purple-800"><?= esc($prog['catatan_instruktur']) ?></p>
                                     </div>
                                 <?php endif; ?>
+
+                                <?php
+                                $pembimbingVerified = !empty($prog['verified_by']) && !empty($prog['catatan_pembimbing']);
+                                $instrukturVerified = !empty($prog['instruktur_verified_by']) && !empty($prog['catatan_instruktur']);
+                                $pembimbingHasRecord = !empty($prog['verified_by']);
+                                $instrukturHasRecord = !empty($prog['instruktur_verified_by']);
+                                $isApproved = $prog['status'] === 'approved';
+                                $needsAction = $isApproved && (!$pembimbingVerified || !$instrukturVerified);
+                                ?>
+
+                                <?php if ($needsAction): ?>
+                                    <div class="mt-3 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                                        <p class="text-xs text-amber-700 font-medium mb-2">
+                                            <i class="fas fa-exclamation-triangle mr-1"></i> 
+                                            Jurnal ini disetujui namun belum memiliki catatan dari:
+                                        </p>
+                                        <div class="flex flex-wrap gap-2 mb-2">
+                                            <?php if (!$pembimbingVerified): ?>
+                                                <span class="px-2 py-0.5 text-xs font-medium rounded bg-orange-100 text-orange-700">
+                                                    <i class="fas fa-user-tie mr-1"></i> Pembimbing
+                                                </span>
+                                            <?php endif; ?>
+                                            <?php if (!$instrukturVerified): ?>
+                                                <span class="px-2 py-0.5 text-xs font-medium rounded bg-indigo-100 text-indigo-700">
+                                                    <i class="fas fa-building mr-1"></i> Instruktur
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
+
+                                        <!-- Form Aksi per Role -->
+                                        <div class="bg-white border border-gray-200 rounded-lg p-3 mb-2 space-y-3">
+                                            <!-- Aksi Pembimbing -->
+                                            <?php if (!$pembimbingVerified): ?>
+                                                <?php if (!$pembimbingHasRecord && empty($prog['catatan_pembimbing'])): ?>
+                                                    <!-- Belum ada verifikasi & belum ada catatan → Verifikasi + Catatan -->
+                                                    <form action="<?= base_url('ketua-jurusan/jurnal-pkl/tambah-catatan/' . $prog['id']) ?>" method="POST">
+                                                        <?= csrf_field() ?>
+                                                        <input type="hidden" name="role" value="pembimbing">
+                                                        <input type="hidden" name="action" value="verify">
+                                                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                                            <span class="text-xs text-orange-700 font-medium flex items-center gap-1">
+                                                                <i class="fas fa-user-tie"></i> Pembimbing:
+                                                            </span>
+                                                            <input type="text" name="catatan" required maxlength="200" placeholder="Catatan verifikasi..." class="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                                                            <button type="submit" onclick="return confirm('Verifikasi jurnal ini atas nama pembimbing?')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap">
+                                                                <i class="fas fa-check mr-1"></i> Verifikasi
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                <?php elseif (!$pembimbingHasRecord && !empty($prog['catatan_pembimbing'])): ?>
+                                                    <!-- Belum ada verifikasi tapi catatan sudah ada → Verifikasi saja -->
+                                                    <form action="<?= base_url('ketua-jurusan/jurnal-pkl/tambah-catatan/' . $prog['id']) ?>" method="POST">
+                                                        <?= csrf_field() ?>
+                                                        <input type="hidden" name="role" value="pembimbing">
+                                                        <input type="hidden" name="action" value="verify">
+                                                        <input type="hidden" name="catatan" value="<?= esc($prog['catatan_pembimbing']) ?>">
+                                                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                                            <span class="text-xs text-orange-700 font-medium flex items-center gap-1">
+                                                                <i class="fas fa-user-tie"></i> Pembimbing:
+                                                            </span>
+                                                            <span class="flex-1 text-xs text-gray-500 italic">Catatan sudah ada, cukup verifikasi</span>
+                                                            <button type="submit" onclick="return confirm('Verifikasi jurnal ini atas nama pembimbing?')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap">
+                                                                <i class="fas fa-check mr-1"></i> Verifikasi
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                <?php else: ?>
+                                                    <!-- Sudah verifikasi tapi belum ada catatan → Tambah Catatan -->
+                                                    <form action="<?= base_url('ketua-jurusan/jurnal-pkl/tambah-catatan/' . $prog['id']) ?>" method="POST">
+                                                        <?= csrf_field() ?>
+                                                        <input type="hidden" name="role" value="pembimbing">
+                                                        <input type="hidden" name="action" value="add_catatan">
+                                                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                                            <span class="text-xs text-orange-700 font-medium flex items-center gap-1">
+                                                                <i class="fas fa-user-tie"></i> Pembimbing:
+                                                            </span>
+                                                            <input type="text" name="catatan" required maxlength="200" placeholder="Tambah catatan..." class="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                                                            <button type="submit" onclick="return confirm('Tambah catatan atas nama pembimbing?')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap">
+                                                                <i class="fas fa-plus mr-1"></i> Tambah
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                <?php endif; ?>
+                                            <?php endif; ?>
+
+                                            <!-- Aksi Instruktur -->
+                                            <?php if (!$instrukturVerified): ?>
+                                                <?php if (!$instrukturHasRecord && empty($prog['catatan_instruktur'])): ?>
+                                                    <!-- Belum ada verifikasi & belum ada catatan → Verifikasi + Catatan -->
+                                                    <form action="<?= base_url('ketua-jurusan/jurnal-pkl/tambah-catatan/' . $prog['id']) ?>" method="POST">
+                                                        <?= csrf_field() ?>
+                                                        <input type="hidden" name="role" value="instruktur">
+                                                        <input type="hidden" name="action" value="verify">
+                                                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                                            <span class="text-xs text-indigo-700 font-medium flex items-center gap-1">
+                                                                <i class="fas fa-building"></i> Instruktur:
+                                                            </span>
+                                                            <input type="text" name="catatan" required maxlength="200" placeholder="Catatan verifikasi..." class="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                                                            <button type="submit" onclick="return confirm('Verifikasi jurnal ini atas nama instruktur?')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap">
+                                                                <i class="fas fa-check mr-1"></i> Verifikasi
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                <?php elseif (!$instrukturHasRecord && !empty($prog['catatan_instruktur'])): ?>
+                                                    <!-- Belum ada verifikasi tapi catatan sudah ada → Verifikasi saja -->
+                                                    <form action="<?= base_url('ketua-jurusan/jurnal-pkl/tambah-catatan/' . $prog['id']) ?>" method="POST">
+                                                        <?= csrf_field() ?>
+                                                        <input type="hidden" name="role" value="instruktur">
+                                                        <input type="hidden" name="action" value="verify">
+                                                        <input type="hidden" name="catatan" value="<?= esc($prog['catatan_instruktur']) ?>">
+                                                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                                            <span class="text-xs text-indigo-700 font-medium flex items-center gap-1">
+                                                                <i class="fas fa-building"></i> Instruktur:
+                                                            </span>
+                                                            <span class="flex-1 text-xs text-gray-500 italic">Catatan sudah ada, cukup verifikasi</span>
+                                                            <button type="submit" onclick="return confirm('Verifikasi jurnal ini atas nama instruktur?')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap">
+                                                                <i class="fas fa-check mr-1"></i> Verifikasi
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                <?php else: ?>
+                                                    <!-- Sudah verifikasi tapi belum ada catatan → Tambah Catatan -->
+                                                    <form action="<?= base_url('ketua-jurusan/jurnal-pkl/tambah-catatan/' . $prog['id']) ?>" method="POST">
+                                                        <?= csrf_field() ?>
+                                                        <input type="hidden" name="role" value="instruktur">
+                                                        <input type="hidden" name="action" value="add_catatan">
+                                                        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                                            <span class="text-xs text-indigo-700 font-medium flex items-center gap-1">
+                                                                <i class="fas fa-building"></i> Instruktur:
+                                                            </span>
+                                                            <input type="text" name="catatan" required maxlength="200" placeholder="Tambah catatan..." class="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                                                            <button type="submit" onclick="return confirm('Tambah catatan atas nama instruktur?')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap">
+                                                                <i class="fas fa-plus mr-1"></i> Tambah
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                <?php endif; ?>
+                                            <?php endif; ?>
+                                        </div>
+
+                                        <!-- Form Batal Verifikasi -->
+                                        <form action="<?= base_url('ketua-jurusan/jurnal-pkl/batal-verifikasi/' . $prog['id']) ?>" method="POST" class="inline">
+                                            <?= csrf_field() ?>
+                                            <button type="submit" onclick="return confirm('Batalkan verifikasi jurnal ini? Status akan dikembalikan ke menunggu verifikasi.')" class="inline-flex items-center gap-1 px-2 py-1 bg-white border border-orange-200 text-orange-700 text-xs font-medium rounded-lg hover:bg-orange-50 transition-colors">
+                                                <i class="fas fa-undo text-[10px]"></i> Batal Verifikasi
+                                            </button>
+                                        </form>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>

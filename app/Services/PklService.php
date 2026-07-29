@@ -571,6 +571,179 @@ class PklService extends BaseService
         }
     }
 
+    // ─── Ketua Jurusan Actions ───────────────────────────
+
+    /**
+     * Cancel verification by ketua jurusan for approved journals without catatan
+     */
+    public function cancelVerificationForKetuaJurusan(int $id): array
+    {
+        try {
+            $this->db->transStart();
+
+            $progress = $this->progressModel->find($id);
+            if (!$progress) {
+                return $this->error('Progress tidak ditemukan', 404);
+            }
+
+            if ($progress['status'] !== 'approved') {
+                return $this->error('Hanya jurnal dengan status approved yang dapat dibatalkan');
+            }
+
+            $pembimbingVerified = !empty($progress['verified_by']) && !empty($progress['catatan_pembimbing']);
+            $instrukturVerified = !empty($progress['instruktur_verified_by']) && !empty($progress['catatan_instruktur']);
+
+            if ($pembimbingVerified && $instrukturVerified) {
+                return $this->error('Jurnal ini sudah memiliki catatan dari kedua belah pihak');
+            }
+
+            $data = [];
+
+            if (!$pembimbingVerified) {
+                $data['verified_by'] = null;
+                $data['verified_at'] = null;
+            }
+
+            if (!$instrukturVerified) {
+                $data['instruktur_verified_by'] = null;
+                $data['instruktur_verified_at'] = null;
+            }
+
+            if ($pembimbingVerified) {
+                $data['status'] = 'verified';
+            } else {
+                $data['status'] = 'submitted';
+            }
+
+            $success = $this->progressModel->update($id, $data);
+            if (!$success) {
+                $this->db->transRollback();
+                return $this->error('Gagal membatalkan verifikasi');
+            }
+
+            $this->db->transComplete();
+            if ($this->db->transStatus() === false) {
+                return $this->error('Gagal membatalkan verifikasi');
+            }
+
+            return $this->success(['message' => 'Verifikasi progress berhasil dibatalkan oleh Ketua Jurusan']);
+        } catch (\Exception $e) {
+            $this->db->transRollback();
+            $this->logError('cancelVerificationForKetuaJurusan', $e);
+            return $this->error('Gagal membatalkan verifikasi: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Add catatan on behalf of pembimbing or instruktur by ketua jurusan
+     */
+    public function addCatatanOnBehalf(int $id, string $role, string $catatan): array
+    {
+        try {
+            $this->db->transStart();
+
+            $progress = $this->progressModel->find($id);
+            if (!$progress) {
+                return $this->error('Progress tidak ditemukan', 404);
+            }
+
+            if ($progress['status'] !== 'approved') {
+                return $this->error('Hanya jurnal dengan status approved yang dapat ditambahkan catatan');
+            }
+
+            if (!in_array($role, ['pembimbing', 'instruktur'])) {
+                return $this->error('Role tidak valid');
+            }
+
+            $catatanField = ($role === 'instruktur') ? 'catatan_instruktur' : 'catatan_pembimbing';
+            $verifiedByField = ($role === 'instruktur') ? 'instruktur_verified_by' : 'verified_by';
+            $verifiedAtField = ($role === 'instruktur') ? 'instruktur_verified_at' : 'verified_at';
+
+            if (!empty($progress[$catatanField])) {
+                return $this->error('Catatan ' . $role . ' sudah ada');
+            }
+
+            if (empty($progress[$verifiedByField])) {
+                return $this->error('Verifikasi ' . $role . ' belum ada');
+            }
+
+            $data = [
+                $catatanField => $catatan,
+            ];
+
+            $success = $this->progressModel->update($id, $data);
+            if (!$success) {
+                $this->db->transRollback();
+                return $this->error('Gagal menyimpan catatan');
+            }
+
+            $this->db->transComplete();
+            if ($this->db->transStatus() === false) {
+                return $this->error('Gagal menyimpan catatan');
+            }
+
+            return $this->success(['message' => 'Catatan berhasil ditambahkan oleh Ketua Jurusan']);
+        } catch (\Exception $e) {
+            $this->db->transRollback();
+            $this->logError('addCatatanOnBehalf', $e);
+            return $this->error('Gagal menyimpan catatan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Verify on behalf of pembimbing or instruktur by ketua jurusan
+     */
+    public function verifyOnBehalf(int $id, string $role, string $catatan, int $userId): array
+    {
+        try {
+            $this->db->transStart();
+
+            $progress = $this->progressModel->find($id);
+            if (!$progress) {
+                return $this->error('Progress tidak ditemukan', 404);
+            }
+
+            if ($progress['status'] !== 'approved') {
+                return $this->error('Hanya jurnal dengan status approved yang dapat diverifikasi');
+            }
+
+            if (!in_array($role, ['pembimbing', 'instruktur'])) {
+                return $this->error('Role tidak valid');
+            }
+
+            $catatanField = ($role === 'instruktur') ? 'catatan_instruktur' : 'catatan_pembimbing';
+            $verifiedByField = ($role === 'instruktur') ? 'instruktur_verified_by' : 'verified_by';
+            $verifiedAtField = ($role === 'instruktur') ? 'instruktur_verified_at' : 'verified_at';
+
+            if (!empty($progress[$verifiedByField])) {
+                return $this->error('Verifikasi ' . $role . ' sudah ada');
+            }
+
+            $data = [
+                $catatanField => $catatan,
+                $verifiedByField => $userId,
+                $verifiedAtField => date('Y-m-d H:i:s'),
+            ];
+
+            $success = $this->progressModel->update($id, $data);
+            if (!$success) {
+                $this->db->transRollback();
+                return $this->error('Gagal menyimpan verifikasi');
+            }
+
+            $this->db->transComplete();
+            if ($this->db->transStatus() === false) {
+                return $this->error('Gagal menyimpan verifikasi');
+            }
+
+            return $this->success(['message' => 'Verifikasi berhasil ditambahkan oleh Ketua Jurusan']);
+        } catch (\Exception $e) {
+            $this->db->transRollback();
+            $this->logError('verifyOnBehalf', $e);
+            return $this->error('Gagal menyimpan verifikasi: ' . $e->getMessage());
+        }
+    }
+
     // ─── Guru/Pembimbing ─────────────────────────────────
 
     public function getGroupedBySiswaForPembimbing(): array
