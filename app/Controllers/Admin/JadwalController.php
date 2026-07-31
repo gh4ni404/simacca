@@ -284,6 +284,37 @@ class JadwalController extends BaseController
     }
 
     /**
+     * Check jadwal batch validation (AJAX)
+     */
+    public function checkBatch()
+    {
+        if (!$this->request->isAJAX()) {
+            return $this->response->setStatusCode(403)->setJSON(['error' => 'Forbidden']);
+        }
+
+        $rawData = $this->request->getPost('data');
+
+        if (!$rawData) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Data tidak valid'
+            ]);
+        }
+
+        $data = json_decode($rawData, true);
+
+        if (!is_array($data)) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Format data tidak valid'
+            ]);
+        }
+
+        $result = $this->jadwalService->checkJadwalBatch($data);
+        return $this->response->setJSON($result);
+    }
+
+    /**
      * Export jadwal to Excel
      */
     public function export()

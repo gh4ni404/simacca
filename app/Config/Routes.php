@@ -147,6 +147,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('jadwal/update/(:num)', 'Admin\\JadwalController::update/$1', ['filter' => 'role:admin']);
     $routes->get('jadwal/hapus/(:num)', 'Admin\\JadwalController::delete/$1', ['filter' => 'role:admin']);
     $routes->post('jadwal/checkConflict', 'Admin\\JadwalController::checkConflict', ['filter' => 'role:admin']);
+    $routes->post('jadwal/check-batch', 'Admin\\JadwalController::checkBatch', ['filter' => 'role:admin']);
     $routes->get('jadwal/import', 'Admin\\JadwalController::import', ['filter' => 'role:admin']);
     $routes->post('jadwal/process-import', 'Admin\\JadwalController::processImport', ['filter' => 'role:admin']);
     $routes->get('jadwal/download-template', 'Admin\\JadwalController::downloadTemplate', ['filter' => 'role:admin']);

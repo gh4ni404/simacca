@@ -285,6 +285,108 @@ class JadwalService extends BaseService
     }
 
     /**
+     * Validate jadwal batch for preview
+     * 
+     * @param array $data Array of jadwal rows from Excel
+     * @return array
+     */
+    public function checkJadwalBatch(array $data): array
+    {
+        try {
+            $results = [];
+            $hariValid = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
+            $semesterValid = ['Ganjil', 'Genap'];
+            $tahunAjaran = get_active_tahun_ajaran();
+
+            foreach ($data as $item) {
+                $row = $item['row'] ?? 0;
+                $hari = $item['hari'] ?? '';
+                $jamMulai = $item['jam_mulai'] ?? '';
+                $jamSelesai = $item['jam_selesai'] ?? '';
+                $guruInput = $item['guru'] ?? '';
+                $mapelInput = $item['mapel'] ?? '';
+                $kelasInput = $item['kelas'] ?? '';
+                $semester = $item['semester'] ?? '';
+
+                $errors = [];
+
+                if (empty($hari) || empty($jamMulai) || empty($jamSelesai) || empty($guruInput) || empty($mapelInput) || empty($kelasInput) || empty($semester)) {
+                    $errors[] = 'Data tidak lengkap';
+                } else {
+                    if (!in_array($hari, $hariValid)) {
+                        $errors[] = 'Hari tidak valid';
+                    }
+                    if (!in_array($semester, $semesterValid)) {
+                        $errors[] = 'Semester tidak valid';
+                    }
+                    if (!preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $jamMulai)) {
+                        $errors[] = 'Format jam mulai salah';
+                    }
+                    if (!preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $jamSelesai)) {
+                        $errors[] = 'Format jam selesai salah';
+                    }
+
+                    if (empty($errors)) {
+                        $guruId = $this->resolveGuruId($guruInput);
+                        if (!$guruId || !$this->guruModel->find($guruId)) {
+                            $errors[] = 'Guru tidak ditemukan';
+                        }
+
+                        $mapelId = $this->resolveMataPelajaranId($mapelInput);
+                        if (!$mapelId || !$this->mapelModel->find($mapelId)) {
+                            $errors[] = 'Mapel tidak ditemukan';
+                        }
+
+                        $kelasId = $this->resolveKelasId($kelasInput);
+                        if (!$kelasId || !$this->kelasModel->find($kelasId)) {
+                            $errors[] = 'Kelas tidak ditemukan';
+                        }
+
+                        if (empty($errors)) {
+                            $hasConflictGuru = $this->jadwalModel->checkConflict($guruId, $hari, $jamMulai, $jamSelesai, null, $tahunAjaran);
+                            $hasConflictKelas = $this->jadwalModel->checkKelasConflict($kelasId, $hari, $jamMulai, $jamSelesai, null, $tahunAjaran);
+
+                            if ($hasConflictGuru) {
+                                $errors[] = 'Konflik jadwal guru';
+                            }
+                            if ($hasConflictKelas) {
+                                $errors[] = 'Konflik jadwal kelas';
+                            }
+                        }
+                    }
+                }
+
+                if (empty($errors)) {
+                    $results[] = [
+                        'row' => $row,
+                        'status' => 'valid',
+                        'message' => ''
+                    ];
+                } elseif (count($errors) <= 2 && !in_array('Data tidak lengkap', $errors)) {
+                    $results[] = [
+                        'row' => $row,
+                        'status' => 'warning',
+                        'message' => implode(', ', $errors)
+                    ];
+                } else {
+                    $results[] = [
+                        'row' => $row,
+                        'status' => 'error',
+                        'message' => implode(', ', $errors)
+                    ];
+                }
+            }
+
+            return $this->successResponse([
+                'results' => $results
+            ]);
+        } catch (\Exception $e) {
+            $this->logError('checkJadwalBatch', $e);
+            return $this->errorResponse('Gagal memvalidasi data: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Get form dropdown lists
      * 
      * @return array
