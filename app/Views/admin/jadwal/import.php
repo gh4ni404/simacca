@@ -305,6 +305,7 @@
         }
 
         previewSection.classList.remove('hidden');
+        submitBtn.disabled = false;
         previewBody.innerHTML = '<tr><td colspan="8" class="px-4 py-8 text-center"><i class="fas fa-spinner fa-spin text-indigo-500 mr-2"></i> Membaca file Excel...</td></tr>';
         previewCount.textContent = '';
         previewSummary.classList.add('hidden');
