@@ -32,6 +32,7 @@ if (!function_exists('render_alerts')) {
         // Priority order for single alert display
         $priorities = [
             'errors',
+            'import_errors',
             'error', 
             'warning',
             'success_custom',
@@ -170,6 +171,7 @@ if (!function_exists('render_single_alert')) {
                 $output .= '</div>';
                 break;
                 
+            case 'import_errors':
             case 'errors':
                 $output .= '<div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm mb-6 animate-fade-in" role="alert">';
                 $output .= '<div class="flex items-start">';

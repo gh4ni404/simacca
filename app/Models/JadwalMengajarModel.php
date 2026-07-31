@@ -43,8 +43,8 @@ class JadwalMengajarModel extends Model
         'mata_pelajaran_id' => 'required|numeric',
         'kelas_id'          => 'required|numeric',
         'hari'              => 'required|in_list[Senin,Selasa,Rabu,Kamis,Jumat,Sabtu]',
-        'jam_mulai'         => 'required|valid_date[H:i]',
-        'jam_selesai'       => 'required|valid_date[H:i]',
+        'jam_mulai'         => 'required|valid_date[H:i:s]',
+        'jam_selesai'       => 'required|valid_date[H:i:s]',
         'semester'          => 'required|in_list[Ganjil,Genap]',
         'tahun_ajaran'      => 'required|regex_match[/\d{4}\/\d{4}/]'
     ];
@@ -212,7 +212,7 @@ class JadwalMengajarModel extends Model
     /**
      * Cek konflik jadwal
      */
-    public function checkConflict($guruId, $hari, $jamMulai, $jamSelesai, $excludeId = null)
+    public function checkConflict($guruId, $hari, $jamMulai, $jamSelesai, $excludeId = null, $tahunAjaran = null)
     {
         $db = \Config\Database::connect();
         $jamMulaiEscaped = $db->escape($jamMulai);
@@ -227,6 +227,10 @@ class JadwalMengajarModel extends Model
             ->orWhere("(jam_selesai BETWEEN $jamMulaiEscaped AND $jamSelesaiEscaped)")
             ->groupEnd();
 
+        if ($tahunAjaran) {
+            $builder->where('tahun_ajaran', $tahunAjaran);
+        }
+
         if ($excludeId) {
             $builder->where('id !=', $excludeId);
         }
@@ -237,7 +241,7 @@ class JadwalMengajarModel extends Model
     /**
      * Cek konflik kelas
      */
-    public function checkKelasConflict($kelasId, $hari, $jamMulai, $jamSelesai, $excludeId = null)
+    public function checkKelasConflict($kelasId, $hari, $jamMulai, $jamSelesai, $excludeId = null, $tahunAjaran = null)
     {
         $db = \Config\Database::connect();
         $jamMulaiEscaped = $db->escape($jamMulai);
@@ -251,6 +255,10 @@ class JadwalMengajarModel extends Model
             ->orWhere("(jam_mulai BETWEEN $jamMulaiEscaped AND $jamSelesaiEscaped)")
             ->orWhere("(jam_selesai BETWEEN $jamMulaiEscaped AND $jamSelesaiEscaped)")
             ->groupEnd();
+
+        if ($tahunAjaran) {
+            $builder->where('tahun_ajaran', $tahunAjaran);
+        }
 
         if ($excludeId) {
             $builder->where('id !=', $excludeId);

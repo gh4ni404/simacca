@@ -429,7 +429,7 @@ class JadwalService extends BaseService
             // Load spreadsheet
             $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getTempName());
             $sheet = $spreadsheet->getActiveSheet();
-            $rows = $sheet->toArray();
+            $rows = $sheet->toArray(null, true, true, false);
 
             // Skip header row
             array_shift($rows);
@@ -452,12 +452,12 @@ class JadwalService extends BaseService
                     $mataPelajaranInput = trim($row[4]);
                     $kelasInput = trim($row[5]);
                     $semester = trim($row[6]);
-                    $tahunAjaran = trim($row[7]);
+                    $tahunAjaran = get_active_tahun_ajaran();
 
                     // Validate required fields
                     if (empty($hari) || empty($jamMulai) || empty($jamSelesai) || 
                         empty($guruInput) || empty($mataPelajaranInput) || empty($kelasInput) ||
-                        empty($semester) || empty($tahunAjaran)) {
+                        empty($semester)) {
                         throw new \Exception("Data tidak lengkap pada baris " . ($index + 2));
                     }
 
@@ -489,7 +489,7 @@ class JadwalService extends BaseService
                     }
 
                     // Check for schedule conflict for teacher
-                    if ($this->jadwalModel->checkConflict($guruId, $hari, $jamMulai, $jamSelesai)) {
+                    if ($this->jadwalModel->checkConflict($guruId, $hari, $jamMulai, $jamSelesai, null, $tahunAjaran)) {
                         if ($skipDuplicate) {
                             $errorCount++;
                             $errors[] = "Baris " . ($index + 2) . ": Guru {$guru['nama_lengkap']} sudah memiliki jadwal di waktu yang sama (dilewati)";
@@ -501,7 +501,7 @@ class JadwalService extends BaseService
                     }
 
                     // Check for schedule conflict for class
-                    if ($this->jadwalModel->checkKelasConflict($kelasId, $hari, $jamMulai, $jamSelesai)) {
+                    if ($this->jadwalModel->checkKelasConflict($kelasId, $hari, $jamMulai, $jamSelesai, null, $tahunAjaran)) {
                         if ($skipDuplicate) {
                             $errorCount++;
                             $errors[] = "Baris " . ($index + 2) . ": Kelas {$kelas['nama_kelas']} sudah memiliki jadwal di waktu yang sama (dilewati)";
@@ -524,7 +524,12 @@ class JadwalService extends BaseService
                         'tahun_ajaran' => $tahunAjaran
                     ];
 
-                    $this->jadwalModel->insert($jadwalData);
+                    $result = $this->jadwalModel->insert($jadwalData);
+
+                    if (!$result) {
+                        $validationErrors = $this->jadwalModel->errors();
+                        throw new \Exception('Validasi gagal: ' . implode(', ', $validationErrors));
+                    }
 
                     $db->transComplete();
 
@@ -658,7 +663,6 @@ class JadwalService extends BaseService
                 'E1' => 'MATA PELAJARAN',
                 'F1' => 'KELAS',
                 'G1' => 'SEMESTER',
-                'H1' => 'TAHUN AJARAN',
             ];
 
             foreach ($headers as $cell => $text) {
@@ -683,7 +687,7 @@ class JadwalService extends BaseService
                     ],
                 ],
             ];
-            $sheet->getStyle('A1:H1')->applyFromArray($headerStyle);
+            $sheet->getStyle('A1:G1')->applyFromArray($headerStyle);
             $sheet->getRowDimension(1)->setRowHeight(25);
 
             // Get data for reference sheets
@@ -716,7 +720,6 @@ class JadwalService extends BaseService
                 $sheet->setCellValue('E2', $mapelList[0]['nama_mapel']);
                 $sheet->setCellValue('F2', $kelasList[0]['nama_kelas']);
                 $sheet->setCellValue('G2', 'Ganjil');
-                $sheet->setCellValue('H2', date('Y') . '/' . (date('Y') + 1));
             }
 
             // Set column widths
@@ -727,7 +730,6 @@ class JadwalService extends BaseService
             $sheet->getColumnDimension('E')->setWidth(35);
             $sheet->getColumnDimension('F')->setWidth(15);
             $sheet->getColumnDimension('G')->setWidth(12);
-            $sheet->getColumnDimension('H')->setWidth(15);
 
             $sheet->freezePane('A2');
 
@@ -898,19 +900,20 @@ class JadwalService extends BaseService
             ['5. MATA PELAJARAN: Pilih dari dropdown - HANYA NAMA (data dari sheet "Data Mata Pelajaran")'],
             ['6. KELAS: Pilih dari dropdown - NAMA KELAS (data dari sheet "Data Kelas")'],
             ['7. SEMESTER: Pilih dari dropdown (Ganjil atau Genap)'],
-            ['8. TAHUN AJARAN: Format YYYY/YYYY (contoh: 2023/2024, 2024/2025)'],
             [''],
             ['TIPS PENTING:'],
             ['✓ CUKUP PILIH NAMA dari dropdown (tidak perlu NIP atau kode!)'],
             ['✓ Dropdown otomatis mengambil data dari sheet referensi'],
             ['✓ Jangan mengubah nama kolom header'],
             ['✓ Format jam HARUS HH:MM:SS'],
+            ['✓ Tahun ajaran otomatis diambil dari pengaturan sistem'],
             ['✓ Sistem akan otomatis mengecek konflik jadwal'],
             ['✓ Centang "Lewati jadwal konflik" saat upload untuk skip data yang konflik'],
             [''],
             ['VALIDASI OTOMATIS:'],
-            ['→ Sistem akan mengecek apakah guru sudah mengajar di jam yang sama'],
-            ['→ Sistem akan mengecek apakah kelas sudah ada pelajaran di jam yang sama'],
+            ['→ Tahun ajaran menggunakan tahun ajaran aktif dari pengaturan sistem'],
+            ['→ Sistem akan mengecek apakah guru sudah mengajar di jam yang sama (tahun ajaran aktif)'],
+            ['→ Sistem akan mengecek apakah kelas sudah ada pelajaran di jam yang sama (tahun ajaran aktif)'],
             ['→ Data yang valid akan diimport, yang invalid akan dilaporkan'],
         ];
 

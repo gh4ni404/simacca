@@ -255,11 +255,29 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function confirmDelete(id, name) {
-        if (confirm(`Apakah Anda yakin ingin menghapus jadwal "${name}"?\n\nPERHATIAN: Jika sudah ada absensi, jadwal tidak dapat dihapus.`)) {
-            window.location.href = '<?= base_url('admin/jadwal/hapus/'); ?>' + id;
-        }
+        Swal.fire({
+            title: 'Hapus Jadwal?',
+            html: `
+                <p style="text-align:left;margin-bottom:12px">Apakah Anda yakin ingin menghapus jadwal <strong>"${name}"</strong>?</p>
+                <div style="text-align:left;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px;font-size:13px;color:#991b1b">
+                    <i class="fas fa-exclamation-triangle" style="margin-right:4px"></i>
+                    <strong>PERHATIAN:</strong> Jika sudah ada absensi, jadwal tidak dapat dihapus.
+                </div>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Ya, Hapus',
+            cancelButtonText: 'Batal'
+        }).then(function(result) {
+            if (result.isConfirmed) {
+                window.location.href = '<?= base_url('admin/jadwal/hapus/'); ?>' + id;
+            }
+        });
     }
 </script>
 <?= $this->endSection() ?>

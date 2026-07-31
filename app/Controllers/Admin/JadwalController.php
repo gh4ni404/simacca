@@ -31,7 +31,7 @@ class JadwalController extends BaseController
             'per_page' => $this->request->getGet('per_page') ?? 10,
             'search' => $this->request->getGet('search'),
             'semester' => $this->request->getGet('semester'),
-            'tahun_ajaran' => $this->request->getGet('tahun_ajaran')
+            'tahun_ajaran' => $this->request->getGet('tahun_ajaran') ?: get_active_tahun_ajaran()
         ];
 
         $result = $this->jadwalService->getAllJadwal($filters);
@@ -360,6 +360,9 @@ class JadwalController extends BaseController
                 $this->session->setFlashdata('success', $result['data']['message']);
             }
 
+            if (!empty($result['data']['errors'])) {
+                return redirect()->to('/admin/jadwal/import');
+            }
             return redirect()->to('/admin/jadwal');
         } else {
             $this->session->setFlashdata('error', $result['message']);

@@ -33,7 +33,7 @@
                         <li>Format jam: HH:MM:SS (contoh: 07:00:00)</li>
                         <li>Hari: Pilih dari dropdown (Senin-Jumat)</li>
                         <li>Semester: Pilih dari dropdown (Ganjil/Genap)</li>
-                        <li>Tahun Ajaran: Format YYYY/YYYY (contoh: 2023/2024)</li>
+                        <li>Tahun ajaran otomatis dari pengaturan sistem</li>
                         <li>Sistem mengecek konflik jadwal otomatis</li>
                     </ul>
                 </div>
@@ -139,6 +139,7 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.getElementById('file-upload').addEventListener('change', function(e) {
         const file = e.target.files[0];
@@ -150,7 +151,12 @@
             submitBtn.disabled = false;
 
             if (file.size > 5242880) {
-                alert('Ukuran file terlalu besar! Maksimal 5MB');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'File Terlalu Besar',
+                    text: 'Ukuran file maksimal 5MB!',
+                    confirmButtonColor: '#dc2626'
+                });
                 e.target.value = '';
                 fileName.textContent = '';
                 submitBtn.disabled = true;
@@ -159,7 +165,12 @@
 
             const extension = file.name.split('.').pop().toLowerCase();
             if (!['xlsx', 'xls'].includes(extension)) {
-                alert('Format file harus Excel (.xlsx atau .xls)');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Format File Salah',
+                    text: 'Format file harus Excel (.xlsx atau .xls)!',
+                    confirmButtonColor: '#dc2626'
+                });
                 e.target.value = '';
                 fileName.textContent = '';
                 submitBtn.disabled = true;
@@ -173,16 +184,35 @@
     });
 
     document.getElementById('importForm').addEventListener('submit', function(e) {
-        const confirmed = confirm('Apakah Anda yakin ingin melakukan import data jadwal?\n\nPastikan:\n1. Format data sudah benar\n2. ID Guru, Mapel, dan Kelas valid\n3. Tidak ada konflik jadwal (atau sudah dicentang "Lewati jadwal konflik")');
+        e.preventDefault();
 
-        if (!confirmed) {
-            e.preventDefault();
-            return false;
-        }
-
-        const submitBtn = document.getElementById('submitBtn');
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memproses...';
-        submitBtn.disabled = true;
+        Swal.fire({
+            title: 'Import Data Jadwal?',
+            html: `
+                <p style="text-align:left;margin-bottom:12px">Apakah Anda yakin ingin melakukan import data jadwal?</p>
+                <div style="text-align:left;background:#f9fafb;border-radius:8px;padding:12px;font-size:13px;color:#374151">
+                    <strong style="color:#6b7280">Pastikan:</strong>
+                    <ul style="margin:6px 0 0 16px;padding:0;list-style:disc">
+                        <li>Format data sudah benar</li>
+                        <li>Guru, Mapel, dan Kelas valid</li>
+                        <li>Tidak ada konflik jadwal (atau sudah centang "Lewati jadwal konflik")</li>
+                    </ul>
+                </div>
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#7c3aed',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Ya, Import',
+            cancelButtonText: 'Batal'
+        }).then(function(result) {
+            if (result.isConfirmed) {
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memproses...';
+                submitBtn.disabled = true;
+                document.getElementById('importForm').submit();
+            }
+        });
     });
 </script>
 <?= $this->endSection() ?>
