@@ -7,8 +7,8 @@
 **Framework:** CodeIgniter 4.6.4  
 **Database:** MySQL  
 **Styling:** Tailwind CSS  
-**Version:** 2.0.0  
-**Last Updated:** 2026-01-20
+**Version:** 3.0.0  
+**Last Updated:** 2026-08-02
 
 ---
 
@@ -18,16 +18,29 @@ SIMACCA adalah sistem informasi berbasis web untuk monitoring absensi siswa dan 
 
 ### ✨ Fitur Utama
 
-- 🔐 **Multi-Role System** - Admin, Guru Mapel, Wali Kelas, Siswa, Wakakur
+- 🔐 **Multi-Role System** - Admin, Guru Mapel, Wali Kelas, Siswa, Wakakur, Instruktur, Ketua Jurusan
 - 📊 **Dashboard Interaktif** - Statistik real-time untuk setiap role
 - ✅ **Absensi Digital** - Input cepat dengan UI mobile-friendly
+- 👨‍🏫 **Absensi Guru** - Self check-in/check-out dengan foto & kamera
 - 📝 **Jurnal KBM** - Dokumentasi kegiatan belajar mengajar
+- 🏭 **Jurnal PKL (Task-Oriented)** - Jurnal praktik kerja lapangan berbasis tugas
+- 🔍 **Verifikasi 2-Tahap** - Verifikasi pembimbing + instruktur untuk jurnal PKL
 - 📸 **Auto Image Optimization** - Kompresi otomatis 70-85%
 - 👨‍🏫 **Guru Pengganti** - Sistem untuk guru piket/pengganti
 - 📱 **Dual Layout System** - Auto-detect desktop & mobile layouts
 - 🔓 **Admin Unlock Absensi** - Unlock absensi terkunci untuk edit
-- 📧 **Email Notifications** - Password reset & notifikasi otomatis
-- 📄 **Export Reports** - Download laporan dalam format Excel/PDF
+- 📧 **Email Notifications** - Password reset, welcome, perubahan password/email, notifikasi
+- 📄 **Export Reports** - Download laporan dalam format Excel (browser print untuk PDF)
+- 🏭 **Manajemen PKL** - Pembimbing, tempat, siswa, kategori, dan task PKL
+- 📋 **Izin Guru** - Sistem pengajuan izin guru dengan persetujuan wakakur
+- 📊 **Laporan Mingguan** - Cetak laporan mengajar mingguan
+- 🔄 **Rollover Tahun Ajaran** - Backup & restore data antar tahun ajaran
+- 👥 **Multi-Role Users** - Satu user bisa memiliki beberapa role sekaligus
+- 🔒 **Security Helpers** - Validasi upload file, sanitasi filename, safe redirect
+- 🧩 **Component Library** - Komponen UI reusable (alerts, badges, cards, modals, tables)
+- 🖨️ **Print Layout** - Template cetak khusus untuk laporan
+- 💬 **Casual Message System** - Pesan ramah pengguna berbahasa Indonesia
+- 🎓 **XII Filter** - Batasi akses Jurnal PKL hanya untuk siswa kelas 12
 
 ---
 
@@ -127,6 +140,8 @@ docs/
 - **Mobile Layout** - Bottom tab bar, touch-optimized
 - **Manual Switch** - User bisa override pilihan layout
 - **Responsive** - Seamless transition antar device
+- **Layout Switcher** - URL endpoints untuk testing (`/layout/desktop`, `/layout/mobile`, `/layout/auto`)
+- **Device Info** - Endpoint `/layout/device-info` untuk debug device detection
 
 ### 🔓 Admin Unlock Absensi (v2.0.0)
 - **Single Unlock** - Unlock satu absensi dengan mudah
@@ -134,26 +149,107 @@ docs/
 - **Time Tracking** - Monitor waktu unlock dengan jelas
 - **Badge System** - Visual indicator untuk status locked/unlocked
 - **24-hour Window** - Guru punya 24 jam untuk edit setelah unlock
+- **Absensi Guru Monitoring** - Monitor absensi guru dengan detail & laporan
 
 ### 👨‍🎓 Wakakur Role (v2.0.0)
 - **Dual Access** - Bisa mengajar DAN supervisi
 - **Teaching Features** - Akses penuh ke fitur guru (absensi, jurnal)
 - **Admin Features** - Dashboard sekolah, laporan detail
 - **Student Management** - Kelola data siswa sekolah
-- **Permission Approval** - Approve izin siswa
+- **Permission Approval** - Approve izin siswa & guru
+- **Absensi Guru Monitoring** - Monitor & export absensi guru
+- **Print Laporan** - Cetak laporan administrasi
 
 ### 📸 Auto Image Optimization (v1.5.0)
 - **Auto-rotate EXIF orientation** - Foto landscape otomatis benar
 - Kompresi otomatis 70-85% tanpa loss kualitas
 - Profile photos: 800x800px @ 85% quality
 - Journal photos: 1920x1920px @ 85% quality
+- Absensi guru photos: Auto-optimize saat check-in/check-out
+- Jurnal PKL photos: Auto-optimize untuk dokumentasi PKL
+- PKL progress photos: Auto-optimize untuk bukti tugas
 - Support: JPEG, PNG, GIF, WebP
+- Secure file serving via FileController
 
 ### 👨‍🏫 Guru Pengganti System (v1.2.0)
 - Mode selection UI (Normal vs Pengganti)
 - Auto-detect substitute teacher
 - Dual ownership access control
 - Full integration dengan absensi & jurnal
+
+### 🖨️ Print Layout System (v3.0.0) [NEW]
+- **Print Layout Template** - Template cetak khusus untuk semua laporan
+- **Guru Absensi Print** - Cetak absensi per pertemuan
+- **Guru Jurnal Print** - Cetak jurnal KBM
+- **Guru Laporan Print** - Cetak laporan mengajar
+- **Weekly Report Print** - Cetak laporan mingguan
+- **Siswa PKL Print** - Cetak jurnal PKL, catatan, rekap
+- **Admin Laporan Print** - Cetak detail absensi admin
+- **Wakakur Laporan Print** - Cetak laporan wakakur
+
+### 🏭 PKL Module (v3.0.0) [NEW]
+- **Manajemen Pembimbing PKL** - Assign guru sebagai pembimbing PKL
+- **Manajemen Tempat PKL** - Kelola lokasi/prusahaan PKL
+- **Manajemen Siswa PKL** - Assign siswa ke tempat PKL
+- **Kategori PKL** - Kategorisasi kegiatan PKL
+- **Mapping Kategori** - Mapping kategori ke kelas/jurusan
+- **Master Task PKL** - Template tugas PKL untuk instruktur
+- **Jurnal PKL Task-Oriented** - Jurnal berbasis tugas dengan tracking per hari
+- **Verifikasi 2-Tahap** - Pembimbing verifikasi → Instruktur verifikasi
+- **Rekap Absensi PKL** - Rekap kehadiran siswa PKL per pembimbing
+- **Arsip Jurnal PKL** -Arsip jurnal PKL yang sudah selesai
+
+### 👨‍🏫 Absensi Guru (v3.0.0) [NEW]
+- **Self Check-in/Check-out** - Guru absensi mandiri
+- **Foto Dokumentasi** - Upload foto saat check-in/check-out
+- **Riwayat Absensi** - History kehadiran guru
+- **Monitoring Admin** - Admin & wakakur monitor absensi guru
+- **Export Excel** - Export laporan absensi guru ke Excel
+- **Keterangan** - Catatan keterangan untuk absensi guru
+
+### 🔍 Verifikasi Jurnal PKL (v3.0.0) [NEW]
+- **2-Tahap Verifikasi** - Pembimbing → Instruktur
+- **Status Flow** - draft → submitted → revision → approved → verified
+- **Batal Verifikasi** - Pembimbing & ketua jurusan bisa batal verifikasi
+- **Catatan Instruktur** - Instruktur bisa berikan catatan ke progress siswa
+- **Revision Loop** - Siswa bisa revisi dan submit ulang
+
+### 👥 Multi-Role Users (v3.0.0) [NEW]
+- **User Roles Table** - Satu user bisa punya beberapa role
+- **Flexible Access** - Contoh: ketua_jurusan + guru_mapel
+- **Role-Based Filtering** - Filter otomatis berdasarkan role
+
+### 👨‍🏫 Instruktur Role (v3.0.0) [NEW]
+- **Jurnal PKL Monitoring** - Monitor jurnal PKL semua siswa
+- **Verifikasi Progress** - Verifikasi progress siswa setelah pembimbing
+- **Task Template Management** - Kelola template tugas PKL
+- **Pending Review** - Antrian review yang perlu diverifikasi
+- **Catatan Instruktur** - Berikan catatan ke progress siswa
+- **Batal Verifikasi** - Batalkan verifikasi jika perlu revisi
+
+### 👔 Ketua Jurusan Role (v3.0.0) [NEW]
+- **Read-Only Monitoring** - Monitor PKL tanpa bisa edit
+- **Jurnal PKL Monitoring** - Lihat semua jurnal PKL jurusan
+- **Siswa PKL Monitoring** - Lihat semua siswa PKL jurusan
+- **Absensi PKL Monitoring** - Lihat rekap absensi PKL
+- **Batal Verifikasi** - Batalkan verifikasi jurnal PKL
+- **Tambah Catatan** - Berikan catatan ke jurnal PKL
+
+### 📋 Izin Guru (v3.0.0) [NEW]
+- **Pengajuan Izin** - Guru ajukan izin dengan berkas
+- **Persetujuan Wakakur** - Wakakur approve/reject izin
+- **Upload Berkas** - Upload bukti pendukung (JPG, PNG, PDF)
+
+### 📊 Laporan Mingguan (v3.0.0) [NEW]
+- **Weekly Report** - Cetak laporan mengajar per minggu
+- **Print Layout** - Format cetak yang rapi
+
+### 🔄 Rollover Tahun Ajaran (v3.0.0) [NEW]
+- **Backup Data** - Backup data sebelum rollover
+- **Restore Data** - Restore data dari backup
+- **Academic Year Management** - Kelola tahun ajaran aktif
+- **Pengaturan PKL** - Konfigurasi tanggal mulai/akhir jurnal PKL
+- **Pengaturan Umum** - Pengaturan aplikasi lainnya
 
 ---
 
@@ -165,6 +261,7 @@ docs/
 - **JavaScript:** Vanilla JS (No frameworks)
 - **Image Processing:** PHP GD Library + EXIF
 - **Email:** SMTP (Gmail, Mailtrap, etc)
+- **File Upload:** Secure file serving with validation
 
 ---
 
@@ -178,12 +275,14 @@ Setelah server berjalan (`php spark serve`):
 - **Wakakur Dashboard:** http://localhost:8080/wakakur/dashboard
 - **Wali Kelas Dashboard:** http://localhost:8080/walikelas/dashboard
 - **Siswa Dashboard:** http://localhost:8080/siswa/dashboard
+- **Instruktur Dashboard:** http://localhost:8080/instruktur/dashboard
+- **Ketua Jurusan Dashboard:** http://localhost:8080/ketua-jurusan/dashboard
 
 **Default Login:**
 - Username: `admin`
 - Password: `admin123`
 
-**Note:** Untuk testing Wakakur role, upgrade user existing via command atau database.
+**Note:** Untuk testing role lain, upgrade user existing via command atau database.
 
 ---
 
@@ -198,7 +297,13 @@ Setelah server berjalan (`php spark serve`):
 | `php spark migrate:status` | Cek status migrations |
 | `php spark cache:clear` | Clear application cache |
 | `php spark email:test` | Test email configuration |
+| `php spark email:diagnostics` | Diagnosa masalah email |
 | `php spark token:cleanup` | Clean expired tokens |
+| `php spark session:cleanup` | Clean expired sessions |
+| `php spark mark-alpha-guru` | Tandai alpha untuk guru yang tidak check-in |
+| `php spark set-profile-completion` | Set status profil completion user |
+| `php spark check-wakakur-schedule` | Cek jadwal wakakur |
+| `php spark check-wakakur-profile` | Cek profil wakakur |
 
 ---
 
@@ -218,6 +323,20 @@ Setelah server berjalan (`php spark serve`):
 | Profile & Photo | ✅ Complete | 100% | 2026-01-15 |
 | Image Optimization | ✅ Complete | 100% | 2026-01-15 |
 | Email Service | ✅ Complete | 100% | 2026-01-15 |
+| PKL Module | ✅ Complete | 100% | 2026-07-28 |
+| Instruktur Module | ✅ Complete | 100% | 2026-07-28 |
+| Ketua Jurusan Module | ✅ Complete | 100% | 2026-07-28 |
+| Absensi Guru | ✅ Complete | 100% | 2026-02-12 |
+| Izin Guru | ✅ Complete | 100% | 2026-02-12 |
+| Weekly Report | ✅ Complete | 100% | 2026-07-28 |
+| Rollover System | ✅ Complete | 100% | 2026-07-11 |
+| Multi-Role Users | ✅ Complete | 100% | 2026-07-21 |
+| Profile Completion | ✅ Complete | 100% | 2026-01-15 |
+| Bulk Actions | ✅ Complete | 100% | 2026-07-28 |
+| Jadwal Conflict Detection | ✅ Complete | 100% | 2026-07-28 |
+| Component Library | ✅ Complete | 100% | 2026-07-28 |
+| Soft Deletes | ✅ Complete | 100% | 2026-07-11 |
+| Security Helpers | ✅ Complete | 100% | 2026-07-28 |
 
 **Legend:**
 - ✅ Complete - Fully functional & tested
