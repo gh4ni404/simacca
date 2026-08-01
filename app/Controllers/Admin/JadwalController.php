@@ -271,7 +271,8 @@ class JadwalController extends BaseController
             'hari' => $this->request->getPost('hari'),
             'jam_mulai' => $this->request->getPost('jam_mulai'),
             'jam_selesai' => $this->request->getPost('jam_selesai'),
-            'exclude_id' => $this->request->getPost('exclude_id')
+            'exclude_id' => $this->request->getPost('exclude_id'),
+            'tahun_ajaran' => $this->request->getPost('tahun_ajaran') ?: get_active_tahun_ajaran()
         ];
 
         $result = $this->jadwalService->checkConflict($data);
@@ -325,7 +326,7 @@ class JadwalController extends BaseController
 
         $filters = [
             'semester' => $this->request->getGet('semester'),
-            'tahun_ajaran' => $this->request->getGet('tahun_ajaran')
+            'tahun_ajaran' => $this->request->getGet('tahun_ajaran') ?: get_active_tahun_ajaran()
         ];
 
         $result = $this->jadwalService->exportToExcel($filters);

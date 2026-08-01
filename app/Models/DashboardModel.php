@@ -105,9 +105,9 @@ class DashboardModel extends Model
         $hariIni = $hariIndonesia[date('l')];
 
         $stats = [
-            'jadwal_hari_ini'   => $jadwalModel->getByGuru($guruId, $hariIni),
+            'jadwal_hari_ini'   => $jadwalModel->getByGuru($guruId, $hariIni, get_active_tahun_ajaran()),
             'total_jadwal'      => $jadwalModel->where('guru_id', $guruId)->countAllResults(),
-            'total_absensi'     => $absensiModel->getByGuru($guruId),
+            'total_absensi'     => $absensiModel->getByGuru($guruId, null, null, get_active_tahun_ajaran()),
         ];
 
         return $stats;
@@ -125,7 +125,7 @@ class DashboardModel extends Model
         $stats = [
             'total_siswa'       => $siswaModel->where('kelas_id', $kelasId)->countAllResults(),
             'pending_izin'      => $izinModel->getPendingApproval($kelasId),
-            'recent_absensi'    => $absensiModel->getByKelas($kelasId, null, 5),
+            'recent_absensi'    => $absensiModel->getByKelas($kelasId, null, null, get_active_tahun_ajaran()),
         ];
 
         return $stats;

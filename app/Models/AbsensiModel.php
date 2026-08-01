@@ -103,7 +103,7 @@ class AbsensiModel extends Model
      * 
      * OPTIMIZED: Reduced JOINs and moved aggregate calculation to separate queries
      */
-    public function getByGuru($guruId, $startDate = null, $endDate = null)
+    public function getByGuru($guruId, $startDate = null, $endDate = null, $tahunAjaran = null)
     {
         // First, get basic absensi data with minimal JOINs
         // Include both: own schedules OR substitute teaching
@@ -124,6 +124,10 @@ class AbsensiModel extends Model
             ->where('jadwal_mengajar.guru_id', $guruId)  // Only get schedules that belong to this teacher
             ->orderBy('absensi.tanggal', 'DESC')
             ->orderBy('absensi.id', 'DESC');
+
+        if ($tahunAjaran) {
+            $builder->where('jadwal_mengajar.tahun_ajaran', $tahunAjaran);
+        }
 
         if ($startDate && $endDate) {
             $builder->where('absensi.tanggal >=', $startDate);
@@ -185,7 +189,7 @@ class AbsensiModel extends Model
     /**
      * Get absensi by kelas
      */
-    public function getByKelas($kelasId, $startDate = null, $endDate = null)
+    public function getByKelas($kelasId, $startDate = null, $endDate = null, $tahunAjaran = null)
     {
         $builder = $this->select('absensi.*,
                                 guru.nama_lengkap as nama_guru,
@@ -195,6 +199,10 @@ class AbsensiModel extends Model
             ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
             ->where('jadwal_mengajar.kelas_id', $kelasId)
             ->orderBy('absensi.tanggal', 'DESC');
+
+        if ($tahunAjaran) {
+            $builder->where('jadwal_mengajar.tahun_ajaran', $tahunAjaran);
+        }
 
         if ($startDate && $endDate) {
             $builder->where('absensi.tanggal >=', $startDate);
@@ -207,7 +215,7 @@ class AbsensiModel extends Model
     /**
      * Get absensi by guru and kelas (for detailed view per class)
      */
-    public function getByGuruAndKelas($guruId, $kelasId, $tanggal = null)
+    public function getByGuruAndKelas($guruId, $kelasId, $tanggal = null, $tahunAjaran = null)
     {
         // Get basic absensi data
         $builder = $this->select('absensi.*,
@@ -226,6 +234,10 @@ class AbsensiModel extends Model
             ->orderBy('absensi.tanggal', 'DESC')
             ->orderBy('absensi.pertemuan_ke', 'DESC')
             ->orderBy('absensi.id', 'DESC');
+
+        if ($tahunAjaran) {
+            $builder->where('jadwal_mengajar.tahun_ajaran', $tahunAjaran);
+        }
 
         if ($tanggal) {
             $builder->where('absensi.tanggal', $tanggal);
@@ -293,7 +305,7 @@ class AbsensiModel extends Model
     /**
      * Get statistik absensi
      */
-    public function getStatistik($guruId = null, $kelasId = null, $startDate = null, $endDate = null)
+    public function getStatistik($guruId = null, $kelasId = null, $startDate = null, $endDate = null, $tahunAjaran = null)
     {
         $builder = $this->select('COUNT(absensi.id) as total_pertemuan')
             ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id');
@@ -306,6 +318,10 @@ class AbsensiModel extends Model
             $builder->where('jadwal_mengajar.kelas_id', $kelasId);
         }
 
+        if ($tahunAjaran) {
+            $builder->where('jadwal_mengajar.tahun_ajaran', $tahunAjaran);
+        }
+
         if ($startDate && $endDate) {
             $builder->where('absensi.tanggal >=', $startDate);
             $builder->where('absensi.tanggal <=', $endDate);
@@ -313,23 +329,28 @@ class AbsensiModel extends Model
         return $builder->first();
     }
 
-    public function getRecentAbsensi($limit = 5)
+    public function getRecentAbsensi($limit = 5, $tahunAjaran = null)
     {
-        return $this->select('absensi.*, guru.nama_lengkap as nama_guru, mata_pelajaran.nama_mapel, kelas.nama_kelas')
+        $builder = $this->select('absensi.*, guru.nama_lengkap as nama_guru, mata_pelajaran.nama_mapel, kelas.nama_kelas')
             ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
             ->join('guru', 'guru.id = jadwal_mengajar.guru_id')
             ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
             ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
             ->orderBy('absensi.tanggal', 'DESC')
             ->orderBy('absensi.created_at', 'DESC')
-            ->limit($limit)
-            ->findAll();
+            ->limit($limit);
+
+        if ($tahunAjaran) {
+            $builder->where('jadwal_mengajar.tahun_ajaran', $tahunAjaran);
+        }
+
+        return $builder->findAll();
     }
 
     /**
      * Get laporan absensi lengkap untuk admin
      */
-    public function getLaporanAbsensiLengkap($from, $to, $kelasId = null)
+    public function getLaporanAbsensiLengkap($from, $to, $kelasId = null, $tahunAjaran = null)
     {
         $builder = $this->db->table('absensi a')
             ->select('a.id,
@@ -362,6 +383,10 @@ class AbsensiModel extends Model
             $builder->where('k.id', $kelasId);
         }
 
+        if ($tahunAjaran) {
+            $builder->where('jm.tahun_ajaran', $tahunAjaran);
+        }
+
         $builder->groupBy('a.id')
             ->orderBy('a.tanggal', 'DESC')
             ->orderBy('jm.jam_mulai', 'ASC');
@@ -373,7 +398,7 @@ class AbsensiModel extends Model
      * Get laporan absensi per hari dengan list semua jadwal (sudah & belum mengisi)
      * Untuk monitoring pengisian absensi dan jurnal oleh guru
      */
-    public function getLaporanAbsensiPerHari($from, $to, $kelasId = null)
+    public function getLaporanAbsensiPerHari($from, $to, $kelasId = null, $tahunAjaran = null)
     {
         // Generate tanggal range
         $dates = [];
@@ -424,6 +449,10 @@ class AbsensiModel extends Model
 
             if ($kelasId) {
                 $builderJadwal->where('k.id', $kelasId);
+            }
+
+            if ($tahunAjaran) {
+                $builderJadwal->where('jm.tahun_ajaran', $tahunAjaran);
             }
 
             $builderJadwal->groupBy('jm.id')

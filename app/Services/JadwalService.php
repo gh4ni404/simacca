@@ -258,12 +258,15 @@ class JadwalService extends BaseService
     public function checkConflict(array $data): array
     {
         try {
+            $tahunAjaran = $data['tahun_ajaran'] ?? get_active_tahun_ajaran();
+
             $conflictGuru = $this->jadwalModel->checkConflict(
                 $data['guru_id'], 
                 $data['hari'], 
                 $data['jam_mulai'], 
                 $data['jam_selesai'], 
-                $data['exclude_id'] ?? null
+                $data['exclude_id'] ?? null,
+                $tahunAjaran
             );
             
             $conflictKelas = $this->jadwalModel->checkKelasConflict(
@@ -271,7 +274,8 @@ class JadwalService extends BaseService
                 $data['hari'], 
                 $data['jam_mulai'], 
                 $data['jam_selesai'], 
-                $data['exclude_id'] ?? null
+                $data['exclude_id'] ?? null,
+                $tahunAjaran
             );
 
             return $this->successResponse([

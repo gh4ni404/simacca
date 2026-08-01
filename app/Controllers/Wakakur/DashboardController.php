@@ -95,7 +95,7 @@ class DashboardController extends BaseController
         $totalIzinPending = $this->izinModel->where('status', 'pending')->countAllResults();
 
         // Recent activities (as guru mapel) - use existing model method
-        $recentAbsensi = $this->absensiModel->getByGuru($guruId);
+        $recentAbsensi = $this->absensiModel->getByGuru($guruId, null, null, get_active_tahun_ajaran());
         $recentAbsensi = array_slice($recentAbsensi, 0, 5);
 
         $data = [

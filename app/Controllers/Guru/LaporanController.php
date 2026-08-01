@@ -45,8 +45,8 @@ class LaporanController extends BaseController
         $startDate = $this->request->getGet('start_date');
         $endDate = $this->request->getGet('end_date');
 
-        // Get jadwal mengajar guru (untuk filter kelas)
-        $jadwalGuru = $this->jadwalModel->getByGuru($guru['id']);
+        // Get jadwal mengajar guru (untuk filter kelas, filtered by tahun_ajaran)
+        $jadwalGuru = $this->jadwalModel->getByGuru($guru['id'], null, get_active_tahun_ajaran());
         
         // Extract unique kelas from jadwal
         $kelasIds = array_unique(array_column($jadwalGuru, 'kelas_id'));
@@ -63,11 +63,12 @@ class LaporanController extends BaseController
 
         // Generate laporan jika ada filter
         if ($kelasId && $startDate && $endDate) {
-            // Get absensi data
+            // Get absensi data (filtered by tahun_ajaran)
             $absensiData = $this->absensiModel->select('absensi.*, jadwal_mengajar.kelas_id')
                 ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
                 ->where('jadwal_mengajar.guru_id', $guru['id'])
                 ->where('jadwal_mengajar.kelas_id', $kelasId)
+                ->where('jadwal_mengajar.tahun_ajaran', get_active_tahun_ajaran())
                 ->where('absensi.tanggal >=', $startDate)
                 ->where('absensi.tanggal <=', $endDate)
                 ->orderBy('absensi.tanggal', 'ASC')
@@ -186,11 +187,12 @@ class LaporanController extends BaseController
             return redirect()->to('/guru/laporan')->with('error', '❌ Data kelas nggak ketemu 🤔');
         }
 
-        // Get absensi data
+        // Get absensi data (filtered by tahun_ajaran)
         $absensiData = $this->absensiModel->select('absensi.*, jadwal_mengajar.kelas_id')
             ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
             ->where('jadwal_mengajar.guru_id', $guru['id'])
             ->where('jadwal_mengajar.kelas_id', $kelasId)
+            ->where('jadwal_mengajar.tahun_ajaran', get_active_tahun_ajaran())
             ->where('absensi.tanggal >=', $startDate)
             ->where('absensi.tanggal <=', $endDate)
             ->orderBy('absensi.tanggal', 'ASC')

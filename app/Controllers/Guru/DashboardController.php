@@ -113,8 +113,10 @@ class DashboardController extends BaseController
         $currentMonth = date('m');
         $currentYear = date('Y');
 
-        // Get total jadwal
-        $totalJadwal = $this->jadwalModel->where('guru_id', $guruId)->countAllResults();
+        // Get total jadwal (filtered by tahun_ajaran)
+        $totalJadwal = $this->jadwalModel->where('guru_id', $guruId)
+            ->where('tahun_ajaran', get_active_tahun_ajaran())
+            ->countAllResults();
 
         // Get absensi bulan ini
         $absensiBulanIni = $this->absensiModel->select('COUNT(DISTINCT tanggal) as total_hari, COUNT(*) as total_pertemuan')
@@ -123,18 +125,20 @@ class DashboardController extends BaseController
             ->where('YEAR(tanggal)', $currentYear)
             ->first();
 
-        // Get jurnal bulan ini
+        // Get jurnal bulan ini (filtered by tahun_ajaran)
         $jurnalBulanIni = $this->jurnalModel->select('COUNT(*) as total')
             ->join('absensi', 'absensi.id = jurnal_kbm.absensi_id')
             ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
             ->where('jadwal_mengajar.guru_id', $guruId)
+            ->where('jadwal_mengajar.tahun_ajaran', get_active_tahun_ajaran())
             ->where('MONTH(absensi.tanggal)', $currentMonth)
             ->where('YEAR(absensi.tanggal)', $currentYear)
             ->first();
 
-        // Get total kelas yang diajar
+        // Get total kelas yang diajar (filtered by tahun_ajaran)
         $totalKelas = $this->jadwalModel->select('COUNT(DISTINCT kelas_id) as total')
             ->where('guru_id', $guruId)
+            ->where('tahun_ajaran', get_active_tahun_ajaran())
             ->first();
 
         return [
@@ -174,6 +178,7 @@ class DashboardController extends BaseController
             ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
             ->where('guru_id', $guruId)
             ->where('hari', $hariIni)
+            ->where('jadwal_mengajar.tahun_ajaran', get_active_tahun_ajaran())
             ->orderBy('jam_mulai', 'ASC')
             ->findAll();
     }
@@ -186,11 +191,12 @@ class DashboardController extends BaseController
     {
         $hariList = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'];
         
-        // Single query untuk semua hari - OPTIMIZATION
+        // Single query untuk semua hari - OPTIMIZATION (filtered by tahun_ajaran)
         $allJadwal = $this->jadwalModel->select('jadwal_mengajar.*, mata_pelajaran.nama_mapel, kelas.nama_kelas')
             ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
             ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
             ->where('guru_id', $guruId)
+            ->where('jadwal_mengajar.tahun_ajaran', get_active_tahun_ajaran())
             ->whereIn('hari', $hariList)
             ->orderBy('FIELD(hari, "Senin", "Selasa", "Rabu", "Kamis", "Jumat")', '', false)
             ->orderBy('jam_mulai', 'ASC')
@@ -217,6 +223,7 @@ class DashboardController extends BaseController
             ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
             ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
             ->where('jadwal_mengajar.guru_id', $guruId)
+            ->where('jadwal_mengajar.tahun_ajaran', get_active_tahun_ajaran())
             ->orderBy('absensi.tanggal', 'DESC')
             ->orderBy('absensi.created_at', 'DESC')
             ->limit(5)
@@ -236,6 +243,7 @@ class DashboardController extends BaseController
             ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
             ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
             ->where('jadwal_mengajar.guru_id', $guruId)
+            ->where('jadwal_mengajar.tahun_ajaran', get_active_tahun_ajaran())
             ->orderBy('absensi.tanggal', 'DESC')
             ->limit(5)
             ->findAll();
@@ -271,21 +279,23 @@ class DashboardController extends BaseController
         $startDate = "$currentYear-$currentMonth-01";
         $endDate = date('Y-m-t', strtotime($startDate));
 
-        // Get absensi data for current month - OPTIMIZED with date range
+        // Get absensi data for current month - OPTIMIZED with date range and tahun_ajaran
         $absensiData = $this->absensiModel->select("DATE_FORMAT(tanggal, '%Y-%m-%d') as tanggal, COUNT(*) as jumlah")
             ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
             ->where('jadwal_mengajar.guru_id', $guruId)
+            ->where('jadwal_mengajar.tahun_ajaran', get_active_tahun_ajaran())
             ->where('tanggal >=', $startDate)
             ->where('tanggal <=', $endDate)
             ->groupBy('tanggal')
             ->orderBy('tanggal', 'ASC')
             ->findAll();
 
-        // Get absensi by status for current month - OPTIMIZED with date range
+        // Get absensi by status for current month - OPTIMIZED with date range and tahun_ajaran
         $statusData = $this->absensiModel->select('absensi_detail.status, COUNT(*) as jumlah')
             ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
             ->join('absensi_detail', 'absensi_detail.absensi_id = absensi.id')
             ->where('jadwal_mengajar.guru_id', $guruId)
+            ->where('jadwal_mengajar.tahun_ajaran', get_active_tahun_ajaran())
             ->where('absensi.tanggal >=', $startDate)
             ->where('absensi.tanggal <=', $endDate)
             ->groupBy('absensi_detail.status')
@@ -438,6 +448,7 @@ class DashboardController extends BaseController
         return $this->jadwalModel->select('kelas.*')
             ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
             ->where('jadwal_mengajar.guru_id', $guruId)
+            ->where('jadwal_mengajar.tahun_ajaran', get_active_tahun_ajaran())
             ->groupBy('kelas.id')
             ->orderBy('kelas.tingkat, kelas.nama_kelas')
             ->findAll();

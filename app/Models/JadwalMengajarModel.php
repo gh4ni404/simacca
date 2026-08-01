@@ -154,7 +154,7 @@ class JadwalMengajarModel extends Model
     /**
      * Get jadwal by guru
      */
-    public function getByGuru($guruId, $hari = null)
+    public function getByGuru($guruId, $hari = null, $tahunAjaran = null)
     {
         $builder = $this->select('jadwal_mengajar.*, mata_pelajaran.nama_mapel, kelas.nama_kelas')
             ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
@@ -164,6 +164,10 @@ class JadwalMengajarModel extends Model
 
         if ($hari) {
             $builder->where('hari', $hari);
+        }
+
+        if ($tahunAjaran) {
+            $builder->where('jadwal_mengajar.tahun_ajaran', $tahunAjaran);
         }
 
         return $builder->findAll();
@@ -190,7 +194,7 @@ class JadwalMengajarModel extends Model
     /**
      * Get jadwal hari ini untuk guru
      */
-    public function getJadwalHariIni($guruId)
+    public function getJadwalHariIni($guruId, $tahunAjaran = null)
     {
         $hariIndonesia = [
             'Sunday'    => 'Minggu',
@@ -206,7 +210,7 @@ class JadwalMengajarModel extends Model
 
         if (!$hariIni) return [];
 
-        return $this->getByGuru($guruId, $hariIni);
+        return $this->getByGuru($guruId, $hariIni, $tahunAjaran);
     }
 
     /**
@@ -228,7 +232,7 @@ class JadwalMengajarModel extends Model
             ->groupEnd();
 
         if ($tahunAjaran) {
-            $builder->where('tahun_ajaran', $tahunAjaran);
+            $builder->where('jadwal_mengajar.tahun_ajaran', $tahunAjaran);
         }
 
         if ($excludeId) {
@@ -257,7 +261,7 @@ class JadwalMengajarModel extends Model
             ->groupEnd();
 
         if ($tahunAjaran) {
-            $builder->where('tahun_ajaran', $tahunAjaran);
+            $builder->where('jadwal_mengajar.tahun_ajaran', $tahunAjaran);
         }
 
         if ($excludeId) {

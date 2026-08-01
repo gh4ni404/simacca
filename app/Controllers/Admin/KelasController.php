@@ -243,9 +243,9 @@ class KelasController extends BaseController
         // Get siswa list (already included in service response)
         $siswa = $kelas['siswa'] ?? [];
 
-        // Get absensi statistics for this kelas (this month)
+        // Get absensi statistics for this kelas (this month, filtered by tahun_ajaran)
         $absensiModel = new \App\Models\AbsensiModel();
-        $absensiList = $absensiModel->getByKelas($id, date('Y-m-01'), date('Y-m-t'));
+        $absensiList = $absensiModel->getByKelas($id, date('Y-m-01'), date('Y-m-t'), get_active_tahun_ajaran());
         
         // Format statistics as expected by view
         $absensiStats = [

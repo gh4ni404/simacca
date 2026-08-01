@@ -48,20 +48,21 @@ class AbsensiController extends BaseController
         $search = $this->request->getGet('search');
         $tanggal = $this->request->getGet('tanggal');
         $kelasId = $this->request->getGet('kelas_id');
+        $tahunAjaran = get_active_tahun_ajaran();
 
         // Get absensi by guru using service
-        $absensiResult = $this->absensiService->getByGuru($guruId, $tanggal);
+        $absensiResult = $this->absensiService->getByGuru($guruId, $tanggal, $tahunAjaran);
         $absensi = $absensiResult['data'] ?? [];
 
         // Get kelas summary
         $kelasSummary = $this->absensiService->getKelasSummary($absensi);
 
         // Get stats
-        $statsResult = $this->absensiService->getAbsensiStats($guruId, $tanggal);
+        $statsResult = $this->absensiService->getAbsensiStats($guruId, $tanggal, $tahunAjaran);
         $stats = $statsResult['data'] ?? [];
 
         // Get all classes taught by this teacher
-        $kelasOptions = $this->getKelasOptions($guruId);
+        $kelasOptions = $this->getKelasOptions($guruId, $tahunAjaran);
 
         $data = [
             'title' => 'Manajemen Absensi',
@@ -97,9 +98,10 @@ class AbsensiController extends BaseController
         $guruId = $guru['id'];
         $jadwalId = $this->request->getGet('jadwal_id');
         $tanggal = $this->request->getGet('tanggal') ?? date('Y-m-d');
+        $tahunAjaran = get_active_tahun_ajaran();
 
         // Get today's schedule
-        $jadwalHariIni = $this->getJadwalHariIni($guruId);
+        $jadwalHariIni = $this->getJadwalHariIni($guruId, $tahunAjaran);
 
         // If jadwal_id is provided, use that
         if ($jadwalId) {
@@ -268,11 +270,13 @@ class AbsensiController extends BaseController
 
         $guruId = $guru['id'];
         $tanggal = $this->request->getGet('tanggal');
+        $tahunAjaran = get_active_tahun_ajaran();
 
         // Verify this teacher teaches this class
         $teachesThisClass = $this->jadwalModel
             ->where('guru_id', $guruId)
             ->where('kelas_id', $kelasId)
+            ->where('tahun_ajaran', $tahunAjaran)
             ->countAllResults() > 0;
 
         if (!$teachesThisClass) {
@@ -281,7 +285,7 @@ class AbsensiController extends BaseController
         }
 
         // Get absensi for this kelas using service
-        $absensiResult = $this->absensiService->getByGuruAndKelas($guruId, $kelasId, $tanggal);
+        $absensiResult = $this->absensiService->getByGuruAndKelas($guruId, $kelasId, $tanggal, $tahunAjaran);
         $absensiList = $absensiResult['data'] ?? [];
 
         // Calculate stats for this kelas
@@ -520,13 +524,14 @@ class AbsensiController extends BaseController
 
         $kelasId = $this->request->getGet('kelas_id');
         $tanggal = $this->request->getGet('tanggal');
+        $tahunAjaran = get_active_tahun_ajaran();
 
         if (!$kelasId) {
             return $this->response->setJSON(['success' => false, 'message' => 'Kelas ID diperlukan']);
         }
 
-        // Get students in the class
-        $siswaList = $this->siswaModel->getByKelas($kelasId);
+        // Get students in the class (filtered by tahun_ajaran)
+        $siswaList = $this->siswaModel->getByKelas($kelasId, $tahunAjaran);
 
         // Get approved izin for this date
         $approvedIzin = [];
@@ -566,6 +571,8 @@ class AbsensiController extends BaseController
             return $this->response->setJSON(['success' => false, 'message' => 'Hari diperlukan']);
         }
 
+        $tahunAjaran = get_active_tahun_ajaran();
+
         // Check if this is for substitute teacher mode
         $isSubstitute = $this->request->getGet('substitute') === 'true';
 
@@ -579,11 +586,12 @@ class AbsensiController extends BaseController
                 ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
                 ->join('guru', 'guru.id = jadwal_mengajar.guru_id')
                 ->where('hari', $hari)
+                ->where('jadwal_mengajar.tahun_ajaran', $tahunAjaran)
                 ->orderBy('jam_mulai', 'ASC')
                 ->findAll();
         } else {
             // Get only this teacher's schedules
-            $jadwal = $this->jadwalModel->getByGuru($guru['id'], $hari);
+            $jadwal = $this->jadwalModel->getByGuru($guru['id'], $hari, $tahunAjaran);
         }
 
         return $this->response->setJSON([
@@ -669,7 +677,7 @@ class AbsensiController extends BaseController
      * Helper Methods
      */
 
-    private function getJadwalHariIni($guruId)
+    private function getJadwalHariIni($guruId, $tahunAjaran = null)
     {
         $hariIndonesia = [
             'Sunday' => 'Minggu',
@@ -687,23 +695,33 @@ class AbsensiController extends BaseController
             return [];
         }
 
-        return $this->jadwalModel->select('jadwal_mengajar.*, mata_pelajaran.nama_mapel, kelas.nama_kelas')
+        $builder = $this->jadwalModel->select('jadwal_mengajar.*, mata_pelajaran.nama_mapel, kelas.nama_kelas')
             ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
             ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
             ->where('guru_id', $guruId)
             ->where('hari', $hariIni)
-            ->orderBy('jam_mulai', 'ASC')
-            ->findAll();
+            ->orderBy('jam_mulai', 'ASC');
+
+        if ($tahunAjaran) {
+            $builder->where('jadwal_mengajar.tahun_ajaran', $tahunAjaran);
+        }
+
+        return $builder->findAll();
     }
 
-    private function getKelasOptions($guruId)
+    private function getKelasOptions($guruId, $tahunAjaran = null)
     {
-        $kelasList = $this->jadwalModel->select('kelas.*')
+        $builder = $this->jadwalModel->select('kelas.*')
             ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
             ->where('guru_id', $guruId)
             ->groupBy('kelas.id')
-            ->orderBy('kelas.tingkat, kelas.nama_kelas')
-            ->findAll();
+            ->orderBy('kelas.tingkat, kelas.nama_kelas');
+
+        if ($tahunAjaran) {
+            $builder->where('jadwal_mengajar.tahun_ajaran', $tahunAjaran);
+        }
+
+        $kelasList = $builder->findAll();
 
         $options = ['' => 'Semua Kelas'];
         foreach ($kelasList as $kelas) {

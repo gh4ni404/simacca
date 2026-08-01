@@ -51,10 +51,10 @@ class AbsensiService extends BaseService
      * @param string|null $tanggal
      * @return array
      */
-    public function getByGuru(int $guruId, ?string $tanggal = null): array
+    public function getByGuru(int $guruId, ?string $tanggal = null, ?string $tahunAjaran = null): array
     {
         try {
-            $absensi = $this->absensiModel->getByGuru($guruId, $tanggal);
+            $absensi = $this->absensiModel->getByGuru($guruId, $tanggal, null, $tahunAjaran);
             
             // Add can_edit and can_delete flags
             foreach ($absensi as &$item) {
@@ -78,10 +78,10 @@ class AbsensiService extends BaseService
      * @param string|null $tanggal
      * @return array
      */
-    public function getByGuruAndKelas(int $guruId, int $kelasId, ?string $tanggal = null): array
+    public function getByGuruAndKelas(int $guruId, int $kelasId, ?string $tanggal = null, ?string $tahunAjaran = null): array
     {
         try {
-            $absensiList = $this->absensiModel->getByGuruAndKelas($guruId, $kelasId, $tanggal);
+            $absensiList = $this->absensiModel->getByGuruAndKelas($guruId, $kelasId, $tanggal, $tahunAjaran);
             
             // Add can_edit and can_delete flags
             foreach ($absensiList as &$item) {
@@ -430,7 +430,7 @@ class AbsensiService extends BaseService
      * @param string|null $tanggal
      * @return array
      */
-    public function getAbsensiStats(int $guruId, ?string $tanggal = null): array
+    public function getAbsensiStats(int $guruId, ?string $tanggal = null, ?string $tahunAjaran = null): array
     {
         try {
             $stats = [
@@ -445,6 +445,10 @@ class AbsensiService extends BaseService
                 ->join('absensi', 'absensi.id = absensi_detail.absensi_id')
                 ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
                 ->where('jadwal_mengajar.guru_id', $guruId);
+
+            if ($tahunAjaran) {
+                $builder->where('jadwal_mengajar.tahun_ajaran', $tahunAjaran);
+            }
 
             if ($tanggal) {
                 $builder->where('absensi.tanggal', $tanggal);
@@ -656,10 +660,10 @@ class AbsensiService extends BaseService
      * @param string|null $tanggal
      * @return array
      */
-    public function getSiswaByKelas(int $kelasId, ?string $tanggal = null): array
+    public function getSiswaByKelas(int $kelasId, ?string $tanggal = null, ?string $tahunAjaran = null): array
     {
         try {
-            $siswaList = $this->siswaModel->getByKelas($kelasId);
+            $siswaList = $this->siswaModel->getByKelas($kelasId, $tahunAjaran);
             
             $approvedIzin = [];
             if ($tanggal) {

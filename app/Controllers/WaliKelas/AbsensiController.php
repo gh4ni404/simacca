@@ -44,8 +44,8 @@ class AbsensiController extends BaseController
         $startDate = $this->request->getGet('start_date') ?? date('Y-m-01');
         $endDate = $this->request->getGet('end_date') ?? date('Y-m-t');
 
-        // Get absensi data
-        $absensiData = $this->absensiModel->getByKelas($kelas['id'], $startDate, $endDate);
+        // Get absensi data (filtered by tahun_ajaran)
+        $absensiData = $this->absensiModel->getByKelas($kelas['id'], $startDate, $endDate, get_active_tahun_ajaran());
 
         // Get detail statistik untuk setiap absensi
         foreach ($absensiData as &$absen) {

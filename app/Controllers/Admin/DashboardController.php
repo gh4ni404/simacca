@@ -69,7 +69,7 @@ class DashboardController extends BaseController
             'chartData' => $this->dashboardModel->getChartData(),
 
             // // Data terbaru
-            'recentAbsensi' => $this->absensiModel->getRecentAbsensi(),
+            'recentAbsensi' => $this->absensiModel->getRecentAbsensi(5, get_active_tahun_ajaran()),
             'pendingIzin' => $this->izinModel->getPendingIzin(),
             // 'recentUsers' => $this->getRecentUsers(),
 

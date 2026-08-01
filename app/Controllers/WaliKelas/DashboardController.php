@@ -59,7 +59,7 @@ class DashboardController extends BaseController
         $startDate = date('Y-m-01');
         $endDate = date('Y-m-t');
         
-        $absensiKelas = $this->absensiModel->getByKelas($kelas['id'], $startDate, $endDate);
+        $absensiKelas = $this->absensiModel->getByKelas($kelas['id'], $startDate, $endDate, get_active_tahun_ajaran());
         
         // Get statistik kehadiran siswa
         $stats = [
@@ -105,7 +105,7 @@ class DashboardController extends BaseController
             ->findAll();
 
         // Recent absensi
-        $recentAbsensi = $this->absensiModel->getByKelas($kelas['id'], null, null);
+        $recentAbsensi = $this->absensiModel->getByKelas($kelas['id'], null, null, get_active_tahun_ajaran());
         $recentAbsensi = array_slice($recentAbsensi, 0, 5);
 
         $data = [

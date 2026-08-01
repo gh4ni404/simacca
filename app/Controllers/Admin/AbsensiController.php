@@ -60,6 +60,7 @@ class AbsensiController extends BaseController
             ->join('kelas', 'kelas.id = jadwal_mengajar.kelas_id')
             ->join('mata_pelajaran', 'mata_pelajaran.id = jadwal_mengajar.mata_pelajaran_id')
             ->join('guru guru_pengganti', 'guru_pengganti.id = absensi.guru_pengganti_id', 'left')
+            ->where('jadwal_mengajar.tahun_ajaran', get_active_tahun_ajaran())
             ->where('absensi.tanggal >=', $tanggalDari)
             ->where('absensi.tanggal <=', $tanggalSampai)
             ->orderBy('absensi.tanggal', 'DESC')

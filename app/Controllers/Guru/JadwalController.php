@@ -28,8 +28,8 @@ class JadwalController extends BaseController
             return redirect()->to('/guru/dashboard')->with('error', 'Data guru nggak ketemu 🤔');
         }
 
-        // Get jadwal mengajar untuk guru yang sedang login
-        $jadwal = $this->jadwalModel->getByGuru($guru['id']);
+        // Get jadwal mengajar untuk guru yang sedang login (filtered by tahun_ajaran)
+        $jadwal = $this->jadwalModel->getByGuru($guru['id'], null, get_active_tahun_ajaran());
 
         // Group jadwal by hari
         $jadwalByHari = [
@@ -44,8 +44,8 @@ class JadwalController extends BaseController
             $jadwalByHari[$item['hari']][] = $item;
         }
 
-        // Get jadwal hari ini
-        $jadwalHariIni = $this->jadwalModel->getJadwalHariIni($guru['id']);
+        // Get jadwal hari ini (filtered by tahun_ajaran)
+        $jadwalHariIni = $this->jadwalModel->getJadwalHariIni($guru['id'], get_active_tahun_ajaran());
 
         $data = [
             'title' => 'Jadwal Mengajar',
