@@ -162,13 +162,8 @@ class AbsensiService extends BaseService
         }
 
         return $this->executeInTransaction(function () use ($data, $jadwal) {
-            // AUTO-CALCULATE pertemuan_ke (ignore user input for consistency)
-            $lastAbsensi = $this->absensiModel
-                ->where('jadwal_mengajar_id', $data['jadwal_mengajar_id'])
-                ->orderBy('pertemuan_ke', 'DESC')
-                ->first();
-            
-            $pertemuanKe = $lastAbsensi ? ($lastAbsensi['pertemuan_ke'] + 1) : 1;
+            // AUTO-CALCULATE pertemuan_ke scoped by guru+mapel+kelas+tahun_ajaran
+            $pertemuanKe = $this->calculateNextPertemuan($data['jadwal_mengajar_id']);
             
             // Prepare absensi data
             $absensiData = [
@@ -473,6 +468,10 @@ class AbsensiService extends BaseService
     /**
      * Get next pertemuan number
      * 
+     * Scoped by guru + mata_pelajaran + kelas + tahun_ajaran so that
+     * all sessions of the same subject for the same class share one
+     * continuous pertemuan sequence (e.g. Senin=1, Rabu=2, Senin=3, ...).
+     * 
      * @param int $guruId
      * @param int|null $kelasId
      * @param int|null $jadwalId
@@ -481,22 +480,43 @@ class AbsensiService extends BaseService
     public function getNextPertemuan(int $guruId, ?int $kelasId = null, ?int $jadwalId = null): array
     {
         try {
-            if ($jadwalId) {
-                $lastAbsensi = $this->absensiModel
-                    ->where('jadwal_mengajar_id', $jadwalId)
-                    ->orderBy('pertemuan_ke', 'DESC')
-                    ->first();
-
-                $nextPertemuan = $lastAbsensi ? ($lastAbsensi['pertemuan_ke'] + 1) : 1;
-            } else {
-                $nextPertemuan = 1;
-            }
+            $nextPertemuan = $this->calculateNextPertemuan($jadwalId);
 
             return $this->successResponse(['pertemuan_ke' => $nextPertemuan]);
         } catch (\Exception $e) {
             $this->log('error', 'Failed to get next pertemuan: ' . $e->getMessage());
             return $this->errorResponse('Gagal mendapatkan nomor pertemuan');
         }
+    }
+
+    /**
+     * Calculate next pertemuan_ke by scoped lookup (guru + mapel + kelas + tahun_ajaran)
+     * 
+     * @param int|null $jadwalId
+     * @return int
+     */
+    private function calculateNextPertemuan(?int $jadwalId): int
+    {
+        if (!$jadwalId) {
+            return 1;
+        }
+
+        $jadwal = $this->jadwalModel->find($jadwalId);
+        if (!$jadwal) {
+            return 1;
+        }
+
+        $lastAbsensi = $this->absensiModel
+            ->select('absensi.pertemuan_ke')
+            ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
+            ->where('jadwal_mengajar.guru_id', $jadwal['guru_id'])
+            ->where('jadwal_mengajar.mata_pelajaran_id', $jadwal['mata_pelajaran_id'])
+            ->where('jadwal_mengajar.kelas_id', $jadwal['kelas_id'])
+            ->where('jadwal_mengajar.tahun_ajaran', $jadwal['tahun_ajaran'])
+            ->orderBy('absensi.pertemuan_ke', 'DESC')
+            ->first();
+
+        return $lastAbsensi ? ($lastAbsensi['pertemuan_ke'] + 1) : 1;
     }
 
     /**
