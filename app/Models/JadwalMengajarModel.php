@@ -43,8 +43,8 @@ class JadwalMengajarModel extends Model
         'mata_pelajaran_id' => 'required|numeric',
         'kelas_id'          => 'required|numeric',
         'hari'              => 'required|in_list[Senin,Selasa,Rabu,Kamis,Jumat,Sabtu]',
-        'jam_mulai'         => 'required|valid_date[H:i:s]',
-        'jam_selesai'       => 'required|valid_date[H:i:s]',
+        'jam_mulai'         => 'required|regex_match[/^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/]',
+        'jam_selesai'       => 'required|regex_match[/^([01]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/]',
         'semester'          => 'required|in_list[Ganjil,Genap]',
         'tahun_ajaran'      => 'required|regex_match[/\d{4}\/\d{4}/]'
     ];

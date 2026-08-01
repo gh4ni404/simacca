@@ -91,13 +91,15 @@ class JadwalService extends BaseService
     public function createJadwal(array $data): array
     {
         try {
+            $tahunAjaran = get_active_tahun_ajaran();
+
             // Check for schedule conflict for teacher
-            if ($this->jadwalModel->checkConflict($data['guru_id'], $data['hari'], $data['jam_mulai'], $data['jam_selesai'])) {
+            if ($this->jadwalModel->checkConflict($data['guru_id'], $data['hari'], $data['jam_mulai'], $data['jam_selesai'], null, $tahunAjaran)) {
                 return $this->errorResponse('Guru bentrok nih! Ada jadwal lain di jam yang sama', 409);
             }
 
             // Check for schedule conflict for class
-            if ($this->jadwalModel->checkKelasConflict($data['kelas_id'], $data['hari'], $data['jam_mulai'], $data['jam_selesai'])) {
+            if ($this->jadwalModel->checkKelasConflict($data['kelas_id'], $data['hari'], $data['jam_mulai'], $data['jam_selesai'], null, $tahunAjaran)) {
                 return $this->errorResponse('Kelas udah ada jadwal di jam ini', 409);
             }
 
@@ -110,7 +112,7 @@ class JadwalService extends BaseService
                 'jam_mulai' => $data['jam_mulai'],
                 'jam_selesai' => $data['jam_selesai'],
                 'semester' => $data['semester'],
-                'tahun_ajaran' => get_active_tahun_ajaran()
+                'tahun_ajaran' => $tahunAjaran
             ];
 
             // Save to database
@@ -143,12 +145,13 @@ class JadwalService extends BaseService
             }
 
             // Check for schedule conflict for teacher (excluding current)
-            if ($this->jadwalModel->checkConflict($data['guru_id'], $data['hari'], $data['jam_mulai'], $data['jam_selesai'], $id)) {
+            $tahunAjaran = get_active_tahun_ajaran();
+            if ($this->jadwalModel->checkConflict($data['guru_id'], $data['hari'], $data['jam_mulai'], $data['jam_selesai'], $id, $tahunAjaran)) {
                 return $this->errorResponse('Guru bentrok nih! Ada jadwal lain di jam yang sama', 409);
             }
 
             // Check for schedule conflict for class (excluding current)
-            if ($this->jadwalModel->checkKelasConflict($data['kelas_id'], $data['hari'], $data['jam_mulai'], $data['jam_selesai'], $id)) {
+            if ($this->jadwalModel->checkKelasConflict($data['kelas_id'], $data['hari'], $data['jam_mulai'], $data['jam_selesai'], $id, $tahunAjaran)) {
                 return $this->errorResponse('Kelas udah ada jadwal di jam ini', 409);
             }
 
