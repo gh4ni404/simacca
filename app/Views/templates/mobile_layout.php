@@ -394,10 +394,20 @@
                         </a>
                     </div>
                 </div>
-                <a href="<?= base_url('guru/laporan'); ?>" class="bottom-nav-item <?= $isLaporanActive ? 'active' : '' ?>">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>Laporan</span>
-                </a>
+                <div class="bottom-nav-dropdown" id="dd-laporan">
+                    <a href="#" class="bottom-nav-item <?= $isLaporanActive ? 'active' : '' ?>" onclick="toggleDropdown(event, 'dd-laporan')">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Laporan</span>
+                    </a>
+                    <div class="bottom-nav-dropdown-menu" id="dd-laporan-menu">
+                        <a href="<?= base_url('guru/laporan'); ?>">
+                            <i class="fas fa-chart-bar"></i> Laporan Umum
+                        </a>
+                        <a href="<?= base_url('guru/laporan-mingguan'); ?>">
+                            <i class="fas fa-calendar-week"></i> Laporan Mingguan
+                        </a>
+                    </div>
+                </div>
             <?php else: ?>
                 <?php
                 $bottomNavItems = [];

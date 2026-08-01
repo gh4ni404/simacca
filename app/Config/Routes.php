@@ -270,6 +270,10 @@ $routes->group('guru', ['filter' => 'role:guru_mapel,wakakur'], function ($route
     // Laporan Routes
     $routes->get('laporan', 'Guru\LaporanController::index', ['as' => 'guru.laporan']);
     $routes->get('laporan/print', 'Guru\LaporanController::print');
+
+    // Weekly Report Routes
+    $routes->get('laporan-mingguan', 'Guru\WeeklyReportController::index', ['as' => 'guru.laporan_mingguan']);
+    $routes->get('laporan-mingguan/print', 'Guru\WeeklyReportController::print', ['as' => 'guru.laporan_mingguan.print']);
     
     // Jurnal PKL (Verifikasi Pembimbing) - Task-Oriented
     $routes->get('jurnal-pkl', 'Guru\PklController::index', ['as' => 'guru.jurnal_pkl']);

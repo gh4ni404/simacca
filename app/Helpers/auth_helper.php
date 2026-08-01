@@ -286,7 +286,17 @@ if (!function_exists('get_sidebar_menu')) {
                 [
                     'title' => 'Laporan',
                     'icon' => 'fas fa-chart-bar',
-                    'url' => '/guru/laporan'
+                    'url' => '#',
+                    'submenu' => [
+                        [
+                            'title' => 'Laporan Umum',
+                            'url' => '/guru/laporan'
+                        ],
+                        [
+                            'title' => 'Laporan Mingguan',
+                            'url' => '/guru/laporan-mingguan'
+                        ]
+                    ]
                 ]
             ],
             'wali_kelas' => [
