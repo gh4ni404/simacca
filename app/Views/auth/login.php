@@ -62,8 +62,11 @@ Login
                     name="password" 
                     placeholder="Masukkan password"
                     required
-                    class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    class="pl-10 pr-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 >
+                <div class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer" onclick="togglePassword()">
+                    <i id="eyeIcon" class="fas fa-eye text-gray-400 hover:text-gray-600"></i>
+                </div>
             </div>
             <?php if (isset($validation) && $validation->hasError('password')): ?>
                 <p class="mt-1 text-sm text-red-600">
@@ -192,6 +195,20 @@ loginForm.addEventListener('submit', async function(e) {
         });
     }
 });
+
+function togglePassword() {
+    const password = document.getElementById('password');
+    const eyeIcon = document.getElementById('eyeIcon');
+    if (password.type === 'password') {
+        password.type = 'text';
+        eyeIcon.classList.remove('fa-eye');
+        eyeIcon.classList.add('fa-eye-slash');
+    } else {
+        password.type = 'password';
+        eyeIcon.classList.remove('fa-eye-slash');
+        eyeIcon.classList.add('fa-eye');
+    }
+}
 
 function setLoadingState(loading) {
     if (loading) {
