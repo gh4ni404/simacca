@@ -32,7 +32,7 @@ SIMACCA adalah sistem informasi berbasis web untuk monitoring absensi siswa dan 
 - 📧 **Email Notifications** - Password reset, welcome, perubahan password/email, notifikasi
 - 📄 **Export Reports** - Download laporan dalam format Excel (browser print untuk PDF)
 - 🏭 **Manajemen PKL** - Pembimbing, tempat, siswa, kategori, dan task PKL
-- 📋 **Izin Guru** - Sistem pengajuan izin guru dengan persetujuan wakakur
+- 📋 **Izin Guru** - Sistem pengajuan izin guru dengan persetujuan wakakur (routes belum terdaftar)
 - 📊 **Laporan Mingguan** - Cetak laporan mengajar mingguan
 - 🔄 **Rollover Tahun Ajaran** - Backup & restore data antar tahun ajaran
 - 👥 **Multi-Role Users** - Satu user bisa memiliki beberapa role sekaligus
@@ -239,6 +239,7 @@ docs/
 - **Pengajuan Izin** - Guru ajukan izin dengan berkas
 - **Persetujuan Wakakur** - Wakakur approve/reject izin
 - **Upload Berkas** - Upload bukti pendukung (JPG, PNG, PDF)
+- ⚠️ **Note:** Routes belum terdaftar di Routes.php (controllers, model, views sudah ada)
 
 ### 📊 Laporan Mingguan (v3.0.0) [NEW]
 - **Weekly Report** - Cetak laporan mengajar per minggu
@@ -300,10 +301,10 @@ Setelah server berjalan (`php spark serve`):
 | `php spark email:diagnostics` | Diagnosa masalah email |
 | `php spark token:cleanup` | Clean expired tokens |
 | `php spark session:cleanup` | Clean expired sessions |
-| `php spark mark-alpha-guru` | Tandai alpha untuk guru yang tidak check-in |
-| `php spark set-profile-completion` | Set status profil completion user |
-| `php spark check-wakakur-schedule` | Cek jadwal wakakur |
-| `php spark check-wakakur-profile` | Cek profil wakakur |
+| `php spark absensi:mark-alpha` | Tandai alpha untuk guru yang tidak check-in |
+| `php spark profile:complete` | Set status profil completion user |
+| `php spark wakakur:check-schedule` | Cek jadwal wakakur |
+| `php spark profile:check-wakakur` | Cek profil wakakur |
 
 ---
 
@@ -327,7 +328,7 @@ Setelah server berjalan (`php spark serve`):
 | Instruktur Module | ✅ Complete | 100% | 2026-07-28 |
 | Ketua Jurusan Module | ✅ Complete | 100% | 2026-07-28 |
 | Absensi Guru | ✅ Complete | 100% | 2026-02-12 |
-| Izin Guru | ✅ Complete | 100% | 2026-02-12 |
+| Izin Guru | 🚧 In Progress | 90% | 2026-02-12 |
 | Weekly Report | ✅ Complete | 100% | 2026-07-28 |
 | Rollover System | ✅ Complete | 100% | 2026-07-11 |
 | Multi-Role Users | ✅ Complete | 100% | 2026-07-21 |
