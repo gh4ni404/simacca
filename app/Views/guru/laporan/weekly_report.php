@@ -67,8 +67,8 @@
                 Filter Laporan Mingguan
             </h2>
 
-            <form method="get" action="<?= base_url('guru/laporan-mingguan') ?>" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <form method="get" action="<?= base_url('guru/laporan-mingguan') ?>">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
                     <!-- Minggu (Week Start) -->
                     <div>
                         <label for="week_start" class="block text-sm font-semibold text-gray-700 mb-2">
@@ -79,7 +79,6 @@
                                value="<?= esc($weekStart) ?>"
                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-indigo-200 focus:border-indigo-500 transition-all"
                                required>
-                        <p class="text-xs text-gray-500 mt-1">Laporan otomatis untuk periode Senin - Sabtu</p>
                     </div>
 
                     <!-- Mata Pelajaran -->
@@ -100,13 +99,14 @@
                     </div>
 
                     <!-- Submit Button -->
-                    <div class="flex items-end">
+                    <div>
                         <button type="submit" 
                                 class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center">
                             <i class="fas fa-search mr-2"></i> Tampilkan Laporan
                         </button>
                     </div>
                 </div>
+                <p class="text-xs text-gray-500 mt-3"><i class="fas fa-info-circle mr-1"></i> Laporan otomatis untuk periode Senin - Sabtu</p>
             </form>
         </div>
 
