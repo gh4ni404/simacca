@@ -297,8 +297,8 @@
                         </table>
                     </div>
 
-                    <!-- Mobile View: Cards -->
-                    <div class="md:hidden space-y-4">
+                    <!-- Mobile View: Cards (disabled to prevent duplicate form submission) -->
+                    <fieldset disabled class="md:hidden space-y-4">
                         <?php
                         // Recreate the same data structure for mobile view
                         $existingDetails = [];
@@ -389,7 +389,7 @@
                                        placeholder="Keterangan (opsional)"><?= esc($currentKeterangan) ?></textarea>
                         </div>
                         <?php endforeach; ?>
-                    </div>
+                    </fieldset>
                 <?php endif; ?>
             </div>
         </div>
