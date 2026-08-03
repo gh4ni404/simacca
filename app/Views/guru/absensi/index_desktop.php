@@ -151,7 +151,7 @@
                                 <?php endif; ?>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                <?= button_link('info', 'Lihat Detail', 'eye', base_url('guru/absensi/kelas/' . $kelas['kelas_id']), ['class' => 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-md hover:shadow-lg transform hover:-translate-y-0.5']) ?>
+                                <?= button_link('info', 'Lihat Detail', 'eye', base_url('guru/absensi/kelas/' . $kelas['kelas_id'] . '?mapel_id=' . $kelas['mata_pelajaran_id']), ['class' => 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-md hover:shadow-lg transform hover:-translate-y-0.5']) ?>
                             </td>
                         </tr>
                         <?php endforeach; ?>

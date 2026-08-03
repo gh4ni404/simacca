@@ -270,6 +270,7 @@ class AbsensiController extends BaseController
 
         $guruId = $guru['id'];
         $tanggal = $this->request->getGet('tanggal');
+        $mapelId = $this->request->getGet('mapel_id');
         $tahunAjaran = get_active_tahun_ajaran();
 
         // Verify this teacher teaches this class
@@ -284,9 +285,17 @@ class AbsensiController extends BaseController
             return redirect()->to('/guru/absensi');
         }
 
-        // Get absensi for this kelas using service
-        $absensiResult = $this->absensiService->getByGuruAndKelas($guruId, $kelasId, $tanggal, $tahunAjaran);
+        // Get absensi for this kelas using service (filtered by mapel if provided)
+        $absensiResult = $this->absensiService->getByGuruAndKelas($guruId, $kelasId, $tanggal, $tahunAjaran, $mapelId);
         $absensiList = $absensiResult['data'] ?? [];
+
+        // Get mata pelajaran name if mapel_id is provided
+        $namaMapel = null;
+        if ($mapelId) {
+            $mapelModel = new \App\Models\MataPelajaranModel();
+            $mapel = $mapelModel->find($mapelId);
+            $namaMapel = $mapel ? $mapel['nama_mapel'] : null;
+        }
 
         // Calculate stats for this kelas
         $kelasStats = [
@@ -321,7 +330,9 @@ class AbsensiController extends BaseController
             'absensiList' => $absensiList,
             'kelasStats' => $kelasStats,
             'guru' => $guru,
-            'tanggal' => $tanggal
+            'tanggal' => $tanggal,
+            'namaMapel' => $namaMapel,
+            'mapelId' => $mapelId
         ];
 
         return view('guru/absensi/kelas', $data);

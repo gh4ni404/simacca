@@ -8,6 +8,7 @@ use App\Models\AbsensiDetailModel;
 use App\Models\GuruModel;
 use App\Models\JadwalMengajarModel;
 use App\Models\KelasModel;
+use App\Models\MataPelajaranModel;
 use App\Models\SiswaModel;
 
 class LaporanController extends BaseController
@@ -17,6 +18,7 @@ class LaporanController extends BaseController
     protected $guruModel;
     protected $jadwalModel;
     protected $kelasModel;
+    protected $mapelModel;
     protected $siswaModel;
 
     public function __construct()
@@ -26,6 +28,7 @@ class LaporanController extends BaseController
         $this->guruModel = new GuruModel();
         $this->jadwalModel = new JadwalMengajarModel();
         $this->kelasModel = new KelasModel();
+        $this->mapelModel = new MataPelajaranModel();
         $this->siswaModel = new SiswaModel();
     }
 
@@ -42,6 +45,7 @@ class LaporanController extends BaseController
 
         // Get filter dari request
         $kelasId = $this->request->getGet('kelas_id');
+        $mapelId = $this->request->getGet('mapel_id');
         $startDate = $this->request->getGet('start_date');
         $endDate = $this->request->getGet('end_date');
 
@@ -58,21 +62,40 @@ class LaporanController extends BaseController
             }
         }
 
+        // Extract unique mata pelajaran from jadwal (filtered by kelas if selected)
+        $filteredJadwal = $jadwalGuru;
+        if ($kelasId) {
+            $filteredJadwal = array_filter($jadwalGuru, fn($j) => $j['kelas_id'] == $kelasId);
+        }
+        $mapelIds = array_unique(array_column($filteredJadwal, 'mata_pelajaran_id'));
+        $mapelList = [];
+        foreach ($mapelIds as $id) {
+            $mapel = $this->mapelModel->find($id);
+            if ($mapel) {
+                $mapelList[$id] = $mapel['nama_mapel'];
+            }
+        }
+
         $laporan = null;
         $rekap = null;
 
         // Generate laporan jika ada filter
         if ($kelasId && $startDate && $endDate) {
             // Get absensi data (filtered by tahun_ajaran)
-            $absensiData = $this->absensiModel->select('absensi.*, jadwal_mengajar.kelas_id')
+            $query = $this->absensiModel->select('absensi.*, jadwal_mengajar.kelas_id')
                 ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
                 ->where('jadwal_mengajar.guru_id', $guru['id'])
                 ->where('jadwal_mengajar.kelas_id', $kelasId)
                 ->where('jadwal_mengajar.tahun_ajaran', get_active_tahun_ajaran())
                 ->where('absensi.tanggal >=', $startDate)
-                ->where('absensi.tanggal <=', $endDate)
-                ->orderBy('absensi.tanggal', 'ASC')
-                ->findAll();
+                ->where('absensi.tanggal <=', $endDate);
+
+            // Filter by mata pelajaran if selected
+            if ($mapelId) {
+                $query->where('jadwal_mengajar.mata_pelajaran_id', $mapelId);
+            }
+
+            $absensiData = $query->orderBy('absensi.tanggal', 'ASC')->findAll();
 
             // Get siswa in kelas
             $siswaList = $this->siswaModel->where('kelas_id', $kelasId)
@@ -151,6 +174,8 @@ class LaporanController extends BaseController
             'guru' => $guru,
             'kelasList' => $kelasList,
             'kelasId' => $kelasId,
+            'mapelList' => $mapelList,
+            'mapelId' => $mapelId,
             'startDate' => $startDate,
             'endDate' => $endDate,
             'laporan' => $laporan,
@@ -173,6 +198,7 @@ class LaporanController extends BaseController
 
         // Get filter dari request
         $kelasId = $this->request->getGet('kelas_id');
+        $mapelId = $this->request->getGet('mapel_id');
         $startDate = $this->request->getGet('start_date');
         $endDate = $this->request->getGet('end_date');
 
@@ -187,16 +213,28 @@ class LaporanController extends BaseController
             return redirect()->to('/guru/laporan')->with('error', '❌ Data kelas nggak ketemu 🤔');
         }
 
+        // Get mapel name if selected
+        $namaMapel = null;
+        if ($mapelId) {
+            $mapel = $this->mapelModel->find($mapelId);
+            $namaMapel = $mapel ? $mapel['nama_mapel'] : null;
+        }
+
         // Get absensi data (filtered by tahun_ajaran)
-        $absensiData = $this->absensiModel->select('absensi.*, jadwal_mengajar.kelas_id')
+        $query = $this->absensiModel->select('absensi.*, jadwal_mengajar.kelas_id')
             ->join('jadwal_mengajar', 'jadwal_mengajar.id = absensi.jadwal_mengajar_id')
             ->where('jadwal_mengajar.guru_id', $guru['id'])
             ->where('jadwal_mengajar.kelas_id', $kelasId)
             ->where('jadwal_mengajar.tahun_ajaran', get_active_tahun_ajaran())
             ->where('absensi.tanggal >=', $startDate)
-            ->where('absensi.tanggal <=', $endDate)
-            ->orderBy('absensi.tanggal', 'ASC')
-            ->findAll();
+            ->where('absensi.tanggal <=', $endDate);
+
+        // Filter by mata pelajaran if selected
+        if ($mapelId) {
+            $query->where('jadwal_mengajar.mata_pelajaran_id', $mapelId);
+        }
+
+        $absensiData = $query->orderBy('absensi.tanggal', 'ASC')->findAll();
 
         // Get siswa in kelas
         $siswaList = $this->siswaModel->where('kelas_id', $kelasId)
@@ -272,6 +310,7 @@ class LaporanController extends BaseController
         $data = [
             'guru' => $guru,
             'namaKelas' => $kelas['nama_kelas'],
+            'namaMapel' => $namaMapel,
             'startDate' => $startDate,
             'endDate' => $endDate,
             'laporan' => $laporan,

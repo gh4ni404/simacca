@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Absensi - <?= esc($namaKelas) ?></title>
+    <title>Laporan Absensi - <?= esc($namaKelas) ?><?= !empty($namaMapel) ? ' - ' . esc($namaMapel) : '' ?></title>
     <style>
         @page {
             size: A4 portrait;
@@ -343,7 +343,7 @@
         <!-- Title -->
         <div class="title">
             <h3>LAPORAN REKAPITULASI ABSENSI SISWA</h3>
-            <p>Periode: <?= date('d F Y', strtotime($startDate)) ?> s/d <?= date('d F Y', strtotime($endDate)) ?></p>
+            <p>Periode: <?= date('d F Y', strtotime($startDate)) ?> s/d <?= date('d F Y', strtotime($endDate)) ?><?= !empty($namaMapel) ? ' | Mapel: ' . esc($namaMapel) : '' ?></p>
         </div>
 
         <!-- Info Section -->
@@ -354,6 +354,13 @@
                     <td>:</td>
                     <td><?= esc($namaKelas) ?></td>
                 </tr>
+                <?php if (!empty($namaMapel)): ?>
+                <tr>
+                    <td>Mata Pelajaran</td>
+                    <td>:</td>
+                    <td><?= esc($namaMapel) ?></td>
+                </tr>
+                <?php endif; ?>
                 <tr>
                     <td>Guru Pengampu</td>
                     <td>:</td>

@@ -14,7 +14,7 @@
                     <i class="fas fa-school text-purple-600 mr-2"></i>
                     <?= esc($kelas['nama_kelas']); ?>
                 </h1>
-                <p class="text-gray-600 mt-1">Daftar Pertemuan & Absensi</p>
+                <p class="text-gray-600 mt-1">Daftar Pertemuan & Absensi<?php if (!empty($namaMapel)): ?> - <span class="font-semibold text-purple-600"><?= esc($namaMapel) ?></span><?php endif; ?></p>
             </div>
         </div>
     </div>

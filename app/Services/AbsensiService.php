@@ -78,10 +78,10 @@ class AbsensiService extends BaseService
      * @param string|null $tanggal
      * @return array
      */
-    public function getByGuruAndKelas(int $guruId, int $kelasId, ?string $tanggal = null, ?string $tahunAjaran = null): array
+    public function getByGuruAndKelas(int $guruId, int $kelasId, ?string $tanggal = null, ?string $tahunAjaran = null, ?int $mataPelajaranId = null): array
     {
         try {
-            $absensiList = $this->absensiModel->getByGuruAndKelas($guruId, $kelasId, $tanggal, $tahunAjaran);
+            $absensiList = $this->absensiModel->getByGuruAndKelas($guruId, $kelasId, $tanggal, $tahunAjaran, $mataPelajaranId);
             
             // Add can_edit and can_delete flags
             foreach ($absensiList as &$item) {
@@ -370,6 +370,7 @@ class AbsensiService extends BaseService
             $kelasId = $item['kelas_id'];
             $kelasName = $item['nama_kelas'];
             $mapelName = $item['nama_mapel'];
+            $mapelId = $item['mata_pelajaran_id'] ?? null;
             
             // Create unique key: kelas_id + mata_pelajaran
             $summaryKey = $kelasId . '_' . $mapelName;
@@ -378,6 +379,7 @@ class AbsensiService extends BaseService
                 $kelasSummary[$summaryKey] = [
                     'kelas_id' => $kelasId,
                     'kelas_nama' => $kelasName,
+                    'mata_pelajaran_id' => $mapelId,
                     'mata_pelajaran' => $mapelName,
                     'total_pertemuan' => 0,
                     'total_hadir' => 0,

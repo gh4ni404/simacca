@@ -71,7 +71,7 @@
             </h2>
 
             <form method="get" action="<?= base_url('guru/laporan') ?>" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <!-- Kelas -->
                     <div>
                         <label for="kelas_id" class="block text-sm font-semibold text-gray-700 mb-2">
@@ -90,15 +90,32 @@
                         </select>
                     </div>
 
+                    <!-- Mata Pelajaran -->
+                    <div>
+                        <label for="mapel_id" class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-book text-green-600 mr-2"></i>
+                            Mata Pelajaran
+                        </label>
+                        <select id="mapel_id" name="mapel_id" 
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-200 focus:border-green-500 transition-all">
+                            <option value="">-- Semua Mata Pelajaran --</option>
+                            <?php foreach ($mapelList as $id => $nama): ?>
+                                <option value="<?= $id ?>" <?= ($mapelId ?? '') == $id ? 'selected' : '' ?>>
+                                    <?= esc($nama) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
                     <!-- Tanggal Mulai -->
                     <div>
                         <label for="start_date" class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fas fa-calendar-alt text-green-600 mr-2"></i>
+                            <i class="fas fa-calendar-alt text-yellow-600 mr-2"></i>
                             Tanggal Mulai
                         </label>
                         <input type="date" id="start_date" name="start_date" 
                                value="<?= $startDate ?>"
-                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-green-200 focus:border-green-500 transition-all"
+                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-yellow-200 focus:border-yellow-500 transition-all"
                                required>
                     </div>
 
@@ -124,7 +141,7 @@
                     </button>
                     
                     <?php if ($laporan): ?>
-                    <a href="<?= base_url('guru/laporan/print?kelas_id=' . $kelasId . '&start_date=' . $startDate . '&end_date=' . $endDate) ?>" 
+                    <a href="<?= base_url('guru/laporan/print?kelas_id=' . $kelasId . '&start_date=' . $startDate . '&end_date=' . $endDate . (!empty($mapelId) ? '&mapel_id=' . $mapelId : '')) ?>" 
                        target="_blank"
                        class="print-button px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg font-medium">
                         <i class="fas fa-print mr-2"></i>
@@ -311,7 +328,7 @@
             </div>
             <h3 class="text-2xl font-bold text-gray-800 mb-3">Belum Ada Data</h3>
             <p class="text-gray-600 mb-6">
-                Silakan pilih kelas dan periode tanggal untuk menampilkan laporan absensi.
+                Silakan pilih kelas, mata pelajaran (opsional), dan periode tanggal untuk menampilkan laporan absensi.
             </p>
             <div class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 rounded-xl">
                 <i class="fas fa-info-circle mr-2"></i>

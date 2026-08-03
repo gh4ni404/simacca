@@ -113,6 +113,7 @@ class AbsensiModel extends Model
                             mata_pelajaran.nama_mapel,
                             kelas.nama_kelas,
                             jadwal_mengajar.kelas_id,
+                            jadwal_mengajar.mata_pelajaran_id,
                             jadwal_mengajar.hari,
                             jadwal_mengajar.jam_mulai,
                             jadwal_mengajar.jam_selesai')
@@ -215,7 +216,7 @@ class AbsensiModel extends Model
     /**
      * Get absensi by guru and kelas (for detailed view per class)
      */
-    public function getByGuruAndKelas($guruId, $kelasId, $tanggal = null, $tahunAjaran = null)
+    public function getByGuruAndKelas($guruId, $kelasId, $tanggal = null, $tahunAjaran = null, $mataPelajaranId = null)
     {
         // Get basic absensi data
         $builder = $this->select('absensi.*,
@@ -241,6 +242,10 @@ class AbsensiModel extends Model
 
         if ($tanggal) {
             $builder->where('absensi.tanggal', $tanggal);
+        }
+
+        if ($mataPelajaranId) {
+            $builder->where('jadwal_mengajar.mata_pelajaran_id', $mataPelajaranId);
         }
 
         $absensiList = $builder->findAll();

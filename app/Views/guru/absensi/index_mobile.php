@@ -154,7 +154,7 @@
 
                         <!-- Footer with Action -->
                         <div class="pt-3 border-t border-gray-100">
-                            <a href="<?= base_url('guru/absensi/kelas/' . $kelas['kelas_id']) ?>"
+                            <a href="<?= base_url('guru/absensi/kelas/' . $kelas['kelas_id'] . '?mapel_id=' . $kelas['mata_pelajaran_id']) ?>"
                                 class="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl active:scale-98 transition-all shadow-sm">
                                 <i class="fas fa-eye"></i>
                                 <span>Lihat Detail</span>

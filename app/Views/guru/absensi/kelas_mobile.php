@@ -11,7 +11,7 @@
             </a>
             <div class="text-white flex-1">
                 <h1 class="text-xl font-bold"><?= esc($kelas['nama_kelas']); ?></h1>
-                <p class="text-sm opacity-90">Daftar Pertemuan</p>
+                <p class="text-sm opacity-90">Daftar Pertemuan<?php if (!empty($namaMapel)): ?> - <?= esc($namaMapel) ?><?php endif; ?></p>
             </div>
         </div>
 
