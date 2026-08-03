@@ -77,6 +77,8 @@
 
         <form action="<?= base_url('guru/absensi/update/' . $absensi['id']) ?>" method="post" id="absensiForm">
             <?= csrf_field() ?>
+            <input type="hidden" name="tanggal" value="<?= $absensi['tanggal'] ?>">
+            <input type="hidden" name="pertemuan_ke" value="<?= $absensi['pertemuan_ke'] ?>">
 
             <!-- Quick Action Buttons -->
             <div class="mb-4">
@@ -150,13 +152,13 @@
 
                         <!-- Status Buttons -->
     <div class="px-4">
-                            <input type="hidden" name="siswa_id[]" value="<?= $siswa['id'] ?>">
+                            <input type="hidden" name="siswa[<?= $siswa['id'] ?>][status]" value="<?= $currentStatus ?>" class="status-input" data-siswa-id="<?= $siswa['id'] ?>">
                             
                             <div class="grid grid-cols-4 gap-2">
                                 <!-- Hadir -->
                                 <label class="status-btn-wrapper">
                                     <input type="radio"
-                                           name="status[<?= $siswa['id'] ?>]"
+                                           name="siswa[<?= $siswa['id'] ?>][status]"
                                            value="hadir"
                                            class="status-input hidden"
                                            data-siswa-id="<?= $siswa['id'] ?>"
@@ -171,7 +173,7 @@
                                 <!-- Izin -->
                                 <label class="status-btn-wrapper">
                                     <input type="radio"
-                                           name="status[<?= $siswa['id'] ?>]"
+                                           name="siswa[<?= $siswa['id'] ?>][status]"
                                            value="izin"
                                            class="status-input hidden"
                                            data-siswa-id="<?= $siswa['id'] ?>"
@@ -186,7 +188,7 @@
                                 <!-- Sakit -->
                                 <label class="status-btn-wrapper">
                                     <input type="radio"
-                                           name="status[<?= $siswa['id'] ?>]"
+                                           name="siswa[<?= $siswa['id'] ?>][status]"
                                            value="sakit"
                                            class="status-input hidden"
                                            data-siswa-id="<?= $siswa['id'] ?>"
@@ -201,7 +203,7 @@
                                 <!-- Alpa -->
                                 <label class="status-btn-wrapper">
                                     <input type="radio"
-                                           name="status[<?= $siswa['id'] ?>]"
+                                           name="siswa[<?= $siswa['id'] ?>][status]"
                                            value="alpa"
                                            class="status-input hidden"
                                            data-siswa-id="<?= $siswa['id'] ?>"
@@ -217,7 +219,7 @@
                             <!-- Keterangan Field (Hidden by default) -->
                             <div id="keterangan-<?= $siswa['id'] ?>" class="mt-3 <?= ($currentStatus == 'izin' || $currentStatus == 'sakit') ? '' : 'hidden' ?>">
                                 <label class="block text-xs font-semibold text-gray-700 mb-1">Keterangan:</label>
-                                <textarea name="keterangan[<?= $siswa['id'] ?>]"
+                                <textarea name="siswa[<?= $siswa['id'] ?>][keterangan]"
                                           rows="2"
                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                           placeholder="Masukkan keterangan..."><?= esc($currentKeterangan) ?></textarea>
@@ -288,7 +290,7 @@
 // Toggle keterangan field based on status
 function toggleKeterangan(siswaId) {
     const keteranganDiv = document.getElementById('keterangan-' + siswaId);
-    const selectedStatus = document.querySelector('input[name="status[' + siswaId + ']"]:checked');
+    const selectedStatus = document.querySelector('input[name="siswa[' + siswaId + '][status]"]:checked');
     
     if (selectedStatus && (selectedStatus.value === 'izin' || selectedStatus.value === 'sakit')) {
         keteranganDiv.classList.remove('hidden');
@@ -299,8 +301,8 @@ function toggleKeterangan(siswaId) {
 
 // Update status UI when radio button changes
 function updateStatusUI(siswaId, status) {
-    const wrapper = document.querySelector(`input[name="status[${siswaId}]"][value="${status}"]`).closest('.status-btn-wrapper');
-    const allWrappers = document.querySelectorAll(`input[name="status[${siswaId}]"]`);
+    const wrapper = document.querySelector(`input[name="siswa[${siswaId}][status]"][value="${status}"]`).closest('.status-btn-wrapper');
+    const allWrappers = document.querySelectorAll(`input[name="siswa[${siswaId}][status]"]`);
     
     // Remove all active classes
     allWrappers.forEach(input => {

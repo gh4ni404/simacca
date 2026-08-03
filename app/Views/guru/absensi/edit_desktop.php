@@ -288,7 +288,7 @@
                                                 class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all keterangan-input"
                                                 name="siswa[<?= $siswa['id'] ?>][keterangan]"
                                                 id="keterangan_<?= $siswa['id'] ?>"
-                                                value="<?= $currentKeterangan ?>"
+                                                value="<?= esc($currentKeterangan, 'attr') ?>"
                                                 placeholder="Keterangan (opsional)">
                                         </td>
                                     </tr>
@@ -386,7 +386,7 @@
                             <textarea name="siswa[<?= $siswa['id'] ?>][keterangan]"
                                       class="w-full px-3 py-2 bg-gray-50 border-2 border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
                                       rows="2"
-                                      placeholder="Keterangan (opsional)"><?= $currentKeterangan ?></textarea>
+                                       placeholder="Keterangan (opsional)"><?= esc($currentKeterangan) ?></textarea>
                         </div>
                         <?php endforeach; ?>
                     </div>
