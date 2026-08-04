@@ -8,13 +8,13 @@ Login
 <div class="flex justify-center">
     <?php $webLogo = get_logo_sekolah(); ?>
     <?php if ($webLogo): ?>
-        <img src="<?= base_url('files/logo/' . $webLogo) ?>" alt="Logo" class="w-20 h-20 object-contain">
+        <img src="<?= base_url('files/logo/' . $webLogo) ?>" alt="Logo" class="w-36 h-36 md:w-44 md:h-44 object-contain">
     <?php else: ?>
         <i class="fas fa-graduation-cap text-5xl text-indigo-600"></i>
     <?php endif; ?>
 </div>
-<h2 class="mt-6 text-3xl font-extrabold text-gray-900">
-    Login SIMACCA
+<h2 class="text-3xl font-extrabold text-gray-900">
+    LOGIN
 </h2>
 <p class="mt-2 text-sm text-gray-600">
     Silahkan login untuk melanjutkan
@@ -106,7 +106,7 @@ Login
         <button 
             type="submit"
             id="loginBtn"
-            class="group relative w-full flex justify-center items-center py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+            class="group relative w-full flex justify-center items-center py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 hover:scale-[1.02] active:scale-95"
         >
             <span id="loginText"><i class="fas fa-sign-in-alt mr-2"></i>Login</span>
         </button>
@@ -166,19 +166,19 @@ loginForm.addEventListener('submit', async function(e) {
         }
 
         if (data.success) {
+            window.location.href = data.redirect_url;
+
             Swal.fire({
                 icon: 'success',
                 title: 'Login Berhasil!',
                 text: 'Selamat datang, ' + data.username + '!',
-                timer: 2000,
                 showConfirmButton: false,
                 allowOutsideClick: false,
                 allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
             });
-
-            setTimeout(() => {
-                window.location.href = data.redirect_url;
-            }, 2000);
         } else {
             setLoadingState(false);
             Swal.fire({
