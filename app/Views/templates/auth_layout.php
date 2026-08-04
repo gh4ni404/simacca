@@ -13,7 +13,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Favicon -->
-    <link rel="shortcut icon" type="image/png" href="<?= base_url('favicon.ico') ?>">
+    <?php $faviconLogo = get_logo_sekolah(); ?>
+    <?php if ($faviconLogo): ?>
+        <link rel="shortcut icon" type="image/png" href="<?= base_url('files/logo/' . $faviconLogo) ?>">
+    <?php else: ?>
+        <link rel="shortcut icon" type="image/png" href="<?= base_url('favicon.ico') ?>">
+    <?php endif; ?>
     
     <!-- Tailwind Config -->
     <script>

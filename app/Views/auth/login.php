@@ -6,7 +6,12 @@ Login
 
 <?= $this->section('header') ?>
 <div class="flex justify-center">
-    <i class="fas fa-graduation-cap text-5xl text-indigo-600"></i>
+    <?php $webLogo = get_logo_sekolah(); ?>
+    <?php if ($webLogo): ?>
+        <img src="<?= base_url('files/logo/' . $webLogo) ?>" alt="Logo" class="w-20 h-20 object-contain">
+    <?php else: ?>
+        <i class="fas fa-graduation-cap text-5xl text-indigo-600"></i>
+    <?php endif; ?>
 </div>
 <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
     Login SIMACCA

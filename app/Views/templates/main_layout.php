@@ -6,7 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?? 'Sistem Absensi'; ?> - <?= get_role_name(); ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="shortcut icon" type="image/png" href="<?= base_url('favicon.ico') ?>">
+    <?php $faviconLogo = get_logo_sekolah(); ?>
+    <?php if ($faviconLogo): ?>
+        <link rel="shortcut icon" type="image/png" href="<?= base_url('files/logo/' . $faviconLogo) ?>">
+    <?php else: ?>
+        <link rel="shortcut icon" type="image/png" href="<?= base_url('favicon.ico') ?>">
+    <?php endif; ?>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -67,7 +72,12 @@
                 <div class="flex">
                     <!-- Logo -->
                     <div class="flex-shrink-0 flex items-center">
-                        <i class="fas fa-graduation-cap flex items-center"></i>
+                        <?php $webLogo = get_logo_sekolah(); ?>
+                        <?php if ($webLogo): ?>
+                            <img src="<?= base_url('files/logo/' . $webLogo) ?>" alt="Logo" class="w-8 h-8 rounded object-contain mr-2">
+                        <?php else: ?>
+                            <i class="fas fa-graduation-cap flex items-center"></i>
+                        <?php endif; ?>
                         <span class="text-xl font-bold text-gray-800"><?= $title ?? 'test'; ?></span>
                     </div>
 

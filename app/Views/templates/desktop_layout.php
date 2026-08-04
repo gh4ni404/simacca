@@ -6,7 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?? 'Sistem Absensi'; ?> - <?= get_role_name(); ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="shortcut icon" type="image/png" href="<?= base_url('favicon.ico') ?>">
+    <?php $faviconLogo = get_logo_sekolah(); ?>
+    <?php if ($faviconLogo): ?>
+        <link rel="shortcut icon" type="image/png" href="<?= base_url('files/logo/' . $faviconLogo) ?>">
+    <?php else: ?>
+        <link rel="shortcut icon" type="image/png" href="<?= base_url('favicon.ico') ?>">
+    <?php endif; ?>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -173,9 +178,14 @@
         <aside class="sidebar bg-white border-r border-gray-200 fixed left-0 top-0 z-40">
             <!-- Header: Logo + App Name -->
             <div class="flex items-center gap-3 px-5 h-16 border-b border-gray-100 flex-shrink-0">
-                <div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-graduation-cap text-white text-sm"></i>
-                </div>
+                <?php $webLogo = get_logo_sekolah(); ?>
+                <?php if ($webLogo): ?>
+                    <img src="<?= base_url('files/logo/' . $webLogo) ?>" alt="Logo" class="w-8 h-8 rounded-lg object-contain flex-shrink-0">
+                <?php else: ?>
+                    <div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-graduation-cap text-white text-sm"></i>
+                    </div>
+                <?php endif; ?>
                 <span class="text-base font-bold text-gray-900 tracking-tight">SIMACCA</span>
             </div>
 

@@ -59,6 +59,65 @@
         </div>
     </div>
 
+    <!-- Card: Logo Web -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+        <div class="px-4 md:px-6 py-3 md:py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2.5 md:gap-3">
+            <div class="w-8 h-8 md:w-10 md:h-10 bg-rose-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-image text-rose-600 text-sm md:text-base"></i>
+            </div>
+            <div class="min-w-0">
+                <h3 class="font-semibold text-gray-800 text-sm md:text-base truncate">Logo Web</h3>
+                <p class="text-xs text-gray-500 truncate">Ganti logo yang ditampilkan di sidebar & navigasi</p>
+            </div>
+        </div>
+        <div class="p-4 md:p-6 flex-1 flex flex-col">
+            <!-- Preview Logo Saat Ini -->
+            <div class="mb-4 flex items-center gap-4">
+                <div class="w-20 h-20 md:w-24 md:h-24 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden flex-shrink-0" id="logoPreviewContainer">
+                    <?php if (!empty($logoSekolah)): ?>
+                        <img src="<?= base_url('files/logo/' . $logoSekolah) ?>" alt="Logo Web" class="w-full h-full object-contain" id="logoPreview">
+                    <?php else: ?>
+                        <div class="text-center" id="logoPlaceholder">
+                            <i class="fas fa-image text-gray-300 text-2xl"></i>
+                            <p class="text-[10px] text-gray-400 mt-1">Belum ada logo</p>
+                        </div>
+                        <img src="" alt="Logo Web" class="w-full h-full object-contain hidden" id="logoPreview">
+                    <?php endif; ?>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs text-gray-500 mb-2">Format: JPG, PNG, SVG, atau WebP. Maks 2MB.</p>
+                    <p class="text-xs text-gray-500">Logo akan ditampilkan di sidebar (desktop) dan navigasi (mobile).</p>
+                </div>
+            </div>
+
+            <!-- Form Upload -->
+            <form action="<?= base_url('admin/pengaturan/upload-logo') ?>" method="post" enctype="multipart/form-data" id="logoForm">
+                <?= csrf_field() ?>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Pilih Logo Baru</label>
+                    <input type="file" name="logo_sekolah" id="logoInput" accept="image/jpg,image/jpeg,image/png,image/svg+xml,image/webp"
+                           class="w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-rose-50 file:text-rose-700 hover:file:bg-rose-100">
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button type="submit" class="inline-flex items-center px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition-colors text-sm font-medium">
+                        <i class="fas fa-upload mr-2"></i> Upload Logo
+                    </button>
+                    <?php if (!empty($logoSekolah)): ?>
+                    <button type="button" onclick="confirmDeleteLogo()" class="inline-flex items-center px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors text-sm font-medium border border-red-200">
+                        <i class="fas fa-trash mr-2"></i> Hapus Logo
+                    </button>
+                    <?php endif; ?>
+                </div>
+            </form>
+
+            <!-- Form Delete (hidden) -->
+            <form action="<?= base_url('admin/pengaturan/delete-logo') ?>" method="post" id="deleteLogoForm" class="hidden">
+                <?= csrf_field() ?>
+            </form>
+        </div>
+    </div>
+
     <!-- Card: Rollover Siswa -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
         <div class="px-4 md:px-6 py-3 md:py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2.5 md:gap-3">
@@ -285,6 +344,42 @@
             </div>
         </div>
     </div>
+
+    <script>
+    // Logo preview & delete
+    (function () {
+        var logoInput = document.getElementById('logoInput');
+        var logoPreview = document.getElementById('logoPreview');
+        var logoPlaceholder = document.getElementById('logoPlaceholder');
+
+        if (logoInput) {
+            logoInput.addEventListener('change', function (e) {
+                var file = e.target.files[0];
+                if (!file) return;
+
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Ukuran file maksimal 2MB.');
+                    logoInput.value = '';
+                    return;
+                }
+
+                var reader = new FileReader();
+                reader.onload = function (ev) {
+                    logoPreview.src = ev.target.result;
+                    logoPreview.classList.remove('hidden');
+                    if (logoPlaceholder) logoPlaceholder.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        window.confirmDeleteLogo = function () {
+            if (confirm('Yakin ingin menghapus logo web? Logo default (ikon wisuda) akan digunakan kembali.')) {
+                document.getElementById('deleteLogoForm').submit();
+            }
+        };
+    })();
+    </script>
 
     <script>
     (function () {

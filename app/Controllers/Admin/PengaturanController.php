@@ -46,6 +46,8 @@ class PengaturanController extends BaseController
             'jurnalPklRequiredDays' => get_jurnal_pkl_required_days(),
         ];
 
+        $data['logoSekolah'] = get_logo_sekolah();
+
         return view('admin/pengaturan/index', $data);
     }
 
@@ -191,6 +193,64 @@ class PengaturanController extends BaseController
             session()->setFlashdata('success', 'Tanggal mulai minggu ke-1 jurnal PKL berhasil disimpan.');
         } else {
             session()->setFlashdata('error', 'Gagal menyimpan pengaturan.');
+        }
+
+        return redirect()->to('/admin/pengaturan');
+    }
+
+    public function uploadLogo()
+    {
+        $rules = [
+            'logo_sekolah' => [
+                'label' => 'Logo Web',
+                'rules' => 'uploaded[logo_sekolah]|max_size[logo_sekolah,2048]|is_image[logo_sekolah]|mime_in[logo_sekolah,image/jpg,image/jpeg,image/png,image/svg+xml,image/webp]',
+                'errors' => [
+                    'uploaded' => 'Pilih file logo terlebih dahulu.',
+                    'max_size' => 'Ukuran logo maksimal 2MB.',
+                    'is_image' => 'File harus berupa gambar.',
+                    'mime_in' => 'Format logo harus JPG, JPEG, PNG, SVG, atau WebP.',
+                ],
+            ],
+        ];
+
+        if (!$this->validate($rules)) {
+            session()->setFlashdata('error', implode(' ', $this->validator->getErrors()));
+            return redirect()->to('/admin/pengaturan');
+        }
+
+        $file = $this->request->getFile('logo_sekolah');
+
+        if ($file->isValid() && !$file->hasMoved()) {
+            // Delete old logo if exists
+            delete_logo_sekolah();
+
+            // Generate filename
+            $newName = 'logo_' . time() . '.' . $file->getExtension();
+
+            $uploadPath = WRITEPATH . 'uploads/logo/';
+            if (!is_dir($uploadPath)) {
+                mkdir($uploadPath, 0755, true);
+            }
+
+            $file->move($uploadPath, $newName);
+            set_logo_sekolah($newName);
+
+            session()->setFlashdata('success', 'Logo web berhasil diperbarui.');
+        } else {
+            session()->setFlashdata('error', 'Gagal mengupload logo web.');
+        }
+
+        return redirect()->to('/admin/pengaturan');
+    }
+
+    public function deleteLogo()
+    {
+        $logo = get_logo_sekolah();
+        if ($logo) {
+            delete_logo_sekolah();
+            session()->setFlashdata('success', 'Logo web berhasil dihapus.');
+        } else {
+            session()->setFlashdata('error', 'Tidak ada logo yang bisa dihapus.');
         }
 
         return redirect()->to('/admin/pengaturan');

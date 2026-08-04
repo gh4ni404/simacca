@@ -8,7 +8,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title><?= $title ?? 'Sistem Absensi'; ?> - <?= get_role_name(); ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="shortcut icon" type="image/png" href="<?= base_url('favicon.ico') ?>">
+    <?php $faviconLogo = get_logo_sekolah(); ?>
+    <?php if ($faviconLogo): ?>
+        <link rel="shortcut icon" type="image/png" href="<?= base_url('files/logo/' . $faviconLogo) ?>">
+    <?php else: ?>
+        <link rel="shortcut icon" type="image/png" href="<?= base_url('favicon.ico') ?>">
+    <?php endif; ?>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -205,7 +210,12 @@
             <div class="flex justify-between items-center h-16">
                 <!-- Logo & Title -->
                 <div class="flex items-center space-x-2">
-                    <i class="fas fa-graduation-cap text-indigo-600 text-xl"></i>
+                    <?php $webLogo = get_logo_sekolah(); ?>
+                    <?php if ($webLogo): ?>
+                        <img src="<?= base_url('files/logo/' . $webLogo) ?>" alt="Logo" class="w-7 h-7 rounded object-contain">
+                    <?php else: ?>
+                        <i class="fas fa-graduation-cap text-indigo-600 text-xl"></i>
+                    <?php endif; ?>
                     <span class="text-lg font-bold text-gray-800">SIMACCA</span>
                 </div>
 

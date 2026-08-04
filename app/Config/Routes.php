@@ -199,6 +199,8 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('pengaturan/revert', 'Admin\PengaturanController::revert', ['filter' => 'role:admin']);
     $routes->post('pengaturan/update-jurnal-pkl-start', 'Admin\PengaturanController::updateJurnalPklStart', ['filter' => 'role:admin']);
     $routes->post('pengaturan/update-jurnal-pkl-period', 'Admin\PengaturanController::updateJurnalPklPeriod', ['filter' => 'role:admin']);
+    $routes->post('pengaturan/upload-logo', 'Admin\PengaturanController::uploadLogo', ['filter' => 'role:admin']);
+    $routes->post('pengaturan/delete-logo', 'Admin\PengaturanController::deleteLogo', ['filter' => 'role:admin']);
 
     // Arsip Jurnal PKL (Task-Oriented)
     $routes->get('jurnal-pkl-archive', 'Admin\PklArchiveController::index', ['filter' => 'role:admin']);
@@ -432,6 +434,7 @@ $routes->get('files/jurnal/(:segment)', 'FileController::jurnalFoto/$1');
 $routes->get('files/jurnal-pkl/(:segment)', 'FileController::jurnalPklFoto/$1');
 $routes->get('files/pkl-progress/(:segment)', 'FileController::pklProgressFoto/$1');
 $routes->get('files/absensi-guru/(:segment)/(:segment)/(:segment)/(:segment)', 'FileController::absensiGuruFoto/$1/$2/$3/$4');
+$routes->get('files/logo/(:segment)', 'FileController::logoSekolah/$1');
 $routes->get('profile-photo/(:segment)', 'FileController::profilePhoto/$1');
 
 // Layout Switcher Routes (for testing and manual switching)

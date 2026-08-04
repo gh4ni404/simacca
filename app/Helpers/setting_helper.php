@@ -172,6 +172,49 @@ if (!function_exists('get_week_range')) {
     }
 }
 
+if (!function_exists('get_logo_sekolah')) {
+    function get_logo_sekolah(): ?string
+    {
+        $settingModel = model(SettingModel::class);
+        return $settingModel->get('logo_sekolah') ?: null;
+    }
+}
+
+if (!function_exists('set_logo_sekolah')) {
+    function set_logo_sekolah(string $filename): bool
+    {
+        $settingModel = model(SettingModel::class);
+        return $settingModel->setSetting('logo_sekolah', $filename);
+    }
+}
+
+if (!function_exists('delete_logo_sekolah')) {
+    function delete_logo_sekolah(): bool
+    {
+        $filename = get_logo_sekolah();
+        if ($filename) {
+            $filepath = WRITEPATH . 'uploads/logo/' . $filename;
+            if (file_exists($filepath)) {
+                unlink($filepath);
+            }
+            $settingModel = model(SettingModel::class);
+            return $settingModel->setSetting('logo_sekolah', '');
+        }
+        return true;
+    }
+}
+
+if (!function_exists('get_logo_url')) {
+    function get_logo_url(): string
+    {
+        $logo = get_logo_sekolah();
+        if ($logo) {
+            return base_url('files/logo/' . $logo);
+        }
+        return '';
+    }
+}
+
 if (!function_exists('get_pkl_progress_display_status')) {
     function get_pkl_progress_display_status(array $progress): string
     {
