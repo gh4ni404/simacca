@@ -104,6 +104,9 @@
                         <i class="fas fa-upload mr-2"></i> Upload Logo
                     </button>
                     <?php if (!empty($logoSekolah)): ?>
+                    <a href="<?= base_url('admin/pengaturan/download-logo') ?>" class="inline-flex items-center px-4 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition-colors text-sm font-medium border border-blue-200">
+                        <i class="fas fa-download mr-2"></i> Download Logo
+                    </a>
                     <button type="button" onclick="confirmDeleteLogo()" class="inline-flex items-center px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors text-sm font-medium border border-red-200">
                         <i class="fas fa-trash mr-2"></i> Hapus Logo
                     </button>

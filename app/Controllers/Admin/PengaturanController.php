@@ -243,6 +243,31 @@ class PengaturanController extends BaseController
         return redirect()->to('/admin/pengaturan');
     }
 
+    public function downloadLogo()
+    {
+        $logo = get_logo_sekolah();
+        if (!$logo) {
+            session()->setFlashdata('error', 'Tidak ada logo untuk diunduh.');
+            return redirect()->to('/admin/pengaturan');
+        }
+
+        $filePath = WRITEPATH . 'uploads/logo/' . $logo;
+
+        if (!file_exists($filePath)) {
+            session()->setFlashdata('error', 'File logo tidak ditemukan.');
+            return redirect()->to('/admin/pengaturan');
+        }
+
+        $mime = mime_content_type($filePath);
+        $extension = pathinfo($logo, PATHINFO_EXTENSION);
+
+        return $this->response
+            ->setHeader('Content-Type', $mime)
+            ->setHeader('Content-Disposition', 'attachment; filename="logo-sekolah.' . $extension . '"')
+            ->setHeader('Content-Length', filesize($filePath))
+            ->setBody(file_get_contents($filePath));
+    }
+
     public function deleteLogo()
     {
         $logo = get_logo_sekolah();
