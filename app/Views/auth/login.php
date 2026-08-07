@@ -13,12 +13,6 @@ Login
         <i class="fas fa-graduation-cap text-5xl text-indigo-600"></i>
     <?php endif; ?>
 </div>
-<h2 class="text-3xl font-extrabold text-gray-900">
-    LOGIN
-</h2>
-<p class="mt-2 text-sm text-gray-600">
-    Silahkan login untuk melanjutkan
-</p>
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
