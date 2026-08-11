@@ -862,7 +862,7 @@ class PklService extends BaseService
                 'week_ready' => $weekReady,
                 'ready_days' => $readyDays,
                 'required_days' => $requiredDays,
-                'total_workdays' => $readyDays,
+                'total_workdays' => $requiredDays,
             ];
         } catch (\Exception $e) {
             log_message('error', '[PKL] getWeekReadiness error: ' . $e->getMessage());
@@ -870,7 +870,7 @@ class PklService extends BaseService
                 'week_ready' => false,
                 'ready_days' => 0,
                 'required_days' => $requiredDays,
-                'total_workdays' => 0,
+                'total_workdays' => $requiredDays,
             ];
         }
     }
