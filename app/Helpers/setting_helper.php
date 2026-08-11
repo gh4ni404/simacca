@@ -273,3 +273,35 @@ if (!function_exists('get_pkl_status_style')) {
     }
 }
 
+
+if (!function_exists('get_kepala_sekolah_nama')) {
+    function get_kepala_sekolah_nama(): string
+    {
+        $settingModel = model(SettingModel::class);
+        return $settingModel->get('kepala_sekolah_nama') ?: '';
+    }
+}
+
+if (!function_exists('set_kepala_sekolah_nama')) {
+    function set_kepala_sekolah_nama(string $nama): bool
+    {
+        $settingModel = model(SettingModel::class);
+        return $settingModel->setSetting('kepala_sekolah_nama', $nama);
+    }
+}
+
+if (!function_exists('get_kepala_sekolah_nip')) {
+    function get_kepala_sekolah_nip(): string
+    {
+        $settingModel = model(SettingModel::class);
+        return $settingModel->get('kepala_sekolah_nip') ?: '';
+    }
+}
+
+if (!function_exists('set_kepala_sekolah_nip')) {
+    function set_kepala_sekolah_nip(string $nip): bool
+    {
+        $settingModel = model(SettingModel::class);
+        return $settingModel->setSetting('kepala_sekolah_nip', $nip);
+    }
+}

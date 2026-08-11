@@ -468,8 +468,8 @@
                 <p>Mengetahui,</p>
                 <p><strong>Kepala Sekolah</strong></p>
                 <div class="signature-space"></div>
-                <p class="signature-name">(_______________________)</p>
-                <p>NIP: ___________________</p>
+                <p class="signature-name"><?= get_kepala_sekolah_nama() ? '(' . esc(get_kepala_sekolah_nama()) . ')' : '(_______________________)' ?></p>
+                <p>NIP: <?= get_kepala_sekolah_nip() ? esc(get_kepala_sekolah_nip()) : '___________________' ?></p>
             </div>
             <div class="signature-box">
                 <p>[Tempat], <?= date('d F Y') ?></p>

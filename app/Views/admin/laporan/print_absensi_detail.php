@@ -743,9 +743,9 @@
         <div class="signature-box">
             <p>Mengetahui,<br>Kepala Sekolah</p>
             <div class="name">
-                (H. Muh. Amin, S.Pd)
+                (<?= get_kepala_sekolah_nama() ?: '.............................' ?>)
             </div>
-            <p style="margin-top: 3px; font-size: 7pt;">NIP. ...................................</p>
+            <p style="margin-top: 3px; font-size: 7pt;">NIP. <?= get_kepala_sekolah_nip() ?: '...................................' ?></p>
         </div>
         <div class="signature-box">
             <p><?= date('d F Y'); ?><br>Administrator</p>

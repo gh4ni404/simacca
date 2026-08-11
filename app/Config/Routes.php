@@ -202,6 +202,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('pengaturan/upload-logo', 'Admin\PengaturanController::uploadLogo', ['filter' => 'role:admin']);
     $routes->get('pengaturan/download-logo', 'Admin\PengaturanController::downloadLogo', ['filter' => 'role:admin']);
     $routes->post('pengaturan/delete-logo', 'Admin\PengaturanController::deleteLogo', ['filter' => 'role:admin']);
+    $routes->post('pengaturan/update-kepala-sekolah', 'Admin\PengaturanController::updateKepalaSekolah', ['filter' => 'role:admin']);
 
     // Arsip Jurnal PKL (Task-Oriented)
     $routes->get('jurnal-pkl-archive', 'Admin\PklArchiveController::index', ['filter' => 'role:admin']);

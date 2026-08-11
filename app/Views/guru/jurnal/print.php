@@ -429,8 +429,8 @@
         <div class="signature-section">
             <div class="signature-box">
                 <p>Mengetahui,<br>Kepala Sekolah</p>
-                <p class="name">H. Muh. Amin, S.Pd</p>
-                <p class="nip">NIP. ......................................</p>
+                <p class="name"><?= get_kepala_sekolah_nama() ?: '(.............................)' ?></p>
+                <p class="nip">NIP. <?= get_kepala_sekolah_nip() ?: '.................................' ?></p>
             </div>
             <div class="signature-box">
                 <p> <br>Guru Mata Pelajaran</p>

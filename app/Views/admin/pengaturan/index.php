@@ -121,6 +121,71 @@
         </div>
     </div>
 
+    <!-- Card: Kepala Sekolah -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+        <div class="px-4 md:px-6 py-3 md:py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2.5 md:gap-3">
+            <div class="w-8 h-8 md:w-10 md:h-10 bg-teal-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-user-tie text-teal-600 text-sm md:text-base"></i>
+            </div>
+            <div class="min-w-0">
+                <h3 class="font-semibold text-gray-800 text-sm md:text-base truncate">Kepala Sekolah</h3>
+                <p class="text-xs text-gray-500 truncate">Nama & NIP yang tampil di tanda tangan laporan cetak</p>
+            </div>
+        </div>
+        <div class="p-4 md:p-6 flex-1 flex flex-col">
+            <form action="<?= base_url('admin/pengaturan/update-kepala-sekolah') ?>" method="post" class="flex-1 flex flex-col">
+                <?= csrf_field() ?>
+
+                <!-- Nama -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">Nama Lengkap</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                            <i class="fas fa-user fa-sm"></i>
+                        </div>
+                        <input type="text" name="kepala_sekolah_nama"
+                               value="<?= old('kepala_sekolah_nama', esc($kepalaSekolahNama)) ?>"
+                               class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
+                               placeholder="Contoh: H. Muh. Amin, S.Pd"
+                               maxlength="100">
+                    </div>
+                </div>
+
+                <!-- NIP -->
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-gray-700 mb-1.5">NIP <span class="text-gray-400 font-normal">(opsional)</span></label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                            <i class="fas fa-id-card fa-sm"></i>
+                        </div>
+                        <input type="text" name="kepala_sekolah_nip"
+                               value="<?= old('kepala_sekolah_nip', esc($kepalaSekolahNip)) ?>"
+                               class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
+                               placeholder="Contoh: 19700101 199903 1 001"
+                               maxlength="50">
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1.5">Kosongkan jika tidak ingin menampilkan NIP.</p>
+                </div>
+
+                <!-- Preview -->
+                <?php if (!empty($kepalaSekolahNama)): ?>
+                <div class="mb-5 bg-teal-50 border border-teal-100 rounded-lg px-3.5 py-2.5">
+                    <p class="text-xs text-teal-600 font-medium mb-1"><i class="fas fa-eye mr-1"></i>Tampilan di laporan:</p>
+                    <p class="text-xs text-gray-700">Mengetahui, <strong>Kepala Sekolah</strong></p>
+                    <p class="text-sm font-semibold text-gray-800 mt-1"><?= esc($kepalaSekolahNama) ?></p>
+                    <?php if (!empty($kepalaSekolahNip)): ?>
+                    <p class="text-xs text-gray-500">NIP. <?= esc($kepalaSekolahNip) ?></p>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+
+                <button type="submit" class="self-start inline-flex items-center px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition-colors text-sm font-medium">
+                    <i class="fas fa-save mr-2"></i> Simpan
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Card: Rollover Siswa -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
         <div class="px-4 md:px-6 py-3 md:py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2.5 md:gap-3">

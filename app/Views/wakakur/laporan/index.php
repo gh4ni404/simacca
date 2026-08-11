@@ -249,8 +249,8 @@
             <p class="mb-1">Mengetahui,</p>
             <p class="font-semibold mb-1">Kepala Sekolah</p>
             <div class="mt-16 mb-2">
-                <p class="font-semibold">_____________________</p>
-                <p class="text-xs">NIP. __________________</p>
+                <p class="font-semibold"><?= get_kepala_sekolah_nama() ?: '_____________________' ?></p>
+                <p class="text-xs">NIP. <?= get_kepala_sekolah_nip() ?: '__________________' ?></p>
             </div>
         </div>
         <div class="text-right">

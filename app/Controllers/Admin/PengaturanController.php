@@ -46,7 +46,9 @@ class PengaturanController extends BaseController
             'jurnalPklRequiredDays' => get_jurnal_pkl_required_days(),
         ];
 
-        $data['logoSekolah'] = get_logo_sekolah();
+        $data['logoSekolah']        = get_logo_sekolah();
+        $data['kepalaSekolahNama']  = get_kepala_sekolah_nama();
+        $data['kepalaSekolahNip']   = get_kepala_sekolah_nip();
 
         return view('admin/pengaturan/index', $data);
     }
@@ -266,6 +268,23 @@ class PengaturanController extends BaseController
             ->setHeader('Content-Disposition', 'attachment; filename="logo-sekolah.' . $extension . '"')
             ->setHeader('Content-Length', filesize($filePath))
             ->setBody(file_get_contents($filePath));
+    }
+
+    public function updateKepalaSekolah()
+    {
+        $nama = trim($this->request->getPost('kepala_sekolah_nama') ?? '');
+        $nip  = trim($this->request->getPost('kepala_sekolah_nip') ?? '');
+
+        if ($nama === '') {
+            session()->setFlashdata('error', 'Nama Kepala Sekolah tidak boleh kosong.');
+            return redirect()->to('/admin/pengaturan');
+        }
+
+        set_kepala_sekolah_nama($nama);
+        set_kepala_sekolah_nip($nip);
+
+        session()->setFlashdata('success', 'Data Kepala Sekolah berhasil diperbarui.');
+        return redirect()->to('/admin/pengaturan');
     }
 
     public function deleteLogo()
