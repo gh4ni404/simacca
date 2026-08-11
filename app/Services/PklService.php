@@ -843,36 +843,26 @@ class PklService extends BaseService
                 }
             }
 
-            $start = new \DateTime($weekStart);
-            $end = new \DateTime($weekEnd);
-            $end->modify('+1 day');
-            $interval = new \DateInterval('P1D');
-            $period = new \DatePeriod($start, $interval, $end);
-
+            // Hitung hari mana saja dalam minggu ini yang punya jurnal fully verified.
+            // $requiredDays = jumlah MINIMUM hari (bebas hari apa saja) yang harus ada jurnalnya,
+            // bukan batas hari-dalam-seminggu. Semua hari Senin–Minggu dianggap valid.
             $readyDays = 0;
-            $totalDays = 0;
 
-            foreach ($period as $dt) {
-                $dayOfWeek = (int) $dt->format('N');
-                if ($dayOfWeek > $requiredDays) continue;
-
-                $totalDays++;
-                $dateStr = $dt->format('Y-m-d');
-
-                if (isset($dayStatus[$dateStr]) && $dayStatus[$dateStr]['total'] > 0) {
-                    $d = $dayStatus[$dateStr];
-                    if ($d['total'] === $d['verified']) $readyDays++;
+            foreach ($dayStatus as $dateStr => $d) {
+                // Hanya hitung hari yang memang berada dalam range minggu ini
+                if ($dateStr < $weekStart || $dateStr > $weekEnd) continue;
+                if ($d['total'] > 0 && $d['total'] === $d['verified']) {
+                    $readyDays++;
                 }
             }
 
-            $targetDays = min($requiredDays, $totalDays);
-            $weekReady = ($readyDays >= $targetDays && $targetDays > 0);
+            $weekReady = ($readyDays >= $requiredDays);
 
             return [
                 'week_ready' => $weekReady,
                 'ready_days' => $readyDays,
                 'required_days' => $requiredDays,
-                'total_workdays' => $totalDays,
+                'total_workdays' => $readyDays,
             ];
         } catch (\Exception $e) {
             log_message('error', '[PKL] getWeekReadiness error: ' . $e->getMessage());

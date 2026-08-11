@@ -364,7 +364,7 @@
                                    min="1" max="7"
                                    class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm">
                         </div>
-                        <p class="text-xs text-gray-400 mt-1.5">Jumlah hari kerja wajib per minggu (contoh: 5 = Senin&ndash;Jumat). Digunakan untuk indikator kesiapan cetak jurnal.</p>
+                        <p class="text-xs text-gray-400 mt-1.5">Jumlah minimum hari per minggu yang harus ada jurnalnya (bebas hari apa saja). Contoh: <strong>1</strong> = minimal 1 hari aktif, <strong>5</strong> = minimal 5 hari aktif. Digunakan untuk indikator kesiapan cetak jurnal.</p>
                     </div>
 
                     <!-- Info Ringkas -->
