@@ -233,7 +233,11 @@
 
         .signature-name {
             font-weight: bold;
-            text-decoration: underline;
+            border-bottom: 1px solid #000;
+            display: inline-block;
+            min-width: 180px;
+            padding-bottom: 2px;
+            text-decoration: none;
         }
 
         /* Footer */
@@ -468,7 +472,7 @@
                 <p>Mengetahui,</p>
                 <p><strong>Kepala Sekolah</strong></p>
                 <div class="signature-space"></div>
-                <p class="signature-name"><?= get_kepala_sekolah_nama() ? '(' . esc(get_kepala_sekolah_nama()) . ')' : '(_______________________)' ?></p>
+                <p class="signature-name"><?= get_kepala_sekolah_nama() ? esc(get_kepala_sekolah_nama()) : '(_______________________)' ?></p>
                 <p>NIP: <?= get_kepala_sekolah_nip() ? esc(get_kepala_sekolah_nip()) : '___________________' ?></p>
             </div>
             <div class="signature-box">

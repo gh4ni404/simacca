@@ -330,7 +330,10 @@
         .signature-box .name {
             margin-top: 40px;
             font-weight: bold;
-            text-decoration: underline;
+            border-bottom: 1px solid #333;
+            display: inline-block;
+            min-width: 150px;
+            padding-bottom: 2px;
         }
 
         /* Print Button */
@@ -743,7 +746,7 @@
         <div class="signature-box">
             <p>Mengetahui,<br>Kepala Sekolah</p>
             <div class="name">
-                (<?= get_kepala_sekolah_nama() ?: '.............................' ?>)
+                <?= get_kepala_sekolah_nama() ?: '.............................' ?>
             </div>
             <p style="margin-top: 3px; font-size: 7pt;">NIP. <?= get_kepala_sekolah_nip() ?: '...................................' ?></p>
         </div>

@@ -123,8 +123,8 @@
         }
 
         .signature-box .name {
-            border-top: 1px solid #333;
-            padding-top: 5px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 3px;
             display: inline-block;
             min-width: 200px;
         }
@@ -289,7 +289,7 @@
         <div class="signature-box">
             <p>Mengetahui,<br>Kepala Sekolah</p>
             <div class="name">
-                (<?= get_kepala_sekolah_nama() ?: '.............................' ?>)
+                <?= get_kepala_sekolah_nama() ?: '.............................' ?>
             </div>
             <p style="margin-top: 5px; font-size: 10pt;">NIP. <?= get_kepala_sekolah_nip() ?: '...................................' ?></p>
         </div>
