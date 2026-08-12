@@ -197,6 +197,49 @@
             text-align: left;
         }
 
+        /* ========== STATUS MERGED CELL (izin/sakit/alpa) ========== */
+        td.status-merged {
+            text-align: center;
+            vertical-align: middle;
+            padding: 0;
+        }
+
+        .status-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 33px; /* sesuai tinggi row: padding 7px*2 + font ~9.5pt ≈ 19px */
+            padding: 0 4px;
+            font-size: 8pt;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            line-height: 1;
+        }
+
+        /* Print-safe: menggunakan pola background yang tetap terbaca di printer mono */
+        .status-izin  {
+            background-color: #e8f0fe;
+            color: #1a3a8f;
+        }
+        .status-sakit {
+            background-color: #fffbeb;
+            color: #7c4a00;
+        }
+        .status-alpa  {
+            background-color: #fff1f0;
+            color: #8b0000;
+        }
+
+        /* Fallback: saat dicetak, pastikan warna teks tetap gelap */
+        @media print {
+            .status-label {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+
         /* ========== SUMMARY + SIGNATURE GROUP ========== */
         .footer-group {
             page-break-inside: avoid;
@@ -438,13 +481,25 @@
                             } else {
                                 $catatanDisplay = '';
                             }
+
+                            // Determine whether to merge jam masuk/pulang columns
+                            $isAbsent = in_array($status, ['izin', 'sakit', 'alpa']);
+                            $statusLabel = ['izin' => 'Izin', 'sakit' => 'Sakit', 'alpa' => 'Alpa'];
                             ?>
                             <tr>
                                 <td class="center"><?= $rowNum ?></td>
                                 <td class="center"><?= esc($day['day_name']) ?></td>
                                 <td class="center"><?= esc($day['display_date']) ?></td>
+                                <?php if ($isAbsent): ?>
+                                <td colspan="2" class="status-merged">
+                                    <span class="status-label status-<?= $status ?>">
+                                        <?= $statusLabel[$status] ?>
+                                    </span>
+                                </td>
+                                <?php else: ?>
                                 <td class="center"><?= esc($jamDatang) ?></td>
                                 <td class="center"><?= esc($jamPulang) ?></td>
+                                <?php endif; ?>
                                 <td><?= esc($catatanDisplay) ?></td>
                             </tr>
                         <?php endforeach; ?>
