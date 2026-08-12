@@ -85,6 +85,12 @@
                     <i class="fas fa-times-circle"></i>
                     <span>Alpa Semua</span>
                 </button>
+                <button type="button"
+                        onclick="setAllStatus('libur')"
+                        class="flex items-center justify-center gap-2 py-3 px-4 bg-purple-50 border-2 border-purple-200 rounded-xl text-purple-700 font-medium text-sm hover:bg-purple-100 transition-all col-span-2">
+                    <i class="fas fa-umbrella-beach"></i>
+                    <span>Libur Semua</span>
+                </button>
             </div>
         </div>
 
@@ -167,6 +173,15 @@
                                         onclick="selectStatus('<?= $sid ?>', 'alpa')">
                                     <i class="fas fa-times-circle text-lg mb-1"></i>
                                     <span class="text-xs font-semibold">Alpa</span>
+                                </button>
+
+                                <!-- Libur -->
+                                <button type="button"
+                                        class="status-btn flex flex-col items-center justify-center py-2.5 rounded-xl border-2 cursor-pointer transition-all active:scale-95 col-span-4 <?= $currentStatus === 'libur' ? 'bg-purple-500 text-white border-purple-500' : 'bg-white text-gray-700 border-gray-300' ?>"
+                                        data-siswa-id="<?= $sid ?>" data-status="libur"
+                                        onclick="selectStatus('<?= $sid ?>', 'libur')">
+                                    <i class="fas fa-umbrella-beach text-lg mb-1"></i>
+                                    <span class="text-xs font-semibold">Libur</span>
                                 </button>
                             </div>
 
@@ -274,6 +289,12 @@
     color: #ffffff;
 }
 
+.status-btn.active-libur {
+    border-color: #a855f7;
+    background-color: #a855f7;
+    color: #ffffff;
+}
+
 .status-btn:hover {
     border-color: #9ca3af;
 }
@@ -300,7 +321,7 @@ function selectStatus(siswaId, status) {
     const buttons = document.querySelectorAll(`.status-btn[data-siswa-id="${siswaId}"]`);
     buttons.forEach(btn => {
         const btnStatus = btn.getAttribute('data-status');
-        btn.classList.remove('active-hadir', 'active-izin', 'active-sakit', 'active-alpa');
+        btn.classList.remove('active-hadir', 'active-izin', 'active-sakit', 'active-alpa', 'active-libur');
         if (btnStatus === status) {
             btn.classList.add(`active-${status}`);
         }
@@ -338,7 +359,7 @@ function setAllStatus(status) {
         selectStatus(siswaId, status);
     });
 
-    const labels = { hadir: 'Hadir', izin: 'Izin', sakit: 'Sakit', alpa: 'Alpa' };
+    const labels = { hadir: 'Hadir', izin: 'Izin', sakit: 'Sakit', alpa: 'Alpa', libur: 'Libur' };
     showToast(`Semua siswa di-set ${labels[status]}`);
 }
 

@@ -303,6 +303,103 @@
         </div>
     </div>
 
+    <!-- Card: Kalender Hari Libur -->
+    <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" id="hari-libur">
+        <div class="px-4 md:px-6 py-3 md:py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2.5 md:gap-3">
+            <div class="w-8 h-8 md:w-10 md:h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-calendar-times text-orange-600 text-sm md:text-base"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+                <h3 class="font-semibold text-gray-800 text-sm md:text-base truncate">Kalender Hari Libur</h3>
+                <p class="text-xs text-gray-500 truncate">Kelola hari libur nasional — absensi PKL pada hari ini akan otomatis ditandai Libur</p>
+            </div>
+        </div>
+        <div class="p-4 md:p-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                <!-- Kiri: Form tambah + import -->
+                <div class="flex flex-col gap-5">
+                    <!-- Form tambah hari libur -->
+                    <form action="<?= base_url('admin/pengaturan/tambah-hari-libur') ?>" method="post">
+                        <?= csrf_field() ?>
+                        <p class="text-sm font-medium text-gray-700 mb-3">Tambah Hari Libur</p>
+                        <div class="flex flex-col sm:flex-row gap-2 mb-2">
+                            <div class="relative flex-shrink-0">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                    <i class="fas fa-calendar-day fa-sm"></i>
+                                </div>
+                                <input type="date" name="tanggal" required
+                                       class="pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent w-full sm:w-44">
+                            </div>
+                            <input type="text" name="keterangan" required maxlength="200"
+                                   placeholder="Keterangan (contoh: Hari Kemerdekaan)"
+                                   class="flex-1 px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                        </div>
+                        <button type="submit" class="inline-flex items-center px-4 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors text-sm font-medium">
+                            <i class="fas fa-plus mr-2"></i> Tambah
+                        </button>
+                    </form>
+
+                    <!-- Import libur nasional -->
+                    <div class="border-t border-gray-100 pt-4">
+                        <p class="text-sm font-medium text-gray-700 mb-1">Import Libur Nasional 2026</p>
+                        <p class="text-xs text-gray-500 mb-3">Impor 16 hari libur nasional Indonesia tahun 2026 sekaligus. Tanggal yang sudah ada akan dilewati.</p>
+                        <form action="<?= base_url('admin/pengaturan/import-hari-libur-nasional') ?>" method="post"
+                              onsubmit="return confirm('Impor hari libur nasional 2026? Tanggal yang sudah ada akan dilewati.')">
+                            <?= csrf_field() ?>
+                            <button type="submit" class="inline-flex items-center px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium">
+                                <i class="fas fa-cloud-download-alt mr-2"></i> Import Libur Nasional 2026
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Kanan: Tabel daftar hari libur -->
+                <div>
+                    <?php if (empty($hariLiburList)): ?>
+                        <div class="flex flex-col items-center justify-center py-10 text-gray-400">
+                            <i class="fas fa-calendar-times text-3xl mb-2"></i>
+                            <p class="text-sm">Belum ada hari libur yang didaftarkan.</p>
+                        </div>
+                    <?php else: ?>
+                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2"><?= count($hariLiburList) ?> Hari Libur Terdaftar</p>
+                        <div class="overflow-y-auto max-h-72 rounded-lg border border-gray-200">
+                            <table class="w-full text-xs">
+                                <thead class="sticky top-0 bg-gray-50 border-b border-gray-200">
+                                    <tr>
+                                        <th class="text-left py-2 px-3 font-semibold text-gray-600">Tanggal</th>
+                                        <th class="text-left py-2 px-3 font-semibold text-gray-600">Keterangan</th>
+                                        <th class="py-2 px-3"></th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100">
+                                    <?php foreach ($hariLiburList as $libur): ?>
+                                    <tr class="hover:bg-orange-50/50">
+                                        <td class="py-2 px-3 text-gray-700 whitespace-nowrap font-medium">
+                                            <?= date('d M Y', strtotime($libur['tanggal'])) ?>
+                                        </td>
+                                        <td class="py-2 px-3 text-gray-600"><?= esc($libur['keterangan']) ?></td>
+                                        <td class="py-2 px-3 text-right">
+                                            <form action="<?= base_url('admin/pengaturan/hapus-hari-libur/' . $libur['id']) ?>" method="post"
+                                                  onsubmit="return confirm('Hapus hari libur <?= esc($libur['keterangan']) ?>?')">
+                                                <?= csrf_field() ?>
+                                                <button type="submit" class="inline-flex items-center justify-center w-6 h-6 bg-red-50 hover:bg-red-100 text-red-500 rounded transition-colors" title="Hapus">
+                                                    <i class="fas fa-trash text-[10px]"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
     <!-- Card: Pengaturan Jurnal PKL -->
     <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="px-4 md:px-6 py-3 md:py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2.5 md:gap-3">

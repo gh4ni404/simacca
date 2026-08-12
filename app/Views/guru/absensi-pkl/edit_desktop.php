@@ -150,6 +150,9 @@
                             <button type="button" onclick="setAllStatus('alpa')" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow-md transition-all transform hover:scale-105">
                                 <i class="fas fa-times-circle mr-1"></i> Semua Alpa
                             </button>
+                            <button type="button" onclick="setAllStatus('libur')" class="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white font-semibold rounded-lg shadow-md transition-all transform hover:scale-105">
+                                <i class="fas fa-umbrella-beach mr-1"></i> Semua Libur
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -204,6 +207,7 @@
                                                 'izin'   => ['label' => 'Izin', 'icon' => 'fa-file-alt'],
                                                 'sakit'  => ['label' => 'Sakit', 'icon' => 'fa-medkit'],
                                                 'alpa'   => ['label' => 'Alpa', 'icon' => 'fa-times-circle'],
+                                                'libur'  => ['label' => 'Libur', 'icon' => 'fa-umbrella-beach'],
                                             ];
                                             foreach ($statusOptionsArr as $value => $opt):
                                                 $isSelected = ($currentStatus === $value);
@@ -279,7 +283,8 @@ const statusStyles = {
     'hadir':  { active: 'bg-green-500 text-white border-green-600 shadow-md',  inactive: 'bg-white text-green-700 border-green-300 hover:bg-green-50', icon: 'fa-check-circle' },
     'izin':   { active: 'bg-blue-500 text-white border-blue-600 shadow-md',   inactive: 'bg-white text-blue-700 border-blue-300 hover:bg-blue-50',  icon: 'fa-file-alt' },
     'sakit':  { active: 'bg-yellow-500 text-white border-yellow-600 shadow-md', inactive: 'bg-white text-yellow-700 border-yellow-300 hover:bg-yellow-50', icon: 'fa-medkit' },
-    'alpa':   { active: 'bg-red-500 text-white border-red-600 shadow-md',     inactive: 'bg-white text-red-700 border-red-300 hover:bg-red-50',    icon: 'fa-times-circle' }
+    'alpa':   { active: 'bg-red-500 text-white border-red-600 shadow-md',     inactive: 'bg-white text-red-700 border-red-300 hover:bg-red-50',    icon: 'fa-times-circle' },
+    'libur':  { active: 'bg-purple-500 text-white border-purple-600 shadow-md', inactive: 'bg-white text-purple-700 border-purple-300 hover:bg-purple-50', icon: 'fa-umbrella-beach' }
 };
 
 function setTimeNow(siswaId, field) {
@@ -338,7 +343,7 @@ function setAllStatus(status) {
         selectStatus(siswaId, status);
     });
 
-    const labels = { hadir: 'Hadir', izin: 'Izin', sakit: 'Sakit', alpa: 'Alpa' };
+    const labels = { hadir: 'Hadir', izin: 'Izin', sakit: 'Sakit', alpa: 'Alpa', libur: 'Libur' };
     const notif = document.createElement('div');
     notif.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
     notif.innerHTML = `<div class="flex items-center"><i class="fas fa-check-circle mr-2"></i><span>Semua siswa di-set <strong>${labels[status]}</strong></span></div>`;

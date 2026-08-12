@@ -6,16 +6,19 @@ use App\Controllers\BaseController;
 use App\Services\SiswaService;
 use App\Models\RolloverHistoryModel;
 use App\Models\RolloverBackupModel;
+use App\Models\HariLiburModel;
 
 class PengaturanController extends BaseController
 {
     protected $siswaService;
     protected $rolloverHistoryModel;
+    protected $hariLiburModel;
 
     public function __construct()
     {
-        $this->siswaService = new SiswaService();
+        $this->siswaService         = new SiswaService();
         $this->rolloverHistoryModel = new RolloverHistoryModel();
+        $this->hariLiburModel       = new HariLiburModel();
 
         if (!session()->get('isLoggedIn') || session()->get('role') !== 'admin') {
             return redirect()->to('/access-denied');
@@ -49,6 +52,7 @@ class PengaturanController extends BaseController
         $data['logoSekolah']        = get_logo_sekolah();
         $data['kepalaSekolahNama']  = get_kepala_sekolah_nama();
         $data['kepalaSekolahNip']   = get_kepala_sekolah_nip();
+        $data['hariLiburList']      = $this->hariLiburModel->getAllSorted();
 
         return view('admin/pengaturan/index', $data);
     }
@@ -298,5 +302,103 @@ class PengaturanController extends BaseController
         }
 
         return redirect()->to('/admin/pengaturan');
+    }
+
+    // ─── Hari Libur (Kalender Libur Nasional) ────────────────────────────────
+
+    public function storeHariLibur()
+    {
+        $tanggal    = trim($this->request->getPost('tanggal') ?? '');
+        $keterangan = trim($this->request->getPost('keterangan') ?? '');
+
+        if (!$tanggal || !$keterangan) {
+            session()->setFlashdata('error', 'Tanggal dan keterangan wajib diisi.');
+            return redirect()->to('/admin/pengaturan#hari-libur');
+        }
+
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal)) {
+            session()->setFlashdata('error', 'Format tanggal tidak valid.');
+            return redirect()->to('/admin/pengaturan#hari-libur');
+        }
+
+        // Upsert: jika tanggal sudah ada, update keterangannya
+        $existing = $this->hariLiburModel->where('tanggal', $tanggal)->first();
+        if ($existing) {
+            $this->hariLiburModel->update($existing['id'], [
+                'keterangan' => $keterangan,
+                'created_by' => session()->get('userId'),
+            ]);
+            session()->setFlashdata('success', 'Hari libur ' . date('d/m/Y', strtotime($tanggal)) . ' berhasil diperbarui.');
+        } else {
+            $this->hariLiburModel->skipValidation(false)->insert([
+                'tanggal'    => $tanggal,
+                'keterangan' => $keterangan,
+                'created_by' => session()->get('userId'),
+            ]);
+            session()->setFlashdata('success', 'Hari libur ' . date('d/m/Y', strtotime($tanggal)) . ' berhasil ditambahkan.');
+        }
+
+        return redirect()->to('/admin/pengaturan#hari-libur');
+    }
+
+    public function deleteHariLibur($id)
+    {
+        $libur = $this->hariLiburModel->find((int) $id);
+        if (!$libur) {
+            session()->setFlashdata('error', 'Data hari libur tidak ditemukan.');
+            return redirect()->to('/admin/pengaturan#hari-libur');
+        }
+
+        $this->hariLiburModel->delete((int) $id);
+        session()->setFlashdata('success', 'Hari libur ' . date('d/m/Y', strtotime($libur['tanggal'])) . ' berhasil dihapus.');
+        return redirect()->to('/admin/pengaturan#hari-libur');
+    }
+
+    public function importHariLiburNasional()
+    {
+        // Daftar hari libur nasional Indonesia 2026
+        $hariLiburNasional = [
+            ['tanggal' => '2026-01-01', 'keterangan' => 'Tahun Baru Masehi'],
+            ['tanggal' => '2026-01-29', 'keterangan' => 'Tahun Baru Imlek'],
+            ['tanggal' => '2026-03-04', 'keterangan' => 'Isra Miraj Nabi Muhammad SAW'],
+            ['tanggal' => '2026-03-19', 'keterangan' => 'Hari Raya Nyepi'],
+            ['tanggal' => '2026-03-20', 'keterangan' => 'Wafat Yesus Kristus (Good Friday)'],
+            ['tanggal' => '2026-04-02', 'keterangan' => 'Hari Raya Idul Fitri 1447 H'],
+            ['tanggal' => '2026-04-03', 'keterangan' => 'Hari Raya Idul Fitri 1447 H'],
+            ['tanggal' => '2026-05-01', 'keterangan' => 'Hari Buruh Internasional'],
+            ['tanggal' => '2026-05-14', 'keterangan' => 'Kenaikan Yesus Kristus'],
+            ['tanggal' => '2026-05-23', 'keterangan' => 'Hari Raya Waisak'],
+            ['tanggal' => '2026-06-01', 'keterangan' => 'Hari Lahir Pancasila'],
+            ['tanggal' => '2026-06-09', 'keterangan' => 'Hari Raya Idul Adha 1447 H'],
+            ['tanggal' => '2026-06-29', 'keterangan' => 'Tahun Baru Islam 1448 H'],
+            ['tanggal' => '2026-08-17', 'keterangan' => 'Hari Kemerdekaan Republik Indonesia'],
+            ['tanggal' => '2026-09-07', 'keterangan' => 'Maulid Nabi Muhammad SAW'],
+            ['tanggal' => '2026-12-25', 'keterangan' => 'Hari Raya Natal'],
+        ];
+
+        $userId = session()->get('userId');
+        $inserted = 0;
+        $skipped  = 0;
+
+        foreach ($hariLiburNasional as $libur) {
+            $existing = $this->hariLiburModel->where('tanggal', $libur['tanggal'])->first();
+            if (!$existing) {
+                $this->hariLiburModel->insert([
+                    'tanggal'    => $libur['tanggal'],
+                    'keterangan' => $libur['keterangan'],
+                    'created_by' => $userId,
+                ]);
+                $inserted++;
+            } else {
+                $skipped++;
+            }
+        }
+
+        $msg = "Import selesai: {$inserted} hari libur ditambahkan";
+        if ($skipped > 0) {
+            $msg .= ", {$skipped} sudah ada (dilewati).";
+        }
+        session()->setFlashdata('success', $msg);
+        return redirect()->to('/admin/pengaturan#hari-libur');
     }
 }

@@ -231,6 +231,10 @@
             background-color: #fff1f0;
             color: #8b0000;
         }
+        .status-libur {
+            background-color: #f5f3ff;
+            color: #5b21b6;
+        }
 
         /* Fallback: saat dicetak, pastikan warna teks tetap gelap */
         @media print {
@@ -425,6 +429,7 @@
         $totalSakit = 0;
         $totalIzin  = 0;
         $totalAlpa  = 0;
+        $totalLibur = 0;
         $rowNum = 0;
         ?>
 
@@ -459,6 +464,7 @@
                             if ($status === 'sakit') $totalSakit++;
                             elseif ($status === 'izin') $totalIzin++;
                             elseif ($status === 'alpa') $totalAlpa++;
+                            elseif ($status === 'libur') $totalLibur++;
 
                             $rowNum++;
 
@@ -483,8 +489,8 @@
                             }
 
                             // Determine whether to merge jam masuk/pulang columns
-                            $isAbsent = in_array($status, ['izin', 'sakit', 'alpa']);
-                            $statusLabel = ['izin' => 'Izin', 'sakit' => 'Sakit', 'alpa' => 'Alpa'];
+                            $isAbsent = in_array($status, ['izin', 'sakit', 'alpa', 'libur']);
+                            $statusLabel = ['izin' => 'Izin', 'sakit' => 'Sakit', 'alpa' => 'Alpa', 'libur' => 'Libur'];
                             ?>
                             <tr>
                                 <td class="center"><?= $rowNum ?></td>
@@ -531,6 +537,12 @@
                         <td class="label-cell">Tanpa Keterangan</td>
                         <td class="colon-cell">:</td>
                         <td class="value-cell"><?= $totalAlpa ?></td>
+                        <td class="unit-cell">Hari</td>
+                    </tr>
+                    <tr>
+                        <td class="label-cell">Libur</td>
+                        <td class="colon-cell">:</td>
+                        <td class="value-cell"><?= $totalLibur ?></td>
                         <td class="unit-cell">Hari</td>
                     </tr>
                 </table>

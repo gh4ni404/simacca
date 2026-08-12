@@ -36,7 +36,7 @@ class AbsensiPklDetailModel extends Model
     protected $validationRules      = [
         'absensi_pkl_id' => 'required|numeric',
         'siswa_id'       => 'required|numeric',
-        'status'         => 'required|in_list[hadir,izin,sakit,alpa]',
+        'status'         => 'required|in_list[hadir,izin,sakit,alpa,libur]',
     ];
     protected $validationMessages   = [];
     protected $skipValidation       = false;
@@ -173,6 +173,7 @@ class AbsensiPklDetailModel extends Model
             'izin'    => 0,
             'sakit'   => 0,
             'alpa'    => 0,
+            'libur'   => 0,
         ];
 
         foreach ($result as $row) {
@@ -203,6 +204,7 @@ class AbsensiPklDetailModel extends Model
             'izin'   => 0,
             'sakit'  => 0,
             'alpa'   => 0,
+            'libur'  => 0,
         ];
 
         foreach ($result as $row) {
@@ -237,6 +239,7 @@ class AbsensiPklDetailModel extends Model
             'izin'   => 0,
             'sakit'  => 0,
             'alpa'   => 0,
+            'libur'  => 0,
         ];
 
         foreach ($result as $row) {
@@ -276,6 +279,7 @@ class AbsensiPklDetailModel extends Model
             'izin'   => 0,
             'sakit'  => 0,
             'alpa'   => 0,
+            'libur'  => 0,
         ];
 
         foreach ($result as $row) {

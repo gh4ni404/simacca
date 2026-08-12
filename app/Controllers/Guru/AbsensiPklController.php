@@ -107,6 +107,7 @@ class AbsensiPklController extends BaseController
             'izin'   => ['label' => 'Izin',   'color' => 'blue',   'icon' => 'fa-file-alt'],
             'sakit'  => ['label' => 'Sakit',  'color' => 'yellow', 'icon' => 'fa-medkit'],
             'alpa'   => ['label' => 'Alpa',   'color' => 'red',    'icon' => 'fa-times-circle'],
+            'libur'  => ['label' => 'Libur',  'color' => 'purple', 'icon' => 'fa-umbrella-beach'],
         ];
 
         $data = [
@@ -238,13 +239,15 @@ class AbsensiPklController extends BaseController
             'izin'   => ['label' => 'Izin',   'color' => 'blue',   'icon' => 'fa-file-alt'],
             'sakit'  => ['label' => 'Sakit',  'color' => 'yellow', 'icon' => 'fa-medkit'],
             'alpa'   => ['label' => 'Alpa',   'color' => 'red',    'icon' => 'fa-times-circle'],
+            'libur'  => ['label' => 'Libur',  'color' => 'purple', 'icon' => 'fa-umbrella-beach'],
         ];
 
         $statusStyles = [
-            'hadir'  => ['active' => 'bg-green-500 text-white border-green-600 shadow-md',  'inactive' => 'bg-white text-green-700 border-green-300 hover:bg-green-50'],
-            'izin'   => ['active' => 'bg-blue-500 text-white border-blue-600 shadow-md',   'inactive' => 'bg-white text-blue-700 border-blue-300 hover:bg-blue-50'],
+            'hadir'  => ['active' => 'bg-green-500 text-white border-green-600 shadow-md',   'inactive' => 'bg-white text-green-700 border-green-300 hover:bg-green-50'],
+            'izin'   => ['active' => 'bg-blue-500 text-white border-blue-600 shadow-md',     'inactive' => 'bg-white text-blue-700 border-blue-300 hover:bg-blue-50'],
             'sakit'  => ['active' => 'bg-yellow-500 text-white border-yellow-600 shadow-md', 'inactive' => 'bg-white text-yellow-700 border-yellow-300 hover:bg-yellow-50'],
-            'alpa'   => ['active' => 'bg-red-500 text-white border-red-600 shadow-md',     'inactive' => 'bg-white text-red-700 border-red-300 hover:bg-red-50'],
+            'alpa'   => ['active' => 'bg-red-500 text-white border-red-600 shadow-md',       'inactive' => 'bg-white text-red-700 border-red-300 hover:bg-red-50'],
+            'libur'  => ['active' => 'bg-purple-500 text-white border-purple-600 shadow-md', 'inactive' => 'bg-white text-purple-700 border-purple-300 hover:bg-purple-50'],
         ];
 
         $data = [

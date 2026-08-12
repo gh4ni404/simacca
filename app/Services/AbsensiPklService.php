@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\AbsensiPklModel;
 use App\Models\AbsensiPklDetailModel;
+use App\Models\HariLiburModel;
 use App\Models\PembimbingPklModel;
 use App\Models\SiswaPklModel;
 use App\Models\SiswaModel;
@@ -12,6 +13,7 @@ class AbsensiPklService extends BaseService
 {
     protected $absensiPklModel;
     protected $absensiPklDetailModel;
+    protected $hariLiburModel;
     protected $pembimbingPklModel;
     protected $siswaPklModel;
     protected $siswaModel;
@@ -20,11 +22,12 @@ class AbsensiPklService extends BaseService
     {
         parent::__construct();
 
-        $this->absensiPklModel = new AbsensiPklModel();
+        $this->absensiPklModel       = new AbsensiPklModel();
         $this->absensiPklDetailModel = new AbsensiPklDetailModel();
-        $this->pembimbingPklModel = new PembimbingPklModel();
-        $this->siswaPklModel = new SiswaPklModel();
-        $this->siswaModel = new SiswaModel();
+        $this->hariLiburModel        = new HariLiburModel();
+        $this->pembimbingPklModel    = new PembimbingPklModel();
+        $this->siswaPklModel         = new SiswaPklModel();
+        $this->siswaModel            = new SiswaModel();
     }
 
     /**
@@ -140,7 +143,17 @@ class AbsensiPklService extends BaseService
                 // Format waktu_absen and waktu_pulang
                 if (!empty($data['siswa'])) {
                     $tanggal = $data['tanggal'];
+
+                    // Cek apakah tanggal ini adalah hari libur nasional (Opsi B)
+                    $isHariLibur = $this->hariLiburModel->isHariLibur($tanggal);
+
                     foreach ($data['siswa'] as $siswaId => &$siswaData) {
+                        // Auto-override ke libur jika kalender menandai hari ini libur
+                        // dan pembimbing tidak sengaja memilih status lain
+                        if ($isHariLibur && ($siswaData['status'] ?? 'alpa') !== 'hadir') {
+                            $siswaData['status'] = 'libur';
+                        }
+
                         if (($siswaData['status'] ?? 'alpa') === 'hadir') {
                             if (!empty($siswaData['waktu_absen'])) {
                                 $timeAbsen = trim($siswaData['waktu_absen']);
@@ -173,9 +186,9 @@ class AbsensiPklService extends BaseService
                 }
 
                 return $this->successResponse([
-                    'absensi_pkl_id' => $absensiPklId,
-                    'total_siswa'    => count($data['siswa']),
-                ], 'Absensi PKL berhasil disimpan');
+                'absensi_pkl_id' => $absensiPklId,
+                'total_siswa'    => count($data['siswa']),
+            ], 'Absensi PKL berhasil disimpan');
             });
         } catch (\Exception $e) {
             $this->log('error', 'Failed to create absensi pkl: ' . $e->getMessage());
@@ -206,12 +219,21 @@ class AbsensiPklService extends BaseService
             // Update details
             if (!empty($data['siswa'])) {
                 $tanggal = $data['tanggal'] ?? $absensi['tanggal'];
+
+                // Cek apakah tanggal ini adalah hari libur nasional (Opsi B)
+                $isHariLibur = $this->hariLiburModel->isHariLibur($tanggal);
+
                 foreach ($data['siswa'] as $siswaId => $siswaData) {
                     if (empty($siswaId)) {
                         continue;
                     }
-                    
-                    $waktuAbsen = null;
+
+                    // Auto-override ke libur jika kalender menandai hari ini libur
+                    if ($isHariLibur && ($siswaData['status'] ?? 'alpa') !== 'hadir') {
+                        $siswaData['status'] = 'libur';
+                    }
+
+                    $waktuAbsen  = null;
                     $waktuPulang = null;
                     
                     if (($siswaData['status'] ?? 'alpa') === 'hadir') {

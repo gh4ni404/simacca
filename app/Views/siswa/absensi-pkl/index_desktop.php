@@ -171,6 +171,7 @@
                                     'izin'   => 'bg-blue-100 text-blue-800',
                                     'sakit'  => 'bg-yellow-100 text-yellow-800',
                                     'alpa'   => 'bg-red-100 text-red-800',
+                                    'libur'  => 'bg-purple-100 text-purple-800',
                                 ];
                                 foreach ($items['items'] as $item):
                                 ?>
@@ -199,7 +200,7 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center">
                                         <span class="px-3 py-1 text-xs font-semibold rounded-full <?= $statusClasses[$item['status']] ?? 'bg-gray-100 text-gray-800' ?>">
-                                            <i class="fas <?= $item['status'] === 'hadir' ? 'fa-check-circle' : ($item['status'] === 'izin' ? 'fa-file-alt' : ($item['status'] === 'sakit' ? 'fa-medkit' : ($item['status'] === 'alpa' ? 'fa-user-times' : 'fa-id-badge'))) ?> mr-1"></i>
+                                            <i class="fas <?= $item['status'] === 'hadir' ? 'fa-check-circle' : ($item['status'] === 'izin' ? 'fa-file-alt' : ($item['status'] === 'sakit' ? 'fa-medkit' : ($item['status'] === 'alpa' ? 'fa-user-times' : ($item['status'] === 'libur' ? 'fa-umbrella-beach' : 'fa-id-badge')))) ?> mr-1"></i>
                                             <?= ucfirst($item['status']) ?>
                                         </span>
                                     </td>

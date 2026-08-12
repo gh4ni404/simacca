@@ -305,3 +305,25 @@ if (!function_exists('set_kepala_sekolah_nip')) {
         return $settingModel->setSetting('kepala_sekolah_nip', $nip);
     }
 }
+
+if (!function_exists('get_hari_libur_list')) {
+    /**
+     * Ambil semua hari libur sebagai associative array ['Y-m-d' => 'keterangan'].
+     */
+    function get_hari_libur_list(): array
+    {
+        $model = model(\App\Models\HariLiburModel::class);
+        return $model->getTanggalList();
+    }
+}
+
+if (!function_exists('is_hari_libur')) {
+    /**
+     * Cek apakah tanggal tertentu terdaftar sebagai hari libur.
+     */
+    function is_hari_libur(string $tanggal): bool
+    {
+        $model = model(\App\Models\HariLiburModel::class);
+        return $model->isHariLibur($tanggal);
+    }
+}
