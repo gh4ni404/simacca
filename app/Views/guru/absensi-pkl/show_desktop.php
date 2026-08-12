@@ -108,8 +108,9 @@
                         ];
                         $no = 1;
                         foreach ($details as $d):
-                            $jamMasuk = ($d['waktu_absen'] && $d['status'] === 'hadir') ? date('H:i', strtotime($d['waktu_absen'])) : '-';
+                            $jamMasuk  = ($d['waktu_absen']  && $d['status'] === 'hadir') ? date('H:i', strtotime($d['waktu_absen']))  : '-';
                             $jamPulang = ($d['waktu_pulang'] && $d['status'] === 'hadir') ? date('H:i', strtotime($d['waktu_pulang'])) : '-';
+                            $pulangMissing = ($d['status'] === 'hadir' && empty($d['waktu_pulang']));
                         ?>
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 text-sm text-gray-500"><?= $no++ ?></td>
@@ -121,7 +122,16 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-center text-sm text-gray-600"><?= $jamMasuk ?></td>
-                            <td class="px-6 py-4 text-center text-sm text-gray-600"><?= $jamPulang ?></td>
+                            <td class="px-6 py-4 text-center text-sm">
+                                <?php if ($pulangMissing): ?>
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-orange-50 text-orange-600 border border-orange-200 rounded-lg text-xs font-semibold"
+                                          title="Jam pulang belum diisi — edit absensi ini untuk melengkapi">
+                                        <i class="fas fa-clock text-orange-400"></i> Belum diisi
+                                    </span>
+                                <?php else: ?>
+                                    <span class="text-gray-600"><?= $jamPulang ?></span>
+                                <?php endif; ?>
+                            </td>
                             <td class="px-6 py-4 text-sm text-gray-600"><?= esc($d['keterangan'] ?? '-') ?></td>
                         </tr>
                         <?php endforeach; ?>

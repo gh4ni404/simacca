@@ -47,8 +47,11 @@ class AbsensiPklService extends BaseService
                 $item['sakit_count'] = $stats['sakit'];
                 $item['alpa_count'] = $stats['alpa'];
                 $item['persen_kehadiran'] = $stats['persen_kehadiran'];
-                $item['can_edit'] = true; // Pembimbing can always edit
-                $item['can_delete'] = true;
+                $item['can_edit']              = true; // Pembimbing can always edit
+                $item['can_delete']            = true;
+                $item['missing_pulang_count']  = $stats['hadir'] > 0
+                    ? $this->absensiPklDetailModel->getMissingPulangCount($item['id'])
+                    : 0;
             }
             unset($item);
 
@@ -147,6 +150,21 @@ class AbsensiPklService extends BaseService
                     // Cek apakah tanggal ini adalah hari libur nasional (Opsi B)
                     $isHariLibur = $this->hariLiburModel->isHariLibur($tanggal);
 
+                    // Validasi: jam masuk wajib diisi jika status hadir
+                    $missingJamMasuk = [];
+                    foreach ($data['siswa'] as $siswaId => $siswaData) {
+                        $status = $siswaData['status'] ?? 'alpa';
+                        if ($isHariLibur && $status !== 'hadir') continue; // akan di-override ke libur
+                        if ($status === 'hadir' && empty($siswaData['waktu_absen'])) {
+                            $missingJamMasuk[] = $siswaId;
+                        }
+                    }
+                    if (!empty($missingJamMasuk)) {
+                        throw new \RuntimeException(
+                            count($missingJamMasuk) . ' siswa dengan status Hadir belum diisi jam masuknya.'
+                        );
+                    }
+
                     foreach ($data['siswa'] as $siswaId => &$siswaData) {
                         // Auto-override ke libur jika kalender menandai hari ini libur
                         // dan pembimbing tidak sengaja memilih status lain
@@ -222,6 +240,22 @@ class AbsensiPklService extends BaseService
 
                 // Cek apakah tanggal ini adalah hari libur nasional (Opsi B)
                 $isHariLibur = $this->hariLiburModel->isHariLibur($tanggal);
+
+                // Validasi: jam masuk wajib diisi jika status hadir
+                $missingJamMasuk = [];
+                foreach ($data['siswa'] as $siswaId => $siswaData) {
+                    if (empty($siswaId)) continue;
+                    $status = $siswaData['status'] ?? 'alpa';
+                    if ($isHariLibur && $status !== 'hadir') continue;
+                    if ($status === 'hadir' && empty($siswaData['waktu_absen'])) {
+                        $missingJamMasuk[] = $siswaId;
+                    }
+                }
+                if (!empty($missingJamMasuk)) {
+                    throw new \RuntimeException(
+                        count($missingJamMasuk) . ' siswa dengan status Hadir belum diisi jam masuknya.'
+                    );
+                }
 
                 foreach ($data['siswa'] as $siswaId => $siswaData) {
                     if (empty($siswaId)) {

@@ -101,6 +101,7 @@
                             <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Sakit</th>
                             <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Alpa</th>
                             <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Kehadiran</th>
+                            <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Jam Pulang</th>
                             <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Aksi</th>
                         </tr>
                     </thead>
@@ -156,6 +157,21 @@
                                 <span class="inline-flex items-center justify-center bg-<?= $colorClass ?>-100 text-<?= $colorClass ?>-800 border border-<?= $colorClass ?>-200 px-3 py-1 rounded-lg text-sm font-bold">
                                     <?= $persen ?>%
                                 </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <?php $missingPulang = $item['missing_pulang_count'] ?? 0; ?>
+                                <?php if ($missingPulang > 0): ?>
+                                    <a href="<?= base_url('guru/absensi-pkl/edit/' . $item['id']) ?>"
+                                       class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-orange-100 text-orange-700 border border-orange-300 rounded-lg text-xs font-semibold hover:bg-orange-200 transition-colors"
+                                       title="<?= $missingPulang ?> siswa hadir belum ada jam pulangnya — klik untuk edit">
+                                        <i class="fas fa-clock text-orange-500"></i>
+                                        <?= $missingPulang ?> belum diisi
+                                    </a>
+                                <?php else: ?>
+                                    <span class="inline-flex items-center gap-1 text-xs text-green-600 font-medium">
+                                        <i class="fas fa-check-circle"></i> Lengkap
+                                    </span>
+                                <?php endif; ?>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
                                 <div class="flex gap-2 justify-center">

@@ -352,6 +352,53 @@
         updateProgressCounters(filled, inputs.length);
     }
 
+    // ── Validasi: jam masuk wajib diisi jika status hadir ──────────────────────
+    document.getElementById('absensiPklForm').addEventListener('submit', function (e) {
+        const errors = [];
+        document.querySelectorAll('.status-input').forEach(function (input) {
+            const siswaId  = input.getAttribute('data-siswa-id');
+            const status   = input.value;
+            if (status !== 'hadir') return;
+
+            const jamMasuk = document.getElementById('waktu_absen_' + siswaId);
+            if (!jamMasuk || jamMasuk.value.trim() === '') {
+                errors.push(siswaId);
+
+                // Highlight input merah
+                if (jamMasuk) {
+                    jamMasuk.classList.add('border-red-500', 'ring-2', 'ring-red-300');
+                    jamMasuk.addEventListener('input', function () {
+                        jamMasuk.classList.remove('border-red-500', 'ring-2', 'ring-red-300');
+                    }, { once: true });
+                }
+
+                // Scroll ke card bermasalah
+                const card = document.querySelector(`.student-card[data-student-id="${siswaId}"]`);
+                if (card && errors.length === 1) {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        });
+
+        if (errors.length > 0) {
+            e.preventDefault();
+            const notif = document.createElement('div');
+            notif.className = 'fixed top-4 right-4 z-50 bg-red-600 text-white px-5 py-3 rounded-xl shadow-xl flex items-start gap-3 max-w-sm';
+            notif.innerHTML = `
+                <i class="fas fa-exclamation-triangle mt-0.5 flex-shrink-0"></i>
+                <div>
+                    <p class="font-semibold text-sm">Jam Masuk Belum Diisi</p>
+                    <p class="text-xs mt-0.5 text-red-100">${errors.length} siswa dengan status <strong>Hadir</strong> belum diisi jam masuknya.</p>
+                </div>`;
+            document.body.appendChild(notif);
+            setTimeout(function () {
+                notif.style.opacity = '0';
+                notif.style.transition = 'opacity 0.4s';
+                setTimeout(function () { notif.remove(); }, 400);
+            }, 4000);
+        }
+    });
+
     function updateProgressCounters(filled, total) {
         const counter = document.getElementById('mobile-progress-counter');
         if (counter) {

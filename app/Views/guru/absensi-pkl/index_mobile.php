@@ -127,6 +127,13 @@
                             <span class="inline-flex items-center px-2.5 py-1 bg-red-100 text-red-800 rounded-lg text-xs font-bold">
                                 <i class="fas fa-times-circle mr-1"></i> Alpa <?= $item['alpa_count'] ?? 0 ?>
                             </span>
+                            <?php if (($item['missing_pulang_count'] ?? 0) > 0): ?>
+                            <a href="<?= base_url('guru/absensi-pkl/edit/' . $item['id']) ?>"
+                               class="inline-flex items-center gap-1 px-2.5 py-1 bg-orange-100 text-orange-700 border border-orange-200 rounded-lg text-xs font-bold"
+                               title="Klik untuk isi jam pulang">
+                                <i class="fas fa-clock"></i> <?= $item['missing_pulang_count'] ?> jam pulang belum diisi
+                            </a>
+                            <?php endif; ?>
                         </div>
 
                         <!-- Kehadiran -->

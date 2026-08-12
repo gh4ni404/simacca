@@ -220,6 +220,18 @@ class AbsensiPklDetailModel extends Model
     }
 
     /**
+     * Hitung jumlah siswa dengan status 'hadir' yang belum terisi waktu_pulang.
+     * Digunakan untuk indikator visual di daftar absensi.
+     */
+    public function getMissingPulangCount(int $absensiPklId): int
+    {
+        return $this->where('absensi_pkl_id', $absensiPklId)
+            ->where('status', 'hadir')
+            ->where('waktu_pulang IS NULL', null, false)
+            ->countAllResults();
+    }
+
+    /**
      * Get aggregate stats for admin (by pembimbing)
      */
     public function getStatsByPembimbingPkl(int $pembimbingPklId): array

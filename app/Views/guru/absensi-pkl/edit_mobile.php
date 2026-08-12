@@ -373,6 +373,38 @@ function updateProgress() {
     }
 }
 
+// ── Validasi: jam masuk wajib diisi jika status hadir ──────────────────────
+document.getElementById('absensiPklForm').addEventListener('submit', function (e) {
+    const errors = [];
+    document.querySelectorAll('.status-input').forEach(function (input) {
+        const siswaId  = input.getAttribute('data-siswa-id');
+        const status   = input.value;
+        if (status !== 'hadir') return;
+
+        const jamMasuk = document.getElementById('waktu_absen_' + siswaId);
+        if (!jamMasuk || jamMasuk.value.trim() === '') {
+            errors.push(siswaId);
+
+            if (jamMasuk) {
+                jamMasuk.classList.add('border-red-500', 'ring-2', 'ring-red-300');
+                jamMasuk.addEventListener('input', function () {
+                    jamMasuk.classList.remove('border-red-500', 'ring-2', 'ring-red-300');
+                }, { once: true });
+            }
+
+            const card = document.querySelector(`.student-card[data-student-id="${siswaId}"], [data-siswa-id="${siswaId}"]`);
+            if (card && errors.length === 1) {
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+
+    if (errors.length > 0) {
+        e.preventDefault();
+        showToast(`${errors.length} siswa status Hadir belum ada jam masuknya`);
+    }
+});
+
 function showToast(message) {
     const toast = document.createElement('div');
     toast.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-opacity';
