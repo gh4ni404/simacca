@@ -270,19 +270,7 @@
                         </tr>
                     <?php
                     endforeach;
-                endif;
-
-                // Pad to at least 8 rows to match the reference PDF layout
-                $minRows = 8;
-                for ($i = $printedRows + 1; $i <= $minRows; $i++):
-                    ?>
-                    <tr>
-                        <td class="no"><?= $i ?></td>
-                        <td class="tgl empty-cell"></td>
-                        <td class="empty-cell"></td>
-                        <td class="empty-cell"></td>
-                    </tr>
-                <?php endfor; ?>
+                endif;?>
             </tbody>
         </table>
 
