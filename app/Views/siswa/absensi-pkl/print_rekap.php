@@ -197,6 +197,13 @@
             text-align: left;
         }
 
+        /* ========== WEEKEND ROW ========== */
+        .weekend-row td {
+            background-color: #fafafa;
+            color: #6b7280;
+            font-style: italic;
+        }
+
         /* ========== STATUS MERGED CELL (izin/sakit/alpa) ========== */
         td.status-merged {
             text-align: center;
@@ -454,6 +461,7 @@
                         <?php foreach ($week['days'] as $day): ?>
                             <?php
                             $dateStr         = $day['date_str'];
+                            $isWeekend       = $day['is_weekend'] ?? false;
                             $absensi         = $attendanceLookup[$dateStr] ?? null;
                             $status          = $absensi['status'] ?? '';
                             $keterangan      = $absensi['keterangan'] ?? '';
@@ -492,7 +500,7 @@
                             $isAbsent = in_array($status, ['izin', 'sakit', 'alpa', 'libur']);
                             $statusLabel = ['izin' => 'Izin', 'sakit' => 'Sakit', 'alpa' => 'Alpa', 'libur' => 'Libur'];
                             ?>
-                            <tr>
+                            <tr<?= $isWeekend ? ' class="weekend-row"' : '' ?>>
                                 <td class="center"><?= $rowNum ?></td>
                                 <td class="center"><?= esc($day['day_name']) ?></td>
                                 <td class="center"><?= esc($day['display_date']) ?></td>

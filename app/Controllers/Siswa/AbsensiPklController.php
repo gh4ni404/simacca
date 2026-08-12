@@ -245,14 +245,22 @@ class AbsensiPklController extends BaseController
 
             while ($currentDay <= $monthEnd) {
                 $dayOfWeek = (int) $currentDay->format('N'); // 1=Mon, 7=Sun
-                if ($dayOfWeek <= 6) { // Skip Sunday (7)
-                    $dateStr = $currentDay->format('Y-m-d');
+                $dateStr   = $currentDay->format('Y-m-d');
+
+                // Tampilkan hari jika:
+                // - Senin–Sabtu (hari kerja normal), ATAU
+                // - Minggu tapi ada data absensi (siswa PKL masuk di hari Minggu)
+                $isWeekend     = ($dayOfWeek === 7);
+                $hasAttendance = isset($attendanceLookup[$dateStr]);
+
+                if (!$isWeekend || $hasAttendance) {
                     $mn = (int) $currentDay->format('m');
                     $yr = (int) $currentDay->format('Y');
                     $days[] = [
                         'date_str'     => $dateStr,
                         'day_name'     => $getIndonesianDayName($currentDay->format('l')),
                         'display_date' => $currentDay->format('d') . ' ' . $indonesianMonth[$mn] . ' ' . $yr,
+                        'is_weekend'   => $isWeekend, // flag untuk styling di view
                     ];
                 }
                 $currentDay->modify('+1 day');
