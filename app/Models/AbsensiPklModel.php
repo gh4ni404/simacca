@@ -232,6 +232,7 @@ class AbsensiPklModel extends Model
             ->join('guru', 'guru.id = pembimbing_pkl.guru_id AND guru.deleted_at IS NULL')
             ->join('tempat_pkl', 'tempat_pkl.id = pembimbing_pkl.tempat_pkl_id AND tempat_pkl.deleted_at IS NULL')
             ->where('absensi_pkl.pembimbing_pkl_id', $pembimbingPklId)
+            ->where('absensi_pkl.deleted_at IS NULL', null, false)
             ->orderBy('absensi_pkl.tanggal', 'DESC')
             ->findAll();
     }

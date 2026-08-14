@@ -3,7 +3,7 @@
 <?= $this->section('pageTitle') ?>Detail Absensi - <?= $absensi['nama_mapel'] ?><?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
-<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
     <!-- Breadcrumb -->
     <nav class="mb-6">
         <ol class="flex items-center space-x-2 text-sm">

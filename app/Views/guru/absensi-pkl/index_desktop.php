@@ -7,7 +7,7 @@
     .table-row-hover:hover { background-color: #f8fafc; transform: translateX(4px); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 </style>
 
-<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
     <div class="mb-8">
         <div class="flex justify-between items-center">
             <div>

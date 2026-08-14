@@ -186,11 +186,11 @@
                             </div>
 
                             <?php
-                            $waktuAbsenVal = '';
+                            $waktuAbsenVal = '08:00';
                             if (!empty($detail['waktu_absen'])) {
                                 $waktuAbsenVal = date('H:i', strtotime($detail['waktu_absen']));
                             }
-                            $waktuPulangVal = '';
+                            $waktuPulangVal = '16:00';
                             if (!empty($detail['waktu_pulang'])) {
                                 $waktuPulangVal = date('H:i', strtotime($detail['waktu_pulang']));
                             }
@@ -334,6 +334,8 @@ function selectStatus(siswaId, status) {
         if (status === 'hadir') {
             waktuAbsenInput.disabled = false;
             waktuPulangInput.disabled = false;
+            waktuAbsenInput.value = '08:00';
+            waktuPulangInput.value = '16:00';
             timeButtons.forEach(btn => {
                 btn.disabled = false;
                 btn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -373,9 +375,10 @@ function updateProgress() {
     }
 }
 
-// ── Validasi: jam masuk wajib diisi jika status hadir ──────────────────────
+// ── Validasi: jam masuk & jam pulang wajib diisi jika status hadir ──────────
 document.getElementById('absensiPklForm').addEventListener('submit', function (e) {
-    const errors = [];
+    const errorsMasuk = [];
+    const errorsPulang = [];
     document.querySelectorAll('.status-input').forEach(function (input) {
         const siswaId  = input.getAttribute('data-siswa-id');
         const status   = input.value;
@@ -383,7 +386,7 @@ document.getElementById('absensiPklForm').addEventListener('submit', function (e
 
         const jamMasuk = document.getElementById('waktu_absen_' + siswaId);
         if (!jamMasuk || jamMasuk.value.trim() === '') {
-            errors.push(siswaId);
+            errorsMasuk.push(siswaId);
 
             if (jamMasuk) {
                 jamMasuk.classList.add('border-red-500', 'ring-2', 'ring-red-300');
@@ -393,15 +396,41 @@ document.getElementById('absensiPklForm').addEventListener('submit', function (e
             }
 
             const card = document.querySelector(`.student-card[data-student-id="${siswaId}"], [data-siswa-id="${siswaId}"]`);
-            if (card && errors.length === 1) {
+            if (card && errorsMasuk.length === 1 && errorsPulang.length === 0) {
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        const jamPulang = document.getElementById('waktu_pulang_' + siswaId);
+        if (!jamPulang || jamPulang.value.trim() === '') {
+            errorsPulang.push(siswaId);
+
+            if (jamPulang) {
+                jamPulang.classList.add('border-red-500', 'ring-2', 'ring-red-300');
+                jamPulang.addEventListener('input', function () {
+                    jamPulang.classList.remove('border-red-500', 'ring-2', 'ring-red-300');
+                }, { once: true });
+            }
+
+            const card = document.querySelector(`.student-card[data-student-id="${siswaId}"], [data-siswa-id="${siswaId}"]`);
+            if (card && errorsMasuk.length === 0 && errorsPulang.length === 1) {
                 card.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
     });
 
-    if (errors.length > 0) {
+    const totalErrors = errorsMasuk.length + errorsPulang.length;
+    if (totalErrors > 0) {
         e.preventDefault();
-        showToast(`${errors.length} siswa status Hadir belum ada jam masuknya`);
+        let msg = '';
+        if (errorsMasuk.length > 0) {
+            msg += `${errorsMasuk.length} siswa jam masuk belum diisi`;
+        }
+        if (errorsPulang.length > 0) {
+            if (msg) msg += ' & ';
+            msg += `${errorsPulang.length} siswa jam pulang belum diisi`;
+        }
+        showToast(msg);
     }
 });
 

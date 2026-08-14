@@ -1,7 +1,7 @@
 <?= $this->extend(get_device_layout()) ?>
 
 <?= $this->section('content') ?>
-<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
     <div class="mb-8">
         <div class="flex items-center gap-3 mb-2">
             <div class="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
@@ -242,7 +242,7 @@ function renderSiswaTable(siswaList) {
         html += `</div></td>
             <td class="px-4 py-4">
                 <div class="flex items-center gap-1.5">
-                    <input type="time" name="siswa[${sid}][waktu_absen]" id="waktu_absen_${sid}"
+                    <input type="time" name="siswa[${sid}][waktu_absen]" id="waktu_absen_${sid}" value="08:00"
                            class="px-2 py-1.5 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all time-input"
                            data-siswa-id="${sid}">
                     <button type="button" onclick="setTimeNow('${sid}', 'waktu_absen')"
@@ -254,7 +254,7 @@ function renderSiswaTable(siswaList) {
             </td>
             <td class="px-4 py-4">
                 <div class="flex items-center gap-1.5">
-                    <input type="time" name="siswa[${sid}][waktu_pulang]" id="waktu_pulang_${sid}"
+                    <input type="time" name="siswa[${sid}][waktu_pulang]" id="waktu_pulang_${sid}" value="16:00"
                            class="px-2 py-1.5 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all time-input"
                            data-siswa-id="${sid}">
                     <button type="button" onclick="setTimeNow('${sid}', 'waktu_pulang')"
@@ -306,6 +306,8 @@ function selectStatus(siswaId, status) {
         if (status === 'hadir') {
             waktuAbsenInput.disabled = false;
             waktuPulangInput.disabled = false;
+            waktuAbsenInput.value = '08:00';
+            waktuPulangInput.value = '16:00';
             timeButtons.forEach(btn => {
                 btn.disabled = false;
                 btn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -346,9 +348,10 @@ function updateProgress() {
     document.getElementById('filledCount').textContent = filled;
 }
 
-// ── Validasi: jam masuk wajib diisi jika status hadir ──────────────────────
+// ── Validasi: jam masuk & jam pulang wajib diisi jika status hadir ──────────
 document.getElementById('absensiPklForm').addEventListener('submit', function (e) {
-    const errors = [];
+    const errorsMasuk = [];
+    const errorsPulang = [];
     document.querySelectorAll('.status-input').forEach(function (input) {
         const siswaId  = input.getAttribute('data-siswa-id');
         const status   = input.value;
@@ -356,9 +359,8 @@ document.getElementById('absensiPklForm').addEventListener('submit', function (e
 
         const jamMasuk = document.getElementById('waktu_absen_' + siswaId);
         if (!jamMasuk || jamMasuk.value.trim() === '') {
-            errors.push(siswaId);
+            errorsMasuk.push(siswaId);
 
-            // Highlight input merah
             if (jamMasuk) {
                 jamMasuk.classList.add('border-red-500', 'ring-2', 'ring-red-300');
                 jamMasuk.addEventListener('input', function () {
@@ -366,23 +368,48 @@ document.getElementById('absensiPklForm').addEventListener('submit', function (e
                 }, { once: true });
             }
 
-            // Scroll ke baris/card bermasalah
             const row = document.querySelector(`[data-siswa-id="${siswaId}"]`);
-            if (row && errors.length === 1) {
+            if (row && errorsMasuk.length === 1 && errorsPulang.length === 0) {
+                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        const jamPulang = document.getElementById('waktu_pulang_' + siswaId);
+        if (!jamPulang || jamPulang.value.trim() === '') {
+            errorsPulang.push(siswaId);
+
+            if (jamPulang) {
+                jamPulang.classList.add('border-red-500', 'ring-2', 'ring-red-300');
+                jamPulang.addEventListener('input', function () {
+                    jamPulang.classList.remove('border-red-500', 'ring-2', 'ring-red-300');
+                }, { once: true });
+            }
+
+            const row = document.querySelector(`[data-siswa-id="${siswaId}"]`);
+            if (row && errorsMasuk.length === 0 && errorsPulang.length === 1) {
                 row.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
     });
 
-    if (errors.length > 0) {
+    const totalErrors = errorsMasuk.length + errorsPulang.length;
+    if (totalErrors > 0) {
         e.preventDefault();
+        let msg = '';
+        if (errorsMasuk.length > 0) {
+            msg += `${errorsMasuk.length} siswa jam masuk belum diisi`;
+        }
+        if (errorsPulang.length > 0) {
+            if (msg) msg += ' & ';
+            msg += `${errorsPulang.length} siswa jam pulang belum diisi`;
+        }
         const notif = document.createElement('div');
         notif.className = 'fixed top-4 right-4 z-50 bg-red-600 text-white px-5 py-3 rounded-xl shadow-xl flex items-start gap-3 max-w-sm';
         notif.innerHTML = `
             <i class="fas fa-exclamation-triangle mt-0.5 flex-shrink-0"></i>
             <div>
-                <p class="font-semibold text-sm">Jam Masuk Belum Diisi</p>
-                <p class="text-xs mt-0.5 text-red-100">${errors.length} siswa dengan status <strong>Hadir</strong> belum diisi jam masuknya.</p>
+                <p class="font-semibold text-sm">Waktu Belum Diisi</p>
+                <p class="text-xs mt-0.5 text-red-100">${msg}</p>
             </div>`;
         document.body.appendChild(notif);
         setTimeout(function () {

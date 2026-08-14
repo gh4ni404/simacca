@@ -267,6 +267,99 @@ class AbsensiPklDetailModel extends Model
     }
 
     /**
+     * Batch get stats for multiple absensi_pkl_id (avoid N+1)
+     * Returns [absensi_pkl_id => ['total'=>, 'hadir'=>, ...], ...]
+     */
+    public function getStatsByAbsensiIds(array $absensiIds): array
+    {
+        if (empty($absensiIds)) return [];
+
+        $result = $this->select('
+                absensi_pkl_id,
+                status,
+                COUNT(*) AS jumlah
+            ')
+            ->whereIn('absensi_pkl_id', $absensiIds)
+            ->groupBy('absensi_pkl_id, status')
+            ->findAll();
+
+        $statsMap = [];
+        foreach ($absensiIds as $id) {
+            $statsMap[$id] = [
+                'total'  => 0,
+                'hadir'  => 0,
+                'izin'   => 0,
+                'sakit'  => 0,
+                'alpa'   => 0,
+                'libur'  => 0,
+            ];
+        }
+
+        foreach ($result as $row) {
+            $id = $row['absensi_pkl_id'];
+            $statsMap[$id][$row['status']] = (int) $row['jumlah'];
+            $statsMap[$id]['total'] += (int) $row['jumlah'];
+        }
+
+        foreach ($statsMap as $id => &$s) {
+            $s['persen_kehadiran'] = $s['total'] > 0
+                ? round(($s['hadir'] / $s['total']) * 100, 1)
+                : 0;
+        }
+        unset($s);
+
+        return $statsMap;
+    }
+
+    /**
+     * Batch get stats for multiple pembimbing_pkl_id (avoid N+1)
+     * Returns [pembimbing_pkl_id => ['total'=>, 'hadir'=>, ...], ...]
+     */
+    public function getStatsByPembimbingIds(array $pembimbingIds): array
+    {
+        if (empty($pembimbingIds)) return [];
+
+        $result = $this->db->table('absensi_pkl_detail')
+            ->select('
+                absensi_pkl.pembimbing_pkl_id,
+                absensi_pkl_detail.status,
+                COUNT(*) AS jumlah
+            ')
+            ->join('absensi_pkl', 'absensi_pkl.id = absensi_pkl_detail.absensi_pkl_id AND absensi_pkl.deleted_at IS NULL')
+            ->whereIn('absensi_pkl.pembimbing_pkl_id', $pembimbingIds)
+            ->groupBy('absensi_pkl.pembimbing_pkl_id, absensi_pkl_detail.status')
+            ->get()
+            ->getResultArray();
+
+        $statsMap = [];
+        foreach ($pembimbingIds as $id) {
+            $statsMap[$id] = [
+                'total'  => 0,
+                'hadir'  => 0,
+                'izin'   => 0,
+                'sakit'  => 0,
+                'alpa'   => 0,
+                'libur'  => 0,
+            ];
+        }
+
+        foreach ($result as $row) {
+            $id = $row['pembimbing_pkl_id'];
+            $statsMap[$id][$row['status']] = (int) $row['jumlah'];
+            $statsMap[$id]['total'] += (int) $row['jumlah'];
+        }
+
+        foreach ($statsMap as $id => &$s) {
+            $s['persen_kehadiran'] = $s['total'] > 0
+                ? round(($s['hadir'] / $s['total']) * 100, 1)
+                : 0;
+        }
+        unset($s);
+
+        return $statsMap;
+    }
+
+    /**
      * Get global stats for admin dashboard
      */
     public function getGlobalStats(?string $from = null, ?string $to = null): array

@@ -150,19 +150,31 @@ class AbsensiPklService extends BaseService
                     // Cek apakah tanggal ini adalah hari libur nasional (Opsi B)
                     $isHariLibur = $this->hariLiburModel->isHariLibur($tanggal);
 
-                    // Validasi: jam masuk wajib diisi jika status hadir
+                    // Validasi: jam masuk & jam pulang wajib diisi jika status hadir
                     $missingJamMasuk = [];
+                    $missingJamPulang = [];
                     foreach ($data['siswa'] as $siswaId => $siswaData) {
                         $status = $siswaData['status'] ?? 'alpa';
                         if ($isHariLibur && $status !== 'hadir') continue; // akan di-override ke libur
-                        if ($status === 'hadir' && empty($siswaData['waktu_absen'])) {
-                            $missingJamMasuk[] = $siswaId;
+                        if ($status === 'hadir') {
+                            if (empty($siswaData['waktu_absen'])) {
+                                $missingJamMasuk[] = $siswaId;
+                            }
+                            if (empty($siswaData['waktu_pulang'])) {
+                                $missingJamPulang[] = $siswaId;
+                            }
                         }
                     }
-                    if (!empty($missingJamMasuk)) {
-                        throw new \RuntimeException(
-                            count($missingJamMasuk) . ' siswa dengan status Hadir belum diisi jam masuknya.'
-                        );
+                    if (!empty($missingJamMasuk) || !empty($missingJamPulang)) {
+                        $msg = '';
+                        if (!empty($missingJamMasuk)) {
+                            $msg .= count($missingJamMasuk) . ' siswa jam masuk belum diisi';
+                        }
+                        if (!empty($missingJamPulang)) {
+                            if ($msg) $msg .= ' & ';
+                            $msg .= count($missingJamPulang) . ' siswa jam pulang belum diisi';
+                        }
+                        throw new \RuntimeException($msg);
                     }
 
                     foreach ($data['siswa'] as $siswaId => &$siswaData) {
@@ -241,20 +253,32 @@ class AbsensiPklService extends BaseService
                 // Cek apakah tanggal ini adalah hari libur nasional (Opsi B)
                 $isHariLibur = $this->hariLiburModel->isHariLibur($tanggal);
 
-                // Validasi: jam masuk wajib diisi jika status hadir
+                // Validasi: jam masuk & jam pulang wajib diisi jika status hadir
                 $missingJamMasuk = [];
+                $missingJamPulang = [];
                 foreach ($data['siswa'] as $siswaId => $siswaData) {
                     if (empty($siswaId)) continue;
                     $status = $siswaData['status'] ?? 'alpa';
                     if ($isHariLibur && $status !== 'hadir') continue;
-                    if ($status === 'hadir' && empty($siswaData['waktu_absen'])) {
-                        $missingJamMasuk[] = $siswaId;
+                    if ($status === 'hadir') {
+                        if (empty($siswaData['waktu_absen'])) {
+                            $missingJamMasuk[] = $siswaId;
+                        }
+                        if (empty($siswaData['waktu_pulang'])) {
+                            $missingJamPulang[] = $siswaId;
+                        }
                     }
                 }
-                if (!empty($missingJamMasuk)) {
-                    throw new \RuntimeException(
-                        count($missingJamMasuk) . ' siswa dengan status Hadir belum diisi jam masuknya.'
-                    );
+                if (!empty($missingJamMasuk) || !empty($missingJamPulang)) {
+                    $msg = '';
+                    if (!empty($missingJamMasuk)) {
+                        $msg .= count($missingJamMasuk) . ' siswa jam masuk belum diisi';
+                    }
+                    if (!empty($missingJamPulang)) {
+                        if ($msg) $msg .= ' & ';
+                        $msg .= count($missingJamPulang) . ' siswa jam pulang belum diisi';
+                    }
+                    throw new \RuntimeException($msg);
                 }
 
                 foreach ($data['siswa'] as $siswaId => $siswaData) {
@@ -407,39 +431,29 @@ class AbsensiPklService extends BaseService
     public function getAdminDashboard(?int $pembimbingPklId = null, ?string $from = null, ?string $to = null): array
     {
         try {
-            $absensi = $this->absensiPklModel->getForAdmin($pembimbingPklId, $from, $to);
             $rekapPembimbing = $this->absensiPklModel->getRekapByPembimbing($from, $to);
             $globalStats = $this->absensiPklDetailModel->getGlobalStats($from, $to);
-            $recentActivity = $this->absensiPklDetailModel->getRecentActivity(15);
 
-            // Enrich rekap with detail stats
+            // Batch stats for rekapPembimbing (1 query instead of N)
+            $pembimbingIds = array_column($rekapPembimbing, 'pembimbing_pkl_id');
+            $pembimbingStats = $this->absensiPklDetailModel->getStatsByPembimbingIds($pembimbingIds);
+
             foreach ($rekapPembimbing as &$item) {
-                $stats = $this->absensiPklDetailModel->getStatsByPembimbingPkl($item['pembimbing_pkl_id']);
-                $item['hadir']            = $stats['hadir'] ?? 0;
-                $item['izin']             = $stats['izin'] ?? 0;
-                $item['sakit']            = $stats['sakit'] ?? 0;
-                $item['alpa']             = $stats['alpa'] ?? 0;
-                $item['total']            = $stats['total'] ?? 0;
-                $item['persen_kehadiran'] = $stats['persen_kehadiran'] ?? 0;
-            }
-            unset($item);
-
-            // Enrich absensi with stats
-            foreach ($absensi as &$item) {
-                $stats = $this->absensiPklDetailModel->getDetailStats($item['id']);
-                $item['total_siswa'] = $stats['total'];
-                $item['hadir_count'] = $stats['hadir'];
-                $item['persen_kehadiran'] = $stats['persen_kehadiran'];
+                $id = $item['pembimbing_pkl_id'];
+                $item['hadir']            = $pembimbingStats[$id]['hadir'] ?? 0;
+                $item['izin']             = $pembimbingStats[$id]['izin'] ?? 0;
+                $item['sakit']            = $pembimbingStats[$id]['sakit'] ?? 0;
+                $item['alpa']             = $pembimbingStats[$id]['alpa'] ?? 0;
+                $item['total']            = $pembimbingStats[$id]['total'] ?? 0;
+                $item['persen_kehadiran'] = $pembimbingStats[$id]['persen_kehadiran'] ?? 0;
             }
             unset($item);
 
             $pembimbingOptions = $this->getPembimbingOptions();
 
             return $this->successResponse([
-                'absensi'           => $absensi,
                 'rekapPembimbing'   => $rekapPembimbing,
                 'globalStats'       => $globalStats,
-                'recentActivity'    => $recentActivity,
                 'pembimbingOptions' => $pembimbingOptions,
             ]);
         } catch (\Exception $e) {

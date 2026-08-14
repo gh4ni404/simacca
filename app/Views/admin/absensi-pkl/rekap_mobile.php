@@ -1,6 +1,9 @@
 <?= $this->extend(get_device_layout()) ?>
 
 <?= $this->section('content') ?>
+<style>
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 <div class="min-h-screen bg-gray-50 pb-20">
     <!-- Mobile Header -->
     <div class="bg-gradient-to-r from-purple-500 to-blue-600 px-4 py-6 shadow-lg">
@@ -96,10 +99,16 @@
         <!-- Absensi List -->
         <div class="bg-white rounded-xl shadow-md overflow-hidden mb-4">
             <div class="bg-gradient-to-r from-purple-500 to-blue-600 px-4 py-3">
-                <h2 class="text-white font-bold text-sm flex items-center">
-                    <i class="fas fa-list mr-2"></i>
-                    Daftar Absensi (<?= count($absensi) ?>)
-                </h2>
+                <div class="flex items-center justify-between">
+                    <h2 class="text-white font-bold text-sm flex items-center">
+                        <i class="fas fa-list mr-2"></i>
+                        Daftar Absensi (<?= count($absensi) ?>)
+                    </h2>
+                    <button type="button" onclick="bulkSetWaktuAbsen()"
+                            class="inline-flex items-center px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold rounded-lg transition-all">
+                        <i class="fas fa-clock mr-1"></i> Set Jam
+                    </button>
+                </div>
             </div>
             <div class="divide-y divide-gray-200">
                 <?php if (empty($absensi)): ?>
@@ -150,7 +159,7 @@
                             <div class="flex items-center text-xs text-gray-600">
                                 <span class="font-semibold"><?= $item['total_siswa'] ?? 0 ?> siswa</span>
                             </div>
-                            <a href="<?= base_url('admin/absensi-pkl/show/' . $item['id']) ?>"
+                            <a href="<?= base_url('admin/absensi-pkl/detail/' . $item['id']) ?>"
                                class="flex items-center justify-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg active:scale-95 transition-all shadow-sm">
                                 <i class="fas fa-eye mr-1"></i> Detail
                             </a>
@@ -174,17 +183,99 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+const PEMBIMBING_PKL_ID = <?= $absensi[0]['pembimbing_pkl_id'] ?? 0 ?>;
+const TOTAL_ABSENSI = <?= count($absensi) ?>;
+const TOTAL_SISWA = <?= $details['total_siswa'] ?? 0 ?>;
+
+function bulkSetWaktuAbsen() {
+    if (TOTAL_ABSENSI === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Ada Data',
+            text: 'Tidak ada data absensi untuk pembimbing ini',
+            confirmButtonColor: '#3B82F6'
+        });
+        return;
+    }
+
+    Swal.fire({
+        title: 'Set Jam Absensi?',
+        html: `Apa kamu yakin ingin mengisi jam masuk <b>08:00</b> dan jam pulang <b>16:00</b> untuk semua siswa hadir di <b><?= esc($details['nama_pembimbing'] ?? '') ?></b>?<br><br><small class="text-gray-500">Total: <?= count($absensi) ?> hari, <?= $details['total_siswa'] ?? 0 ?> siswa</small>`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#22C55E',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: '<i class="fas fa-check mr-1"></i> Ya, Simpan!',
+        cancelButtonText: '<i class="fas fa-times mr-1"></i> Batal',
+        customClass: {
+            popup: 'rounded-2xl',
+            title: 'text-lg font-bold',
+            htmlContainer: 'text-sm'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            bulkSaveWaktuAbsen();
+        }
+    });
+}
+
+function bulkSaveWaktuAbsen() {
+    Swal.fire({
+        title: 'Menyimpan...',
+        html: '<i class="fas fa-spinner fa-spin text-2xl text-blue-500"></i>',
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        customClass: { popup: 'rounded-2xl' }
+    });
+
+    const formData = new FormData();
+    formData.append('pembimbing_pkl_id', PEMBIMBING_PKL_ID);
+    formData.append('waktu_absen', '08:00');
+    formData.append('waktu_pulang', '16:00');
+    formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+
+    fetch('<?= base_url('admin/absensi-pkl/bulk-update-waktu') ?>', {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                html: data.message,
+                confirmButtonColor: '#22C55E',
+                customClass: { popup: 'rounded-2xl' }
+            }).then(() => {
+                location.reload();
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: data.message || 'Terjadi kesalahan',
+                confirmButtonColor: '#EF4444'
+            });
+        }
+    })
+    .catch(() => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal',
+            text: 'Terjadi kesalahan saat menyimpan data',
+            confirmButtonColor: '#EF4444'
+        });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const cards = document.querySelectorAll('.bg-white.rounded-xl, .bg-white.rounded-2xl');
     cards.forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(10px)';
-        setTimeout(() => {
-            card.style.transition = 'all 0.3s ease';
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-        }, index * 50);
+        card.style.animation = `fadeInUp 0.3s ease ${index * 40}ms both`;
     });
 });
 </script>

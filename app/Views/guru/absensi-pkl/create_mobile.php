@@ -241,7 +241,7 @@
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 mb-1">Jam Masuk</label>
                     <div class="flex items-center gap-1.5">
-                        <input type="time" name="siswa[${sid}][waktu_absen]" id="waktu_absen_${sid}"
+                        <input type="time" name="siswa[${sid}][waktu_absen]" id="waktu_absen_${sid}" value="08:00"
                                class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all time-input"
                                data-siswa-id="${sid}">
                         <button type="button" onclick="setTimeNow('${sid}', 'waktu_absen')"
@@ -254,7 +254,7 @@
                 <div>
                     <label class="block text-xs font-semibold text-gray-500 mb-1">Jam Pulang</label>
                     <div class="flex items-center gap-1.5">
-                        <input type="time" name="siswa[${sid}][waktu_pulang]" id="waktu_pulang_${sid}"
+                        <input type="time" name="siswa[${sid}][waktu_pulang]" id="waktu_pulang_${sid}" value="16:00"
                                class="w-full px-3 py-2 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all time-input"
                                data-siswa-id="${sid}">
                         <button type="button" onclick="setTimeNow('${sid}', 'waktu_pulang')"
@@ -309,6 +309,8 @@
             if (status === 'hadir') {
                 waktuAbsenInput.disabled = false;
                 waktuPulangInput.disabled = false;
+                waktuAbsenInput.value = '08:00';
+                waktuPulangInput.value = '16:00';
                 timeButtons.forEach(btn => {
                     btn.disabled = false;
                     btn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -352,9 +354,10 @@
         updateProgressCounters(filled, inputs.length);
     }
 
-    // ── Validasi: jam masuk wajib diisi jika status hadir ──────────────────────
+    // ── Validasi: jam masuk & jam pulang wajib diisi jika status hadir ──────────
     document.getElementById('absensiPklForm').addEventListener('submit', function (e) {
-        const errors = [];
+        const errorsMasuk = [];
+        const errorsPulang = [];
         document.querySelectorAll('.status-input').forEach(function (input) {
             const siswaId  = input.getAttribute('data-siswa-id');
             const status   = input.value;
@@ -362,9 +365,8 @@
 
             const jamMasuk = document.getElementById('waktu_absen_' + siswaId);
             if (!jamMasuk || jamMasuk.value.trim() === '') {
-                errors.push(siswaId);
+                errorsMasuk.push(siswaId);
 
-                // Highlight input merah
                 if (jamMasuk) {
                     jamMasuk.classList.add('border-red-500', 'ring-2', 'ring-red-300');
                     jamMasuk.addEventListener('input', function () {
@@ -372,23 +374,48 @@
                     }, { once: true });
                 }
 
-                // Scroll ke card bermasalah
                 const card = document.querySelector(`.student-card[data-student-id="${siswaId}"]`);
-                if (card && errors.length === 1) {
+                if (card && errorsMasuk.length === 1 && errorsPulang.length === 0) {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+
+            const jamPulang = document.getElementById('waktu_pulang_' + siswaId);
+            if (!jamPulang || jamPulang.value.trim() === '') {
+                errorsPulang.push(siswaId);
+
+                if (jamPulang) {
+                    jamPulang.classList.add('border-red-500', 'ring-2', 'ring-red-300');
+                    jamPulang.addEventListener('input', function () {
+                        jamPulang.classList.remove('border-red-500', 'ring-2', 'ring-red-300');
+                    }, { once: true });
+                }
+
+                const card = document.querySelector(`.student-card[data-student-id="${siswaId}"]`);
+                if (card && errorsMasuk.length === 0 && errorsPulang.length === 1) {
                     card.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             }
         });
 
-        if (errors.length > 0) {
+        const totalErrors = errorsMasuk.length + errorsPulang.length;
+        if (totalErrors > 0) {
             e.preventDefault();
+            let msg = '';
+            if (errorsMasuk.length > 0) {
+                msg += `${errorsMasuk.length} siswa jam masuk belum diisi`;
+            }
+            if (errorsPulang.length > 0) {
+                if (msg) msg += ' & ';
+                msg += `${errorsPulang.length} siswa jam pulang belum diisi`;
+            }
             const notif = document.createElement('div');
             notif.className = 'fixed top-4 right-4 z-50 bg-red-600 text-white px-5 py-3 rounded-xl shadow-xl flex items-start gap-3 max-w-sm';
             notif.innerHTML = `
                 <i class="fas fa-exclamation-triangle mt-0.5 flex-shrink-0"></i>
                 <div>
-                    <p class="font-semibold text-sm">Jam Masuk Belum Diisi</p>
-                    <p class="text-xs mt-0.5 text-red-100">${errors.length} siswa dengan status <strong>Hadir</strong> belum diisi jam masuknya.</p>
+                    <p class="font-semibold text-sm">Waktu Belum Diisi</p>
+                    <p class="text-xs mt-0.5 text-red-100">${msg}</p>
                 </div>`;
             document.body.appendChild(notif);
             setTimeout(function () {

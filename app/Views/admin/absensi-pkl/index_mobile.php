@@ -1,6 +1,9 @@
 <?= $this->extend(get_device_layout()) ?>
 
 <?= $this->section('content') ?>
+<style>
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 <div class="min-h-screen bg-gray-50 pb-20">
     <!-- Header -->
     <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 mb-4 rounded-b-lg mx-0 shadow-md">
@@ -69,7 +72,7 @@
             </form>
         </div>
 
-        <!-- Stats Grid -->
+        <!-- Stats Compact -->
         <?php
         $totalKehadiran = $globalStats['total'] ?? 0;
         $totalHadir = $globalStats['hadir'] ?? 0;
@@ -78,36 +81,34 @@
         $totalAlpa = $globalStats['alpa'] ?? 0;
         $persenGlobal = $globalStats['persen_kehadiran'] ?? 0;
         ?>
-        <div class="grid grid-cols-3 gap-3 mb-4">
-            <div class="bg-white rounded-xl shadow-md p-3 text-center border-t-2 border-blue-500">
-                <p class="text-xs text-gray-500">Total</p>
-                <p class="text-xl font-bold text-gray-800"><?= $totalKehadiran ?></p>
-            </div>
-            <div class="bg-white rounded-xl shadow-md p-3 text-center border-t-2 border-green-500">
-                <p class="text-xs text-gray-500">Hadir</p>
-                <p class="text-xl font-bold text-green-600"><?= $totalHadir ?></p>
-            </div>
-            <div class="bg-white rounded-xl shadow-md p-3 text-center border-t-2 border-blue-500">
-                <p class="text-xs text-gray-500">Izin</p>
-                <p class="text-xl font-bold text-blue-600"><?= $totalIzin ?></p>
-            </div>
-            <div class="bg-white rounded-xl shadow-md p-3 text-center border-t-2 border-yellow-500">
-                <p class="text-xs text-gray-500">Sakit</p>
-                <p class="text-xl font-bold text-yellow-600"><?= $totalSakit ?></p>
-            </div>
-            <div class="bg-white rounded-xl shadow-md p-3 text-center border-t-2 border-red-500">
-                <p class="text-xs text-gray-500">Alpa</p>
-                <p class="text-xl font-bold text-red-600"><?= $totalAlpa ?></p>
-            </div>
-        </div>
-
-        <!-- Kehadiran Global -->
         <div class="bg-white rounded-xl shadow-md p-4 mb-4">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-semibold text-gray-700 flex items-center">
-                    <i class="fas fa-chart-line text-emerald-500 mr-2"></i> Kehadiran Global
-                </span>
-                <strong class="text-lg <?= $persenGlobal >= 80 ? 'text-green-600' : ($persenGlobal >= 60 ? 'text-yellow-600' : 'text-red-600') ?>"><?= $persenGlobal ?>%</strong>
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-chart-bar text-purple-500 mr-2"></i> Statistik Global
+                </h3>
+                <span class="text-lg font-bold <?= $persenGlobal >= 80 ? 'text-green-600' : ($persenGlobal >= 60 ? 'text-yellow-600' : 'text-red-600') ?>"><?= $persenGlobal ?>%</span>
+            </div>
+            <div class="grid grid-cols-5 gap-2 mb-3">
+                <div class="text-center p-2 bg-gray-50 rounded-lg">
+                    <p class="text-xs text-gray-500">Total</p>
+                    <p class="text-sm font-bold text-gray-800"><?= $totalKehadiran ?></p>
+                </div>
+                <div class="text-center p-2 bg-green-50 rounded-lg">
+                    <p class="text-xs text-gray-500">Hadir</p>
+                    <p class="text-sm font-bold text-green-600"><?= $totalHadir ?></p>
+                </div>
+                <div class="text-center p-2 bg-blue-50 rounded-lg">
+                    <p class="text-xs text-gray-500">Izin</p>
+                    <p class="text-sm font-bold text-blue-600"><?= $totalIzin ?></p>
+                </div>
+                <div class="text-center p-2 bg-yellow-50 rounded-lg">
+                    <p class="text-xs text-gray-500">Sakit</p>
+                    <p class="text-sm font-bold text-yellow-600"><?= $totalSakit ?></p>
+                </div>
+                <div class="text-center p-2 bg-red-50 rounded-lg">
+                    <p class="text-xs text-gray-500">Alpa</p>
+                    <p class="text-sm font-bold text-red-600"><?= $totalAlpa ?></p>
+                </div>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                 <div class="bg-gradient-to-r from-emerald-400 to-emerald-600 h-2 rounded-full transition-all duration-300"
@@ -177,70 +178,6 @@
                 <?php endif; ?>
             </div>
         </div>
-
-        <!-- Riwayat Absensi -->
-        <div class="bg-white rounded-xl shadow-md overflow-hidden mb-4">
-            <div class="bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-3">
-                <h2 class="text-white font-bold text-sm flex items-center">
-                    <i class="fas fa-history mr-2"></i>
-                    Riwayat Absensi (<?= count($absensi) ?>)
-                </h2>
-            </div>
-            <div class="divide-y divide-gray-200">
-                <?php if (empty($absensi)): ?>
-                <div class="p-8 text-center">
-                    <i class="fas fa-clipboard-list text-gray-300 text-4xl mb-3"></i>
-                    <p class="text-gray-500 text-sm">Belum ada data absensi</p>
-                </div>
-                <?php else: ?>
-                    <?php $no = 1; foreach ($absensi as $item): ?>
-                    <div class="p-4">
-                        <div class="flex items-start justify-between mb-2">
-                            <div class="flex items-center">
-                                <div class="p-2 bg-blue-100 rounded-lg mr-3">
-                                    <i class="fas fa-calendar-day text-blue-600 text-sm"></i>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-bold text-gray-900"><?= date('d/m/Y', strtotime($item['tanggal'])) ?></p>
-                                    <p class="text-xs text-gray-500"><?= date('l', strtotime($item['tanggal'])) ?></p>
-                                </div>
-                            </div>
-                            <?php
-                            $persen = $item['persen_kehadiran'] ?? 0;
-                            $badgeColor = $persen >= 80 ? 'green' : ($persen >= 60 ? 'yellow' : 'red');
-                            ?>
-                            <span class="px-2 py-1 bg-<?= $badgeColor ?>-100 text-<?= $badgeColor ?>-800 text-xs font-bold rounded-full">
-                                <?= $persen ?>%
-                            </span>
-                        </div>
-                        <div class="mt-2 space-y-1">
-                            <div class="flex items-center text-sm text-gray-700">
-                                <i class="fas fa-user-tie text-gray-400 mr-2 w-4 text-center"></i>
-                                <span class="font-medium"><?= esc($item['nama_pembimbing'] ?? '-') ?></span>
-                            </div>
-                            <div class="flex items-center text-sm text-gray-700">
-                                <i class="fas fa-building text-gray-400 mr-2 w-4 text-center"></i>
-                                <span><?= esc($item['nama_perusahaan'] ?? '-') ?></span>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3 mt-3">
-                            <div class="flex items-center text-xs">
-                                <span class="bg-green-100 text-green-800 px-2 py-0.5 rounded-full font-semibold">
-                                    <i class="fas fa-check-circle mr-1"></i><?= $item['hadir_count'] ?? 0 ?> Hadir
-                                </span>
-                                <span class="text-gray-300 mx-1">/</span>
-                                <span class="text-gray-600 font-semibold"><?= $item['total_siswa'] ?? 0 ?> Total</span>
-                            </div>
-                            <a href="<?= base_url('admin/absensi-pkl/show/' . $item['id']) ?>"
-                               class="ml-auto flex items-center justify-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg active:scale-95 transition-all shadow-sm">
-                                <i class="fas fa-eye mr-1"></i> Detail
-                            </a>
-                        </div>
-                    </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -258,13 +195,7 @@ function toggleFilter() {
 document.addEventListener('DOMContentLoaded', function() {
     const cards = document.querySelectorAll('.bg-white.rounded-xl');
     cards.forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(10px)';
-        setTimeout(() => {
-            card.style.transition = 'all 0.3s ease';
-            card.style.opacity = '1';
-            card.style.transform = 'translateY(0)';
-        }, index * 50);
+        card.style.animation = `fadeInUp 0.3s ease ${index * 40}ms both`;
     });
 });
 </script>
