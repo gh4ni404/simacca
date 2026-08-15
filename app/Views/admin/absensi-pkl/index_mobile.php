@@ -380,7 +380,7 @@ function showSetJamAbsensi(pembimbingId, pembimbingLabel) {
 
 function selectSavedTime(pembimbingId, pembimbingLabel, oldJamMasuk, oldJamPulang) {
     Swal.close();
-    showFormSetJam(pembimbingId, pembimbingLabel, oldJamMasuk, oldJamPulang, true);
+    showFormSetJam(pembimbingId, pembimbingLabel, oldJamMasuk || '', oldJamPulang || '', true);
 }
 
 function showFormSetJam(pembimbingId, pembimbingLabel, prefillMasuk, prefillPulang, isSpecificTime = false) {
@@ -450,8 +450,12 @@ function bulkSaveWaktuAbsen(pembimbingId, pembimbingLabel, jamMasuk, jamPulang, 
         formData.append('pembimbing_pkl_id', pembimbingId);
         formData.append('waktu_absen', jamMasuk);
         formData.append('waktu_pulang', jamPulang);
-        if (oldJamMasuk) formData.append('old_jam_masuk', oldJamMasuk);
-        if (oldJamPulang) formData.append('old_jam_pulang', oldJamPulang);
+        // Always send old time values when targeting specific group (even if empty)
+        if (oldJamMasuk !== null || oldJamPulang !== null) {
+            formData.append('old_jam_masuk', oldJamMasuk ?? '');
+            formData.append('old_jam_pulang', oldJamPulang ?? '');
+            formData.append('is_specific_group', '1');
+        }
         formData.append(CSRF_TOKEN_NAME, CSRF_TOKEN_HASH);
 
         return fetch('<?= base_url('admin/absensi-pkl/bulk-update-waktu-by-pembimbing') ?>', {
