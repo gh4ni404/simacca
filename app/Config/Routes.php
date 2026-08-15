@@ -206,6 +206,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('pengaturan/tambah-hari-libur', 'Admin\PengaturanController::storeHariLibur', ['filter' => 'role:admin']);
     $routes->post('pengaturan/hapus-hari-libur/(:num)', 'Admin\PengaturanController::deleteHariLibur/$1', ['filter' => 'role:admin']);
     $routes->post('pengaturan/import-hari-libur-nasional', 'Admin\PengaturanController::importHariLiburNasional', ['filter' => 'role:admin']);
+    $routes->post('pengaturan/import-hari-minggu', 'Admin\PengaturanController::importHariMinggu', ['filter' => 'role:admin']);
 
     // Arsip Jurnal PKL (Task-Oriented)
     $routes->get('jurnal-pkl-archive', 'Admin\PklArchiveController::index', ['filter' => 'role:admin']);

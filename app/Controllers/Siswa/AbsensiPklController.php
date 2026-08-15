@@ -177,6 +177,35 @@ class AbsensiPklController extends BaseController
             ];
         }
 
+        // Fetch holidays in the date range and auto-set libur status
+        $hariLiburModel = new \App\Models\HariLiburModel();
+        $holidays = $hariLiburModel->getByRange($filterStartDate, $filterEndDate);
+        $holidayLookup = [];
+        foreach ($holidays as $h) {
+            $holidayLookup[$h['tanggal']] = $h['keterangan'];
+        }
+
+        // For each holiday date, auto-set status to 'libur' unless guru explicitly set 'hadir'
+        foreach ($holidayLookup as $holidayDate => $keteranganLibur) {
+            if (!isset($attendanceLookup[$holidayDate])) {
+                // No attendance record at all → auto libur
+                $attendanceLookup[$holidayDate] = [
+                    'status'          => 'libur',
+                    'keterangan'      => $keteranganLibur,
+                    'keterangan_umum' => '',
+                    'waktu_absen'     => '',
+                    'waktu_pulang'    => '',
+                ];
+            } elseif ($attendanceLookup[$holidayDate]['status'] !== 'hadir') {
+                // Has record but not hadir → override to libur
+                $attendanceLookup[$holidayDate]['status'] = 'libur';
+                if (empty($attendanceLookup[$holidayDate]['keterangan'])) {
+                    $attendanceLookup[$holidayDate]['keterangan'] = $keteranganLibur;
+                }
+            }
+            // If status is 'hadir' → keep it (guru override)
+        }
+
         // Fetch journal activities for this student
         $progressModel = new \App\Models\PklProgressModel();
         $progressRows = $progressModel->select('pkl_progress.tanggal, pkl_progress.deskripsi, pkl_tasks.judul')
@@ -244,25 +273,15 @@ class AbsensiPklController extends BaseController
             $currentDay = clone $monthStart;
 
             while ($currentDay <= $monthEnd) {
-                $dayOfWeek = (int) $currentDay->format('N'); // 1=Mon, 7=Sun
-                $dateStr   = $currentDay->format('Y-m-d');
+                $dateStr = $currentDay->format('Y-m-d');
+                $mn = (int) $currentDay->format('m');
+                $yr = (int) $currentDay->format('Y');
 
-                // Tampilkan hari jika:
-                // - Senin–Sabtu (hari kerja normal), ATAU
-                // - Minggu tapi ada data absensi (siswa PKL masuk di hari Minggu)
-                $isWeekend     = ($dayOfWeek === 7);
-                $hasAttendance = isset($attendanceLookup[$dateStr]);
-
-                if (!$isWeekend || $hasAttendance) {
-                    $mn = (int) $currentDay->format('m');
-                    $yr = (int) $currentDay->format('Y');
-                    $days[] = [
-                        'date_str'     => $dateStr,
-                        'day_name'     => $getIndonesianDayName($currentDay->format('l')),
-                        'display_date' => $currentDay->format('d') . ' ' . $indonesianMonth[$mn] . ' ' . $yr,
-                        'is_weekend'   => $isWeekend, // flag untuk styling di view
-                    ];
-                }
+                $days[] = [
+                    'date_str'     => $dateStr,
+                    'day_name'     => $getIndonesianDayName($currentDay->format('l')),
+                    'display_date' => $currentDay->format('d') . ' ' . $indonesianMonth[$mn] . ' ' . $yr,
+                ];
                 $currentDay->modify('+1 day');
             }
 

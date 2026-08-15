@@ -352,6 +352,19 @@
                             </button>
                         </form>
                     </div>
+
+                    <!-- Import hari Minggu -->
+                    <div class="border-t border-gray-100 pt-4">
+                        <p class="text-sm font-medium text-gray-700 mb-1">Import Hari Minggu</p>
+                        <p class="text-xs text-gray-500 mb-3">Impor semua hari Minggu dalam periode PKL sebagai hari libur. Tanggal yang sudah ada akan dilewati.</p>
+                        <form action="<?= base_url('admin/pengaturan/import-hari-minggu') ?>" method="post"
+                              onsubmit="return confirm('Impor semua hari Minggu sebagai hari libur? Tanggal yang sudah ada akan dilewati.')">
+                            <?= csrf_field() ?>
+                            <button type="submit" class="inline-flex items-center px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors text-sm font-medium">
+                                <i class="fas fa-calendar-week mr-2"></i> Import Hari Minggu
+                            </button>
+                        </form>
+                    </div>
                 </div>
 
                 <!-- Kanan: Tabel daftar hari libur -->

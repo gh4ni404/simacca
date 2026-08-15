@@ -197,14 +197,7 @@
             text-align: left;
         }
 
-        /* ========== WEEKEND ROW ========== */
-        .weekend-row td {
-            background-color: #fafafa;
-            color: #6b7280;
-            font-style: italic;
-        }
-
-        /* ========== STATUS MERGED CELL (izin/sakit/alpa) ========== */
+        /* ========== STATUS MERGED CELL (isin/sakit/alpa) ========== */
         td.status-merged {
             text-align: center;
             vertical-align: middle;
@@ -433,6 +426,7 @@
 
         <!-- ===== MONTHLY ATTENDANCE TABLES ===== -->
         <?php
+        $totalHadir = 0;
         $totalSakit = 0;
         $totalIzin  = 0;
         $totalAlpa  = 0;
@@ -461,7 +455,6 @@
                         <?php foreach ($week['days'] as $day): ?>
                             <?php
                             $dateStr         = $day['date_str'];
-                            $isWeekend       = $day['is_weekend'] ?? false;
                             $absensi         = $attendanceLookup[$dateStr] ?? null;
                             $status          = $absensi['status'] ?? '';
                             $keterangan      = $absensi['keterangan'] ?? '';
@@ -469,7 +462,8 @@
                             $waktuAbsen      = $absensi['waktu_absen'] ?? '';
 
                             // Count totals
-                            if ($status === 'sakit') $totalSakit++;
+                            if ($status === 'hadir') $totalHadir++;
+                            elseif ($status === 'sakit') $totalSakit++;
                             elseif ($status === 'izin') $totalIzin++;
                             elseif ($status === 'alpa') $totalAlpa++;
                             elseif ($status === 'libur') $totalLibur++;
@@ -487,10 +481,10 @@
 
                             // Catatan priority:
                             // 1. absensi_pkl.keterangan_umum
-                            // 2. absensi_pkl_detail.keterangan (hanya jika sakit/izin/alpa)
+                            // 2. absensi_pkl_detail.keterangan (untuk sakit/izin/alpa/libur)
                             if (!empty($keteranganUmum)) {
                                 $catatanDisplay = $keteranganUmum;
-                            } elseif (in_array($status, ['sakit', 'izin', 'alpa']) && !empty($keterangan)) {
+                            } elseif (in_array($status, ['sakit', 'izin', 'alpa', 'libur']) && !empty($keterangan)) {
                                 $catatanDisplay = $keterangan;
                             } else {
                                 $catatanDisplay = '';
@@ -500,7 +494,7 @@
                             $isAbsent = in_array($status, ['izin', 'sakit', 'alpa', 'libur']);
                             $statusLabel = ['izin' => 'Izin', 'sakit' => 'Sakit', 'alpa' => 'Alpa', 'libur' => 'Libur'];
                             ?>
-                            <tr<?= $isWeekend ? ' class="weekend-row"' : '' ?>>
+                            <tr>
                                 <td class="center"><?= $rowNum ?></td>
                                 <td class="center"><?= esc($day['day_name']) ?></td>
                                 <td class="center"><?= esc($day['display_date']) ?></td>
@@ -528,6 +522,12 @@
                 <table class="summary-table">
                     <tr>
                         <th colspan="4">Kehadiran</th>
+                    </tr>
+                    <tr>
+                        <td class="label-cell">Hadir</td>
+                        <td class="colon-cell">:</td>
+                        <td class="value-cell"><?= $totalHadir ?></td>
+                        <td class="unit-cell">Hari</td>
                     </tr>
                     <tr>
                         <td class="label-cell">Sakit</td>

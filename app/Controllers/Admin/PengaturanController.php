@@ -401,4 +401,50 @@ class PengaturanController extends BaseController
         session()->setFlashdata('success', $msg);
         return redirect()->to('/admin/pengaturan#hari-libur');
     }
+
+    public function importHariMinggu()
+    {
+        helper('setting');
+        $startDate = get_jurnal_pkl_start_date();
+        $endDate   = get_jurnal_pkl_end_date();
+
+        if (!$startDate) {
+            session()->setFlashdata('error', 'Tanggal mulai periode PKL belum diatur.');
+            return redirect()->to('/admin/pengaturan#hari-libur');
+        }
+
+        $end = $endDate ?: date('Y-m-d');
+        $current = new \DateTime($startDate);
+        $last    = new \DateTime($end);
+
+        $userId    = session()->get('userId');
+        $inserted  = 0;
+        $skipped   = 0;
+
+        while ($current <= $last) {
+            // Day of week: 7 = Sunday
+            if ((int) $current->format('N') === 7) {
+                $tanggal = $current->format('Y-m-d');
+                $existing = $this->hariLiburModel->where('tanggal', $tanggal)->first();
+                if (!$existing) {
+                    $this->hariLiburModel->insert([
+                        'tanggal'    => $tanggal,
+                        'keterangan' => 'Hari Minggu',
+                        'created_by' => $userId,
+                    ]);
+                    $inserted++;
+                } else {
+                    $skipped++;
+                }
+            }
+            $current->modify('+1 day');
+        }
+
+        $msg = "Import selesai: {$inserted} hari Minggu ditambahkan";
+        if ($skipped > 0) {
+            $msg .= ", {$skipped} sudah ada (dilewati).";
+        }
+        session()->setFlashdata('success', $msg);
+        return redirect()->to('/admin/pengaturan#hari-libur');
+    }
 }
