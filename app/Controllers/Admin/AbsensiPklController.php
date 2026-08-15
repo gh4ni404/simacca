@@ -268,6 +268,7 @@ class AbsensiPklController extends BaseController
         $waktuPulang = $this->request->getPost('waktu_pulang') ?? '16:00';
         $oldJamMasuk = $this->request->getPost('old_jam_masuk');
         $oldJamPulang = $this->request->getPost('old_jam_pulang');
+        $isSpecificGroup = $this->request->getPost('is_specific_group') === '1';
 
         $isAjax = $this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest';
 
@@ -301,7 +302,8 @@ class AbsensiPklController extends BaseController
             $hasOldMasuk = ($oldJamMasuk !== null && trim($oldJamMasuk) !== '');
             $hasOldPulang = ($oldJamPulang !== null && trim($oldJamPulang) !== '');
 
-            if ($hasOldMasuk || $hasOldPulang) {
+            // Apply filter if targeting specific group OR if old time values are provided
+            if ($isSpecificGroup || $hasOldMasuk || $hasOldPulang) {
                 if ($hasOldMasuk) {
                     $oldMasukShort = trim($oldJamMasuk);
                     $detailQuery->where("LEFT(TIME(absensi_pkl_detail.waktu_absen), 5)", $oldMasukShort);
