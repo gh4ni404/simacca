@@ -275,6 +275,18 @@ const TOTAL_ABSENSI = <?= count($rekapPembimbing) ?>;
 const DEFAULT_JAM_MASUK = '<?= get_absensi_pkl_jam_masuk() ?>';
 const DEFAULT_JAM_PULANG = '<?= get_absensi_pkl_jam_pulang() ?>';
 const PEMBIMBING_OPTIONS = <?= json_encode($pembimbingOptions) ?>;
+const CSRF_TOKEN_NAME = '<?= csrf_token() ?>';
+let CSRF_TOKEN_HASH = '<?= csrf_hash() ?>';
+
+async function refreshCsrfToken() {
+    try {
+        const res = await fetch('<?= base_url('csrf-token') ?>', { credentials: 'same-origin' });
+        const data = await res.json();
+        CSRF_TOKEN_HASH = data.tokenValue;
+        document.querySelectorAll('input[name="' + CSRF_TOKEN_NAME + '"]').forEach(el => el.value = CSRF_TOKEN_HASH);
+    } catch (e) { /* keep current token */ }
+    return CSRF_TOKEN_HASH;
+}
 
 function bulkSetWaktuAbsen() {
     if (TOTAL_ABSENSI === 0) {
@@ -342,14 +354,16 @@ function showSetJamAbsensi(pembimbingId, pembimbingLabel) {
         customClass: { popup: 'rounded-2xl' }
     });
 
-    const formData = new FormData();
-    formData.append('pembimbing_pkl_id', pembimbingId);
-    formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+    refreshCsrfToken().then(() => {
+        const formData = new FormData();
+        formData.append('pembimbing_pkl_id', pembimbingId);
+        formData.append(CSRF_TOKEN_NAME, CSRF_TOKEN_HASH);
 
-    fetch('<?= base_url('admin/absensi-pkl/get-times-by-pembimbing') ?>', {
-        method: 'POST',
-        body: formData,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        return fetch('<?= base_url('admin/absensi-pkl/get-times-by-pembimbing') ?>', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
     })
     .then(response => response.json())
     .then(data => {
@@ -362,16 +376,22 @@ function showSetJamAbsensi(pembimbingId, pembimbingLabel) {
         if (data.times && data.times.length > 0) {
             timesHtml = `
                 <div class="text-left mb-4">
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Jam yang Tersimpan</p>
-                    <div class="space-y-2 max-h-40 overflow-y-auto">
-                        ${data.times.map(t => `
-                            <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg border border-gray-200">
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Klik jam untuk langsung diatur</p>
+                    <div class="space-y-2 max-h-48 overflow-y-auto" id="swal-times-list">
+                        ${data.times.map((t, i) => `
+                            <button type="button" onclick="selectSavedTime(${pembimbingId}, '${pembimbingLabel.replace(/'/g, "\\'")}', '${t.jam_masuk || ''}', '${t.jam_pulang || ''}')"
+                                    class="w-full flex items-center justify-between p-2.5 bg-gray-50 rounded-lg border border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition-all cursor-pointer group text-left">
                                 <div class="flex items-center gap-2">
-                                    <i class="fas fa-clock text-blue-500 text-xs"></i>
-                                    <span class="text-sm font-bold text-gray-800">${t.jam_masuk || '-'} &mdash; ${t.jam_pulang || '-'}</span>
+                                    <div class="w-7 h-7 bg-blue-100 group-hover:bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0 transition-colors">
+                                        <i class="fas fa-clock text-blue-500 text-xs"></i>
+                                    </div>
+                                    <span class="text-sm font-bold text-gray-800 group-hover:text-blue-700 transition-colors">${t.jam_masuk || '-'} &mdash; ${t.jam_pulang || '-'}</span>
                                 </div>
-                                <span class="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">${t.jumlah_siswa} siswa</span>
-                            </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">${t.jumlah_siswa} siswa</span>
+                                    <i class="fas fa-chevron-right text-gray-400 group-hover:text-blue-500 text-xs transition-colors"></i>
+                                </div>
+                            </button>
                         `).join('')}
                     </div>
                     <p class="text-xs text-gray-400 mt-2">Total <b class="text-gray-600">${data.total_hadir}</b> siswa hadir</p>
@@ -394,7 +414,6 @@ function showSetJamAbsensi(pembimbingId, pembimbingLabel) {
                     ${timesHtml}
                 </div>
             `,
-            icon: 'info',
             showCancelButton: true,
             confirmButtonColor: '#22C55E',
             cancelButtonColor: '#6B7280',
@@ -407,7 +426,7 @@ function showSetJamAbsensi(pembimbingId, pembimbingLabel) {
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                showFormSetJam(pembimbingId, pembimbingLabel);
+                showFormSetJam(pembimbingId, pembimbingLabel, DEFAULT_JAM_MASUK, DEFAULT_JAM_PULANG);
             }
         });
     })
@@ -416,25 +435,30 @@ function showSetJamAbsensi(pembimbingId, pembimbingLabel) {
     });
 }
 
-function showFormSetJam(pembimbingId, pembimbingLabel) {
-    // Step 3: Form set jam masuk & pulang
+function selectSavedTime(pembimbingId, pembimbingLabel, jamMasuk, jamPulang) {
+    Swal.close();
+    showFormSetJam(pembimbingId, pembimbingLabel, jamMasuk, jamPulang);
+}
+
+function showFormSetJam(pembimbingId, pembimbingLabel, prefillMasuk, prefillPulang) {
     Swal.fire({
-        title: 'Set Jam Absensi',
+        title: 'Konfirmasi Set Jam',
         html: `
             <div class="text-left">
-                <p class="text-sm text-gray-600 mb-4">Atur jam masuk dan jam pulang untuk <b>${pembimbingLabel}</b>:</p>
+                <p class="text-sm text-gray-600 mb-4">Atur jam masuk & pulang untuk <b>${pembimbingLabel}</b>:</p>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Jam Masuk</label>
-                        <input type="time" id="swal-jam-masuk" value="${DEFAULT_JAM_MASUK}"
+                        <input type="time" id="swal-jam-masuk" value="${prefillMasuk}"
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Jam Pulang</label>
-                        <input type="time" id="swal-jam-pulang" value="${DEFAULT_JAM_PULANG}"
+                        <input type="time" id="swal-jam-pulang" value="${prefillPulang}"
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
+                <p class="text-xs text-gray-400 mt-3">Jam akan diterapkan ke semua siswa hadir pembimbing ini</p>
             </div>
         `,
         icon: 'question',
@@ -473,16 +497,18 @@ function bulkSaveWaktuAbsen(pembimbingId, jamMasuk, jamPulang) {
         customClass: { popup: 'rounded-2xl' }
     });
 
-    const formData = new FormData();
-    formData.append('pembimbing_pkl_id', pembimbingId);
-    formData.append('waktu_absen', jamMasuk);
-    formData.append('waktu_pulang', jamPulang);
-    formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+    refreshCsrfToken().then(() => {
+        const formData = new FormData();
+        formData.append('pembimbing_pkl_id', pembimbingId);
+        formData.append('waktu_absen', jamMasuk);
+        formData.append('waktu_pulang', jamPulang);
+        formData.append(CSRF_TOKEN_NAME, CSRF_TOKEN_HASH);
 
-    fetch('<?= base_url('admin/absensi-pkl/bulk-update-waktu-by-pembimbing') ?>', {
-        method: 'POST',
-        body: formData,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        return fetch('<?= base_url('admin/absensi-pkl/bulk-update-waktu-by-pembimbing') ?>', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
     })
     .then(response => response.json())
     .then(data => {
