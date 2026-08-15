@@ -333,7 +333,91 @@ function bulkSetWaktuAbsen() {
 }
 
 function showSetJamAbsensi(pembimbingId, pembimbingLabel) {
-    // Step 2: Set Jam Masuk & Pulang
+    // Step 2: Loading lalu tampilkan jam tersimpan
+    Swal.fire({
+        title: 'Memuat data jam...',
+        html: '<i class="fas fa-spinner fa-spin text-2xl text-blue-500"></i>',
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        customClass: { popup: 'rounded-2xl' }
+    });
+
+    const formData = new FormData();
+    formData.append('pembimbing_pkl_id', pembimbingId);
+    formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+
+    fetch('<?= base_url('admin/absensi-pkl/get-times-by-pembimbing') ?>', {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            Swal.fire({ icon: 'error', title: 'Gagal', text: data.message || 'Gagal memuat data', confirmButtonColor: '#EF4444' });
+            return;
+        }
+
+        let timesHtml = '';
+        if (data.times && data.times.length > 0) {
+            timesHtml = `
+                <div class="text-left mb-4">
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Jam yang Tersimpan</p>
+                    <div class="space-y-2 max-h-40 overflow-y-auto">
+                        ${data.times.map(t => `
+                            <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg border border-gray-200">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-clock text-blue-500 text-xs"></i>
+                                    <span class="text-sm font-bold text-gray-800">${t.jam_masuk || '-'} &mdash; ${t.jam_pulang || '-'}</span>
+                                </div>
+                                <span class="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">${t.jumlah_siswa} siswa</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">Total <b class="text-gray-600">${data.total_hadir}</b> siswa hadir</p>
+                </div>
+            `;
+        } else {
+            timesHtml = `
+                <div class="text-left mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <p class="text-sm text-yellow-700"><i class="fas fa-info-circle mr-1"></i> Belum ada jam tersimpan untuk pembimbing ini</p>
+                </div>
+            `;
+        }
+
+        // Step 2: Tampilkan jam tersimpan + tombol set jam baru
+        Swal.fire({
+            title: 'Set Jam Absensi',
+            html: `
+                <div class="text-left">
+                    <p class="text-sm text-gray-600 mb-3">Pembimbing: <b>${pembimbingLabel}</b></p>
+                    ${timesHtml}
+                </div>
+            `,
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonColor: '#22C55E',
+            cancelButtonColor: '#6B7280',
+            confirmButtonText: '<i class="fas fa-edit mr-1"></i> Set Jam Baru',
+            cancelButtonText: '<i class="fas fa-times mr-1"></i> Batal',
+            customClass: {
+                popup: 'rounded-2xl',
+                title: 'text-lg font-bold',
+                htmlContainer: 'text-sm'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                showFormSetJam(pembimbingId, pembimbingLabel);
+            }
+        });
+    })
+    .catch(() => {
+        Swal.fire({ icon: 'error', title: 'Gagal', text: 'Gagal memuat data jam', confirmButtonColor: '#EF4444' });
+    });
+}
+
+function showFormSetJam(pembimbingId, pembimbingLabel) {
+    // Step 3: Form set jam masuk & pulang
     Swal.fire({
         title: 'Set Jam Absensi',
         html: `

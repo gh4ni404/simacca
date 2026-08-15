@@ -333,4 +333,31 @@ class AbsensiPklController extends BaseController
 
         return redirect()->back()->with('success', "Berhasil memperbarui {$totalUpdated} data waktu absensi untuk {$namaPembimbing}");
     }
+
+    /**
+     * Get distinct attendance times for a specific pembimbing (AJAX)
+     */
+    public function getTimesByPembimbing()
+    {
+        $pembimbingPklId = $this->request->getPost('pembimbing_pkl_id');
+
+        if (!$pembimbingPklId) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Pembimbing harus dipilih']);
+        }
+
+        $times = $this->absensiPklDetailModel->getDistinctTimesByPembimbing((int) $pembimbingPklId);
+
+        // Get total hadir count for this pembimbing
+        $totalHadir = $this->absensiPklDetailModel
+            ->join('absensi_pkl', 'absensi_pkl.id = absensi_pkl_detail.absensi_pkl_id AND absensi_pkl.deleted_at IS NULL')
+            ->where('absensi_pkl.pembimbing_pkl_id', (int) $pembimbingPklId)
+            ->where('absensi_pkl_detail.status', 'hadir')
+            ->countAllResults();
+
+        return $this->response->setJSON([
+            'success'    => true,
+            'times'      => $times,
+            'total_hadir'=> $totalHadir,
+        ]);
+    }
 }
