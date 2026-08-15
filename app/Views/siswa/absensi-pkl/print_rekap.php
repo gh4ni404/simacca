@@ -481,10 +481,10 @@
 
                             // Catatan priority:
                             // 1. absensi_pkl.keterangan_umum
-                            // 2. absensi_pkl_detail.keterangan (untuk sakit/izin/alpa/libur)
+                            // 2. absensi_pkl_detail.keterangan (untuk semua status termasuk hadir)
                             if (!empty($keteranganUmum)) {
                                 $catatanDisplay = $keteranganUmum;
-                            } elseif (in_array($status, ['sakit', 'izin', 'alpa', 'libur']) && !empty($keterangan)) {
+                            } elseif (!empty($keterangan)) {
                                 $catatanDisplay = $keterangan;
                             } else {
                                 $catatanDisplay = '';

@@ -105,6 +105,7 @@
                             <th class="px-4 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Status</th>
                             <th class="px-4 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Jam Masuk</th>
                             <th class="px-4 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Jam Pulang</th>
+                            <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Keterangan</th>
                             <th class="px-4 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Aksi</th>
                         </tr>
                     </thead>
@@ -153,6 +154,7 @@
                                 <span class="text-gray-400 text-sm">-</span>
                                 <?php endif; ?>
                             </td>
+                            <td class="px-4 py-4 text-sm text-gray-600"><?= esc($d['keterangan'] ?? '-') ?></td>
                             <td class="px-4 py-4 text-center">
                                 <?php if ($d['status'] === 'hadir'): ?>
                                 <button type="button" onclick="saveWaktuAbsen(<?= $d['id'] ?>, <?= $absensi['id'] ?>)"
