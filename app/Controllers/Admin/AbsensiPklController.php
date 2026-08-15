@@ -305,6 +305,9 @@ class AbsensiPklController extends BaseController
                 if ($hasOldMasuk) {
                     $oldMasukShort = trim($oldJamMasuk);
                     $detailQuery->where("LEFT(TIME(absensi_pkl_detail.waktu_absen), 5)", $oldMasukShort);
+                } else {
+                    // Handle NULL waktu_absen
+                    $detailQuery->where("absensi_pkl_detail.waktu_absen IS NULL", null, false);
                 }
                 if ($hasOldPulang) {
                     $oldPulangShort = trim($oldJamPulang);

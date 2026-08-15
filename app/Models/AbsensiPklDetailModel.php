@@ -437,7 +437,6 @@ class AbsensiPklDetailModel extends Model
             ->join('absensi_pkl', 'absensi_pkl.id = absensi_pkl_detail.absensi_pkl_id AND absensi_pkl.deleted_at IS NULL')
             ->where('absensi_pkl.pembimbing_pkl_id', $pembimbingPklId)
             ->where('absensi_pkl_detail.status', 'hadir')
-            ->where('absensi_pkl_detail.waktu_absen IS NOT NULL', null, false)
             ->groupBy('LEFT(TIME(absensi_pkl_detail.waktu_absen), 5), LEFT(TIME(absensi_pkl_detail.waktu_pulang), 5)')
             ->orderBy('jam_masuk', 'ASC')
             ->get()
