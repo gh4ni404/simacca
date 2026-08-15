@@ -298,12 +298,21 @@ class AbsensiPklController extends BaseController
                 ->where('status', 'hadir');
 
             // Filter by old time pair if provided (only update matching time group)
-            if ($oldJamMasuk !== null && $oldJamMasuk !== '' && $oldJamPulang !== null && $oldJamPulang !== '') {
-                $oldMasukShort = trim($oldJamMasuk);
-                $oldPulangShort = trim($oldJamPulang);
+            $hasOldMasuk = ($oldJamMasuk !== null && trim($oldJamMasuk) !== '');
+            $hasOldPulang = ($oldJamPulang !== null && trim($oldJamPulang) !== '');
 
-                $detailQuery->where("LEFT(TIME(absensi_pkl_detail.waktu_absen), 5)", $oldMasukShort);
-                $detailQuery->where("LEFT(TIME(absensi_pkl_detail.waktu_pulang), 5)", $oldPulangShort);
+            if ($hasOldMasuk || $hasOldPulang) {
+                if ($hasOldMasuk) {
+                    $oldMasukShort = trim($oldJamMasuk);
+                    $detailQuery->where("LEFT(TIME(absensi_pkl_detail.waktu_absen), 5)", $oldMasukShort);
+                }
+                if ($hasOldPulang) {
+                    $oldPulangShort = trim($oldJamPulang);
+                    $detailQuery->where("LEFT(TIME(absensi_pkl_detail.waktu_pulang), 5)", $oldPulangShort);
+                } else {
+                    // Handle NULL waktu_pulang
+                    $detailQuery->where("absensi_pkl_detail.waktu_pulang IS NULL", null, false);
+                }
             }
 
             $details = $detailQuery->findAll();
