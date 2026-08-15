@@ -266,6 +266,8 @@ class AbsensiPklController extends BaseController
         $pembimbingPklId = $this->request->getPost('pembimbing_pkl_id');
         $waktuAbsen = $this->request->getPost('waktu_absen') ?? '08:00';
         $waktuPulang = $this->request->getPost('waktu_pulang') ?? '16:00';
+        $oldJamMasuk = $this->request->getPost('old_jam_masuk');
+        $oldJamPulang = $this->request->getPost('old_jam_pulang');
 
         $isAjax = $this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest';
 
@@ -291,10 +293,20 @@ class AbsensiPklController extends BaseController
         $totalUpdated = 0;
 
         foreach ($absensiList as $absensi) {
-            $details = $this->absensiPklDetailModel
+            $detailQuery = $this->absensiPklDetailModel
                 ->where('absensi_pkl_id', $absensi['id'])
-                ->where('status', 'hadir')
-                ->findAll();
+                ->where('status', 'hadir');
+
+            // Filter by old time pair if provided (only update matching time group)
+            if ($oldJamMasuk !== null && $oldJamMasuk !== '' && $oldJamPulang !== null && $oldJamPulang !== '') {
+                $oldMasukShort = trim($oldJamMasuk);
+                $oldPulangShort = trim($oldJamPulang);
+
+                $detailQuery->where("LEFT(TIME(absensi_pkl_detail.waktu_absen), 5)", $oldMasukShort);
+                $detailQuery->where("LEFT(TIME(absensi_pkl_detail.waktu_pulang), 5)", $oldPulangShort);
+            }
+
+            $details = $detailQuery->findAll();
 
             $tanggal = $absensi['tanggal'];
 
@@ -323,15 +335,18 @@ class AbsensiPklController extends BaseController
 
         $namaPembimbing = $pembimbingInfo['nama_pembimbing'] ?? 'Pembimbing';
 
+        $timeFilterMsg = ($oldJamMasuk !== null && $oldJamMasuk !== '' && $oldJamPulang !== null && $oldJamPulang !== '')
+            ? " (jam {$oldJamMasuk}-{$oldJamPulang})" : '';
+
         if ($isAjax) {
             return $this->response->setJSON([
                 'success' => true,
-                'message' => "Berhasil memperbarui {$totalUpdated} data waktu absensi untuk {$namaPembimbing}",
+                'message' => "Berhasil memperbarui {$totalUpdated} data waktu absensi untuk {$namaPembimbing}{$timeFilterMsg}",
                 'total_updated' => $totalUpdated,
             ]);
         }
 
-        return redirect()->back()->with('success', "Berhasil memperbarui {$totalUpdated} data waktu absensi untuk {$namaPembimbing}");
+        return redirect()->back()->with('success', "Berhasil memperbarui {$totalUpdated} data waktu absensi untuk {$namaPembimbing}{$timeFilterMsg}");
     }
 
     /**

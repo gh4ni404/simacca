@@ -430,29 +430,18 @@ class AbsensiPklDetailModel extends Model
     {
         $result = $this->db->table('absensi_pkl_detail')
             ->select('
-                TIME(absensi_pkl_detail.waktu_absen) AS jam_masuk,
-                TIME(absensi_pkl_detail.waktu_pulang) AS jam_pulang,
+                LEFT(TIME(absensi_pkl_detail.waktu_absen), 5) AS jam_masuk,
+                LEFT(TIME(absensi_pkl_detail.waktu_pulang), 5) AS jam_pulang,
                 COUNT(*) AS jumlah_siswa
             ')
             ->join('absensi_pkl', 'absensi_pkl.id = absensi_pkl_detail.absensi_pkl_id AND absensi_pkl.deleted_at IS NULL')
             ->where('absensi_pkl.pembimbing_pkl_id', $pembimbingPklId)
             ->where('absensi_pkl_detail.status', 'hadir')
             ->where('absensi_pkl_detail.waktu_absen IS NOT NULL', null, false)
-            ->groupBy('TIME(absensi_pkl_detail.waktu_absen), TIME(absensi_pkl_detail.waktu_pulang)')
+            ->groupBy('LEFT(TIME(absensi_pkl_detail.waktu_absen), 5), LEFT(TIME(absensi_pkl_detail.waktu_pulang), 5)')
             ->orderBy('jam_masuk', 'ASC')
             ->get()
             ->getResultArray();
-
-        // Format time for display (remove :00 seconds part if present)
-        foreach ($result as &$row) {
-            if ($row['jam_masuk']) {
-                $row['jam_masuk'] = substr($row['jam_masuk'], 0, 5);
-            }
-            if ($row['jam_pulang']) {
-                $row['jam_pulang'] = substr($row['jam_pulang'], 0, 5);
-            }
-        }
-        unset($row);
 
         return $result;
     }

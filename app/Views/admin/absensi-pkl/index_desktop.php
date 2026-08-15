@@ -435,12 +435,15 @@ function showSetJamAbsensi(pembimbingId, pembimbingLabel) {
     });
 }
 
-function selectSavedTime(pembimbingId, pembimbingLabel, jamMasuk, jamPulang) {
+function selectSavedTime(pembimbingId, pembimbingLabel, oldJamMasuk, oldJamPulang) {
     Swal.close();
-    showFormSetJam(pembimbingId, pembimbingLabel, jamMasuk, jamPulang);
+    showFormSetJam(pembimbingId, pembimbingLabel, oldJamMasuk, oldJamPulang, true);
 }
 
-function showFormSetJam(pembimbingId, pembimbingLabel, prefillMasuk, prefillPulang) {
+function showFormSetJam(pembimbingId, pembimbingLabel, prefillMasuk, prefillPulang, isSpecificTime = false) {
+    const timeHint = isSpecificTime
+        ? `<p class="text-xs text-orange-500 mt-2"><i class="fas fa-exclamation-triangle mr-1"></i> Hanya siswa dengan jam <b>${prefillMasuk} - ${prefillPulang}</b> yang akan diupdate</p>`
+        : `<p class="text-xs text-gray-400 mt-3">Jam akan diterapkan ke semua siswa hadir pembimbing ini</p>`;
     Swal.fire({
         title: 'Konfirmasi Set Jam',
         html: `
@@ -458,7 +461,7 @@ function showFormSetJam(pembimbingId, pembimbingLabel, prefillMasuk, prefillPula
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
-                <p class="text-xs text-gray-400 mt-3">Jam akan diterapkan ke semua siswa hadir pembimbing ini</p>
+                ${timeHint}
             </div>
         `,
         icon: 'question',
@@ -483,12 +486,12 @@ function showFormSetJam(pembimbingId, pembimbingLabel, prefillMasuk, prefillPula
         }
     }).then((result) => {
         if (result.isConfirmed) {
-            bulkSaveWaktuAbsen(pembimbingId, result.value.jamMasuk, result.value.jamPulang);
+            bulkSaveWaktuAbsen(pembimbingId, result.value.jamMasuk, result.value.jamPulang, isSpecificTime ? prefillMasuk : null, isSpecificTime ? prefillPulang : null);
         }
     });
 }
 
-function bulkSaveWaktuAbsen(pembimbingId, jamMasuk, jamPulang) {
+function bulkSaveWaktuAbsen(pembimbingId, jamMasuk, jamPulang, oldJamMasuk = null, oldJamPulang = null) {
     Swal.fire({
         title: 'Menyimpan...',
         html: '<i class="fas fa-spinner fa-spin text-2xl text-blue-500"></i>',
@@ -502,6 +505,8 @@ function bulkSaveWaktuAbsen(pembimbingId, jamMasuk, jamPulang) {
         formData.append('pembimbing_pkl_id', pembimbingId);
         formData.append('waktu_absen', jamMasuk);
         formData.append('waktu_pulang', jamPulang);
+        if (oldJamMasuk) formData.append('old_jam_masuk', oldJamMasuk);
+        if (oldJamPulang) formData.append('old_jam_pulang', oldJamPulang);
         formData.append(CSRF_TOKEN_NAME, CSRF_TOKEN_HASH);
 
         return fetch('<?= base_url('admin/absensi-pkl/bulk-update-waktu-by-pembimbing') ?>', {
@@ -514,8 +519,8 @@ function bulkSaveWaktuAbsen(pembimbingId, jamMasuk, jamPulang) {
     .then(data => {
         if (data.success) {
             Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
+                icon: data.total_updated === 0 ? 'warning' : 'success',
+                title: data.total_updated === 0 ? 'Tidak Ada Data Diupdate' : 'Berhasil!',
                 html: `${data.message}<br><small class="text-gray-500">Jam: ${jamMasuk} - ${jamPulang}</small>`,
                 confirmButtonColor: '#22C55E',
                 customClass: { popup: 'rounded-2xl' }
