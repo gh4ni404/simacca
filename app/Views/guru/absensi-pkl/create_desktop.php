@@ -66,8 +66,7 @@
                         <label for="tanggal" class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-calendar-alt mr-2 text-blue-500"></i> Tanggal <span class="text-red-500">*</span>
                         </label>
-                        <input type="date" id="tanggal" name="tanggal" value="<?= esc($tanggal) ?>" required
-                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <input type="date" id="tanggal" name="tanggal" value="<?= esc($tanggal instanceof \DateTime ? $tanggal->format('Y-m-d') : $tanggal) ?>" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                     </div>
                 </div>
 

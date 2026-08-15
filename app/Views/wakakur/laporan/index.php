@@ -8,7 +8,7 @@
         <h2 class="text-xl font-bold mb-1">LAPORAN ABSENSI PEMBELAJARAN</h2>
         <h3 class="text-lg font-semibold mb-2">SISTEM INFORMASI AKADEMIK</h3>
         <div class="border-t-2 border-b-2 border-black py-1 inline-block px-8">
-            <p class="text-sm">Tanggal: <?= date('d/m/Y', strtotime($tanggal)); ?></p>
+            <p class="text-sm">Tanggal: <?= ($tanggal instanceof \DateTimeInterface) ? $tanggal->format('d/m/Y') : date('d/m/Y', strtotime($tanggal)); ?></p>
             <?php if ($kelasId): ?>
                 <p class="text-sm">Kelas: <?= esc($kelasList[$kelasId] ?? '-'); ?></p>
             <?php else: ?>
@@ -53,7 +53,7 @@
                     <i class="fas fa-calendar-alt text-blue-500 mr-1"></i>
                     Tanggal
                 </label>
-                <input type="date" name="tanggal" value="<?= esc($tanggal); ?>" 
+                <input type="date" name="tanggal" value="<?= esc($tanggal instanceof \DateTime ? $tanggal->format('Y-m-d') : $tanggal); ?>" 
                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" 
                        required>
             </div>
@@ -117,7 +117,7 @@
                 <i class="fas fa-table mr-3"></i>
                 Detail Absensi Pembelajaran
             </h2>
-            <span class="text-sm text-purple-100">Tanggal: <?= date('d/m/Y', strtotime($tanggal)); ?></span>
+            <span class="text-sm text-purple-100">Tanggal: <?= ($tanggal instanceof \DateTimeInterface) ? $tanggal->format('d/m/Y') : date('d/m/Y', strtotime($tanggal)); ?></span>
         </div>
     </div>
 

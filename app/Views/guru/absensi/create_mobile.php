@@ -129,7 +129,7 @@
                             <input type="date"
                                 id="tanggal"
                                 name="tanggal"
-                                value="<?= $tanggal; ?>"
+                                value="<?= esc($tanggal instanceof \DateTime ? $tanggal->format('Y-m-d') : $tanggal) ?>"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 required>
                             <p class="text-xs text-gray-500 mt-1">
@@ -193,7 +193,7 @@
                         </div>
                         <div class="px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
                             <span class="text-sm text-gray-600">Tanggal:</span>
-                            <span class="font-bold text-blue-700 ml-2"><?= date('d/m/Y', strtotime($tanggal)); ?></span>
+                            <span class="font-bold text-blue-700 ml-2"><?= ($tanggal instanceof \DateTimeInterface) ? $tanggal->format('d/m/Y') : date('d/m/Y', strtotime($tanggal)); ?></span>
                         </div>
                     </div>
 
@@ -213,7 +213,7 @@
                                 required>
                         </div>
                         <!-- Tanggal hidden field (already selected above) -->
-                        <input type="hidden" name="tanggal" value="<?= $tanggal; ?>">
+                        <input type="hidden" name="tanggal" value="<?= esc($tanggal instanceof \DateTime ? $tanggal->format('Y-m-d') : $tanggal) ?>">
                     </div>
 
                     <!-- Approved Izin Info -->
@@ -326,7 +326,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const kelasId = '<?= $jadwal["kelas_id"]; ?>';
-            const tanggal = '<?= $tanggal; ?>';
+            const tanggal = '<?= esc($tanggal instanceof \DateTime ? $tanggal->format('Y-m-d') : $tanggal) ?>';
 
             // Load siswa data
             loadSiswaData(kelasId, tanggal);

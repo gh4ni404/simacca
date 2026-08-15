@@ -53,7 +53,7 @@
 
         <form method="get" class="p-6">
             <div class="grid grid-cols-3 gap-4 mb-4">
-                <?= form_input('tanggal', 'Tanggal', $tanggal, ['type' => 'date']) ?>
+                <?= form_input('tanggal', 'Tanggal', ($tanggal instanceof \DateTimeInterface) ? $tanggal->format('Y-m-d') : $tanggal, ['type' => 'date']) ?>
                 <div class="mb-4">
                     <label class="block text-sm font-semibold text-gray-700 mb-2 flex items-center">
                         <i class="fas fa-school mr-2 text-purple-500"></i>

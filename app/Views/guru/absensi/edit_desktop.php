@@ -1,7 +1,7 @@
 <?= $this->extend(get_device_layout()) ?>
 
 <?= $this->section('content') ?>
-<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+<div class="min-h-screen">
     <!-- Header -->
     <div class="mb-6 md:mb-8">
         <div class="flex items-center gap-3 mb-2">

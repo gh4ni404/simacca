@@ -8,7 +8,7 @@
         <h2 class="text-xl font-bold mb-1">LAPORAN ABSENSI PEMBELAJARAN</h2>
         <h3 class="text-lg font-semibold mb-2">SISTEM INFORMASI AKADEMIK</h3>
         <div class="border-t-2 border-b-2 border-black py-1 inline-block px-8">
-            <p class="text-sm">Tanggal: <?= date('d/m/Y', strtotime($tanggal)); ?></p>
+            <p class="text-sm">Tanggal: <?= ($tanggal instanceof \DateTimeInterface) ? $tanggal->format('d/m/Y') : date('d/m/Y', strtotime($tanggal)); ?></p>
             <?php if ($kelasId): ?>
                 <p class="text-sm">Kelas: <?= esc($kelasList[$kelasId] ?? '-'); ?></p>
             <?php else: ?>
@@ -28,7 +28,7 @@
     <form class="grid grid-cols-1 md:grid-cols-3 gap-4" method="get" action="<?= base_url('admin/laporan/absensi-detail'); ?>">
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
-            <input type="date" name="tanggal" value="<?= esc($tanggal); ?>" class="w-full border rounded-lg px-3 py-2" required>
+            <input type="date" name="tanggal" value="<?= esc($tanggal instanceof \DateTime ? $tanggal->format('Y-m-d') : $tanggal); ?>" class="w-full border rounded-lg px-3 py-2" required>
         </div>
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
@@ -57,7 +57,7 @@
     <div class="p-6 border-b border-gray-200 no-print">
         <div class="flex justify-between items-center">
             <h2 class="text-lg font-semibold text-gray-800">Detail Absensi Pembelajaran</h2>
-            <span class="text-sm text-gray-500">Tanggal: <?= date('d/m/Y', strtotime($tanggal)); ?></span>
+            <span class="text-sm text-gray-500">Tanggal: <?= ($tanggal instanceof \DateTimeInterface) ? $tanggal->format('d/m/Y') : date('d/m/Y', strtotime($tanggal)); ?></span>
         </div>
         <?php if (!empty($laporanPerHari)): ?>
             <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
