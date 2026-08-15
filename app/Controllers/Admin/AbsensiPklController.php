@@ -257,4 +257,80 @@ class AbsensiPklController extends BaseController
 
         return redirect()->back()->with('success', "Berhasil memperbarui {$totalUpdated} data waktu absensi");
     }
+
+    /**
+     * Bulk update waktu absen & pulang untuk siswa hadir pada pembimbing tertentu
+     */
+    public function bulkUpdateWaktuByPembimbing()
+    {
+        $pembimbingPklId = $this->request->getPost('pembimbing_pkl_id');
+        $waktuAbsen = $this->request->getPost('waktu_absen') ?? '08:00';
+        $waktuPulang = $this->request->getPost('waktu_pulang') ?? '16:00';
+
+        $isAjax = $this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest';
+
+        if (!$pembimbingPklId) {
+            if ($isAjax) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Pembimbing harus dipilih']);
+            }
+            return redirect()->back()->with('error', 'Pembimbing harus dipilih');
+        }
+
+        // Get absensi records for this pembimbing only
+        $absensiList = $this->absensiPklModel
+            ->where('pembimbing_pkl_id', (int) $pembimbingPklId)
+            ->findAll();
+
+        if (empty($absensiList)) {
+            if ($isAjax) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Tidak ada data absensi untuk pembimbing ini']);
+            }
+            return redirect()->back()->with('error', 'Tidak ada data absensi untuk pembimbing ini');
+        }
+
+        $totalUpdated = 0;
+
+        foreach ($absensiList as $absensi) {
+            $details = $this->absensiPklDetailModel
+                ->where('absensi_pkl_id', $absensi['id'])
+                ->where('status', 'hadir')
+                ->findAll();
+
+            $tanggal = $absensi['tanggal'];
+
+            foreach ($details as $detail) {
+                $timeAbsen = trim($waktuAbsen);
+                if (strlen($timeAbsen) === 5) $timeAbsen .= ':00';
+
+                $timePulang = trim($waktuPulang);
+                if (strlen($timePulang) === 5) $timePulang .= ':00';
+
+                $this->absensiPklDetailModel->update((int) $detail['id'], [
+                    'waktu_absen' => $tanggal . ' ' . $timeAbsen,
+                    'waktu_pulang' => $tanggal . ' ' . $timePulang,
+                ]);
+                $totalUpdated++;
+            }
+        }
+
+        // Get pembimbing name for response message
+        $pembimbingInfo = $this->absensiPklModel
+            ->select('guru.nama_lengkap AS nama_pembimbing')
+            ->join('pembimbing_pkl', 'pembimbing_pkl.id = absensi_pkl.pembimbing_pkl_id AND pembimbing_pkl.deleted_at IS NULL')
+            ->join('guru', 'guru.id = pembimbing_pkl.guru_id AND guru.deleted_at IS NULL')
+            ->where('absensi_pkl.pembimbing_pkl_id', (int) $pembimbingPklId)
+            ->first();
+
+        $namaPembimbing = $pembimbingInfo['nama_pembimbing'] ?? 'Pembimbing';
+
+        if ($isAjax) {
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => "Berhasil memperbarui {$totalUpdated} data waktu absensi untuk {$namaPembimbing}",
+                'total_updated' => $totalUpdated,
+            ]);
+        }
+
+        return redirect()->back()->with('success', "Berhasil memperbarui {$totalUpdated} data waktu absensi untuk {$namaPembimbing}");
+    }
 }

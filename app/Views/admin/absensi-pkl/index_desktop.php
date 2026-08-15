@@ -46,7 +46,7 @@
                     </div>
                     <div>
                         <h3 class="text-white font-bold text-sm">Set Jam Absensi PKL</h3>
-                        <p class="text-cyan-100 text-xs">Atur jam masuk & pulang serentak</p>
+                        <p class="text-cyan-100 text-xs">Atur jam masuk & pulang per pembimbing</p>
                     </div>
                 </div>
                 <button type="button" onclick="bulkSetWaktuAbsen()"
@@ -274,6 +274,7 @@
 const TOTAL_ABSENSI = <?= count($rekapPembimbing) ?>;
 const DEFAULT_JAM_MASUK = '<?= get_absensi_pkl_jam_masuk() ?>';
 const DEFAULT_JAM_PULANG = '<?= get_absensi_pkl_jam_pulang() ?>';
+const PEMBIMBING_OPTIONS = <?= json_encode($pembimbingOptions) ?>;
 
 function bulkSetWaktuAbsen() {
     if (TOTAL_ABSENSI === 0) {
@@ -286,11 +287,58 @@ function bulkSetWaktuAbsen() {
         return;
     }
 
+    // Build pembimbing select options (skip empty key)
+    let optionsHtml = '<option value="">-- Pilih Pembimbing --</option>';
+    for (const [id, label] of Object.entries(PEMBIMBING_OPTIONS)) {
+        if (id === '') continue;
+        optionsHtml += `<option value="${id}">${label}</option>`;
+    }
+
+    // Step 1: Pilih Pembimbing
     Swal.fire({
-        title: 'Set Jam Absensi (Semua Pembimbing)',
+        title: 'Set Jam Absensi',
         html: `
             <div class="text-left">
-                <p class="text-sm text-gray-600 mb-4">Masukkan jam masuk dan jam pulang untuk <b>semua siswa hadir</b> di <b>${TOTAL_ABSENSI}</b> pembimbing:</p>
+                <p class="text-sm text-gray-600 mb-4">Pilih pembimbing yang ingin diatur jam absensinya:</p>
+                <label class="block text-xs font-medium text-gray-700 mb-1 text-left">Pembimbing</label>
+                <select id="swal-pembimbing" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-left">
+                    ${optionsHtml}
+                </select>
+            </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#22C55E',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: '<i class="fas fa-arrow-right mr-1"></i> Selanjutnya',
+        cancelButtonText: '<i class="fas fa-times mr-1"></i> Batal',
+        customClass: {
+            popup: 'rounded-2xl',
+            title: 'text-lg font-bold',
+            htmlContainer: 'text-sm'
+        },
+        preConfirm: () => {
+            const pembimbingId = document.getElementById('swal-pembimbing').value;
+            if (!pembimbingId) {
+                Swal.showValidationMessage('Pembimbing harus dipilih');
+                return false;
+            }
+            return { pembimbingId, pembimbingLabel: document.getElementById('swal-pembimbing').options[document.getElementById('swal-pembimbing').selectedIndex].text };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            showSetJamAbsensi(result.value.pembimbingId, result.value.pembimbingLabel);
+        }
+    });
+}
+
+function showSetJamAbsensi(pembimbingId, pembimbingLabel) {
+    // Step 2: Set Jam Masuk & Pulang
+    Swal.fire({
+        title: 'Set Jam Absensi',
+        html: `
+            <div class="text-left">
+                <p class="text-sm text-gray-600 mb-4">Atur jam masuk dan jam pulang untuk <b>${pembimbingLabel}</b>:</p>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-medium text-gray-700 mb-1">Jam Masuk</label>
@@ -309,7 +357,7 @@ function bulkSetWaktuAbsen() {
         showCancelButton: true,
         confirmButtonColor: '#22C55E',
         cancelButtonColor: '#6B7280',
-        confirmButtonText: '<i class="fas fa-check mr-1"></i> Simpan Semua!',
+        confirmButtonText: '<i class="fas fa-check mr-1"></i> Simpan!',
         cancelButtonText: '<i class="fas fa-times mr-1"></i> Batal',
         customClass: {
             popup: 'rounded-2xl',
@@ -327,12 +375,12 @@ function bulkSetWaktuAbsen() {
         }
     }).then((result) => {
         if (result.isConfirmed) {
-            bulkSaveWaktuAbsen(result.value.jamMasuk, result.value.jamPulang);
+            bulkSaveWaktuAbsen(pembimbingId, result.value.jamMasuk, result.value.jamPulang);
         }
     });
 }
 
-function bulkSaveWaktuAbsen(jamMasuk, jamPulang) {
+function bulkSaveWaktuAbsen(pembimbingId, jamMasuk, jamPulang) {
     Swal.fire({
         title: 'Menyimpan...',
         html: '<i class="fas fa-spinner fa-spin text-2xl text-blue-500"></i>',
@@ -342,11 +390,12 @@ function bulkSaveWaktuAbsen(jamMasuk, jamPulang) {
     });
 
     const formData = new FormData();
+    formData.append('pembimbing_pkl_id', pembimbingId);
     formData.append('waktu_absen', jamMasuk);
     formData.append('waktu_pulang', jamPulang);
     formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
 
-    fetch('<?= base_url('admin/absensi-pkl/bulk-update-waktu-all') ?>', {
+    fetch('<?= base_url('admin/absensi-pkl/bulk-update-waktu-by-pembimbing') ?>', {
         method: 'POST',
         body: formData,
         headers: { 'X-Requested-With': 'XMLHttpRequest' }

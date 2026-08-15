@@ -237,6 +237,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('absensi-pkl/rekap/(:num)', 'Admin\AbsensiPklController::rekap/$1', ['filter' => 'role:admin']);
     $routes->post('absensi-pkl/update-waktu', 'Admin\AbsensiPklController::updateWaktuAbsen', ['filter' => 'role:admin']);
     $routes->post('absensi-pkl/bulk-update-waktu-all', 'Admin\AbsensiPklController::bulkUpdateWaktuAll', ['filter' => 'role:admin']);
+    $routes->post('absensi-pkl/bulk-update-waktu-by-pembimbing', 'Admin\AbsensiPklController::bulkUpdateWaktuByPembimbing', ['filter' => 'role:admin']);
 
     // Laporan
     $routes->get('laporan/absensi', 'Admin\LaporanController::absensi', ['filter' => 'role:admin']);
