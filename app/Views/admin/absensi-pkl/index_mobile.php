@@ -317,7 +317,9 @@ function showSetJamAbsensi(pembimbingId, pembimbingLabel) {
         if (data.times && data.times.length > 0) {
             timesHtml = `
                 <div class="text-left mb-4">
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Klik jam untuk langsung diatur</p>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+                        <p class="text-xs text-blue-700"><i class="fas fa-lightbulb mr-1 text-blue-500"></i> <b>Cara mengatur jam:</b> Klik salah satu jam di bawah untuk mengubah waktu absensi siswa pada jam tersebut.</p>
+                    </div>
                     <div class="space-y-2 max-h-48 overflow-y-auto" id="swal-times-list">
                         ${data.times.map((t, i) => `
                             <button type="button" onclick="selectSavedTime(${pembimbingId}, '${pembimbingLabel.replace(/'/g, "\\'")}', '${t.jam_masuk || ''}', '${t.jam_pulang || ''}')"
@@ -346,7 +348,7 @@ function showSetJamAbsensi(pembimbingId, pembimbingLabel) {
             `;
         }
 
-        // Step 2: Tampilkan jam tersimpan + tombol set jam baru
+        // Step 2: Tampilkan jam tersimpan
         Swal.fire({
             title: 'Set Jam Absensi',
             html: `
@@ -356,9 +358,9 @@ function showSetJamAbsensi(pembimbingId, pembimbingLabel) {
                 </div>
             `,
             showCancelButton: true,
-            confirmButtonColor: '#22C55E',
-            cancelButtonColor: '#6B7280',
-            confirmButtonText: '<i class="fas fa-edit mr-1"></i> Set Jam Baru',
+            confirmButtonColor: '#6B7280',
+            cancelButtonColor: '#EF4444',
+            confirmButtonText: '<i class="fas fa-arrow-left mr-1"></i> Sebelumnya',
             cancelButtonText: '<i class="fas fa-times mr-1"></i> Batal',
             customClass: {
                 popup: 'rounded-2xl',
@@ -367,7 +369,7 @@ function showSetJamAbsensi(pembimbingId, pembimbingLabel) {
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                showFormSetJam(pembimbingId, pembimbingLabel, DEFAULT_JAM_MASUK, DEFAULT_JAM_PULANG);
+                bulkSetWaktuAbsen();
             }
         });
     })
@@ -410,7 +412,7 @@ function showFormSetJam(pembimbingId, pembimbingLabel, prefillMasuk, prefillPula
         confirmButtonColor: '#22C55E',
         cancelButtonColor: '#6B7280',
         confirmButtonText: '<i class="fas fa-check mr-1"></i> Simpan!',
-        cancelButtonText: '<i class="fas fa-times mr-1"></i> Batal',
+        cancelButtonText: '<i class="fas fa-arrow-left mr-1"></i> Kembali',
         customClass: {
             popup: 'rounded-2xl',
             title: 'text-lg font-bold',
@@ -427,12 +429,14 @@ function showFormSetJam(pembimbingId, pembimbingLabel, prefillMasuk, prefillPula
         }
     }).then((result) => {
         if (result.isConfirmed) {
-            bulkSaveWaktuAbsen(pembimbingId, result.value.jamMasuk, result.value.jamPulang, isSpecificTime ? prefillMasuk : null, isSpecificTime ? prefillPulang : null);
+            bulkSaveWaktuAbsen(pembimbingId, pembimbingLabel, result.value.jamMasuk, result.value.jamPulang, isSpecificTime ? prefillMasuk : null, isSpecificTime ? prefillPulang : null);
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+            showSetJamAbsensi(pembimbingId, pembimbingLabel);
         }
     });
 }
 
-function bulkSaveWaktuAbsen(pembimbingId, jamMasuk, jamPulang, oldJamMasuk = null, oldJamPulang = null) {
+function bulkSaveWaktuAbsen(pembimbingId, pembimbingLabel, jamMasuk, jamPulang, oldJamMasuk = null, oldJamPulang = null) {
     Swal.fire({
         title: 'Menyimpan...',
         html: '<i class="fas fa-spinner fa-spin text-2xl text-blue-500"></i>',
@@ -466,7 +470,7 @@ function bulkSaveWaktuAbsen(pembimbingId, jamMasuk, jamPulang, oldJamMasuk = nul
                 confirmButtonColor: '#22C55E',
                 customClass: { popup: 'rounded-2xl' }
             }).then(() => {
-                location.reload();
+                showSetJamAbsensi(pembimbingId, pembimbingLabel);
             });
         } else {
             Swal.fire({
