@@ -106,16 +106,10 @@
         <!-- Students List -->
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
             <div class="bg-gradient-to-r from-gray-700 to-gray-800 px-4 py-3">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-white font-bold text-sm flex items-center">
-                        <i class="fas fa-users mr-2"></i>
-                        Daftar Kehadiran (<?= count($details) ?>)
-                    </h2>
-                    <button type="button" onclick="bulkSetWaktuAbsen()"
-                            class="inline-flex items-center px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white text-xs font-semibold rounded-lg transition-all">
-                        <i class="fas fa-clock mr-1"></i> Set Jam
-                    </button>
-                </div>
+                <h2 class="text-white font-bold text-sm flex items-center">
+                    <i class="fas fa-users mr-2"></i>
+                    Daftar Kehadiran (<?= count($details) ?>)
+                </h2>
             </div>
             <div class="divide-y divide-gray-200">
                 <?php if (empty($details)): ?>
@@ -210,105 +204,6 @@
 <?= $this->section('scripts') ?>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-function bulkSetWaktuAbsen() {
-    const cards = document.querySelectorAll('[data-detail-id]');
-    let count = 0;
-    cards.forEach(card => {
-        const absenInput = card.querySelector('[id^="waktu_absen_"]');
-        if (absenInput) count++;
-    });
-
-    if (count === 0) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Tidak Ada Data',
-            text: 'Tidak ada siswa dengan status hadir',
-            confirmButtonColor: '#3B82F6'
-        });
-        return;
-    }
-
-    Swal.fire({
-        title: 'Set Jam Absensi?',
-        html: `Apa kamu yakin ingin mengisi jam masuk <b>08:00</b> dan jam pulang <b>16:00</b> untuk <b>${count}</b> siswa?`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#22C55E',
-        cancelButtonColor: '#6B7280',
-        confirmButtonText: '<i class="fas fa-check mr-1"></i> Ya, Simpan!',
-        cancelButtonText: '<i class="fas fa-times mr-1"></i> Batal',
-        customClass: {
-            popup: 'rounded-2xl',
-            title: 'text-lg font-bold',
-            htmlContainer: 'text-sm'
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            bulkSaveWaktuAbsen();
-        }
-    });
-}
-
-function bulkSaveWaktuAbsen() {
-    Swal.fire({
-        title: 'Menyimpan...',
-        html: '<i class="fas fa-spinner fa-spin text-2xl text-blue-500"></i>',
-        showConfirmButton: false,
-        allowOutsideClick: false,
-        customClass: { popup: 'rounded-2xl' }
-    });
-
-    const cards = document.querySelectorAll('[data-detail-id]');
-    const promises = [];
-    const absensiPklId = <?= $absensi['id'] ?>;
-
-    cards.forEach(card => {
-        const detailId = card.getAttribute('data-detail-id');
-        const absenInput = document.getElementById('waktu_absen_' + detailId);
-        const pulangInput = document.getElementById('waktu_pulang_' + detailId);
-
-        if (!absenInput || !pulangInput) return;
-
-        absenInput.value = '08:00';
-        pulangInput.value = '16:00';
-
-        const formData = new FormData();
-        formData.append('detail_id', detailId);
-        formData.append('absensi_pkl_id', absensiPklId);
-        formData.append('waktu_absen', '08:00');
-        formData.append('waktu_pulang', '16:00');
-        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
-
-        const promise = fetch('<?= base_url('admin/absensi-pkl/update-waktu') ?>', {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        }).then(response => response.json());
-
-        promises.push(promise);
-    });
-
-    Promise.all(promises).then(results => {
-        const successCount = results.filter(r => r.success).length;
-        Swal.fire({
-            icon: 'success',
-            title: 'Berhasil!',
-            html: `Jam absensi untuk <b>${successCount}</b> siswa berhasil disimpan`,
-            confirmButtonColor: '#22C55E',
-            customClass: { popup: 'rounded-2xl' }
-        }).then(() => {
-            location.reload();
-        });
-    }).catch(() => {
-        Swal.fire({
-            icon: 'error',
-            title: 'Gagal',
-            text: 'Terjadi kesalahan saat menyimpan data',
-            confirmButtonColor: '#EF4444'
-        });
-    });
-}
-
 function saveWaktuAbsen(detailId, absensiPklId) {
     const waktuAbsenInput = document.getElementById('waktu_absen_' + detailId);
     const waktuPulangInput = document.getElementById('waktu_pulang_' + detailId);

@@ -53,6 +53,8 @@ class PengaturanController extends BaseController
         $data['kepalaSekolahNama']  = get_kepala_sekolah_nama();
         $data['kepalaSekolahNip']   = get_kepala_sekolah_nip();
         $data['hariLiburList']      = $this->hariLiburModel->getAllSorted();
+        $data['absensiPklJamMasuk'] = get_absensi_pkl_jam_masuk();
+        $data['absensiPklJamPulang'] = get_absensi_pkl_jam_pulang();
 
         return view('admin/pengaturan/index', $data);
     }
@@ -446,5 +448,27 @@ class PengaturanController extends BaseController
         }
         session()->setFlashdata('success', $msg);
         return redirect()->to('/admin/pengaturan#hari-libur');
+    }
+
+    public function updateAbsensiPklJam()
+    {
+        $jamMasuk  = trim($this->request->getPost('jam_masuk') ?? '');
+        $jamPulang = trim($this->request->getPost('jam_pulang') ?? '');
+
+        if (!$jamMasuk || !$jamPulang) {
+            session()->setFlashdata('error', 'Jam masuk dan jam pulang harus diisi.');
+            return redirect()->to('/admin/pengaturan#jam-absensi-pkl');
+        }
+
+        if (!preg_match('/^\d{2}:\d{2}$/', $jamMasuk) || !preg_match('/^\d{2}:\d{2}$/', $jamPulang)) {
+            session()->setFlashdata('error', 'Format jam tidak valid. Gunakan format HH:MM.');
+            return redirect()->to('/admin/pengaturan#jam-absensi-pkl');
+        }
+
+        set_absensi_pkl_jam_masuk($jamMasuk);
+        set_absensi_pkl_jam_pulang($jamPulang);
+
+        session()->setFlashdata('success', 'Pengaturan jam absensi PKL berhasil disimpan (Jam Masuk: ' . $jamMasuk . ', Jam Pulang: ' . $jamPulang . ')');
+        return redirect()->to('/admin/pengaturan#jam-absensi-pkl');
     }
 }

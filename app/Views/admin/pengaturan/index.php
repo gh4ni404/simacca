@@ -523,6 +523,50 @@
         </div>
     </div>
 
+    <!-- Card: Pengaturan Jam Absensi PKL -->
+    <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" id="jam-absensi-pkl">
+        <div class="px-4 md:px-6 py-3 md:py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2.5 md:gap-3">
+            <div class="w-8 h-8 md:w-10 md:h-10 bg-cyan-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-clock text-cyan-600 text-sm md:text-base"></i>
+            </div>
+            <div class="min-w-0">
+                <h3 class="font-semibold text-gray-800 text-sm md:text-base truncate">Pengaturan Jam Absensi PKL</h3>
+                <p class="text-xs text-gray-500 truncate">Atur jam masuk dan jam pulang default untuk tombol "Set Jam Absensi"</p>
+            </div>
+        </div>
+        <div class="p-4 md:p-6">
+            <form action="<?= base_url('admin/pengaturan/update-absensi-pkl-jam') ?>" method="post" class="max-w-md">
+                <?= csrf_field() ?>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Jam Masuk Default</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <i class="fas fa-sign-in-alt fa-sm"></i>
+                            </div>
+                            <input type="time" name="jam_masuk" value="<?= old('jam_masuk', $absensiPklJamMasuk ?? '08:00') ?>"
+                                   class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Jam Pulang Default</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <i class="fas fa-sign-out-alt fa-sm"></i>
+                            </div>
+                            <input type="time" name="jam_pulang" value="<?= old('jam_pulang', $absensiPklJamPulang ?? '16:00') ?>"
+                                   class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm">
+                        </div>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-400 mb-4">Nilai ini akan digunakan sebagai default saat mengklik tombol "Set Jam Absensi" di halaman monitoring absensi PKL.</p>
+                <button type="submit" class="inline-flex items-center px-5 py-2.5 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors text-sm font-medium shadow-sm">
+                    <i class="fas fa-save mr-2"></i> Simpan
+                </button>
+            </form>
+        </div>
+    </div>
+
     <script>
     // Logo preview & delete
     (function () {

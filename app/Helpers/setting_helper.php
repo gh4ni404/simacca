@@ -306,6 +306,38 @@ if (!function_exists('set_kepala_sekolah_nip')) {
     }
 }
 
+if (!function_exists('get_absensi_pkl_jam_masuk')) {
+    function get_absensi_pkl_jam_masuk(): string
+    {
+        $settingModel = model(SettingModel::class);
+        return $settingModel->get('absensi_pkl_jam_masuk') ?: '08:00';
+    }
+}
+
+if (!function_exists('set_absensi_pkl_jam_masuk')) {
+    function set_absensi_pkl_jam_masuk(string $jam): bool
+    {
+        $settingModel = model(SettingModel::class);
+        return $settingModel->setSetting('absensi_pkl_jam_masuk', $jam);
+    }
+}
+
+if (!function_exists('get_absensi_pkl_jam_pulang')) {
+    function get_absensi_pkl_jam_pulang(): string
+    {
+        $settingModel = model(SettingModel::class);
+        return $settingModel->get('absensi_pkl_jam_pulang') ?: '16:00';
+    }
+}
+
+if (!function_exists('set_absensi_pkl_jam_pulang')) {
+    function set_absensi_pkl_jam_pulang(string $jam): bool
+    {
+        $settingModel = model(SettingModel::class);
+        return $settingModel->setSetting('absensi_pkl_jam_pulang', $jam);
+    }
+}
+
 if (!function_exists('get_hari_libur_list')) {
     /**
      * Ambil semua hari libur sebagai associative array ['Y-m-d' => 'keterangan'].

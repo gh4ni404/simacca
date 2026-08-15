@@ -72,6 +72,25 @@
             </form>
         </div>
 
+        <!-- Quick Action: Set Jam Absensi -->
+        <div class="bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl shadow-md p-4 mb-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-clock text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-bold text-sm">Set Jam Absensi</h3>
+                        <p class="text-cyan-100 text-xs">Atur jam masuk & pulang semua siswa</p>
+                    </div>
+                </div>
+                <button type="button" onclick="bulkSetWaktuAbsen()"
+                        class="inline-flex items-center px-4 py-2 bg-white text-blue-600 hover:bg-blue-50 text-xs font-bold rounded-lg transition-all shadow-md flex-shrink-0 active:scale-95">
+                    <i class="fas fa-clock mr-1"></i> Atur
+                </button>
+            </div>
+        </div>
+
         <!-- Stats Compact -->
         <?php
         $totalKehadiran = $globalStats['total'] ?? 0;
@@ -184,12 +203,124 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+const TOTAL_ABSENSI = <?= count($rekapPembimbing) ?>;
+const DEFAULT_JAM_MASUK = '<?= get_absensi_pkl_jam_masuk() ?>';
+const DEFAULT_JAM_PULANG = '<?= get_absensi_pkl_jam_pulang() ?>';
+
 function toggleFilter() {
     const form = document.getElementById('filterForm');
     const icon = document.getElementById('filterToggleIcon');
     form.classList.toggle('hidden');
     icon.style.transform = form.classList.contains('hidden') ? '' : 'rotate(180deg)';
+}
+
+function bulkSetWaktuAbsen() {
+    if (TOTAL_ABSENSI === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Tidak Ada Data',
+            text: 'Tidak ada data pembimbing',
+            confirmButtonColor: '#3B82F6'
+        });
+        return;
+    }
+
+    Swal.fire({
+        title: 'Set Jam Absensi (Semua Pembimbing)',
+        html: `
+            <div class="text-left">
+                <p class="text-sm text-gray-600 mb-4">Masukkan jam masuk dan jam pulang untuk <b>semua siswa hadir</b> di <b>${TOTAL_ABSENSI}</b> pembimbing:</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Jam Masuk</label>
+                        <input type="time" id="swal-jam-masuk" value="${DEFAULT_JAM_MASUK}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Jam Pulang</label>
+                        <input type="time" id="swal-jam-pulang" value="${DEFAULT_JAM_PULANG}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+            </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#22C55E',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: '<i class="fas fa-check mr-1"></i> Simpan Semua!',
+        cancelButtonText: '<i class="fas fa-times mr-1"></i> Batal',
+        customClass: {
+            popup: 'rounded-2xl',
+            title: 'text-lg font-bold',
+            htmlContainer: 'text-sm'
+        },
+        preConfirm: () => {
+            const jamMasuk = document.getElementById('swal-jam-masuk').value;
+            const jamPulang = document.getElementById('swal-jam-pulang').value;
+            if (!jamMasuk || !jamPulang) {
+                Swal.showValidationMessage('Jam masuk dan jam pulang harus diisi');
+                return false;
+            }
+            return { jamMasuk, jamPulang };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            bulkSaveWaktuAbsen(result.value.jamMasuk, result.value.jamPulang);
+        }
+    });
+}
+
+function bulkSaveWaktuAbsen(jamMasuk, jamPulang) {
+    Swal.fire({
+        title: 'Menyimpan...',
+        html: '<i class="fas fa-spinner fa-spin text-2xl text-blue-500"></i>',
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        customClass: { popup: 'rounded-2xl' }
+    });
+
+    const formData = new FormData();
+    formData.append('waktu_absen', jamMasuk);
+    formData.append('waktu_pulang', jamPulang);
+    formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
+
+    fetch('<?= base_url('admin/absensi-pkl/bulk-update-waktu-all') ?>', {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                html: `${data.message}<br><small class="text-gray-500">Jam: ${jamMasuk} - ${jamPulang}</small>`,
+                confirmButtonColor: '#22C55E',
+                customClass: { popup: 'rounded-2xl' }
+            }).then(() => {
+                location.reload();
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: data.message || 'Terjadi kesalahan',
+                confirmButtonColor: '#EF4444'
+            });
+        }
+    })
+    .catch(() => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal',
+            text: 'Terjadi kesalahan saat menyimpan data',
+            confirmButtonColor: '#EF4444'
+        });
+    });
 }
 
 document.addEventListener('DOMContentLoaded', function() {

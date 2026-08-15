@@ -207,6 +207,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('pengaturan/hapus-hari-libur/(:num)', 'Admin\PengaturanController::deleteHariLibur/$1', ['filter' => 'role:admin']);
     $routes->post('pengaturan/import-hari-libur-nasional', 'Admin\PengaturanController::importHariLiburNasional', ['filter' => 'role:admin']);
     $routes->post('pengaturan/import-hari-minggu', 'Admin\PengaturanController::importHariMinggu', ['filter' => 'role:admin']);
+    $routes->post('pengaturan/update-absensi-pkl-jam', 'Admin\PengaturanController::updateAbsensiPklJam', ['filter' => 'role:admin']);
 
     // Arsip Jurnal PKL (Task-Oriented)
     $routes->get('jurnal-pkl-archive', 'Admin\PklArchiveController::index', ['filter' => 'role:admin']);
@@ -235,7 +236,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('absensi-pkl/detail/(:num)', 'Admin\AbsensiPklController::show/$1', ['filter' => 'role:admin']);
     $routes->get('absensi-pkl/rekap/(:num)', 'Admin\AbsensiPklController::rekap/$1', ['filter' => 'role:admin']);
     $routes->post('absensi-pkl/update-waktu', 'Admin\AbsensiPklController::updateWaktuAbsen', ['filter' => 'role:admin']);
-    $routes->post('absensi-pkl/bulk-update-waktu', 'Admin\AbsensiPklController::bulkUpdateWaktuByPembimbing', ['filter' => 'role:admin']);
+    $routes->post('absensi-pkl/bulk-update-waktu-all', 'Admin\AbsensiPklController::bulkUpdateWaktuAll', ['filter' => 'role:admin']);
 
     // Laporan
     $routes->get('laporan/absensi', 'Admin\LaporanController::absensi', ['filter' => 'role:admin']);

@@ -176,15 +176,9 @@
                             </h2>
                             <p class="text-purple-100 mt-1">Riwayat absensi kehadiran siswa bimbingan</p>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <button type="button" onclick="bulkSetWaktuAbsen()"
-                                class="inline-flex items-center px-4 py-2 bg-white/20 hover:bg-white/30 text-white text-sm font-semibold rounded-lg transition-all backdrop-blur-sm">
-                                <i class="fas fa-clock mr-2"></i> Set Jam Absensi (08:00 - 16:00)
-                            </button>
-                            <div class="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-xl">
-                                <p class="text-sm opacity-90">Total Rekapan</p>
-                                <p class="text-3xl font-bold"><?= count($absensi) ?></p>
-                            </div>
+                        <div class="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-xl">
+                            <p class="text-sm opacity-90">Total Rekapan</p>
+                            <p class="text-3xl font-bold"><?= count($absensi) ?></p>
                         </div>
                     </div>
                 </div>
@@ -315,100 +309,8 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    const PEMBIMBING_PKL_ID = <?= $absensi[0]['pembimbing_pkl_id'] ?? 0 ?>;
-    const TOTAL_ABSENSI = <?= count($absensi) ?>;
-    const TOTAL_SISWA = <?= $details['total_siswa'] ?? 0 ?>;
-
-    function bulkSetWaktuAbsen() {
-        if (TOTAL_ABSENSI === 0) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Tidak Ada Data',
-                text: 'Tidak ada data absensi untuk pembimbing ini',
-                confirmButtonColor: '#3B82F6'
-            });
-            return;
-        }
-
-        Swal.fire({
-            title: 'Set Jam Absensi?',
-            html: `Apa kamu yakin ingin mengisi jam masuk <b>08:00</b> dan jam pulang <b>16:00</b> untuk semua siswa hadir di <b><?= esc($details['nama_pembimbing'] ?? '') ?></b>?<br><br><small class="text-gray-500">Total: <?= count($absensi) ?> hari, <?= $details['total_siswa'] ?? 0 ?> siswa</small>`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#22C55E',
-            cancelButtonColor: '#6B7280',
-            confirmButtonText: '<i class="fas fa-check mr-1"></i> Ya, Simpan!',
-            cancelButtonText: '<i class="fas fa-times mr-1"></i> Batal',
-            customClass: {
-                popup: 'rounded-2xl',
-                title: 'text-lg font-bold',
-                htmlContainer: 'text-sm'
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                bulkSaveWaktuAbsen();
-            }
-        });
-    }
-
-    function bulkSaveWaktuAbsen() {
-        Swal.fire({
-            title: 'Menyimpan...',
-            html: '<i class="fas fa-spinner fa-spin text-2xl text-blue-500"></i>',
-            showConfirmButton: false,
-            allowOutsideClick: false,
-            customClass: { popup: 'rounded-2xl' }
-        });
-
-        console.log('pembimbing_pkl_id:', PEMBIMBING_PKL_ID);
-
-        const formData = new FormData();
-        formData.append('pembimbing_pkl_id', PEMBIMBING_PKL_ID);
-        formData.append('waktu_absen', '08:00');
-        formData.append('waktu_pulang', '16:00');
-        formData.append('<?= csrf_token() ?>', '<?= csrf_hash() ?>');
-
-        fetch('<?= base_url('admin/absensi-pkl/bulk-update-waktu') ?>', {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Response:', data);
-                if (data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil!',
-                        html: data.message,
-                        confirmButtonColor: '#22C55E',
-                        customClass: { popup: 'rounded-2xl' }
-                    }).then(() => {
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal',
-                        text: data.message || 'Terjadi kesalahan',
-                        confirmButtonColor: '#EF4444'
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal',
-                    text: 'Terjadi kesalahan saat menyimpan data',
-                    confirmButtonColor: '#EF4444'
-                });
-            });
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
         const rows = document.querySelectorAll('.table-row-hover');
         rows.forEach((row, index) => {
             row.style.animation = `fadeInUp 0.3s ease ${index * 30}ms both`;

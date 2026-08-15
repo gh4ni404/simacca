@@ -203,29 +203,21 @@ class AbsensiPklController extends BaseController
     }
 
     /**
-     * Bulk update waktu absen & pulang untuk semua siswa berdasarkan pembimbing_pkl_id
+     * Bulk update waktu absen & pulang untuk SEMUA siswa hadir (semua pembimbing)
      */
-    public function bulkUpdateWaktuByPembimbing()
+    public function bulkUpdateWaktuAll()
     {
-        $pembimbingPklId = $this->request->getPost('pembimbing_pkl_id');
         $waktuAbsen = $this->request->getPost('waktu_absen') ?? '08:00';
         $waktuPulang = $this->request->getPost('waktu_pulang') ?? '16:00';
 
         $isAjax = $this->request->getHeaderLine('X-Requested-With') === 'XMLHttpRequest';
 
-        if (!$pembimbingPklId) {
-            if ($isAjax) {
-                return $this->response->setJSON(['success' => false, 'message' => 'Data tidak valid: pembimbing_pkl_id kosong']);
-            }
-            return redirect()->back()->with('error', 'Data tidak valid');
-        }
-
-        // Get all absensi for this pembimbing
-        $absensiList = $this->absensiPklModel->getByPembimbingPkl((int) $pembimbingPklId);
+        // Get all absensi records
+        $absensiList = $this->absensiPklModel->findAll();
 
         if (empty($absensiList)) {
             if ($isAjax) {
-                return $this->response->setJSON(['success' => false, 'message' => 'Tidak ada data absensi untuk pembimbing ID: ' . $pembimbingPklId]);
+                return $this->response->setJSON(['success' => false, 'message' => 'Tidak ada data absensi']);
             }
             return redirect()->back()->with('error', 'Tidak ada data absensi');
         }
@@ -233,7 +225,6 @@ class AbsensiPklController extends BaseController
         $totalUpdated = 0;
 
         foreach ($absensiList as $absensi) {
-            // Get all details with status 'hadir' for this absensi
             $details = $this->absensiPklDetailModel
                 ->where('absensi_pkl_id', $absensi['id'])
                 ->where('status', 'hadir')
@@ -261,8 +252,6 @@ class AbsensiPklController extends BaseController
                 'success' => true,
                 'message' => "Berhasil memperbarui {$totalUpdated} data waktu absensi",
                 'total_updated' => $totalUpdated,
-                'total_absensi' => count($absensiList),
-                'pembimbing_pkl_id' => $pembimbingPklId
             ]);
         }
 
