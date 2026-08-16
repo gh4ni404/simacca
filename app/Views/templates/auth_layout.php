@@ -238,10 +238,10 @@
     </div>
     <?php endif; ?>
     
-    <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-2xl auth-card relative z-10">
+    <div class="w-80 md:w-96 bg-white p-8 rounded-lg shadow-2xl auth-card relative z-10">
         
         <!-- Header Section -->
-        <div class="text-center">
+        <div class="text-center mb-6">
             <?= $this->renderSection('header') ?>
         </div>
         
@@ -249,7 +249,7 @@
         <?= render_alerts() ?>
         
         <!-- Main Content -->
-        <div class="mt-8">
+        <div>
             <?= $this->renderSection('content') ?>
         </div>
         

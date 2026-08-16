@@ -8,7 +8,7 @@ Login
 <div class="flex justify-center">
     <?php $webLogo = get_logo_sekolah(); ?>
     <?php if ($webLogo): ?>
-        <img src="<?= base_url('files/logo/' . $webLogo) ?>" alt="Logo" class="w-36 h-36 md:w-44 md:h-44 object-contain">
+        <img src="<?= base_url('files/logo/' . $webLogo) ?>" alt="Logo" class="w-60 h-60 md:w-72 md:h-72 object-contain">
     <?php else: ?>
         <i class="fas fa-graduation-cap text-5xl text-indigo-600"></i>
     <?php endif; ?>
@@ -16,7 +16,7 @@ Login
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
-<form id="loginForm" action="<?= base_url('login/process'); ?>" method="POST" class="space-y-6">
+<form id="loginForm" action="<?= base_url('login/process'); ?>" method="POST" class="flex flex-col gap-4">
     <?= csrf_field(); ?>
     
     <div class="space-y-4">
@@ -76,18 +76,7 @@ Login
     </div>
 
     <!-- Remember Me & Forgot Password -->
-    <div class="flex items-center justify-between">
-        <div class="flex items-center">
-            <input 
-                type="checkbox" 
-                id="remember-me" 
-                name="remember-me"
-                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-            >
-            <label for="remember-me" class="ml-2 block text-sm text-gray-700">
-                Ingat Saya
-            </label>
-        </div>
+    <div class="flex items-center justify-end">
         <div class="text-sm">
             <a href="<?= base_url('forgot-password'); ?>" class="font-medium text-indigo-600 hover:text-indigo-500 transition-colors">
                 Lupa Password?
