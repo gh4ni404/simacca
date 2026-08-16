@@ -197,7 +197,7 @@ class GuruPiketModel extends Model
         $assignedIds = array_column($assignedQuery->findAll(), 'guru_id');
 
         $guruModel = new GuruModel();
-        $builder = $guruModel->select('guru.id, guru.nama_lengkap, guru.nip')
+        $builder = $guruModel->select('guru.id, guru.nama_lengkap, guru.nip, guru.jenis_kelamin, users.profile_photo')
             ->join('users', 'users.id = guru.user_id')
             ->where('users.is_active', 1)
             ->orderBy('guru.nama_lengkap', 'ASC');

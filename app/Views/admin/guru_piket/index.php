@@ -474,12 +474,13 @@
                     const label = document.createElement('label');
                     label.className = 'flex items-center px-4 py-3 hover:bg-indigo-50 cursor-pointer transition-colors guru-item';
                     label.setAttribute('data-search', (guru.nama_lengkap + ' ' + guru.nip).toLowerCase());
+                    const avatarHtml = guru.profile_photo
+                        ? `<img src="${'<?= base_url('profile-photo/') ?>' + guru.profile_photo}" alt="${guru.nama_lengkap}" class="h-8 w-8 object-cover rounded-full mr-3">`
+                        : `<div class="flex-shrink-0 h-8 w-8 ${guru.jenis_kelamin === 'L' ? 'bg-blue-100' : 'bg-pink-100'} rounded-full flex items-center justify-center mr-3"><span class="${guru.jenis_kelamin === 'L' ? 'text-blue-600' : 'text-pink-600'} font-semibold text-xs">${guru.nama_lengkap.substring(0, 2).toUpperCase()}</span></div>`;
                     label.innerHTML = `
                         <input type="checkbox" name="guru_ids[]" value="${guru.id}" 
                             class="guru-checkbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3">
-                        <div class="flex-shrink-0 h-8 w-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
-                            <span class="text-indigo-600 font-semibold text-xs">${guru.nama_lengkap.substring(0, 2).toUpperCase()}</span>
-                        </div>
+                        ${avatarHtml}
                         <div>
                             <p class="text-sm font-medium text-gray-900 guru-nama">${guru.nama_lengkap}</p>
                             <p class="text-xs text-gray-500 guru-nip">${guru.nip}</p>
