@@ -240,6 +240,15 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('absensi-pkl/bulk-update-waktu-by-pembimbing', 'Admin\AbsensiPklController::bulkUpdateWaktuByPembimbing', ['filter' => 'role:admin']);
     $routes->post('absensi-pkl/get-times-by-pembimbing', 'Admin\AbsensiPklController::getTimesByPembimbing', ['filter' => 'role:admin']);
 
+    // Guru Piket Management
+    $routes->get('guru-piket', 'Admin\GuruPiketController::index', ['filter' => 'role:admin']);
+    $routes->post('guru-piket/simpan', 'Admin\GuruPiketController::store', ['filter' => 'role:admin']);
+    $routes->post('guru-piket/update/(:num)', 'Admin\GuruPiketController::update/$1', ['filter' => 'role:admin']);
+    $routes->get('guru-piket/hapus/(:num)', 'Admin\GuruPiketController::delete/$1', ['filter' => 'role:admin']);
+    $routes->get('guru-piket/toggle-status/(:num)', 'Admin\GuruPiketController::toggleStatus/$1', ['filter' => 'role:admin']);
+    $routes->post('guru-piket/bulk-assign', 'Admin\GuruPiketController::bulkAssign', ['filter' => 'role:admin']);
+    $routes->post('guru-piket/get-available-guru', 'Admin\GuruPiketController::getAvailableGuru', ['filter' => 'role:admin']);
+
     // Laporan
     $routes->get('laporan/absensi', 'Admin\LaporanController::absensi', ['filter' => 'role:admin']);
     $routes->get('laporan/absensi-detail', 'Admin\LaporanController::absensiDetail', ['filter' => 'role:admin']);

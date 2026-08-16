@@ -221,6 +221,12 @@ if (!function_exists('get_sidebar_menu')) {
                     'url' => '/admin/absensi-guru'
                 ],
                 [
+                    'title' => 'Guru Piket',
+                    'icon' => 'fas fa-clipboard-list',
+                    'url' => '/admin/guru-piket',
+                    'active' => ['admin/guru-piket']
+                ],
+                [
                     'title' => 'Laporan',
                     'icon' => 'fas fa-chart-bar',
                     'url' => '#',
