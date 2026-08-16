@@ -26,6 +26,7 @@ class GuestFilter implements FilterInterface
 
     /**
      * Before filter - redirect if user is already logged in
+     * Supports remember_me_token: if valid cookie exists, redirect to dashboard
      */
     public function before(RequestInterface $request, $arguments = null)
     {
@@ -47,6 +48,43 @@ class GuestFilter implements FilterInterface
                     return redirect()->to('/');
             }
         }
+
+        // Jika ada remember_me_token cookie yang valid, redirect ke dashboard
+        // (AuthFilter akan handle auto-login saat akses protected route)
+        $token = $_COOKIE['remember_me_token'] ?? null;
+        if ($token) {
+            $rememberModel = new \App\Models\RememberTokenModel();
+            $userId = $rememberModel->validateToken($token);
+            if ($userId) {
+                // Token valid → load user role, redirect ke dashboard yang tepat
+                $userModel = new \App\Models\UserModel();
+                $user = $userModel->where('id', $userId)->where('is_active', 1)->first();
+                if ($user) {
+                    $userRoleModel = new \App\Models\UserRoleModel();
+                    $allRoles = $userRoleModel->getRolesByUserId($user['id']);
+                    if (empty($allRoles)) {
+                        $allRoles = [$user['role']];
+                    }
+
+                    $priority = [
+                        'admin'          => '/admin/dashboard',
+                        'wakakur'        => '/wakakur/dashboard',
+                        'ketua_jurusan'  => '/ketua-jurusan/dashboard',
+                        'wali_kelas'     => '/walikelas/dashboard',
+                        'guru_mapel'     => '/guru/dashboard',
+                        'instruktur'     => '/instruktur/dashboard',
+                        'siswa'          => '/siswa/jurnal-pkl',
+                    ];
+
+                    foreach ($priority as $role => $url) {
+                        if (in_array($role, $allRoles)) {
+                            return redirect()->to($url);
+                        }
+                    }
+                }
+            }
+        }
+
         return $request;
     }
 

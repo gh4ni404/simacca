@@ -16,6 +16,7 @@ class AuthController extends BaseController
     protected $siswaModel;
     protected $userRoleModel;
     protected $passwordResetTokenModel;
+    protected $rememberTokenModel;
     protected $appName;
 
     public function __construct()
@@ -25,6 +26,7 @@ class AuthController extends BaseController
         $this->siswaModel = new SiswaModel();
         $this->userRoleModel = new UserRoleModel();
         $this->passwordResetTokenModel = new \App\Models\PasswordResetTokenModel();
+        $this->rememberTokenModel = new \App\Models\RememberTokenModel();
         $this->appName = 'SIMACCA';
         
         // Load email helper
@@ -159,6 +161,18 @@ class AuthController extends BaseController
             session()->set('last_activity', time());
             session()->regenerate(false);
 
+            // Auto set remember me cookie (30 hari)
+            $token = $this->rememberTokenModel->createToken($user['id'], 30);
+            $expiry = time() + (30 * 24 * 60 * 60); // 30 hari
+            setcookie('remember_me_token', $token, [
+                'expires'  => $expiry,
+                'path'     => '/',
+                'domain'   => '',
+                'secure'   => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on'),
+                'httponly'  => true,
+                'samesite' => 'Lax',
+            ]);
+
             if ($isAjax) {
                 return $this->response->setJSON([
                     'success'      => true,
@@ -251,6 +265,21 @@ class AuthController extends BaseController
      */
     public function Logout()
     {
+        // Hapus remember me token dari DB & cookie
+        $token = $_COOKIE['remember_me_token'] ?? null;
+        if ($token) {
+            $tokenHash = hash('sha256', $token);
+            $this->rememberTokenModel->deleteTokenByHash($tokenHash);
+            setcookie('remember_me_token', '', [
+                'expires'  => time() - 3600,
+                'path'     => '/',
+                'domain'   => '',
+                'secure'   => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on'),
+                'httponly'  => true,
+                'samesite' => 'Lax',
+            ]);
+        }
+
         // Get user info before destroying session
         $username = session()->get('username');
         

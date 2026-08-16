@@ -85,6 +85,13 @@ class SessionCleanup extends BaseCommand
         } else {
             CLI::write('No old session files to clean up.', 'blue');
         }
+
+        // Cleanup expired remember tokens
+        CLI::newLine();
+        CLI::write('Cleaning up expired remember tokens...', 'yellow');
+        $rememberModel = new \App\Models\RememberTokenModel();
+        $deletedTokens = $rememberModel->cleanupExpired();
+        CLI::write("Expired remember tokens deleted: {$deletedTokens}", 'green');
     }
 
     /**
