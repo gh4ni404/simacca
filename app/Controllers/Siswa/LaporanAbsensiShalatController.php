@@ -13,6 +13,7 @@ class LaporanAbsensiShalatController extends BaseController
 
     public function __construct()
     {
+        $this->session = session();
         $this->absensiShalatModel = new AbsensiShalatModel();
         $this->siswaModel = new SiswaModel();
     }
