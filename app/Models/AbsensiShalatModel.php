@@ -227,7 +227,7 @@ class AbsensiShalatModel extends Model
     }
 
     /**
-     * Get guru's own duty session attendance
+     * Get all attendance for a date range (all guru piket sessions)
      */
     public function getRekapByGuru(int $guruId, string $from, string $to): array
     {
@@ -236,12 +236,13 @@ class AbsensiShalatModel extends Model
         return $db->table('absensi_shalat')
             ->select('absensi_shalat.waktu_absen,
                       siswa.nama_lengkap, siswa.nis, kelas.nama_kelas,
+                      guru.nama_lengkap as nama_guru,
                       prayer_sessions.created_at as waktu_sesi')
             ->join('siswa', 'siswa.id = absensi_shalat.siswa_id')
             ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
             ->join('prayer_sessions', 'prayer_sessions.id = absensi_shalat.prayer_session_id')
             ->join('guru_piket', 'guru_piket.id = prayer_sessions.guru_piket_id')
-            ->where('guru_piket.guru_id', $guruId)
+            ->join('guru', 'guru.id = guru_piket.guru_id')
             ->where('absensi_shalat.waktu_absen >=', $from . ' 00:00:00')
             ->where('absensi_shalat.waktu_absen <=', $to . ' 23:59:59')
             ->orderBy('absensi_shalat.waktu_absen', 'DESC')

@@ -74,6 +74,7 @@
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">NIS</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nama Siswa</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Kelas</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Guru Piket</th>
                         <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Waktu Absen</th>
                     </tr>
                 </thead>
@@ -84,6 +85,7 @@
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700"><?= esc($row['nis']); ?></td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900"><?= esc($row['nama_lengkap']); ?></td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700"><?= esc($row['nama_kelas']); ?></td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500"><?= esc($row['nama_guru'] ?? '-'); ?></td>
                         <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-500">
                             <?= date('H:i', strtotime($row['waktu_absen'])); ?>
                         </td>

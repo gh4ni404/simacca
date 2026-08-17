@@ -113,6 +113,8 @@
                                     <span class="font-mono text-xs"><?= substr($session['token'], 0, 8) ?>...</span>
                                     <span class="text-gray-400 mx-1">|</span>
                                     <span class="text-green-600 font-semibold"><?= $session['total_hadir'] ?> hadir</span>
+                                    <span class="text-gray-400 mx-1">|</span>
+                                    <span class="text-xs text-gray-500"><?= esc($session['nama_guru'] ?? '-') ?></span>
                                 </div>
                                 <span class="text-xs text-gray-400"><?= date('H:i', strtotime($session['created_at'])) ?></span>
                             </div>
@@ -348,6 +350,8 @@ function refreshStats() {
                             <span class="font-mono text-xs">${sess.token.substring(0, 8)}...</span>
                             <span class="text-gray-400 mx-1">|</span>
                             <span class="text-green-600 font-semibold">${sess.total_hadir} hadir</span>
+                            <span class="text-gray-400 mx-1">|</span>
+                            <span class="text-xs text-gray-500">${sess.nama_guru || '-'}</span>
                         </div>
                         <span class="text-xs text-gray-400">${new Date(sess.created_at).toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'})}</span>
                     `;
