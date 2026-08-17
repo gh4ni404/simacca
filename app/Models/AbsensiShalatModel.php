@@ -114,13 +114,10 @@ class AbsensiShalatModel extends Model
         return $this->select('absensi_shalat.*, 
                               siswa.nama_lengkap, siswa.nis, 
                               kelas.nama_kelas,
-                              guru.nama_lengkap as nama_guru_piket,
                               prayer_sessions.token')
             ->join('siswa', 'siswa.id = absensi_shalat.siswa_id')
             ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
             ->join('prayer_sessions', 'prayer_sessions.id = absensi_shalat.prayer_session_id')
-            ->join('guru_piket', 'guru_piket.id = prayer_sessions.guru_piket_id')
-            ->join('guru', 'guru.id = guru_piket.guru_id', 'left')
             ->where('DATE(absensi_shalat.waktu_absen)', $today)
             ->orderBy('absensi_shalat.waktu_absen', 'DESC')
             ->findAll();
