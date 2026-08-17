@@ -141,6 +141,9 @@
                                     <div>
                                         <p class="font-medium"><?= $att['nama_lengkap'] ?></p>
                                         <p class="text-xs text-gray-400"><?= $att['nis'] ?> - <?= $att['nama_kelas'] ?? '' ?></p>
+                                        <?php if (!empty($att['nama_guru_piket'])): ?>
+                                            <p class="text-xs text-blue-500"><i class="fas fa-chalkboard-teacher mr-1"></i><?= esc($att['nama_guru_piket']) ?></p>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                                 <span class="text-xs text-gray-400"><?= date('H:i:s', strtotime($att['waktu_absen'])) ?></span>
@@ -328,6 +331,7 @@ function refreshStats() {
                             <div>
                                 <p class="font-medium">${att.nama_lengkap}</p>
                                 <p class="text-xs text-gray-400">${att.nis} - ${att.nama_kelas || ''}</p>
+                                ${att.nama_guru_piket ? '<p class="text-xs text-blue-500"><i class="fas fa-chalkboard-teacher mr-1"></i>' + att.nama_guru_piket + '</p>' : ''}
                             </div>
                         </div>
                         <span class="text-xs text-gray-400">${att.waktu_absen ? att.waktu_absen.substring(11, 19) : ''}</span>
