@@ -147,4 +147,137 @@ class AbsensiShalatModel extends Model
             ->orderBy('absensi_shalat.waktu_absen', 'DESC')
             ->findAll();
     }
+
+    /**
+     * Get recap per kelas: count of distinct sessions attended per class
+     */
+    public function getRekapPerKelas(string $from, string $to): array
+    {
+        $db = \Config\Database::connect();
+
+        return $db->table('absensi_shalat')
+            ->select('kelas.nama_kelas,
+                      COUNT(DISTINCT absensi_shalat.siswa_id) as total_siswa_hadir,
+                      COUNT(DISTINCT absensi_shalat.prayer_session_id) as total_sesi')
+            ->join('siswa', 'siswa.id = absensi_shalat.siswa_id')
+            ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
+            ->join('prayer_sessions', 'prayer_sessions.id = absensi_shalat.prayer_session_id')
+            ->where('absensi_shalat.waktu_absen >=', $from . ' 00:00:00')
+            ->where('absensi_shalat.waktu_absen <=', $to . ' 23:59:59')
+            ->groupBy('kelas.nama_kelas')
+            ->orderBy('kelas.nama_kelas', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
+
+    /**
+     * Get per-siswa attendance list for a date range
+     */
+    public function getRekapPerSiswa(string $from, string $to, ?int $kelasId = null): array
+    {
+        $db = \Config\Database::connect();
+
+        $builder = $db->table('absensi_shalat')
+            ->select('siswa.nama_lengkap, siswa.nis, kelas.nama_kelas,
+                      COUNT(DISTINCT absensi_shalat.prayer_session_id) as total_hadir,
+                      MIN(absensi_shalat.waktu_absen) as waktu_pertama,
+                      MAX(absensi_shalat.waktu_absen) as waktu_terakhir')
+            ->join('siswa', 'siswa.id = absensi_shalat.siswa_id')
+            ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
+            ->where('absensi_shalat.waktu_absen >=', $from . ' 00:00:00')
+            ->where('absensi_shalat.waktu_absen <=', $to . ' 23:59:59')
+            ->groupBy('siswa.id')
+            ->orderBy('kelas.nama_kelas', 'ASC')
+            ->orderBy('siswa.nama_lengkap', 'ASC');
+
+        if ($kelasId) {
+            $builder->where('siswa.kelas_id', $kelasId);
+        }
+
+        return $builder->get()->getResultArray();
+    }
+
+    /**
+     * Get daily detail: sessions and attendance grouped by date
+     */
+    public function getRekapHarian(string $from, string $to): array
+    {
+        $db = \Config\Database::connect();
+
+        $sessions = $db->table('prayer_sessions')
+            ->select('prayer_sessions.id, prayer_sessions.created_at,
+                      guru.nama_lengkap as nama_guru,
+                      (SELECT COUNT(*) FROM absensi_shalat WHERE prayer_session_id = prayer_sessions.id) as jumlah_hadir')
+            ->join('guru_piket', 'guru_piket.id = prayer_sessions.guru_piket_id')
+            ->join('guru', 'guru.id = guru_piket.guru_id')
+            ->where('prayer_sessions.created_at >=', $from . ' 00:00:00')
+            ->where('prayer_sessions.created_at <=', $to . ' 23:59:59')
+            ->orderBy('prayer_sessions.created_at', 'DESC')
+            ->get()
+            ->getResultArray();
+
+        // Group by date
+        $grouped = [];
+        foreach ($sessions as $session) {
+            $date = date('Y-m-d', strtotime($session['created_at']));
+            $grouped[$date][] = $session;
+        }
+
+        return $grouped;
+    }
+
+    /**
+     * Get guru's own duty session attendance
+     */
+    public function getRekapByGuru(int $guruId, string $from, string $to): array
+    {
+        $db = \Config\Database::connect();
+
+        return $db->table('absensi_shalat')
+            ->select('absensi_shalat.waktu_absen,
+                      siswa.nama_lengkap, siswa.nis, kelas.nama_kelas,
+                      prayer_sessions.created_at as waktu_sesi')
+            ->join('siswa', 'siswa.id = absensi_shalat.siswa_id')
+            ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
+            ->join('prayer_sessions', 'prayer_sessions.id = absensi_shalat.prayer_session_id')
+            ->join('guru_piket', 'guru_piket.id = prayer_sessions.guru_piket_id')
+            ->where('guru_piket.guru_id', $guruId)
+            ->where('absensi_shalat.waktu_absen >=', $from . ' 00:00:00')
+            ->where('absensi_shalat.waktu_absen <=', $to . ' 23:59:59')
+            ->orderBy('absensi_shalat.waktu_absen', 'DESC')
+            ->get()
+            ->getResultArray();
+    }
+
+    /**
+     * Get student's personal attendance history
+     */
+    public function getRekapBySiswa(int $siswaId, string $from, string $to): array
+    {
+        $db = \Config\Database::connect();
+
+        return $db->table('absensi_shalat')
+            ->select('absensi_shalat.waktu_absen,
+                      prayer_sessions.created_at as waktu_sesi')
+            ->join('prayer_sessions', 'prayer_sessions.id = absensi_shalat.prayer_session_id')
+            ->where('absensi_shalat.siswa_id', $siswaId)
+            ->where('absensi_shalat.waktu_absen >=', $from . ' 00:00:00')
+            ->where('absensi_shalat.waktu_absen <=', $to . ' 23:59:59')
+            ->orderBy('absensi_shalat.waktu_absen', 'DESC')
+            ->get()
+            ->getResultArray();
+    }
+
+    /**
+     * Get total sessions count in date range
+     */
+    public function getTotalSessions(string $from, string $to): int
+    {
+        $db = \Config\Database::connect();
+
+        return (int) $db->table('prayer_sessions')
+            ->where('created_at >=', $from . ' 00:00:00')
+            ->where('created_at <=', $to . ' 23:59:59')
+            ->countAllResults();
+    }
 }

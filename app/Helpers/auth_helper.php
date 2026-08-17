@@ -240,6 +240,10 @@ if (!function_exists('get_sidebar_menu')) {
                             'url' => '/admin/laporan/absensi-detail'
                         ],
                         [
+                            'title' => 'Rekap Absensi Shalat',
+                            'url' => '/admin/laporan/absensi-shalat'
+                        ],
+                        [
                             'title' => 'Statistik',
                             'url' => '/admin/laporan/statistik'
                         ]
@@ -306,6 +310,10 @@ if (!function_exists('get_sidebar_menu')) {
                         [
                             'title' => 'Laporan Mingguan',
                             'url' => '/guru/laporan-mingguan'
+                        ],
+                        [
+                            'title' => 'Rekap Absensi Shalat',
+                            'url' => '/guru/laporan/absensi-shalat'
                         ]
                     ]
                 ]
@@ -411,6 +419,11 @@ if (!function_exists('get_sidebar_menu')) {
                     'title' => 'Absensi Shalat',
                     'icon' => 'fas fa-mosque',
                     'url' => '/siswa/absensi-shalat/scan'
+                ],
+                [
+                    'title' => 'Riwayat Shalat',
+                    'icon' => 'fas fa-history',
+                    'url' => '/siswa/laporan/absensi-shalat'
                 ],
                 [
                     'title' => 'Praktik Kerja Lapangan',

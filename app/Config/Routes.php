@@ -254,6 +254,9 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('laporan/absensi-detail', 'Admin\LaporanController::absensiDetail', ['filter' => 'role:admin']);
     $routes->get('laporan/absensi-detail/print', 'Admin\LaporanController::printAbsensiDetail', ['filter' => 'role:admin']);
     $routes->get('laporan/statistik', 'Admin\LaporanController::statistik', ['filter' => 'role:admin']);
+
+    // Laporan Absensi Shalat
+    $routes->get('laporan/absensi-shalat', 'Admin\LaporanAbsensiShalatController::index', ['filter' => 'role:admin']);
 });
 
 // Guru Routes (accessible by guru_mapel and wakakur who teach)
@@ -331,6 +334,9 @@ $routes->group('guru', ['filter' => 'role:guru_mapel,wakakur'], function ($route
     $routes->get('absensi-shalat/attendance/(:num)', 'Guru\AbsensiShalatController::getAttendance/$1');
     $routes->post('absensi-shalat/stop-session', 'Guru\AbsensiShalatController::stopSession');
     $routes->get('absensi-shalat/stats', 'Guru\AbsensiShalatController::getStats');
+
+    // Laporan Absensi Shalat
+    $routes->get('laporan/absensi-shalat', 'Guru\LaporanAbsensiShalatController::index');
 });
 
 // Wali Kelas Routes
@@ -409,6 +415,9 @@ $routes->group('siswa', ['filter' => 'role:siswa'], function ($routes) {
 
     // Absensi Shalat (Scan QR)
     $routes->get('absensi-shalat/scan', 'Siswa\AbsensiShalatController::scan', ['as' => 'siswa.absensi_shalat_scan']);
+
+    // Laporan Absensi Shalat
+    $routes->get('laporan/absensi-shalat', 'Siswa\LaporanAbsensiShalatController::index');
 });
 
 // Scan page route (accessible for all logged-in users, used by siswa after scanning QR)

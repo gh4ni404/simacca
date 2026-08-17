@@ -419,6 +419,9 @@
                         <a href="<?= base_url('guru/laporan-mingguan'); ?>">
                             <i class="fas fa-calendar-week"></i> Laporan Mingguan
                         </a>
+                        <a href="<?= base_url('guru/laporan/absensi-shalat'); ?>">
+                            <i class="fas fa-mosque"></i> Rekap Shalat
+                        </a>
                     </div>
                 </div>
             <?php else: ?>
