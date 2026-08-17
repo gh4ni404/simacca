@@ -323,6 +323,14 @@ $routes->group('guru', ['filter' => 'role:guru_mapel,wakakur'], function ($route
     $routes->get('absensi-guru/history', 'Guru\AbsensiGuruController::history');
     $routes->get('absensi-guru/show/(:num)', 'Guru\AbsensiGuruController::show/$1');
     $routes->get('absensi-guru/camera', 'Guru\AbsensiGuruController::camera');
+
+    // Absensi Shalat (QR Code Portal)
+    $routes->get('absensi-shalat', 'Guru\AbsensiShalatController::index', ['as' => 'guru.absensi_shalat']);
+    $routes->post('absensi-shalat/generate-token', 'Guru\AbsensiShalatController::generateToken');
+    $routes->get('absensi-shalat/current-token', 'Guru\AbsensiShalatController::getCurrentToken');
+    $routes->get('absensi-shalat/attendance/(:num)', 'Guru\AbsensiShalatController::getAttendance/$1');
+    $routes->post('absensi-shalat/stop-session', 'Guru\AbsensiShalatController::stopSession');
+    $routes->get('absensi-shalat/stats', 'Guru\AbsensiShalatController::getStats');
 });
 
 // Wali Kelas Routes
@@ -398,6 +406,19 @@ $routes->group('siswa', ['filter' => 'role:siswa'], function ($routes) {
     $routes->get('absensi-pkl/detail/(:num)', 'Siswa\AbsensiPklController::detail/$1');
     $routes->get('absensi-pkl/cetak-rekap', 'Siswa\AbsensiPklController::printRekap');
     $routes->get('absensi-pkl/cetak-rekap/(:segment)', 'Siswa\AbsensiPklController::printRekap/$1');
+
+    // Absensi Shalat (Scan QR)
+    $routes->get('absensi-shalat/scan', 'Siswa\AbsensiShalatController::scan', ['as' => 'siswa.absensi_shalat_scan']);
+});
+
+// Scan page route (accessible for all logged-in users, used by siswa after scanning QR)
+$routes->group('scan', ['filter' => 'auth'], function ($routes) {
+    $routes->get('', 'Api\AttendanceScanController::scanPage');
+});
+
+// API routes for attendance scan (CSRF exempted)
+$routes->group('api', function ($routes) {
+    $routes->post('attendance/scan', 'Api\AttendanceScanController::scan', ['filter' => 'auth']);
 });
 
 // Instruktur PKL Routes

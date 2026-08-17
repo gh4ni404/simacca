@@ -388,6 +388,9 @@
                         <a href="<?= base_url('guru/absensi-pkl'); ?>">
                             <i class="fas fa-building"></i> PKL (12)
                         </a>
+                        <a href="<?= base_url('guru/absensi-shalat'); ?>">
+                            <i class="fas fa-mosque"></i> Shalat
+                        </a>
                     </div>
                 </div>
                 <div class="bottom-nav-dropdown" id="dd-jurnal">

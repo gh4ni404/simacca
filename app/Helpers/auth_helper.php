@@ -270,6 +270,11 @@ if (!function_exists('get_sidebar_menu')) {
                     'url' => '/guru/absensi-guru'
                 ],
                 [
+                    'title' => 'Absensi Shalat',
+                    'icon' => 'fas fa-mosque',
+                    'url' => '/guru/absensi-shalat'
+                ],
+                [
                     'title' => 'Jurnal KBM',
                     'icon' => 'fas fa-book',
                     'url' => '/guru/jurnal'
@@ -401,6 +406,11 @@ if (!function_exists('get_sidebar_menu')) {
                     'title' => 'Absensi',
                     'icon' => 'fas fa-clipboard-check',
                     'url' => '/siswa/absensi'
+                ],
+                [
+                    'title' => 'Absensi Shalat',
+                    'icon' => 'fas fa-mosque',
+                    'url' => '/siswa/absensi-shalat/scan'
                 ],
                 [
                     'title' => 'Praktik Kerja Lapangan',
