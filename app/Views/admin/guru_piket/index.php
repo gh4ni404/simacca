@@ -134,12 +134,18 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <?php foreach ($guruList as $piket): ?>
                                     <div class="flex items-center justify-between bg-gray-50 rounded-lg p-3 border border-gray-100 <?= $piket['is_active'] ? '' : 'opacity-50'; ?>">
-                                        <div class="flex items-center">
+                                        <div class="flex items-center min-w-0 flex-1 mr-3">
                                             <div class="flex-shrink-0 h-9 w-9 rounded-full overflow-hidden mr-3">
-                                                <?php if (!empty($piket['profile_photo'])): ?>
+                                                <?php if (!empty($piket['profile_photo']) && file_exists(WRITEPATH . 'uploads/profile/' . $piket['profile_photo'])): ?>
                                                     <img src="<?= base_url('profile-photo/' . esc($piket['profile_photo'])); ?>" 
                                                          alt="<?= esc($piket['nama_lengkap']); ?>"
-                                                         class="h-9 w-9 object-cover rounded-full">
+                                                         class="h-9 w-9 object-cover rounded-full"
+                                                         onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
+                                                    <div class="hidden h-9 w-9 <?= $piket['jenis_kelamin'] === 'L' ? 'bg-blue-100' : 'bg-pink-100'; ?> rounded-full flex items-center justify-center">
+                                                        <span class="<?= $piket['jenis_kelamin'] === 'L' ? 'text-blue-600' : 'text-pink-600'; ?> font-semibold text-xs">
+                                                            <?= strtoupper(substr($piket['nama_lengkap'], 0, 2)); ?>
+                                                        </span>
+                                                    </div>
                                                 <?php else: ?>
                                                     <div class="h-9 w-9 <?= $piket['jenis_kelamin'] === 'L' ? 'bg-blue-100' : 'bg-pink-100'; ?> rounded-full flex items-center justify-center">
                                                         <span class="<?= $piket['jenis_kelamin'] === 'L' ? 'text-blue-600' : 'text-pink-600'; ?> font-semibold text-xs">
@@ -149,10 +155,10 @@
                                                 <?php endif; ?>
                                             </div>
                                             <div class="min-w-0 flex-1">
-                                                <p class="text-sm font-medium text-gray-900 truncate"><?= esc($piket['nama_lengkap']); ?></p>
-                                                <p class="text-xs text-gray-500 truncate"><?= esc($piket['nip']); ?></p>
+                                                <p class="text-sm font-medium text-gray-900 truncate" title="<?= esc($piket['nama_lengkap']); ?>"><?= esc($piket['nama_lengkap']); ?></p>
+                                                <p class="text-xs text-gray-500 truncate" title="<?= esc($piket['nip']); ?>"><?= esc($piket['nip']); ?></p>
                                                 <?php if (!empty($piket['keterangan'])): ?>
-                                                    <p class="text-xs text-gray-400 mt-0.5"><i class="fas fa-info-circle mr-1"></i><?= esc($piket['keterangan']); ?></p>
+                                                    <p class="text-xs text-gray-400 mt-0.5 truncate" title="<?= esc($piket['keterangan']); ?>"><i class="fas fa-info-circle mr-1"></i><?= esc($piket['keterangan']); ?></p>
                                                 <?php endif; ?>
                                             </div>
                                         </div>
@@ -475,7 +481,12 @@
                     label.className = 'flex items-center px-4 py-3 hover:bg-indigo-50 cursor-pointer transition-colors guru-item';
                     label.setAttribute('data-search', (guru.nama_lengkap + ' ' + guru.nip).toLowerCase());
                     const avatarHtml = guru.profile_photo
-                        ? `<img src="${'<?= base_url('profile-photo/') ?>' + guru.profile_photo}" alt="${guru.nama_lengkap}" class="h-8 w-8 object-cover rounded-full mr-3">`
+                        ? `<div class="flex-shrink-0 h-8 w-8 rounded-full overflow-hidden mr-3">
+                             <img src="${'<?= base_url('profile-photo/') ?>' + guru.profile_photo}" alt="${guru.nama_lengkap}" class="h-8 w-8 object-cover rounded-full" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                             <div class="h-8 w-8 ${guru.jenis_kelamin === 'L' ? 'bg-blue-100' : 'bg-pink-100'} rounded-full flex items-center justify-center" style="display:none">
+                               <span class="${guru.jenis_kelamin === 'L' ? 'text-blue-600' : 'text-pink-600'} font-semibold text-xs">${guru.nama_lengkap.substring(0, 2).toUpperCase()}</span>
+                             </div>
+                           </div>`
                         : `<div class="flex-shrink-0 h-8 w-8 ${guru.jenis_kelamin === 'L' ? 'bg-blue-100' : 'bg-pink-100'} rounded-full flex items-center justify-center mr-3"><span class="${guru.jenis_kelamin === 'L' ? 'text-blue-600' : 'text-pink-600'} font-semibold text-xs">${guru.nama_lengkap.substring(0, 2).toUpperCase()}</span></div>`;
                     label.innerHTML = `
                         <input type="checkbox" name="guru_ids[]" value="${guru.id}" 
