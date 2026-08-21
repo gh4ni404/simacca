@@ -18,7 +18,7 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('content') ?>
-<div class="bg-white rounded-xl shadow p-6">
+<div class="bg-white rounded-xl shadow p-4">
     <!-- Header -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div>
@@ -109,18 +109,30 @@
         </div>
     </div>
     <!-- Tabel -->
-    <div class="table-responsive">
-        <table class="min-w-full divide-y divide-gray-200" id="guruTable">
-            <thead class="bg-gray-50">
+    <!-- Header Tabel (tetap, tidak ikut scroll) -->
+    <div class="overflow-x-auto border-b border-gray-200" id="headerTableWrapper">
+        <table class="w-full min-w-[800px] table-auto bg-gray-50">
+            <colgroup id="headerColgroup">
+                <col><col><col><col><col><col>
+            </colgroup>
+            <thead>
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIP</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Guru</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIP</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mata Pelajaran</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                 </tr>
             </thead>
+        </table>
+    </div>
+    <!-- Body Tabel (scrollable) -->
+    <div class="overflow-x-auto overflow-y-auto max-h-[calc(100vh-30rem)] border border-gray-200 rounded-b-lg shadow-sm" id="guruTableWrapper">
+        <table class="w-full min-w-[800px] table-auto divide-y divide-gray-200" id="guruTable">
+            <colgroup id="bodyColgroup">
+                <col><col><col><col><col><col>
+            </colgroup>
             <tbody class="bg-white divide-y divide-gray-200">
                 <?php if (empty($guru)): ?>
                     <tr>
@@ -133,9 +145,6 @@
                 <?php else: ?>
                     <?php foreach ($guru as $g): ?>
                         <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900"> <?= esc($g['nip']); ?></div>
-                            </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0 h-10 w-10">
@@ -156,6 +165,9 @@
                                         <div class="text-sm text-gray-500"><?= esc($g['jenis_kelamin']) == 'L' ? 'Laki-laki' : 'Wanita'; ?></div>
                                     </div>
                                 </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900"> <?= esc($g['nip']); ?></div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900"><?= esc($g['nama_mapel']) ?? '-'; ?></div>
@@ -214,21 +226,6 @@
             </tbody>
         </table>
     </div>
-
-    <!-- Pagination (if needed) -->
-    <?php if (count($guru) > 10): ?>
-        <div class="mt-6 flex justify-between items-center">
-            <div class="text-sm text-gray-700">
-                Menampilkan <span class="font-medium">1-10</span> dari <span class="font-medium"><?= count($guru); ?></span> hasil
-            </div>
-            <div class="flex space-x-2">
-                <button class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">Sebelumnya</button>
-                <button class="px-3 py-1 border border-gray-300 rounded bg-indigo-50 text-white">1</button>
-                <button class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">2</button>
-                <button class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">Selanjutnya</button>
-            </div>
-        </div>
-    <?php endif; ?>
 </div>
 
 <!-- Delete Confirmation Modal -->
@@ -338,6 +335,72 @@
         if (event.target === modal) {
             closeModal();
         }
+    }
+
+    // ─── Sync lebar header colgroup dengan kolom body tabel (Responsif via Persentase) ───
+    function syncTableLayout() {
+        const headerTable = document.querySelector('#headerTableWrapper table');
+        const bodyTable = document.getElementById('guruTable');
+        const headerWrapper = document.getElementById('headerTableWrapper');
+        const bodyWrapper = document.getElementById('guruTableWrapper');
+
+        if (!headerTable || !bodyTable || !headerWrapper || !bodyWrapper) return;
+
+        // 1. Sync header wrapper padding untuk kompensasi lebar scrollbar
+        const scrollbarWidth = bodyWrapper.offsetWidth - bodyWrapper.clientWidth;
+        headerWrapper.style.paddingRight = scrollbarWidth + 'px';
+
+        // 2. Reset sementara ke auto-layout agar browser mengukur lebar alami konten
+        headerTable.style.tableLayout = 'auto';
+        bodyTable.style.tableLayout = 'auto';
+
+        const headerCols = document.querySelectorAll('#headerColgroup col');
+        const bodyCols = document.querySelectorAll('#bodyColgroup col');
+        headerCols.forEach(col => col.style.width = '');
+        bodyCols.forEach(col => col.style.width = '');
+
+        // Gunakan requestAnimationFrame untuk pengukuran setelah browser render layout
+        requestAnimationFrame(() => {
+            const headerThs = headerTable.querySelectorAll('thead th');
+            const firstRow = bodyTable.querySelector('tbody tr');
+            const hasColspan = firstRow && firstRow.querySelector('td[colspan]');
+            const bodyTds = (firstRow && !hasColspan) ? firstRow.querySelectorAll('td') : [];
+
+            // Hitung lebar alami kolom
+            let totalWidth = 0;
+            const naturalWidths = [];
+
+            headerThs.forEach((th, i) => {
+                const thWidth = th.getBoundingClientRect().width;
+                const tdWidth = bodyTds[i] ? bodyTds[i].getBoundingClientRect().width : 0;
+                const maxWidth = Math.max(thWidth, tdWidth);
+                naturalWidths.push(maxWidth);
+                totalWidth += maxWidth;
+            });
+
+            // Set lebar kolom sebagai persentase dari total lebar alami
+            if (totalWidth > 0) {
+                headerThs.forEach((th, i) => {
+                    const percentage = (naturalWidths[i] / totalWidth) * 100;
+                    if (headerCols[i]) headerCols[i].style.width = percentage + '%';
+                    if (bodyCols[i]) bodyCols[i].style.width = percentage + '%';
+                });
+            }
+
+            // Kunci kembali ke fixed layout agar kolom tetap sejajar sempurna
+            headerTable.style.tableLayout = 'fixed';
+            bodyTable.style.tableLayout = 'fixed';
+        });
+    }
+
+    // Jalankan sync saat load, resize, dan mutasi data
+    window.addEventListener('load', syncTableLayout);
+    window.addEventListener('resize', syncTableLayout);
+
+    if (window.ResizeObserver) {
+        const ro = new ResizeObserver(syncTableLayout);
+        const bodyTable = document.getElementById('guruTable');
+        if (bodyTable) ro.observe(bodyTable);
     }
 </script>
 <?= $this->endSection() ?>

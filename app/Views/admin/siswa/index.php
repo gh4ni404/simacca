@@ -165,16 +165,20 @@ endif;
         </div>
     </div>
 
-    <!-- Table -->
-    <div class="table-responsive">
-        <table class="min-w-full divide-y divide-gray-200" id="siswaTable">
-            <thead class="bg-gray-50">
+    <!-- Tabel -->
+    <!-- Header Tabel (tetap, tidak ikut scroll) -->
+    <div class="overflow-x-auto border-b border-gray-200" id="headerTableWrapper">
+        <table class="w-full min-w-[800px] table-auto bg-gray-50">
+            <colgroup id="headerColgroup">
+                <col><col><col><col><col><col><col><col>
+            </colgroup>
+            <thead>
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
                         <input type="checkbox" id="selectAll" class="rounded text-indigo-600">
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIS</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Siswa</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NIS</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kelas</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gender</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tahun Ajaran</th>
@@ -182,6 +186,14 @@ endif;
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                 </tr>
             </thead>
+        </table>
+    </div>
+    <!-- Body Tabel (scrollable) -->
+    <div class="overflow-x-auto overflow-y-auto max-h-[calc(100vh-31rem)] border border-gray-200 rounded-b-lg shadow-sm" id="siswaTableWrapper">
+        <table class="w-full min-w-[800px] table-auto divide-y divide-gray-200" id="siswaTable">
+            <colgroup id="bodyColgroup">
+                <col><col><col><col><col><col><col><col>
+            </colgroup>
             <tbody class="bg-white divide-y divide-gray-200">
                 <?php if (empty($siswa)): ?>
                     <tr>
@@ -198,9 +210,6 @@ endif;
                         <tr class="hover:bg-gray-50" data-kelas="<?= $s['kelas_id'] ?>" data-status="<?= $s['is_active'] ? 'active' : 'inactive' ?>">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <input type="checkbox" class="siswa-checkbox rounded text-indigo-600" value="<?= $s['id'] ?>">
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900"><?= esc($s['nis']) ?></div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
@@ -222,6 +231,9 @@ endif;
                                         <div class="text-sm text-gray-500"><?= esc($s['username']) ?></div>
                                     </div>
                                 </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900"><?= esc($s['nis']) ?></div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900"><?= esc($s['nama_kelas'] ?? '-') ?></div>
@@ -523,6 +535,72 @@ endif;
         if (event.target === modal) {
             closeModal();
         }
+    }
+
+    // ─── Sync lebar header colgroup dengan kolom body tabel (Responsif via Persentase) ───
+    function syncTableLayout() {
+        const headerTable = document.querySelector('#headerTableWrapper table');
+        const bodyTable = document.getElementById('siswaTable');
+        const headerWrapper = document.getElementById('headerTableWrapper');
+        const bodyWrapper = document.getElementById('siswaTableWrapper');
+
+        if (!headerTable || !bodyTable || !headerWrapper || !bodyWrapper) return;
+
+        // 1. Sync header wrapper padding untuk kompensasi lebar scrollbar
+        const scrollbarWidth = bodyWrapper.offsetWidth - bodyWrapper.clientWidth;
+        headerWrapper.style.paddingRight = scrollbarWidth + 'px';
+
+        // 2. Reset sementara ke auto-layout agar browser mengukur lebar alami konten
+        headerTable.style.tableLayout = 'auto';
+        bodyTable.style.tableLayout = 'auto';
+
+        const headerCols = document.querySelectorAll('#headerColgroup col');
+        const bodyCols = document.querySelectorAll('#bodyColgroup col');
+        headerCols.forEach(col => col.style.width = '');
+        bodyCols.forEach(col => col.style.width = '');
+
+        // Gunakan requestAnimationFrame untuk pengukuran setelah browser render layout
+        requestAnimationFrame(() => {
+            const headerThs = headerTable.querySelectorAll('thead th');
+            const firstRow = bodyTable.querySelector('tbody tr');
+            const hasColspan = firstRow && firstRow.querySelector('td[colspan]');
+            const bodyTds = (firstRow && !hasColspan) ? firstRow.querySelectorAll('td') : [];
+
+            // Hitung lebar alami kolom
+            let totalWidth = 0;
+            const naturalWidths = [];
+
+            headerThs.forEach((th, i) => {
+                const thWidth = th.getBoundingClientRect().width;
+                const tdWidth = bodyTds[i] ? bodyTds[i].getBoundingClientRect().width : 0;
+                const maxWidth = Math.max(thWidth, tdWidth);
+                naturalWidths.push(maxWidth);
+                totalWidth += maxWidth;
+            });
+
+            // Set lebar kolom sebagai persentase dari total lebar alami
+            if (totalWidth > 0) {
+                headerThs.forEach((th, i) => {
+                    const percentage = (naturalWidths[i] / totalWidth) * 100;
+                    if (headerCols[i]) headerCols[i].style.width = percentage + '%';
+                    if (bodyCols[i]) bodyCols[i].style.width = percentage + '%';
+                });
+            }
+
+            // Kunci kembali ke fixed layout agar kolom tetap sejajar sempurna
+            headerTable.style.tableLayout = 'fixed';
+            bodyTable.style.tableLayout = 'fixed';
+        });
+    }
+
+    // Jalankan sync saat load, resize, dan mutasi data
+    window.addEventListener('load', syncTableLayout);
+    window.addEventListener('resize', syncTableLayout);
+
+    if (window.ResizeObserver) {
+        const ro = new ResizeObserver(syncTableLayout);
+        const bodyTable = document.getElementById('siswaTable');
+        if (bodyTable) ro.observe(bodyTable);
     }
 </script>
 <?= $this->endSection() ?>
