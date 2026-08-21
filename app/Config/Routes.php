@@ -334,6 +334,8 @@ $routes->group('guru', ['filter' => 'role:guru_mapel,wakakur'], function ($route
     $routes->get('absensi-shalat/attendance/(:num)', 'Guru\AbsensiShalatController::getAttendance/$1');
     $routes->post('absensi-shalat/stop-session', 'Guru\AbsensiShalatController::stopSession');
     $routes->get('absensi-shalat/stats', 'Guru\AbsensiShalatController::getStats');
+    $routes->get('absensi-shalat/search-siswa', 'Guru\AbsensiShalatController::searchSiswaAjax');
+    $routes->post('absensi-shalat/absen-manual', 'Guru\AbsensiShalatController::absenManual');
 
     // Laporan Absensi Shalat
     $routes->get('laporan/absensi-shalat', 'Guru\LaporanAbsensiShalatController::index');

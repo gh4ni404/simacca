@@ -21,7 +21,7 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- QR Code Section -->
-    <div class="lg:col-span-2">
+    <div class="lg:col-span-2 space-y-6">
         <div class="bg-white rounded-xl shadow-lg overflow-hidden">
             <div class="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-4">
                 <h3 class="text-lg font-semibold">
@@ -73,6 +73,39 @@
                         class="hidden px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-semibold">
                         <i class="fas fa-stop mr-2"></i>Hentikan Sesi
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manual Attendance Card -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-4">
+                <h3 class="text-lg font-semibold">
+                    <i class="fas fa-user-check mr-2"></i>Absensi Manual Siswa
+                </h3>
+            </div>
+            <div class="p-6">
+                <!-- Manual Attendance Container -->
+                <div id="manual-absensi-container" class="hidden">
+                    <p class="text-gray-600 mb-4">Gunakan fitur ini jika siswa tidak membawa HP/tidak dapat melakukan scan QRIS.</p>
+                    <form id="form-manual-absen" onsubmit="submitManualAbsen(event)">
+                        <div class="mb-4">
+                            <label for="siswa-select" class="block text-sm font-medium text-gray-700 mb-2">Pilih Siswa</label>
+                            <select id="siswa-select" name="siswa_id" class="w-full text-gray-800" required>
+                                <option value=""></option>
+                            </select>
+                        </div>
+                        <button type="submit" id="btn-manual-submit"
+                            class="w-full px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors font-semibold shadow-lg">
+                            <i class="fas fa-check mr-2"></i>Catat Kehadiran
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Placeholder when session is inactive -->
+                <div id="manual-absensi-placeholder" class="text-center py-6 text-gray-400">
+                    <i class="fas fa-info-circle text-4xl mb-2 text-gray-300"></i>
+                    <p class="text-lg font-medium">Mulai sesi shalat terlebih dahulu untuk melakukan absensi manual</p>
                 </div>
             </div>
         </div>
@@ -187,7 +220,12 @@ async function postRequest(url, callback) {
         callback(data);
     } catch (err) {
         console.error('Error:', err);
-        alert('Terjadi kesalahan. Silakan coba lagi.');
+        Swal.fire({
+            title: 'Terjadi Kesalahan',
+            text: 'Terjadi kesalahan pada server. Silakan coba lagi.',
+            icon: 'error',
+            confirmButtonColor: '#10b981'
+        });
     }
 }
 
@@ -200,7 +238,12 @@ function startSession() {
             updateUI(true);
             refreshStats();
         } else {
-            alert(data.message || 'Gagal memulai sesi');
+            Swal.fire({
+                title: 'Gagal',
+                text: data.message || 'Gagal memulai sesi.',
+                icon: 'error',
+                confirmButtonColor: '#10b981'
+            });
         }
     });
 }
@@ -289,6 +332,9 @@ function updateUI(active) {
     const btnStart = document.getElementById('btn-start');
     const btnRefresh = document.getElementById('btn-refresh');
     const btnStop = document.getElementById('btn-stop');
+    
+    const manualContainer = document.getElementById('manual-absensi-container');
+    const manualPlaceholder = document.getElementById('manual-absensi-placeholder');
 
     if (active) {
         badge.className = 'px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700';
@@ -296,12 +342,19 @@ function updateUI(active) {
         btnStart.classList.add('hidden');
         btnRefresh.classList.remove('hidden');
         btnStop.classList.remove('hidden');
+        
+        if (manualContainer) manualContainer.classList.remove('hidden');
+        if (manualPlaceholder) manualPlaceholder.classList.add('hidden');
+        initSelect2();
     } else {
         badge.className = 'px-3 py-1 rounded-full text-sm font-semibold bg-gray-100 text-gray-600';
         badge.innerHTML = '<i class="fas fa-circle text-gray-400 mr-1"></i>Belum Aktif';
         btnStart.classList.remove('hidden');
         btnRefresh.classList.add('hidden');
         btnStop.classList.add('hidden');
+        
+        if (manualContainer) manualContainer.classList.add('hidden');
+        if (manualPlaceholder) manualPlaceholder.classList.remove('hidden');
     }
 }
 
@@ -368,6 +421,104 @@ setInterval(refreshStats, 5000);
 // Initial stats load
 refreshStats();
 
+let select2Initialized = false;
+
+function initSelect2() {
+    if (select2Initialized) return;
+    
+    $('#siswa-select').select2({
+        placeholder: 'Cari Nama atau NIS Siswa...',
+        minimumInputLength: 2,
+        width: '100%',
+        ajax: {
+            url: '<?= base_url("/guru/absensi-shalat/search-siswa") ?>',
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return {
+                    q: params.term
+                };
+            },
+            processResults: function (data) {
+                return {
+                    results: data.results
+                };
+            },
+            cache: true
+        }
+    });
+    
+    select2Initialized = true;
+}
+
+async function submitManualAbsen(event) {
+    event.preventDefault();
+    
+    const siswaSelect = document.getElementById('siswa-select');
+    const siswaId = siswaSelect.value;
+    
+    if (!siswaId) {
+        Swal.fire({
+            title: 'Peringatan',
+            text: 'Harap pilih siswa terlebih dahulu.',
+            icon: 'warning',
+            confirmButtonColor: '#10b981'
+        });
+        return;
+    }
+    
+    const btnSubmit = document.getElementById('btn-manual-submit');
+    const originalText = btnSubmit.innerHTML;
+    
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memproses...';
+    
+    try {
+        await refreshCsrfToken();
+        const formData = new FormData();
+        formData.append(csrfName, csrfHash);
+        formData.append('siswa_id', siswaId);
+        
+        const res = await fetch('<?= base_url("/guru/absensi-shalat/absen-manual") ?>', {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: formData
+        });
+        
+        const data = await res.json();
+        
+        if (data.success) {
+            Swal.fire({
+                title: 'Berhasil!',
+                text: data.message,
+                icon: 'success',
+                timer: 3000,
+                showConfirmButton: false
+            });
+            $('#siswa-select').val(null).trigger('change');
+            refreshStats();
+        } else {
+            Swal.fire({
+                title: 'Gagal',
+                text: data.message || 'Gagal merekam absensi manual.',
+                icon: 'warning',
+                confirmButtonColor: '#10b981'
+            });
+        }
+    } catch (err) {
+        console.error('Error:', err);
+        Swal.fire({
+            title: 'Terjadi Kesalahan',
+            text: 'Terjadi kesalahan saat memproses absensi manual.',
+            icon: 'error',
+            confirmButtonColor: '#10b981'
+        });
+    } finally {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = originalText;
+    }
+}
+
 // Auto-restore session on page refresh
 document.addEventListener('DOMContentLoaded', function() {
     const activeSession = <?= $activeSession ? json_encode($activeSession) : 'null' ?>;
@@ -381,5 +532,34 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
+<!-- Custom Select2 Styles for premium feel -->
+<style>
+.select2-container--default .select2-selection--single {
+    border-color: #e2e8f0;
+    border-radius: 0.75rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 2.8rem;
+}
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #4a5568;
+    padding-left: 1rem;
+}
+.select2-dropdown {
+    border-color: #e2e8f0;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+</style>
+
+<!-- Select2 & SweetAlert2 CSS & JS dependencies -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <?= $this->endSection() ?>

@@ -289,6 +289,137 @@ class AbsensiShalatController extends BaseController
         }
     }
 
+    /**
+     * Search siswa via AJAX for manual attendance
+     */
+    public function searchSiswaAjax()
+    {
+        try {
+            if (!$this->request->isAJAX()) {
+                return $this->response->setStatusCode(403)->setJSON(['error' => 'Forbidden']);
+            }
+
+            $userId = $this->session->get('userId');
+            $guru = $this->guruModel->getByUserId($userId);
+
+            if (!$guru) {
+                return $this->response->setStatusCode(401)->setJSON(['success' => false, 'message' => 'Unauthorized']);
+            }
+
+            $keyword = $this->request->getGet('q') ?? '';
+            $siswaModel = new \App\Models\SiswaModel();
+            
+            // Search active students
+            $students = $siswaModel->select('siswa.id, siswa.nama_lengkap, siswa.nis, kelas.nama_kelas')
+                ->join('users', 'users.id = siswa.user_id')
+                ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
+                ->where('users.is_active', 1)
+                ->groupStart()
+                    ->like('siswa.nama_lengkap', $keyword)
+                    ->orLike('siswa.nis', $keyword)
+                ->groupEnd()
+                ->limit(20)
+                ->findAll();
+
+            $results = [];
+            foreach ($students as $s) {
+                $results[] = [
+                    'id'   => $s['id'],
+                    'text' => $s['nama_lengkap'] . ' (' . $s['nis'] . ' - ' . ($s['nama_kelas'] ?? '-') . ')'
+                ];
+            }
+
+            return $this->response->setJSON(['results' => $results]);
+        } catch (Throwable $e) {
+            log_message('error', 'searchSiswaAjax error: ' . $e->getMessage());
+            return $this->response->setStatusCode(500)->setJSON([
+                'success' => false,
+                'message' => 'Terjadi kesalahan server. Coba lagi.',
+            ]);
+        }
+    }
+
+    /**
+     * Submit manual attendance for a student
+     */
+    public function absenManual()
+    {
+        try {
+            if (!$this->request->isAJAX()) {
+                return $this->response->setStatusCode(403)->setJSON(['error' => 'Forbidden']);
+            }
+
+            $userId = $this->session->get('userId');
+            $guru = $this->guruModel->getByUserId($userId);
+
+            if (!$guru) {
+                return $this->response->setStatusCode(401)->setJSON(['success' => false, 'message' => 'Unauthorized']);
+            }
+
+            $hariIni = $this->getHariIndo(date('l'));
+            $tahunAjaran = get_active_tahun_ajaran();
+            $semester = $this->determineSemester();
+
+            $guruPiket = $this->guruPiketModel
+                ->where('guru_id', $guru['id'])
+                ->where('hari', $hariIni)
+                ->where('tahun_ajaran', $tahunAjaran)
+                ->where('semester', $semester)
+                ->where('is_active', 1)
+                ->first();
+
+            if (!$guruPiket) {
+                return $this->response->setStatusCode(403)->setJSON(['success' => false, 'message' => 'Kamu nggak piket hari ini']);
+            }
+
+            $activeSession = $this->prayerSessionModel->getActiveSession($guruPiket['id']);
+
+            if (!$activeSession) {
+                return $this->response->setStatusCode(400)->setJSON(['success' => false, 'message' => 'Tidak ada sesi aktif. Harap mulai sesi shalat terlebih dahulu.']);
+            }
+
+            $siswaId = $this->request->getPost('siswa_id');
+            if (empty($siswaId)) {
+                return $this->response->setStatusCode(400)->setJSON(['success' => false, 'message' => 'Siswa harus dipilih.']);
+            }
+
+            // Get student info to make sure they exist
+            $siswaModel = new \App\Models\SiswaModel();
+            $siswa = $siswaModel->find($siswaId);
+            if (!$siswa) {
+                return $this->response->setStatusCode(404)->setJSON(['success' => false, 'message' => 'Data siswa tidak ditemukan.']);
+            }
+
+            // Record attendance
+            $result = $this->absensiShalatModel->recordAttendance($activeSession['id'], $siswaId);
+
+            if ($result === 'duplicate') {
+                return $this->response->setJSON([
+                    'success'   => false,
+                    'message'   => 'Siswa tersebut sudah absen sebelumnya.',
+                ]);
+            }
+
+            if ($result === false) {
+                return $this->response->setStatusCode(500)->setJSON([
+                    'success' => false,
+                    'message' => 'Gagal mencatat absensi. Silakan coba lagi.',
+                ]);
+            }
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => 'Absensi shalat manual berhasil untuk ' . $siswa['nama_lengkap'],
+            ]);
+        } catch (Throwable $e) {
+            log_message('error', 'absenManual error: ' . $e->getMessage());
+            return $this->response->setStatusCode(500)->setJSON([
+                'success' => false,
+                'message' => 'Terjadi kesalahan server. Coba lagi.',
+            ]);
+        }
+    }
+
     private function getHariIndo(string $day): string
     {
         $map = [
