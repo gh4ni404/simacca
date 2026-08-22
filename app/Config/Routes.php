@@ -95,6 +95,8 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('guru/import', 'Admin\GuruController::import', ['filter' => 'role:admin']);
     $routes->post('guru/process-import', 'Admin\GuruController::processImport', ['filter' => 'role:admin']);
     $routes->get('guru/download-template', 'Admin\GuruController::downloadTemplate', ['filter' => 'role:admin']);
+    $routes->get('guru/test-multi-role', 'Admin\GuruController::testMultiRole', ['filter' => 'role:admin']);
+    $routes->post('guru/fix-multi-role', 'Admin\GuruController::fixMultiRole', ['filter' => 'role:admin']);
 
     // Siswa Management
     // Dalam group 'admin'
@@ -472,6 +474,16 @@ $routes->group('ketua-jurusan', ['filter' => 'role:ketua_jurusan'], function ($r
     // Absensi PKL Monitoring
     $routes->get('absensi-pkl', 'KetuaJurusan\AbsensiPklController::index', ['as' => 'ketuajurusan.absensi_pkl']);
     $routes->get('absensi-pkl/rekap/(:num)', 'KetuaJurusan\AbsensiPklController::rekap/$1');
+});
+
+// Kepala Sekolah Routes
+$routes->group('kepala-sekolah', ['filter' => 'role:kepala_sekolah,admin'], function ($routes) {
+    $routes->get('dashboard', 'KepalaSekolah\DashboardController::index', ['as' => 'kepalasekolah.dashboard']);
+});
+
+// Tendik (Tenaga Pendidik / Staf) Routes
+$routes->group('tendik', ['filter' => 'role:tendik,admin'], function ($routes) {
+    $routes->get('dashboard', 'Tendik\DashboardController::index', ['as' => 'tendik.dashboard']);
 });
 
 // Profile Routes (for all roles)

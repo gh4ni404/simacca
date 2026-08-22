@@ -32,21 +32,7 @@ class GuestFilter implements FilterInterface
     {
         // if user is logged in, redirect to dashboard
         if (session()->get('isLoggedIn')) {
-            $role = session()->get('role');
-
-            switch ($role) {
-                case 'admin':
-                    return redirect()->to('/admin/dashboard');
-                case 'guru_mapel':
-                    return redirect()->to('/guru/dashboard');
-                case 'wali_kelas':
-                    return redirect()->to('/walikelas/dashboard');
-                case 'siswa':
-                    return redirect()->to('/siswa/jurnal-pkl');
-                
-                default:
-                    return redirect()->to('/');
-            }
+            return redirect()->to(get_dashboard_url());
         }
 
         // Jika ada remember_me_token cookie yang valid, redirect ke dashboard
@@ -68,10 +54,12 @@ class GuestFilter implements FilterInterface
 
                     $priority = [
                         'admin'          => '/admin/dashboard',
+                        'kepala_sekolah' => '/kepala-sekolah/dashboard',
                         'wakakur'        => '/wakakur/dashboard',
                         'ketua_jurusan'  => '/ketua-jurusan/dashboard',
                         'wali_kelas'     => '/walikelas/dashboard',
                         'guru_mapel'     => '/guru/dashboard',
+                        'tendik'         => '/tendik/dashboard',
                         'instruktur'     => '/instruktur/dashboard',
                         'siswa'          => '/siswa/jurnal-pkl',
                     ];

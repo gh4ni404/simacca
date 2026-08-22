@@ -29,15 +29,17 @@ class SiswaController extends BaseController
         $userId = session()->get('user_id');
         $guru = $this->guruModel->getByUserId($userId);
 
-        if (!$guru || !$guru['is_wali_kelas']) {
-            return redirect()->to('/access-denied')->with('error', 'Anda bukan wali kelas');
+        if (!$guru) {
+            return redirect()->to('/access-denied')->with('error', 'Data guru tidak ditemukan');
         }
 
+        $activeTA = get_active_tahun_ajaran();
+
         // Get kelas data
-        $kelas = $this->kelasModel->getByWaliKelas($guru['id'], get_active_tahun_ajaran());
+        $kelas = $this->kelasModel->getByWaliKelas($guru['id'], $activeTA);
 
         if (!$kelas) {
-            return redirect()->to('/access-denied')->with('error', 'Anda belum ditugaskan sebagai wali kelas');
+            return redirect()->to('/guru/dashboard')->with('info', 'Kamu belum ditugaskan sebagai wali kelas pada Tahun Ajaran ' . $activeTA . ' 😊');
         }
 
         // Get siswa dengan statistik kehadiran

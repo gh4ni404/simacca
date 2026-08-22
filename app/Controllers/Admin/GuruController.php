@@ -71,6 +71,7 @@ class GuruController extends BaseController
     public function store()
     {
         $roles = $this->request->getPost('roles') ?? [];
+        $isWaliKelas = in_array('wali_kelas', $roles) ? 1 : 0;
         $isKetuaJurusan = in_array('ketua_jurusan', $roles) ? 1 : 0;
         $data = [
             'nip' => $this->request->getPost('nip'),
@@ -81,8 +82,8 @@ class GuruController extends BaseController
             'email' => $this->request->getPost('email'),
             'roles' => $roles,
             'mata_pelajaran_id' => $this->request->getPost('mata_pelajaran_id') ?: null,
-            'is_wali_kelas' => $this->request->getPost('is_wali_kelas') ? 1 : 0,
-            'kelas_id' => $this->request->getPost('kelas_id') ?: null,
+            'is_wali_kelas' => $isWaliKelas,
+            'kelas_id' => $isWaliKelas ? ($this->request->getPost('kelas_id') ?: null) : null,
             'jurusan' => $isKetuaJurusan ? ($this->request->getPost('jurusan') ?: null) : null,
             'is_ketua_jurusan' => $isKetuaJurusan
         ];
@@ -137,6 +138,7 @@ class GuruController extends BaseController
     public function update($id)
     {
         $roles = $this->request->getPost('roles') ?? [];
+        $isWaliKelas = in_array('wali_kelas', $roles) ? 1 : 0;
         $isKetuaJurusan = in_array('ketua_jurusan', $roles) ? 1 : 0;
         $data = [
             'nip' => $this->request->getPost('nip'),
@@ -147,8 +149,8 @@ class GuruController extends BaseController
             'email' => $this->request->getPost('email'),
             'roles' => $roles,
             'mata_pelajaran_id' => $this->request->getPost('mata_pelajaran_id') ?: null,
-            'is_wali_kelas' => $this->request->getPost('is_wali_kelas') ? 1 : 0,
-            'kelas_id' => $this->request->getPost('kelas_id') ?: null,
+            'is_wali_kelas' => $isWaliKelas,
+            'kelas_id' => $isWaliKelas ? ($this->request->getPost('kelas_id') ?: null) : null,
             'jurusan' => $isKetuaJurusan ? ($this->request->getPost('jurusan') ?: null) : null,
             'is_ketua_jurusan' => $isKetuaJurusan
         ];
@@ -195,6 +197,7 @@ class GuruController extends BaseController
         $userRoleModel = new UserRoleModel();
         $roleModel = new RoleModel();
         $allRoles = $userRoleModel->getRolesByUserId($guruResult['data']['user']['id']);
+        $listsResult = $this->guruService->getFormLists();
 
         $data = [
             'title' => 'Detail Guru',
@@ -204,6 +207,7 @@ class GuruController extends BaseController
             'guru' => $guruResult['data']['guru'],
             'userData' => $guruResult['data']['user'],
             'kelas' => $guruResult['data']['kelas'],
+            'kelasList' => $listsResult['data']['kelasList'] ?? [],
             'allRoles' => $allRoles,
             'roleList' => $roleModel->getDropdown()
         ];
@@ -232,6 +236,18 @@ class GuruController extends BaseController
             return $this->response->setJSON(['success' => false, 'message' => 'Pilih minimal satu role']);
         }
 
+        $isWaliKelas = in_array('wali_kelas', $roles) ? 1 : 0;
+        $isKetuaJurusan = in_array('ketua_jurusan', $roles) ? 1 : 0;
+        $kelasId = $isWaliKelas ? ($this->request->getPost('kelas_id') ?: ($guruResult['data']['guru']['kelas_id'] ?? null)) : null;
+        $jurusan = $isKetuaJurusan ? ($this->request->getPost('jurusan') ?: ($guruResult['data']['guru']['jurusan'] ?? null)) : null;
+
+        if ($isWaliKelas && empty($kelasId)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Kelas wajib dipilih jika role Wali Kelas diaktifkan']);
+        }
+        if ($isKetuaJurusan && empty($jurusan)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Jurusan wajib diisi jika role Ketua Jurusan diaktifkan']);
+        }
+
         try {
             $userRoleModel = new UserRoleModel();
             $userRoleModel->syncRoles($userId, $roles);
@@ -243,12 +259,12 @@ class GuruController extends BaseController
             $userModel->update($userId, ['role' => $primaryRole]);
             $userModel->skipValidation(false);
 
-            // Update jurusan/is_ketua_jurusan in guru table
-            $isKetuaJurusan = in_array('ketua_jurusan', $roles) ? 1 : 0;
-            $jurusan = $isKetuaJurusan ? ($this->request->getPost('jurusan') ?: null) : null;
+            // Update status & atribut in guru table
             $guruModel = new \App\Models\GuruModel();
             $guruModel->skipValidation(true);
             $guruModel->update($id, [
+                'is_wali_kelas'    => $isWaliKelas,
+                'kelas_id'         => $kelasId,
                 'is_ketua_jurusan' => $isKetuaJurusan,
                 'jurusan'          => $jurusan
             ]);
@@ -269,6 +285,45 @@ class GuruController extends BaseController
         } catch (\Exception $e) {
             return $this->response->setJSON(['success' => false, 'message' => 'Gagal memperbarui role: ' . $e->getMessage()]);
         }
+    }
+
+    /**
+     * Diagnostic Test for Multi-Role Teachers (Admin Quick Test)
+     */
+    public function testMultiRole()
+    {
+        $diagnosticResult = $this->guruService->runMultiRoleDiagnostic();
+
+        if ($this->request->isAJAX() || $this->request->getGet('json') === '1') {
+            return $this->response->setJSON($diagnosticResult);
+        }
+
+        $data = [
+            'title'           => 'Quick Test Multi-Role Guru',
+            'pageTitle'       => 'Audit & Quick Test Multi-Role Guru',
+            'pageDescription' => 'Hasil diagnosa otomatis integritas data, sinkronisasi role, dan simulasi hidrasi session guru',
+            'user'            => $this->getUserData(),
+            'summary'         => $diagnosticResult['data']['summary'] ?? [],
+            'diagnostics'     => $diagnosticResult['data']['diagnostics'] ?? []
+        ];
+
+        return view('admin/guru/test_multi_role', $data);
+    }
+
+    /**
+     * Auto-fix multi-role attribute inconsistencies
+     */
+    public function fixMultiRole()
+    {
+        $result = $this->guruService->autoFixInconsistencies();
+        if ($result['success']) {
+            $count = $result['data']['fixed_count'] ?? 0;
+            session()->setFlashdata('success', "Audit berhasil! {$count} data guru berhasil diperbaiki/disinkronkan ✨");
+        } else {
+            session()->setFlashdata('error', 'Gagal melakukan perbaikan otomatis.');
+        }
+
+        return redirect()->to('/admin/guru/test-multi-role');
     }
 
     /**
@@ -441,44 +496,167 @@ class GuruController extends BaseController
             $errorCount = 0;
             $errors = [];
 
+            // Cache Mapel & Kelas for smart name-based & normalized fuzzy lookup
+            $mapelModel = new \App\Models\MataPelajaranModel();
+            $allMapels  = $mapelModel->findAll();
+            $mapelMap   = []; // normalized_name => id
+            $mapelListNames = [];
+            foreach ($allMapels as $m) {
+                $rawName  = trim($m['nama_mapel']);
+                $cleanName = preg_replace('/[^a-z0-9]/', '', strtolower($rawName));
+                $mapelMap[$cleanName] = $m['id'];
+                $mapelMap[strtolower($rawName)] = $m['id'];
+                if (!empty($m['kode_mapel'])) {
+                    $mapelMap[strtolower(trim($m['kode_mapel']))] = $m['id'];
+                }
+                $mapelMap[(string)$m['id']] = $m['id'];
+                $mapelListNames[] = $rawName;
+            }
+
+            $activeTA   = get_active_tahun_ajaran();
+            $kelasModel = new \App\Models\KelasModel();
+            $allKelas   = $kelasModel->where('tahun_ajaran', $activeTA)->findAll();
+            $kelasMap   = []; // normalized_name => id
+            $kelasListNames = [];
+            foreach ($allKelas as $k) {
+                $rawKelas  = trim($k['nama_kelas']);
+                $cleanKelas = preg_replace('/[^a-z0-9]/', '', strtolower($rawKelas));
+                $kelasMap[$cleanKelas] = $k['id'];
+                $kelasMap[strtolower($rawKelas)] = $k['id'];
+                $kelasMap[(string)$k['id']] = $k['id'];
+                $kelasListNames[] = $rawKelas;
+            }
+
+            $roleMap = [
+                'guru mapel'               => 'guru_mapel',
+                'guru'                     => 'guru_mapel',
+                'guru_mapel'               => 'guru_mapel',
+                'wali kelas'               => 'wali_kelas',
+                'walikelas'                => 'wali_kelas',
+                'wali_kelas'               => 'wali_kelas',
+                'wakakur'                  => 'wakakur',
+                'wakil kepala kurikulum'   => 'wakakur',
+                'ketua jurusan'            => 'ketua_jurusan',
+                'kajur'                    => 'ketua_jurusan',
+                'ketua_jurusan'            => 'ketua_jurusan',
+                'kepala sekolah'           => 'kepala_sekolah',
+                'kepsek'                   => 'kepala_sekolah',
+                'kepala_sekolah'           => 'kepala_sekolah',
+                'tendik'                   => 'tendik',
+                'tenaga pendidik'          => 'tendik',
+                'staf'                     => 'tendik',
+                'tu'                       => 'tendik',
+                'admin'                    => 'admin',
+                'administrator'            => 'admin',
+            ];
+
             foreach ($rows as $index => $row) {
                 if (empty($row[0])) continue; // Skip empty rows
 
                 try {
-                    $nip = trim($row[0]);
-                    $namaLengkap = trim($row[1]);
-                    $jenisKelamin = strtoupper(trim($row[2]));
-                    $username = trim($row[3]);
-                    $password = trim($row[4]);
-                    $email = trim($row[5]);
-                    $role = trim($row[6]);
-                    $mapelId = isset($row[7]) ? trim($row[7]) : null;
-                    $kelasId = isset($row[8]) ? trim($row[8]) : null;
-                    $isWaliKelas = (isset($row[9]) && $row[9] == 1) ? 1 : 0;
+                    $nip          = trim($row[0]);
+                    $namaLengkap  = trim($row[1]);
+                    $jkInput      = strtolower(trim($row[2] ?? ''));
+                    $username     = trim($row[3] ?? '');
+                    $password     = trim($row[4] ?? '');
+                    $email        = trim($row[5] ?? '');
+                    $roleRaw      = trim($row[6] ?? '');
+                    $mapelInput   = trim($row[7] ?? '');
+                    $kelasInput   = trim($row[8] ?? '');
+                    $jurusanInput = trim($row[9] ?? '');
 
-                    // Validasi data
-                    if (empty($nip) || empty($namaLengkap) || empty($username) || empty($password) || empty($role)) {
-                        throw new \Exception("Data tidak lengkap pada baris " . ($index + 2));
+                    // Validasi data dasar
+                    if (empty($nip) || empty($namaLengkap)) {
+                        throw new \Exception("NIP dan Nama Lengkap wajib diisi pada baris " . ($index + 2));
                     }
 
-                    // Validasi jenis kelamin
-                    $jenisKelamin = ($jenisKelamin == 'L' || $jenisKelamin == 'P') ? $jenisKelamin : 'L';
+                    // Jenis kelamin (L/P)
+                    $jenisKelamin = (str_contains($jkInput, 'p') || str_contains($jkInput, 'perempuan')) ? 'P' : 'L';
 
-                    // Validasi role
-                    $role = in_array($role, ['guru_mapel', 'wali_kelas', 'wakakur']) ? $role : 'guru_mapel';
+                    // Username & Password otomatis jika kosong
+                    if (empty($username)) {
+                        $username = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $nip));
+                    }
+                    if (empty($password)) {
+                        $password = 'smk' . (strlen($nip) >= 4 ? substr($nip, -4) : '1234');
+                    }
+
+                    // Parse Roles
+                    $parsedRoles = [];
+                    if (!empty($roleRaw)) {
+                        $parts = array_map('trim', explode(',', $roleRaw));
+                        foreach ($parts as $p) {
+                            $lowerP = strtolower($p);
+                            if (isset($roleMap[$lowerP])) {
+                                $parsedRoles[] = $roleMap[$lowerP];
+                            }
+                        }
+                    }
+
+                    // If Kelas Wali is filled, auto-add wali_kelas role if missing
+                    if (!empty($kelasInput) && !in_array('wali_kelas', $parsedRoles)) {
+                        $parsedRoles[] = 'wali_kelas';
+                    }
+
+                    // If Jurusan is filled, auto-add ketua_jurusan role if missing
+                    if (!empty($jurusanInput) && !in_array('ketua_jurusan', $parsedRoles)) {
+                        $parsedRoles[] = 'ketua_jurusan';
+                    }
+
+                    if (empty($parsedRoles)) {
+                        $parsedRoles = ['guru_mapel'];
+                    }
+
+                    // Smart Lookup Mata Pelajaran ID (exact & normalized)
+                    $mapelId = null;
+                    if (!empty($mapelInput)) {
+                        $cleanInput = preg_replace('/[^a-z0-9]/', '', strtolower($mapelInput));
+                        if (isset($mapelMap[$cleanInput])) {
+                            $mapelId = $mapelMap[$cleanInput];
+                        } else {
+                            $availMapelStr = implode(', ', array_slice($mapelListNames, 0, 8));
+                            throw new \Exception("Mata Pelajaran '{$mapelInput}' tidak ditemukan pada baris " . ($index + 2) . ". Contoh yang tersedia: {$availMapelStr}");
+                        }
+                    }
+
+                    // Smart Lookup Kelas ID for Active TA (exact & normalized)
+                    $kelasId = null;
+                    if (in_array('wali_kelas', $parsedRoles)) {
+                        if (!empty($kelasInput)) {
+                            $cleanKelasInput = preg_replace('/[^a-z0-9]/', '', strtolower($kelasInput));
+                            if (isset($kelasMap[$cleanKelasInput])) {
+                                $kelasId = $kelasMap[$cleanKelasInput];
+                            } else {
+                                $availKelasStr = implode(', ', array_slice($kelasListNames, 0, 8));
+                                throw new \Exception("Kelas Wali '{$kelasInput}' tidak ditemukan untuk TA Aktif {$activeTA} pada baris " . ($index + 2) . ". Kelas tersedia: {$availKelasStr}");
+                            }
+                        } else {
+                            throw new \Exception("Wali Kelas wajib mengisi kolom Nama Kelas Wali pada baris " . ($index + 2));
+                        }
+                    }
+
+                    // Validate Jurusan for Ketua Jurusan
+                    $jurusan = null;
+                    if (in_array('ketua_jurusan', $parsedRoles)) {
+                        if (!empty($jurusanInput)) {
+                            $jurusan = strtoupper($jurusanInput);
+                        } else {
+                            throw new \Exception("Ketua Jurusan wajib mengisi kolom Jurusan pada baris " . ($index + 2));
+                        }
+                    }
 
                     // Create guru using service
                     $guruData = [
-                        'nip' => $nip,
-                        'nama_lengkap' => $namaLengkap,
-                        'jenis_kelamin' => $jenisKelamin,
-                        'username' => $username,
-                        'password' => $password,
-                        'email' => !empty($email) ? $email : null,
-                        'role' => $role,
-                        'mata_pelajaran_id' => !empty($mapelId) ? $mapelId : null,
-                        'kelas_id' => !empty($kelasId) ? $kelasId : null,
-                        'is_wali_kelas' => $isWaliKelas
+                        'nip'               => $nip,
+                        'nama_lengkap'      => $namaLengkap,
+                        'jenis_kelamin'     => $jenisKelamin,
+                        'username'          => $username,
+                        'password'          => $password,
+                        'email'             => !empty($email) ? $email : null,
+                        'roles'             => array_unique($parsedRoles),
+                        'mata_pelajaran_id' => $mapelId,
+                        'kelas_id'          => $kelasId,
+                        'jurusan'           => $jurusan,
                     ];
 
                     $result = $this->guruService->createGuru($guruData);
@@ -514,95 +692,208 @@ class GuruController extends BaseController
     }
 
     /**
-     * Download template Excel import guru
+     * Download template Excel import guru dengan Interaktif Dropdown & Reference Sheet
      */
     public function downloadTemplate()
     {
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+
+        // Sheet 1: Template Utama
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Template Import Guru');
 
-        // Header
+        // Sheet 2: Referensi Data
+        $refSheet = $spreadsheet->createSheet();
+        $refSheet->setTitle('Referensi Data');
+
+        // Populate Sheet 2 (Referensi Data) dari Database Real-time
+        $mapelModel  = new \App\Models\MataPelajaranModel();
+        $activeTA    = get_active_tahun_ajaran();
+        $kelasModel  = new \App\Models\KelasModel();
+
+        $mapels  = $mapelModel->orderBy('nama_mapel', 'ASC')->findAll();
+        $kelases = $kelasModel->where('tahun_ajaran', $activeTA)->orderBy('nama_kelas', 'ASC')->findAll();
+        
+        $refSheet->setCellValue('A1', 'Mata Pelajaran');
+        $refSheet->setCellValue('B1', "Kelas TA {$activeTA}");
+        $refSheet->setCellValue('C1', 'Jurusan');
+
+        $refSheet->getStyle('A1:C1')->getFont()->setBold(true);
+
+        $rowMapel = 2;
+        foreach ($mapels as $m) {
+            $refSheet->setCellValue('A' . $rowMapel, $m['nama_mapel']);
+            $rowMapel++;
+        }
+        $mapelLastRow = max(2, $rowMapel - 1);
+
+        $rowKelas = 2;
+        $jurusanSet = [];
+        foreach ($kelases as $k) {
+            $refSheet->setCellValue('B' . $rowKelas, $k['nama_kelas']);
+            if (!empty($k['jurusan'])) {
+                $jurusanSet[strtoupper(trim($k['jurusan']))] = true;
+            }
+            $rowKelas++;
+        }
+        $kelasLastRow = max(2, $rowKelas - 1);
+
+        $jurusanList = !empty($jurusanSet) ? array_keys($jurusanSet) : ['DKV', 'MPLB', 'AT', 'TKJ', 'RPL'];
+        $rowJur = 2;
+        foreach ($jurusanList as $j) {
+            $refSheet->setCellValue('C' . $rowJur, $j);
+            $rowJur++;
+        }
+        $jurusanLastRow = max(2, $rowJur - 1);
+
+        // Header Sheet 1
         $headers = [
             'A1' => 'NIP',
-            'B1' => 'NAMA LENGKAP',
-            'C1' => 'JENIS KELAMIN (L/P)',
-            'D1' => 'USERNAME',
-            'E1' => 'PASSWORD',
-            'F1' => 'EMAIL',
-            'G1' => 'ROLE (guru_mapel / wali_kelas / wakakur)',
-            'H1' => 'MATA_PELAJARAN_ID',
-            'I1' => 'KELAS_ID',
-            'J1' => 'IS_WALI_KELAS (1/0)',
+            'B1' => 'Nama Lengkap',
+            'C1' => 'Jenis Kelamin (Pilih Dropdown)',
+            'D1' => 'Username (Opsional)',
+            'E1' => 'Password (Opsional)',
+            'F1' => 'Email (Opsional)',
+            'G1' => 'Role (Pilih Dropdown / Dipisah Koma)',
+            'H1' => 'Mata Pelajaran (Pilih Dropdown)',
+            'I1' => 'Nama Kelas Wali (Pilih Dropdown)',
+            'J1' => 'Jurusan Ketua (Pilih Dropdown)',
         ];
 
         foreach ($headers as $cell => $text) {
             $sheet->setCellValue($cell, $text);
         }
 
-        // Styling header
+        // Styling header Sheet 1
         $sheet->getStyle('A1:J1')->applyFromArray([
-            'font' => ['bold' => true],
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
             ],
             'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                'startColor' => ['argb' => 'FFDDEEFF']
+                'fillType'   => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['argb' => 'FF4F46E5'] // Indigo
             ]
         ]);
+        $sheet->getRowDimension(1)->setRowHeight(28);
 
-        // Contoh data
+        // Contoh Data
+        $firstMapel = $mapels[0]['nama_mapel'] ?? 'Matematika';
+        $firstKelas = $kelases[0]['nama_kelas'] ?? 'X RPL 1';
+        $firstJur   = $jurusanList[0] ?? 'DKV';
+
         $sheet->fromArray([
             [
-                '1987654321',
-                'Budi Santoso',
-                'L',
+                '198501012010011001',
+                'Budi Santoso, S.Pd',
+                'Laki-laki',
                 'budi.santoso',
                 'password123',
-                'budi@email.com',
-                'guru_mapel',
-                2,
-                '',
-                0
+                'budi@smk.sch.id',
+                'Guru Mapel, Wali Kelas',
+                $firstMapel,
+                $firstKelas,
+                ''
             ],
             [
-                '1987654322',
-                'Siti Aminah',
-                'P',
+                '198203152008012002',
+                'Siti Aminah, M.Pd',
+                'Perempuan',
                 'siti.aminah',
                 'password123',
-                'siti@email.com',
-                'wali_kelas',
+                'siti@smk.sch.id',
+                'Guru Mapel, Ketua Jurusan',
+                $firstMapel,
                 '',
-                3,
-                1
+                $firstJur
             ],
             [
-                '1122334455',
-                'Ahmad Wakakur',
-                'L',
-                'ahmad.wakakur',
+                '197505101999031003',
+                'Drs. H. Ahmad Wijaya, M.M.',
+                'Laki-laki',
+                'ahmad.kepsek',
                 'password123',
-                'ahmad@email.com',
-                'wakakur',
-                1,
-                5,
-                1
+                'ahmad@smk.sch.id',
+                'Kepala Sekolah',
+                '',
+                '',
+                ''
+            ],
+            [
+                '199008202015021004',
+                'Rahmat Hidayat, A.Md',
+                'Laki-laki',
+                '',
+                '',
+                'rahmat@smk.sch.id',
+                'Tendik',
+                '',
+                '',
+                ''
             ]
         ], null, 'A2');
 
-        // Auto width
+        // Pasang Excel Data Validation Dropdowns pada Baris 2 s.d. 100
+        for ($r = 2; $r <= 100; $r++) {
+            // Dropdown C: Jenis Kelamin
+            $vC = $sheet->getCell("C{$r}")->getDataValidation();
+            $vC->setType(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST);
+            $vC->setErrorStyle(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::STYLE_INFORMATION);
+            $vC->setAllowBlank(true);
+            $vC->setShowDropDown(true);
+            $vC->setFormula1('"Laki-laki,Perempuan"');
+
+            // Dropdown G: Role
+            $vG = $sheet->getCell("G{$r}")->getDataValidation();
+            $vG->setType(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST);
+            $vG->setErrorStyle(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::STYLE_INFORMATION);
+            $vG->setAllowBlank(true);
+            $vG->setShowDropDown(true);
+            $vG->setFormula1('"Guru Mapel,Wali Kelas,Guru Mapel; Wali Kelas,Ketua Jurusan,Kepala Sekolah,Tendik,Wakakur"');
+
+            // Dropdown H: Mata Pelajaran (mengacu ke Sheet Referensi Data)
+            $vH = $sheet->getCell("H{$r}")->getDataValidation();
+            $vH->setType(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST);
+            $vH->setErrorStyle(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::STYLE_INFORMATION);
+            $vH->setAllowBlank(true);
+            $vH->setShowDropDown(true);
+            $vH->setFormula1("'Referensi Data'!\$A\$2:\$A\$" . $mapelLastRow);
+
+            // Dropdown I: Kelas Wali (mengacu ke Sheet Referensi Data)
+            $vI = $sheet->getCell("I{$r}")->getDataValidation();
+            $vI->setType(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST);
+            $vI->setErrorStyle(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::STYLE_INFORMATION);
+            $vI->setAllowBlank(true);
+            $vI->setShowDropDown(true);
+            $vI->setFormula1("'Referensi Data'!\$B\$2:\$B\$" . $kelasLastRow);
+
+            // Dropdown J: Jurusan (mengacu ke Sheet Referensi Data)
+            $vJ = $sheet->getCell("J{$r}")->getDataValidation();
+            $vJ->setType(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST);
+            $vJ->setErrorStyle(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::STYLE_INFORMATION);
+            $vJ->setAllowBlank(true);
+            $vJ->setShowDropDown(true);
+            $vJ->setFormula1("'Referensi Data'!\$C\$2:\$C\$" . $jurusanLastRow);
+        }
+
+        // Auto width Sheet 1
         foreach (range('A', 'J') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
-        // Freeze header
+        // Auto width Sheet 2
+        foreach (range('A', 'C') as $col) {
+            $refSheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Set active sheet ke Sheet 1
+        $spreadsheet->setActiveSheetIndex(0);
         $sheet->freezePane('A2');
 
-        // Output
+        // Output file
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        $filename = 'template-import-guru.xlsx';
+        $filename = 'template-import-guru-smk.xlsx';
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment; filename="' . $filename . '"');

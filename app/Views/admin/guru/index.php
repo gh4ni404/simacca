@@ -25,17 +25,21 @@
             <h2 class="text-2xl font-bold text-gray-800"><?= $pageTitle; ?></h2>
             <p class="text-gray-600"><?= $pageDescription; ?></p>
         </div>
-        <div class="mt-4 md:mt-0 flex space-x-3">
+        <div class="mt-4 md:mt-0 flex flex-wrap gap-2">
+            <a href="<?= base_url('admin/guru/test-multi-role'); ?>"
+                class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center text-sm font-medium shadow-sm">
+                <i class="fas fa-stethoscope mr-2"></i> Audit & Quick Test Multi-Role
+            </a>
             <a href="<?= base_url('admin/guru/export'); ?>"
-                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center">
+                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center text-sm font-medium">
                 <i class="fas fa-file-export mr-2"></i> Export Excel
             </a>
             <a href="<?= base_url('admin/guru/import') ?>" 
-               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
+               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center text-sm font-medium">
                 <i class="fas fa-file-import mr-2"></i> Import Excel
             </a>
             <a href="<?= base_url('admin/guru/tambah'); ?>"
-                class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center">
+                class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center text-sm font-medium">
                 <i class="fas fa-plus mr-2"></i> Tambah Guru
             </a>
         </div>

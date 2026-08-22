@@ -17,31 +17,34 @@
         <div class="px-4 pb-4 md:px-6 md:pb-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <h4 class="font-semibold text-blue-900 mb-2 text-sm">Format Data:</h4>
+                    <h4 class="font-semibold text-blue-900 mb-2 text-sm">Format Data Excel yang Mudah & Ramah:</h4>
                     <ul class="list-disc list-inside space-y-1.5 text-sm text-blue-700">
                         <li>Format file harus Excel (.xlsx atau .xls)</li>
-                        <li>Pastikan format kolom sesuai template</li>
-                        <li>Kolom wajib: NIP, Nama Lengkap, Jenis Kelamin, Role</li>
-                        <li>Kolom optional: Email, Mata Pelajaran</li>
-                        <li>Jika username/password tidak diisi, akan digenerate otomatis</li>
+                        <li>Kolom Wajib: <b>NIP</b> dan <b>Nama Lengkap</b></li>
+                        <li><b>Role</b>: Tulis nama role yang ramah (dipisah koma jika multi-role), contoh: <i>Guru Mapel, Wali Kelas</i> atau <i>Ketua Jurusan</i></li>
+                        <li><b>Mata Pelajaran</b>: Tulis nama mapel (contoh: <i>Matematika</i>, <i>Bahasa Indonesia</i>) - tidak perlu hapal ID!</li>
+                        <li><b>Nama Kelas Wali</b>: Tulis nama kelas (contoh: <i>X RPL 1</i>, <i>XI DKV 2</i>) - otomatis dicocokkan pada Tahun Ajaran Aktif!</li>
+                        <li><b>Jurusan Ketua</b>: Tulis singkatan jurusan (contoh: <i>DKV</i>, <i>MPLB</i>, <i>AT</i>) - wajib untuk Ketua Jurusan</li>
+                        <li>Username & Password opsional: jika kosong, otomatis dibuat dari NIP.</li>
                     </ul>
                 </div>
                 <div>
-                    <h4 class="font-semibold text-blue-900 mb-2 text-sm">Panduan Tambahan:</h4>
+                    <h4 class="font-semibold text-blue-900 mb-2 text-sm">Pilihan Role yang Didukung:</h4>
                     <ul class="list-disc list-inside space-y-1.5 text-sm text-blue-700">
-                        <li>Jangan ubah nama kolom</li>
-                        <li>Jenis kelamin hanya <b>L</b> atau <b>P</b></li>
-                        <li>Role: <b>guru_mapel</b>, <b>wali_kelas</b>, atau <b>wakakur</b></li>
-                        <li>IS_WALI_KELAS: 1 (ya) / 0 (tidak)</li>
-                        <li>Kosongkan KELAS_ID jika bukan wali kelas</li>
+                        <li><b>Guru Mapel</b> / <b>Guru</b></li>
+                        <li><b>Wali Kelas</b></li>
+                        <li><b>Ketua Jurusan</b> / <b>Kajur</b></li>
+                        <li><b>Kepala Sekolah</b> / <b>Kepsek</b></li>
+                        <li><b>Tendik</b> / <b>Staf</b> / <b>TU</b></li>
+                        <li><b>Wakakur</b> / <b>Wakil Kepala Kurikulum</b></li>
                     </ul>
                 </div>
             </div>
 
             <div class="mt-4 flex flex-col sm:flex-row gap-3">
                 <a href="<?= base_url('admin/guru/download-template') ?>"
-                   class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center text-sm">
-                    <i class="fas fa-download mr-2"></i> Download Template
+                   class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center justify-center text-sm font-semibold shadow-sm">
+                    <i class="fas fa-file-excel mr-2"></i> Download Template (.xlsx)
                 </a>
                 <a href="<?= base_url('admin/guru') ?>"
                    class="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 flex items-center justify-center text-sm">
@@ -84,12 +87,8 @@
                             <span class="ml-2 text-sm md:text-base text-gray-700">Lewati data duplikat (berdasarkan NIP)</span>
                         </label>
                         <label class="inline-flex items-start">
-                            <input type="checkbox" name="generate_password" class="rounded text-indigo-600 mt-0.5">
-                            <span class="ml-2 text-sm md:text-base text-gray-700">Generate password otomatis untuk data tanpa password</span>
-                        </label>
-                        <label class="inline-flex items-start">
-                            <input type="checkbox" name="update_existing" class="rounded text-indigo-600 mt-0.5">
-                            <span class="ml-2 text-sm md:text-base text-gray-700">Update data yang sudah ada (berdasarkan NIP)</span>
+                            <input type="checkbox" name="generate_password" class="rounded text-indigo-600 mt-0.5" checked>
+                            <span class="ml-2 text-sm md:text-base text-gray-700">Generate password/username otomatis jika tidak diisi</span>
                         </label>
                     </div>
                 </div>
@@ -102,10 +101,10 @@
                             <thead class="bg-gray-50 sticky top-0">
                                 <tr>
                                     <th class="px-3 md:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">NIP</th>
-                                    <th class="px-3 md:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nama Guru</th>
-                                    <th class="px-3 md:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Mapel</th>
+                                    <th class="px-3 md:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nama Lengkap</th>
+                                    <th class="px-3 md:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Mata Pelajaran</th>
                                     <th class="px-3 md:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                                    <th class="px-3 md:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden md:table-cell">Status</th>
+                                    <th class="px-3 md:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase hidden md:table-cell">Kelas / Jurusan</th>
                                 </tr>
                             </thead>
                             <tbody id="previewBody" class="bg-white divide-y divide-gray-200">
@@ -173,11 +172,18 @@
                         return;
                     }
 
-                    function roleBadge(role) {
-                        var r = String(role).toLowerCase().trim();
-                        if (r === 'wali_kelas') return '<span class="badge badge-yellow">Wali Kelas</span>';
-                        if (r === 'wakakur') return '<span class="badge badge-red">Wakakur</span>';
-                        return '<span class="badge badge-green">Guru Mapel</span>';
+                    function roleBadge(roleStr) {
+                        if (!roleStr || roleStr === '-') return '<span class="px-2 py-0.5 text-xs rounded bg-gray-100 text-gray-700">-</span>';
+                        var roles = String(roleStr).split(',').map(function(r){ return r.trim().toLowerCase(); });
+                        var badges = roles.map(function(r) {
+                            if (r === 'wali_kelas') return '<span class="px-1.5 py-0.5 text-xs rounded bg-amber-100 text-amber-800 font-semibold mr-1">Wali Kelas</span>';
+                            if (r === 'wakakur') return '<span class="px-1.5 py-0.5 text-xs rounded bg-red-100 text-red-800 font-semibold mr-1">Wakakur</span>';
+                            if (r === 'ketua_jurusan') return '<span class="px-1.5 py-0.5 text-xs rounded bg-purple-100 text-purple-800 font-semibold mr-1">Ketua Jurusan</span>';
+                            if (r === 'kepala_sekolah') return '<span class="px-1.5 py-0.5 text-xs rounded bg-blue-100 text-blue-800 font-semibold mr-1">Kepala Sekolah</span>';
+                            if (r === 'tendik') return '<span class="px-1.5 py-0.5 text-xs rounded bg-teal-100 text-teal-800 font-semibold mr-1">Tendik</span>';
+                            return '<span class="px-1.5 py-0.5 text-xs rounded bg-indigo-100 text-indigo-800 font-semibold mr-1">Guru Mapel</span>';
+                        });
+                        return badges.join('');
                     }
 
                     let html = '';
@@ -185,14 +191,17 @@
                         const nip = row[0] || '-';
                         const nama = row[1] || '-';
                         const role = row[6] || '-';
-                        const mapelId = row[7] || '-';
+                        const mapel = row[7] || '-';
+                        const kelas = row[8] || '';
+                        const jurusan = row[9] || '';
+                        const extraDetail = (kelas ? 'Kelas: ' + kelas : '') + (jurusan ? (kelas ? ' | ' : '') + 'Jurusan: ' + jurusan : '');
 
                         html += '<tr class="' + (index % 2 === 0 ? 'bg-white' : 'bg-gray-50') + '">'
-                            + '<td class="px-3 md:px-4 py-2 text-xs md:text-sm text-gray-900">' + escapeHtml(String(nip)) + '</td>'
-                            + '<td class="px-3 md:px-4 py-2 text-xs md:text-sm text-gray-900">' + escapeHtml(String(nama)) + '</td>'
-                            + '<td class="px-3 md:px-4 py-2 text-xs md:text-sm text-gray-900 hidden sm:table-cell">' + escapeHtml(String(mapelId)) + '</td>'
+                            + '<td class="px-3 md:px-4 py-2 text-xs md:text-sm font-mono text-gray-900">' + escapeHtml(String(nip)) + '</td>'
+                            + '<td class="px-3 md:px-4 py-2 text-xs md:text-sm text-gray-900 font-medium">' + escapeHtml(String(nama)) + '</td>'
+                            + '<td class="px-3 md:px-4 py-2 text-xs md:text-sm text-gray-700 hidden sm:table-cell">' + escapeHtml(String(mapel)) + '</td>'
                             + '<td class="px-3 md:px-4 py-2 text-xs md:text-sm">' + roleBadge(role) + '</td>'
-                            + '<td class="px-3 md:px-4 py-2 text-xs md:text-sm text-green-600 hidden md:table-cell">Siap Import</td>'
+                            + '<td class="px-3 md:px-4 py-2 text-xs md:text-sm text-gray-600 hidden md:table-cell">' + (extraDetail ? escapeHtml(extraDetail) : '-') + '</td>'
                             + '</tr>';
                     });
 

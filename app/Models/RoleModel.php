@@ -60,7 +60,20 @@ class RoleModel extends Model
         if (self::$cache === null) {
             self::$cache = $this->getDropdown();
         }
-        return self::$cache[$name] ?? ucfirst(str_replace('_', ' ', $name));
+
+        $defaults = [
+            'admin'          => 'Administrator',
+            'guru_mapel'     => 'Guru Mata Pelajaran',
+            'wali_kelas'     => 'Wali Kelas',
+            'wakakur'        => 'Wakil Kepala Kurikulum',
+            'siswa'          => 'Siswa',
+            'instruktur'     => 'Instruktur PKL',
+            'ketua_jurusan'  => 'Ketua Jurusan',
+            'kepala_sekolah' => 'Kepala Sekolah',
+            'tendik'         => 'Tenaga Pendidik / Staf',
+        ];
+
+        return self::$cache[$name] ?? $defaults[$name] ?? ucfirst(str_replace('_', ' ', $name));
     }
 
     public function getRoleNames(): array
@@ -87,9 +100,21 @@ class RoleModel extends Model
             return $existing;
         }
 
+        $defaults = [
+            'admin'          => 'Administrator',
+            'guru_mapel'     => 'Guru Mata Pelajaran',
+            'wali_kelas'     => 'Wali Kelas',
+            'wakakur'        => 'Wakil Kepala Kurikulum',
+            'siswa'          => 'Siswa',
+            'instruktur'     => 'Instruktur PKL',
+            'ketua_jurusan'  => 'Ketua Jurusan',
+            'kepala_sekolah' => 'Kepala Sekolah',
+            'tendik'         => 'Tenaga Pendidik / Staf',
+        ];
+
         $data = [
             'name'         => $name,
-            'display_name' => $displayName ?? ucfirst(str_replace('_', ' ', $name)),
+            'display_name' => $displayName ?? $defaults[$name] ?? ucfirst(str_replace('_', ' ', $name)),
             'description'  => $description ?? "Role {$name}",
             'is_active'    => true,
             'created_at'   => date('Y-m-d H:i:s'),
@@ -100,6 +125,28 @@ class RoleModel extends Model
         $this->clearCache();
 
         return $this->getByName($name);
+    }
+
+    /**
+     * Ensues all system roles exist in roles table.
+     */
+    public function ensureDefaultRoles(): void
+    {
+        $defaults = [
+            'admin'          => ['Administrator', 'Akses Penuh Administrator'],
+            'guru_mapel'     => ['Guru Mata Pelajaran', 'Akses Guru Mengajar & Jurnal'],
+            'wali_kelas'     => ['Wali Kelas', 'Akses Wali Kelas'],
+            'wakakur'        => ['Wakil Kepala Kurikulum', 'Akses Kurikulum & Monitoring Guru'],
+            'siswa'          => ['Siswa', 'Akses Siswa'],
+            'instruktur'     => ['Instruktur PKL', 'Akses Pembimbing Industri PKL'],
+            'ketua_jurusan'  => ['Ketua Jurusan', 'Akses Ketua Program Keahlian / Jurusan'],
+            'kepala_sekolah' => ['Kepala Sekolah', 'Akses Executive Monitoring Kepala Sekolah'],
+            'tendik'         => ['Tenaga Pendidik / Staf', 'Akses Staf & Tenaga Pendidik / TU'],
+        ];
+
+        foreach ($defaults as $name => $info) {
+            $this->ensureRole($name, $info[0], $info[1]);
+        }
     }
 
     public function clearCache(): void

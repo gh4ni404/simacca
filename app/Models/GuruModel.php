@@ -129,14 +129,17 @@ class GuruModel extends Model
     }
 
     /**
-     * Get wali Kelas
+     * Get wali Kelas for a given academic year
      */
-    public function getWaliKelas()
+    public function getWaliKelas(?string $tahunAjaran = null)
     {
-        return $this->where('is_wali_kelas', 1)
-            ->join('kelas', 'kelas.id = guru.kelas_id')
+        if ($tahunAjaran === null) {
+            $tahunAjaran = get_active_tahun_ajaran();
+        }
+
+        return $this->select('guru.*, kelas.id as kelas_id, kelas.nama_kelas, users.username, users.profile_photo')
+            ->join('kelas', 'kelas.wali_kelas_id = guru.id AND kelas.tahun_ajaran = "' . $tahunAjaran . '"', 'inner')
             ->join('users', 'users.id = guru.user_id')
-            ->select('guru.*, kelas.nama_kelas, users.username, users.profile_photo')
             ->findAll();
     }
 

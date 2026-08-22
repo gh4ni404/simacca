@@ -507,6 +507,28 @@ if (!function_exists('get_sidebar_menu')) {
                         ],
                     ]
                 ],
+            ],
+            'kepala_sekolah' => [
+                [
+                    'title' => 'Executive Dashboard',
+                    'icon' => 'fas fa-chart-line',
+                    'url' => '/kepala-sekolah/dashboard',
+                    'active' => ['kepala-sekolah/dashboard']
+                ],
+                [
+                    'title' => 'Laporan Eksekutif',
+                    'icon' => 'fas fa-file-alt',
+                    'url' => '/kepala-sekolah/dashboard#laporan',
+                    'active' => ['kepala-sekolah/dashboard']
+                ],
+            ],
+            'tendik' => [
+                [
+                    'title' => 'Dashboard Tendik',
+                    'icon' => 'fas fa-id-card',
+                    'url' => '/tendik/dashboard',
+                    'active' => ['tendik/dashboard']
+                ],
             ]
         ];
 
@@ -563,13 +585,15 @@ if (!function_exists('get_dashboard_url')) {
         }
 
         $dashboards = [
-            'admin' => '/admin/dashboard',
-            'guru_mapel' => '/guru/dashboard',
-            'wali_kelas' => '/walikelas/dashboard',
-            'wakakur' => '/wakakur/dashboard',
-            'siswa' => '/siswa/jurnal-pkl',
-            'instruktur' => '/instruktur/dashboard',
-            'ketua_jurusan' => '/ketua-jurusan/dashboard',
+            'admin'          => '/admin/dashboard',
+            'kepala_sekolah' => '/kepala-sekolah/dashboard',
+            'guru_mapel'     => '/guru/dashboard',
+            'wali_kelas'     => '/walikelas/dashboard',
+            'wakakur'        => '/wakakur/dashboard',
+            'tendik'         => '/tendik/dashboard',
+            'siswa'          => '/siswa/jurnal-pkl',
+            'instruktur'     => '/instruktur/dashboard',
+            'ketua_jurusan'  => '/ketua-jurusan/dashboard',
         ];
 
         return $dashboards[$role] ?? '/';

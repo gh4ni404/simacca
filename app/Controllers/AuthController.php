@@ -116,7 +116,7 @@ class AuthController extends BaseController
                 'loginTime'     => time(),
             ];
 
-            $guruRoles = ['guru_mapel', 'wali_kelas', 'wakakur', 'ketua_jurusan'];
+            $guruRoles = ['guru_mapel', 'wali_kelas', 'wakakur', 'ketua_jurusan', 'kepala_sekolah', 'tendik'];
             $hasGuruRole = count(array_intersect($guruRoles, $allRoles)) > 0;
 
             if ($hasGuruRole) {
@@ -126,11 +126,27 @@ class AuthController extends BaseController
                     $sessionData['nama_lengkap'] = $guru['nama_lengkap'];
                     $sessionData['nip'] = $guru['nip'];
                     $sessionData['jurusan'] = $guru['jurusan'] ?? null;
-                    $sessionData['is_ketua_jurusan'] = $guru['is_ketua_jurusan'] ?? false;
+                    $sessionData['is_ketua_jurusan'] = (bool)($guru['is_ketua_jurusan'] ?? false);
 
-                    if (in_array('wali_kelas', $allRoles) && $guru['kelas_id']) {
-                        $sessionData['kelas_id'] = $guru['kelas_id'];
+                    // Dynamic Wali Kelas check for active academic year
+                    $activeTahunAjaran = get_active_tahun_ajaran();
+                    $kelasModel = new \App\Models\KelasModel();
+                    $activeKelas = $kelasModel->getByWaliKelas($guru['id'], $activeTahunAjaran);
+
+                    if ($activeKelas) {
+                        $sessionData['kelas_id'] = $activeKelas['id'];
+                        if (!in_array('wali_kelas', $allRoles)) {
+                            $allRoles[] = 'wali_kelas';
+                        }
+                    } else {
+                        $sessionData['kelas_id'] = null;
+                        // If not assigned to any class in active TA, exclude wali_kelas from session all_roles
+                        $allRoles = array_values(array_diff($allRoles, ['wali_kelas']));
+                        if (empty($allRoles)) {
+                            $allRoles = [$user['role']];
+                        }
                     }
+                    $sessionData['all_roles'] = $allRoles;
                 }
             }
 
@@ -243,10 +259,12 @@ class AuthController extends BaseController
         // Priority order for redirect
         $priority = [
             'admin'          => '/admin/dashboard',
+            'kepala_sekolah' => '/kepala-sekolah/dashboard',
             'wakakur'        => '/wakakur/dashboard',
             'ketua_jurusan'  => '/ketua-jurusan/dashboard',
             'wali_kelas'     => '/walikelas/dashboard',
             'guru_mapel'     => '/guru/dashboard',
+            'tendik'         => '/tendik/dashboard',
             'instruktur'     => '/instruktur/dashboard',
             'siswa'          => '/siswa/jurnal-pkl',
         ];

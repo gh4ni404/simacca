@@ -157,34 +157,25 @@
 
                     <!-- Wali Kelas Section -->
                     <div id="waliKelasSection" class="border-t pt-4 <?= !in_array('wali_kelas', old('roles', [])) ? 'hidden' : '' ?>">
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" name="is_wali_kelas" value="1"
-                                class="rounded text-indigo-600 focus:ring-indigo-500"
-                                id="isWaliKelasCheckbox"
-                                <?= old('is_wali_kelas') ? 'checked' : '' ?>>
-                            <span class="ml-2 font-medium text-gray-700">Jadikan sebagai Wali Kelas</span>
-                        </label>
-
-                        <!-- Kelas Selection -->
-                        <div id="kelasSelection" class="mt-3 <?= !old('is_wali_kelas') ? 'hidden' : '' ?>">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Kelas</label>
-                            <select name="kelas_id"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                <option value="">Pilih Kelas</option>
-                                <?php foreach ($kelasList as $id => $kelas): ?>
-                                    <option value="<?= $id ?>" <?= old('kelas_id') == $id ? 'selected' : '' ?>>
-                                        <?= esc($kelas) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
+                        <input type="hidden" name="is_wali_kelas" value="1" id="isWaliKelasCheckbox">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Kelas untuk Wali Kelas *</label>
+                        <select name="kelas_id"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            id="kelasSelect">
+                            <option value="">Pilih Kelas</option>
+                            <?php foreach ($kelasList as $id => $kelas): ?>
+                                <option value="<?= $id ?>" <?= old('kelas_id') == $id ? 'selected' : '' ?>>
+                                    <?= esc($kelas) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
 
                     <!-- Ketua Jurusan Section -->
                     <div id="ketuaJurusanSection" class="border-t pt-4 <?= !in_array('ketua_jurusan', old('roles', [])) ? 'hidden' : '' ?>">
-                        <label class="block text-sm font-medium text-white mb-2">Jurusan *</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Jurusan untuk Ketua Jurusan *</label>
                         <select name="jurusan"
-                            class="w-full px-4 py-2 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             id="jurusanSelect">
                             <option value="">Pilih Jurusan</option>
                             <option value="DKV" <?= old('jurusan') == 'DKV' ? 'selected' : '' ?>>DKV (Desain Komunikasi Visual)</option>
@@ -214,17 +205,17 @@
     // Toggle wali kelas section based on wali_kelas role checkbox
     document.querySelectorAll('.role-checkbox').forEach(function(cb) {
         cb.addEventListener('change', function() {
-            const waliKelasChecked = document.querySelector('.role-checkbox[data-role="wali_kelas"]').checked;
+            const waliKelasCB = document.querySelector('.role-checkbox[data-role="wali_kelas"]');
+            const waliKelasChecked = waliKelasCB ? waliKelasCB.checked : false;
             const waliKelasSection = document.getElementById('waliKelasSection');
             if (waliKelasChecked) {
                 waliKelasSection.classList.remove('hidden');
             } else {
                 waliKelasSection.classList.add('hidden');
-                document.getElementById('isWaliKelasCheckbox').checked = false;
-                document.getElementById('kelasSelection').classList.add('hidden');
             }
 
-            const ketuaJurusanChecked = document.querySelector('.role-checkbox[data-role="ketua_jurusan"]').checked;
+            const ketuaJurusanCB = document.querySelector('.role-checkbox[data-role="ketua_jurusan"]');
+            const ketuaJurusanChecked = ketuaJurusanCB ? ketuaJurusanCB.checked : false;
             const ketuaJurusanSection = document.getElementById('ketuaJurusanSection');
             if (ketuaJurusanChecked) {
                 ketuaJurusanSection.classList.remove('hidden');
@@ -232,16 +223,6 @@
                 ketuaJurusanSection.classList.add('hidden');
             }
         });
-    });
-
-    // Toggle kelas selection based on wali kelas checkbox
-    document.getElementById('isWaliKelasCheckbox').addEventListener('change', function() {
-        const kelasSelection = document.getElementById('kelasSelection');
-        if (this.checked) {
-            kelasSelection.classList.remove('hidden');
-        } else {
-            kelasSelection.classList.add('hidden');
-        }
     });
 
     // Real-time NIP validation
@@ -314,18 +295,20 @@
         }
         rolesFeedback.innerHTML = '';
 
-        const isWaliKelas = document.getElementById('isWaliKelasCheckbox').checked;
+        const waliKelasCB = document.querySelector('.role-checkbox[data-role="wali_kelas"]');
+        const isWaliKelas = waliKelasCB ? waliKelasCB.checked : false;
         const kelasId = document.querySelector('select[name="kelas_id"]')?.value;
 
         if (isWaliKelas && !kelasId) {
             e.preventDefault();
             alert('Silakan pilih kelas untuk wali kelas');
-            document.getElementById('kelasSelection').classList.remove('hidden');
+            document.getElementById('waliKelasSection').classList.remove('hidden');
             return;
         }
 
-        const isKetuaJurusan = document.querySelector('.role-checkbox[data-role="ketua_jurusan"]').checked;
-        const jurusan = document.getElementById('jurusanSelect').value;
+        const ketuaJurusanCB = document.querySelector('.role-checkbox[data-role="ketua_jurusan"]');
+        const isKetuaJurusan = ketuaJurusanCB ? ketuaJurusanCB.checked : false;
+        const jurusan = document.getElementById('jurusanSelect')?.value;
 
         if (isKetuaJurusan && !jurusan) {
             e.preventDefault();

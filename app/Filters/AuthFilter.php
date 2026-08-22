@@ -103,10 +103,27 @@ class AuthFilter implements FilterInterface
                 $sessionData['nama_lengkap'] = $guru['nama_lengkap'];
                 $sessionData['nip'] = $guru['nip'];
                 $sessionData['jurusan'] = $guru['jurusan'] ?? null;
-                $sessionData['is_ketua_jurusan'] = $guru['is_ketua_jurusan'] ?? false;
-                if (in_array('wali_kelas', $allRoles) && $guru['kelas_id']) {
-                    $sessionData['kelas_id'] = $guru['kelas_id'];
+                $sessionData['is_ketua_jurusan'] = (bool)($guru['is_ketua_jurusan'] ?? false);
+
+                // Dynamic Wali Kelas check for active academic year
+                $activeTahunAjaran = get_active_tahun_ajaran();
+                $kelasModel = new \App\Models\KelasModel();
+                $activeKelas = $kelasModel->getByWaliKelas($guru['id'], $activeTahunAjaran);
+
+                if ($activeKelas) {
+                    $sessionData['kelas_id'] = $activeKelas['id'];
+                    if (!in_array('wali_kelas', $allRoles)) {
+                        $allRoles[] = 'wali_kelas';
+                    }
+                } else {
+                    $sessionData['kelas_id'] = null;
+                    // If not assigned to any class in active TA, exclude wali_kelas from session all_roles
+                    $allRoles = array_values(array_diff($allRoles, ['wali_kelas']));
+                    if (empty($allRoles)) {
+                        $allRoles = [$user['role']];
+                    }
                 }
+                $sessionData['all_roles'] = $allRoles;
             }
         }
 

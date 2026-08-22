@@ -253,6 +253,18 @@
             <?php endforeach; ?>
         </div>
 
+        <!-- Kelas (shown when wali_kelas is checked) -->
+        <div id="modalKelasSection" class="mt-3 <?= !in_array('wali_kelas', $allRoles) ? 'hidden' : '' ?>">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Kelas Wali Kelas *</label>
+            <select id="modalKelasSelect"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="">Pilih Kelas</option>
+                <?php foreach ($kelasList as $kId => $kNama): ?>
+                    <option value="<?= $kId ?>" <?= ($guru['kelas_id'] ?? '') == $kId ? 'selected' : '' ?>><?= esc($kNama) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
         <!-- Jurusan (shown when ketua_jurusan is checked) -->
         <div id="modalJurusanSection" class="mt-3 <?= !in_array('ketua_jurusan', $allRoles) ? 'hidden' : '' ?>">
             <label class="block text-sm font-medium text-gray-700 mb-1">Jurusan *</label>
@@ -302,9 +314,17 @@
         document.getElementById('roleSaveFeedback').classList.add('hidden');
     }
 
-    // Toggle jurusan section in modal
+    // Toggle sections in modal
     document.querySelectorAll('.modal-role-checkbox').forEach(function(cb) {
         cb.addEventListener('change', function() {
+            const waliKelasChecked = document.querySelector('.modal-role-checkbox[data-role="wali_kelas"]')?.checked;
+            const kelasSection = document.getElementById('modalKelasSection');
+            if (waliKelasChecked) {
+                kelasSection.classList.remove('hidden');
+            } else {
+                kelasSection.classList.add('hidden');
+            }
+
             const ketuaJurusanChecked = document.querySelector('.modal-role-checkbox[data-role="ketua_jurusan"]')?.checked;
             const jurusanSection = document.getElementById('modalJurusanSection');
             if (ketuaJurusanChecked) {
@@ -325,6 +345,16 @@
             return;
         }
 
+        // Validate kelas_id if wali_kelas is selected
+        if (roles.includes('wali_kelas')) {
+            const kelasId = document.getElementById('modalKelasSelect').value;
+            if (!kelasId) {
+                document.getElementById('roleSaveFeedback').classList.remove('hidden');
+                document.getElementById('roleSaveFeedback').innerHTML = '<span class="text-red-600"><i class="fas fa-exclamation-circle mr-1"></i> Pilih kelas untuk Wali Kelas</span>';
+                return;
+            }
+        }
+
         // Validate jurusan if ketua_jurusan is selected
         if (roles.includes('ketua_jurusan')) {
             const jurusan = document.getElementById('modalJurusanSelect').value;
@@ -341,6 +371,9 @@
 
         const formData = new FormData();
         roles.forEach(r => formData.append('roles[]', r));
+        if (roles.includes('wali_kelas')) {
+            formData.append('kelas_id', document.getElementById('modalKelasSelect').value);
+        }
         if (roles.includes('ketua_jurusan')) {
             formData.append('jurusan', document.getElementById('modalJurusanSelect').value);
         }
@@ -366,7 +399,7 @@
 
                 document.getElementById('roleSaveFeedback').classList.remove('hidden');
                 document.getElementById('roleSaveFeedback').innerHTML = '<span class="text-green-600"><i class="fas fa-check mr-1"></i> ' + data.message + '</span>';
-                setTimeout(function() { closeRoleModal(); }, 1200);
+                setTimeout(function() { location.reload(); }, 1000);
             } else {
                 document.getElementById('roleSaveFeedback').classList.remove('hidden');
                 document.getElementById('roleSaveFeedback').innerHTML = '<span class="text-red-600"><i class="fas fa-exclamation-circle mr-1"></i> ' + data.message + '</span>';
@@ -401,8 +434,10 @@ function get_role_name_from_role($role) {
         'guru_mapel' => 'Guru Mata Pelajaran',
         'wali_kelas' => 'Wali Kelas',
         'wakakur' => 'Wakil Kepala Kurikulum',
-        'siswa' => 'Siswa',
-        'ketua_jurusan' => 'Ketua Jurusan'
+        'siswa'          => 'Siswa',
+        'ketua_jurusan'  => 'Ketua Jurusan',
+        'kepala_sekolah' => 'Kepala Sekolah',
+        'tendik'         => 'Tenaga Pendidik / Staf'
     ];
     return $roleNames[$role] ?? ucfirst(str_replace('_', ' ', $role));
 }
