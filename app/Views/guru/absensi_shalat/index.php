@@ -2,7 +2,7 @@
 
 <?= $this->section('content') ?>
 <div class="bg-white rounded-xl shadow p-6 mb-6">
-    <div class="flex justify-between items-center">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
             <h2 class="text-2xl font-bold text-gray-800">
                 <i class="fas fa-mosque text-green-600 mr-2"></i>Absensi Shalat
@@ -10,7 +10,10 @@
             <p class="text-gray-600">QR Code akan di-refresh otomatis setiap 15 detik</p>
         </div>
         <div class="flex items-center gap-2">
-            <span id="status-badge" class="px-3 py-1 rounded-full text-sm font-semibold bg-gray-100 text-gray-600">
+            <a href="<?= base_url('/scan') ?>" target="_blank" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-xl transition-colors shadow flex items-center gap-1.5">
+                <i class="fas fa-qrcode"></i> Buka Kamera Scanner
+            </a>
+            <span id="status-badge" class="px-3 py-1.5 rounded-full text-sm font-semibold bg-gray-100 text-gray-600">
                 <i class="fas fa-circle text-gray-400 mr-1"></i>Belum Aktif
             </span>
         </div>
@@ -81,17 +84,32 @@
         <div class="bg-white rounded-xl shadow-lg overflow-hidden">
             <div class="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-4">
                 <h3 class="text-lg font-semibold">
-                    <i class="fas fa-user-check mr-2"></i>Absensi Manual Siswa
+                    <i class="fas fa-user-check mr-2"></i>Absensi Manual (Siswa & Guru)
                 </h3>
             </div>
             <div class="p-6">
                 <!-- Manual Attendance Container -->
                 <div id="manual-absensi-container" class="hidden">
-                    <p class="text-gray-600 mb-4">Gunakan fitur ini jika siswa tidak membawa HP/tidak dapat melakukan scan QRIS.</p>
+                    <p class="text-gray-600 mb-4">Gunakan fitur ini jika peserta (Siswa/Guru) tidak membawa HP/tidak dapat melakukan scan QR.</p>
                     <form id="form-manual-absen" onsubmit="submitManualAbsen(event)">
+                        <!-- Type selector radio -->
                         <div class="mb-4">
-                            <label for="siswa-select" class="block text-sm font-medium text-gray-700 mb-2">Pilih Siswa</label>
-                            <select id="siswa-select" name="siswa_id" class="w-full text-gray-800" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tipe Peserta</label>
+                            <div class="flex gap-4">
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="user_type" value="siswa" checked onchange="onUserTypeChange()" class="text-green-600 focus:ring-green-500 h-4 w-4">
+                                    <span class="ml-2 text-sm font-medium text-gray-800"><i class="fas fa-user-graduate text-blue-500 mr-1"></i>Siswa</span>
+                                </label>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="user_type" value="guru" onchange="onUserTypeChange()" class="text-green-600 focus:ring-green-500 h-4 w-4">
+                                    <span class="ml-2 text-sm font-medium text-gray-800"><i class="fas fa-chalkboard-teacher text-purple-500 mr-1"></i>Guru</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="siswa-select" class="block text-sm font-medium text-gray-700 mb-2" id="label-select-user">Pilih Siswa</label>
+                            <select id="siswa-select" name="target_id" class="w-full text-gray-800" required>
                                 <option value=""></option>
                             </select>
                         </div>
@@ -121,9 +139,19 @@
                 </h3>
             </div>
             <div class="p-6">
-                <div class="text-center">
+                <div class="text-center mb-4">
                     <p class="text-sm text-gray-500 mb-1">Total Hadir Hari Ini</p>
                     <p id="total-hadir" class="text-5xl font-bold text-green-600">0</p>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-center border-t border-gray-100 pt-3">
+                    <div class="bg-blue-50 p-2 rounded-lg">
+                        <span class="text-xs text-blue-600 font-medium block"><i class="fas fa-user-graduate mr-1"></i>Siswa</span>
+                        <span id="total-siswa" class="text-lg font-bold text-blue-700">0</span>
+                    </div>
+                    <div class="bg-purple-50 p-2 rounded-lg">
+                        <span class="text-xs text-purple-600 font-medium block"><i class="fas fa-chalkboard-teacher mr-1"></i>Guru</span>
+                        <span id="total-guru" class="text-lg font-bold text-purple-700">0</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -159,7 +187,7 @@
 
         <!-- Live Attendance List -->
         <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-            <div class="bg-gradient-to-r from-teal-600 to-teal-700 text-white px-6 py-4">
+            <div class="bg-gradient-to-r from-teal-600 to-teal-700 text-white px-6 py-4 flex justify-between items-center">
                 <h3 class="text-lg font-semibold">
                     <i class="fas fa-users mr-2"></i>Daftar Hadir
                 </h3>
@@ -170,12 +198,20 @@
                         <p class="text-gray-400 text-center py-4 text-sm">Belum ada yang hadir</p>
                     <?php else: ?>
                         <?php foreach ($todayAttendance as $att): ?>
+                            <?php $isGuru = ($att['user_type'] ?? 'siswa') === 'guru'; ?>
                             <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg text-sm attendance-item">
                                 <div class="flex items-center gap-2">
                                     <i class="fas fa-check-circle text-green-500"></i>
                                     <div>
-                                        <p class="font-medium"><?= $att['nama_lengkap'] ?></p>
-                                        <p class="text-xs text-gray-400"><?= $att['nis'] ?> - <?= $att['nama_kelas'] ?? '' ?></p>
+                                        <p class="font-medium flex items-center gap-1.5">
+                                            <?= esc($att['nama_lengkap']) ?>
+                                            <?php if ($isGuru): ?>
+                                                <span class="px-1.5 py-0.5 text-[10px] font-semibold bg-purple-100 text-purple-700 rounded">Guru</span>
+                                            <?php else: ?>
+                                                <span class="px-1.5 py-0.5 text-[10px] font-semibold bg-blue-100 text-blue-700 rounded">Siswa</span>
+                                            <?php endif; ?>
+                                        </p>
+                                        <p class="text-xs text-gray-400"><?= esc($att['identifier'] ?? $att['nis'] ?? '') ?> - <?= esc($att['unit'] ?? $att['nama_kelas'] ?? '') ?></p>
                                     </div>
                                 </div>
                                 <span class="text-xs text-gray-400"><?= date('H:i:s', strtotime($att['waktu_absen'])) ?></span>
@@ -206,11 +242,14 @@ async function refreshCsrfToken() {
     csrfHash = data.tokenValue;
 }
 
-async function postRequest(url, callback) {
+async function postRequest(url, callback, extraData = {}) {
     try {
         await refreshCsrfToken();
         const formData = new FormData();
         formData.append(csrfName, csrfHash);
+        for (const k in extraData) {
+            formData.append(k, extraData[k]);
+        }
         const res = await fetch(url, {
             method: 'POST',
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
@@ -239,12 +278,31 @@ function startSession() {
             refreshStats();
         } else {
             Swal.fire({
-                title: 'Gagal',
+                title: 'Gagal Memulai Sesi',
                 text: data.message || 'Gagal memulai sesi.',
                 icon: 'error',
                 confirmButtonColor: '#10b981'
             });
         }
+    });
+}
+
+function handleSessionAutoStopped() {
+    isSessionActive = false;
+    clearInterval(refreshInterval);
+    clearInterval(countdownInterval);
+    updateUI(false);
+    document.getElementById('qr-placeholder').classList.remove('hidden');
+    document.getElementById('qr-code').classList.add('hidden');
+    document.getElementById('countdown-container').classList.add('hidden');
+    document.getElementById('token-info').classList.add('hidden');
+    refreshStats();
+
+    Swal.fire({
+        title: 'Sesi Berakhir Otomatis (Auto-Stop)',
+        text: 'Sesi absensi shalat telah dihentikan secara otomatis oleh sistem karena mencapai batas waktu operasional.',
+        icon: 'info',
+        confirmButtonColor: '#10b981'
     });
 }
 
@@ -254,6 +312,8 @@ function refreshToken() {
             showQRCode(data.token, data.scan_url);
             resetCountdown();
             refreshStats();
+        } else if (data.session_expired || !data.success) {
+            handleSessionAutoStopped();
         }
     });
 }
@@ -368,27 +428,41 @@ function refreshStats() {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            document.getElementById('total-hadir').textContent = data.total_hadir;
+            document.getElementById('total-hadir').textContent = data.total_hadir || 0;
+            if (document.getElementById('total-siswa')) document.getElementById('total-siswa').textContent = data.total_siswa || 0;
+            if (document.getElementById('total-guru')) document.getElementById('total-guru').textContent = data.total_guru || 0;
 
             // Update attendance list
             const attList = document.getElementById('attendance-list');
             if (data.attendance && data.attendance.length > 0) {
                 attList.innerHTML = '';
                 data.attendance.forEach(att => {
+                    const isGuru = (att.user_type === 'guru');
+                    const badgeHtml = isGuru 
+                        ? '<span class="px-1.5 py-0.5 text-[10px] font-semibold bg-purple-100 text-purple-700 rounded">Guru</span>'
+                        : '<span class="px-1.5 py-0.5 text-[10px] font-semibold bg-blue-100 text-blue-700 rounded">Siswa</span>';
+                    const detail = isGuru
+                        ? `${att.identifier || att.nip || ''} - Guru`
+                        : `${att.identifier || att.nis || ''} - ${att.unit || att.nama_kelas || ''}`;
+
                     const div = document.createElement('div');
                     div.className = 'flex items-center justify-between p-2 bg-gray-50 rounded-lg text-sm';
                     div.innerHTML = `
                         <div class="flex items-center gap-2">
                             <i class="fas fa-check-circle text-green-500"></i>
                             <div>
-                                <p class="font-medium">${att.nama_lengkap}</p>
-                                <p class="text-xs text-gray-400">${att.nis} - ${att.nama_kelas || ''}</p>
+                                <p class="font-medium flex items-center gap-1.5">
+                                    ${att.nama_lengkap} ${badgeHtml}
+                                </p>
+                                <p class="text-xs text-gray-400">${detail}</p>
                             </div>
                         </div>
                         <span class="text-xs text-gray-400">${att.waktu_absen ? att.waktu_absen.substring(11, 19) : ''}</span>
                     `;
                     attList.appendChild(div);
                 });
+            } else {
+                attList.innerHTML = '<p class="text-gray-400 text-center py-4 text-sm">Belum ada yang hadir</p>';
             }
 
             // Update sessions list
@@ -423,11 +497,24 @@ refreshStats();
 
 let select2Initialized = false;
 
+function onUserTypeChange() {
+    const userType = document.querySelector('input[name="user_type"]:checked').value;
+    const labelSelect = document.getElementById('label-select-user');
+    if (userType === 'guru') {
+        labelSelect.textContent = 'Pilih Guru';
+    } else {
+        labelSelect.textContent = 'Pilih Siswa';
+    }
+    
+    // Clear Select2 value and trigger re-search
+    $('#siswa-select').val(null).trigger('change');
+}
+
 function initSelect2() {
     if (select2Initialized) return;
     
     $('#siswa-select').select2({
-        placeholder: 'Cari Nama atau NIS Siswa...',
+        placeholder: 'Cari Nama atau NIP/NIS...',
         minimumInputLength: 2,
         width: '100%',
         ajax: {
@@ -435,8 +522,10 @@ function initSelect2() {
             dataType: 'json',
             delay: 250,
             data: function (params) {
+                const userType = document.querySelector('input[name="user_type"]:checked') ? document.querySelector('input[name="user_type"]:checked').value : 'siswa';
                 return {
-                    q: params.term
+                    q: params.term,
+                    type: userType
                 };
             },
             processResults: function (data) {
@@ -455,12 +544,13 @@ async function submitManualAbsen(event) {
     event.preventDefault();
     
     const siswaSelect = document.getElementById('siswa-select');
-    const siswaId = siswaSelect.value;
+    const targetId = siswaSelect.value;
+    const userType = document.querySelector('input[name="user_type"]:checked') ? document.querySelector('input[name="user_type"]:checked').value : 'siswa';
     
-    if (!siswaId) {
+    if (!targetId) {
         Swal.fire({
             title: 'Peringatan',
-            text: 'Harap pilih siswa terlebih dahulu.',
+            text: 'Harap pilih ' + (userType === 'guru' ? 'guru' : 'siswa') + ' terlebih dahulu.',
             icon: 'warning',
             confirmButtonColor: '#10b981'
         });
@@ -477,7 +567,8 @@ async function submitManualAbsen(event) {
         await refreshCsrfToken();
         const formData = new FormData();
         formData.append(csrfName, csrfHash);
-        formData.append('siswa_id', siswaId);
+        formData.append('target_id', targetId);
+        formData.append('user_type', userType);
         
         const res = await fetch('<?= base_url("/guru/absensi-shalat/absen-manual") ?>', {
             method: 'POST',

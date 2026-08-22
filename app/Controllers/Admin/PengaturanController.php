@@ -56,6 +56,10 @@ class PengaturanController extends BaseController
         $data['absensiPklJamMasuk'] = get_absensi_pkl_jam_masuk();
         $data['absensiPklJamPulang'] = get_absensi_pkl_jam_pulang();
 
+        $data['absensiShalatJamMulai']   = get_absensi_shalat_jam_mulai();
+        $data['absensiShalatJamTutup']   = get_absensi_shalat_jam_tutup();
+        $data['absensiShalatDurasiMaks'] = get_absensi_shalat_durasi_maks();
+
         return view('admin/pengaturan/index', $data);
     }
 
@@ -470,5 +474,29 @@ class PengaturanController extends BaseController
 
         session()->setFlashdata('success', 'Pengaturan jam absensi PKL berhasil disimpan (Jam Masuk: ' . $jamMasuk . ', Jam Pulang: ' . $jamPulang . ')');
         return redirect()->to('/admin/pengaturan#jam-absensi-pkl');
+    }
+
+    public function updateAbsensiShalatJam()
+    {
+        $jamMulai   = trim($this->request->getPost('jam_mulai') ?? '');
+        $jamTutup   = trim($this->request->getPost('jam_tutup') ?? '');
+        $durasiMaks = (int) $this->request->getPost('durasi_maks');
+
+        if (!$jamMulai || !$jamTutup || $durasiMaks <= 0) {
+            session()->setFlashdata('error', 'Jam buka, jam tutup otomatis, dan durasi maksimal sesi harus diisi dengan benar.');
+            return redirect()->to('/admin/pengaturan#jam-absensi-shalat');
+        }
+
+        if (!preg_match('/^\d{2}:\d{2}$/', $jamMulai) || !preg_match('/^\d{2}:\d{2}$/', $jamTutup)) {
+            session()->setFlashdata('error', 'Format jam tidak valid. Gunakan format HH:MM.');
+            return redirect()->to('/admin/pengaturan#jam-absensi-shalat');
+        }
+
+        set_absensi_shalat_jam_mulai($jamMulai);
+        set_absensi_shalat_jam_tutup($jamTutup);
+        set_absensi_shalat_durasi_maks($durasiMaks);
+
+        session()->setFlashdata('success', 'Pengaturan jam operasional sesi shalat berhasil disimpan (Buka: ' . $jamMulai . ', Tutup Otomatis: ' . $jamTutup . ', Durasi Maks: ' . $durasiMaks . ' menit)');
+        return redirect()->to('/admin/pengaturan#jam-absensi-shalat');
     }
 }

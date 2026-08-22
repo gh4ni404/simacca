@@ -82,21 +82,29 @@
                 <thead>
                     <tr class="bg-gray-50">
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">No</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">NIS</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nama Siswa</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Kelas</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">NIP / NIS</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nama Peserta</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Unit / Kelas</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Guru Piket</th>
                         <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Waktu Absen</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     <?php foreach ($rows as $i => $row): ?>
+                    <?php $isGuru = ($row['user_type'] ?? 'siswa') === 'guru'; ?>
                     <tr class="hover:bg-gray-50">
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500"><?= $i + 1; ?></td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700"><?= esc($row['nis']); ?></td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900"><?= esc($row['nama_lengkap']); ?></td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700"><?= esc($row['nama_kelas']); ?></td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500"><?= esc($row['nama_guru'] ?? '-'); ?></td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700"><?= esc($row['identifier'] ?? $row['nis'] ?? '-'); ?></td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 flex items-center gap-1.5">
+                            <?= esc($row['nama_lengkap']); ?>
+                            <?php if ($isGuru): ?>
+                                <span class="px-1.5 py-0.5 text-[10px] font-semibold bg-purple-100 text-purple-700 rounded">Guru</span>
+                            <?php else: ?>
+                                <span class="px-1.5 py-0.5 text-[10px] font-semibold bg-blue-100 text-blue-700 rounded">Siswa</span>
+                            <?php endif; ?>
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700"><?= esc($row['unit'] ?? $row['nama_kelas'] ?? '-'); ?></td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500"><?= esc($row['nama_guru_piket'] ?? $row['nama_guru'] ?? '-'); ?></td>
                         <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-500">
                             <?= date('H:i', strtotime($row['waktu_absen'])); ?>
                         </td>

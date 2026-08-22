@@ -40,19 +40,10 @@ class AbsensiShalatController extends BaseController
         }
 
         $hariIni = $this->getHariIndo(date('l'));
-        $tahunAjaran = get_active_tahun_ajaran();
-        $semester = $this->determineSemester();
-
-        $guruPiket = $this->guruPiketModel
-            ->where('guru_id', $guru['id'])
-            ->where('hari', $hariIni)
-            ->where('tahun_ajaran', $tahunAjaran)
-            ->where('semester', $semester)
-            ->where('is_active', 1)
-            ->first();
+        $guruPiket = $this->getGuruPiketForSession($guru['id']);
 
         if (!$guruPiket) {
-            $this->session->setFlashdata('error', 'Kamu nggak piket hari ini');
+            $this->session->setFlashdata('error', 'Kamu tidak bertugas piket hari ini (' . $hariIni . ')');
             return redirect()->to('/guru/dashboard');
         }
 
@@ -64,6 +55,7 @@ class AbsensiShalatController extends BaseController
             'title'           => 'Absensi Shalat',
             'guru'            => $guru,
             'guruPiket'       => $guruPiket,
+            'hariIni'         => $hariIni,
             'activeSession'   => $activeSession,
             'todaySessions'   => $todaySessions,
             'todayAttendance' => $todayAttendance,
@@ -90,29 +82,39 @@ class AbsensiShalatController extends BaseController
                 return $this->response->setStatusCode(401)->setJSON(['success' => false, 'message' => 'Unauthorized']);
             }
 
-            $hariIni = $this->getHariIndo(date('l'));
-            $tahunAjaran = get_active_tahun_ajaran();
-            $semester = $this->determineSemester();
-
-            $guruPiket = $this->guruPiketModel
-                ->where('guru_id', $guru['id'])
-                ->where('hari', $hariIni)
-                ->where('tahun_ajaran', $tahunAjaran)
-                ->where('semester', $semester)
-                ->where('is_active', 1)
-                ->first();
+            $guruPiket = $this->getGuruPiketForSession($guru['id']);
 
             if (!$guruPiket) {
-                return $this->response->setStatusCode(403)->setJSON(['success' => false, 'message' => 'Kamu nggak piket hari ini']);
+                return $this->response->setStatusCode(403)->setJSON(['success' => false, 'message' => 'Kamu tidak bertugas piket hari ini']);
+            }
+
+            // Check operational hours
+            $nowTime = date('H:i');
+            $jamMulai = get_absensi_shalat_jam_mulai();
+            $jamTutup = get_absensi_shalat_jam_tutup();
+
+            if ($nowTime < $jamMulai) {
+                return $this->response->setStatusCode(400)->setJSON([
+                    'success' => false,
+                    'message' => 'Sesi shalat belum dapat dibuka. Jam operasional dimulai pukul ' . $jamMulai,
+                ]);
+            }
+
+            if ($nowTime > $jamTutup) {
+                return $this->response->setStatusCode(400)->setJSON([
+                    'success' => false,
+                    'message' => 'Jam operasional absensi shalat hari ini telah berakhir (maksimal pukul ' . $jamTutup . ')',
+                ]);
             }
 
             $result = $this->prayerSessionModel->generateNewToken($guruPiket['id']);
 
             return $this->response->setJSON([
-                'success'    => true,
-                'token'      => $result['token'],
-                'expires_at' => $result['expires_at'],
-                'scan_url'   => base_url('/scan?token=' . $result['token']),
+                'success'            => true,
+                'token'              => $result['token'],
+                'expires_at'         => $result['expires_at'],
+                'session_expires_at' => $result['session_expires_at'] ?? null,
+                'scan_url'           => base_url('/scan?token=' . $result['token']),
             ]);
         } catch (Throwable $e) {
             log_message('error', 'generateToken error: ' . $e->getMessage());
@@ -140,41 +142,39 @@ class AbsensiShalatController extends BaseController
                 return $this->response->setStatusCode(401)->setJSON(['success' => false, 'message' => 'Unauthorized']);
             }
 
-            $hariIni = $this->getHariIndo(date('l'));
-            $tahunAjaran = get_active_tahun_ajaran();
-            $semester = $this->determineSemester();
-
-            $guruPiket = $this->guruPiketModel
-                ->where('guru_id', $guru['id'])
-                ->where('hari', $hariIni)
-                ->where('tahun_ajaran', $tahunAjaran)
-                ->where('semester', $semester)
-                ->where('is_active', 1)
-                ->first();
+            $guruPiket = $this->getGuruPiketForSession($guru['id']);
 
             if (!$guruPiket) {
-                return $this->response->setJSON(['success' => false, 'message' => 'Nggak piket hari ini']);
+                return $this->response->setJSON(['success' => false, 'message' => 'Kamu tidak bertugas piket hari ini']);
             }
 
             $activeSession = $this->prayerSessionModel->getActiveSession($guruPiket['id']);
 
             if (!$activeSession) {
-                return $this->response->setJSON(['success' => false, 'message' => 'Tidak ada sesi aktif']);
+                return $this->response->setJSON([
+                    'success'         => false,
+                    'session_expired' => true,
+                    'message'         => 'Sesi shalat telah dihentikan secara otomatis (Auto-Stop).',
+                ]);
             }
 
             $now = time();
             $expires = strtotime($activeSession['expires_at']);
 
             if ($now > $expires) {
-                $this->prayerSessionModel->deactivateAll($guruPiket['id']);
-                return $this->response->setJSON(['success' => false, 'message' => 'Sesi kedaluwarsa']);
+                return $this->response->setJSON([
+                    'success' => true,
+                    'token'   => $activeSession['token'],
+                    'expired' => true,
+                ]);
             }
 
             return $this->response->setJSON([
-                'success'    => true,
-                'token'      => $activeSession['token'],
-                'expires_at' => $activeSession['expires_at'],
-                'scan_url'   => base_url('/scan?token=' . $activeSession['token']),
+                'success'            => true,
+                'token'              => $activeSession['token'],
+                'expires_at'         => $activeSession['expires_at'],
+                'session_expires_at' => $activeSession['session_expires_at'] ?? null,
+                'scan_url'           => base_url('/scan?token=' . $activeSession['token']),
             ]);
         } catch (Throwable $e) {
             log_message('error', 'getCurrentToken error: ' . $e->getMessage());
@@ -229,20 +229,10 @@ class AbsensiShalatController extends BaseController
                 return $this->response->setStatusCode(401)->setJSON(['success' => false, 'message' => 'Unauthorized']);
             }
 
-            $hariIni = $this->getHariIndo(date('l'));
-            $tahunAjaran = get_active_tahun_ajaran();
-            $semester = $this->determineSemester();
-
-            $guruPiket = $this->guruPiketModel
-                ->where('guru_id', $guru['id'])
-                ->where('hari', $hariIni)
-                ->where('tahun_ajaran', $tahunAjaran)
-                ->where('semester', $semester)
-                ->where('is_active', 1)
-                ->first();
+            $guruPiket = $this->getGuruPiketForSession($guru['id']);
 
             if (!$guruPiket) {
-                return $this->response->setJSON(['success' => false, 'message' => 'Nggak piket hari ini']);
+                return $this->response->setJSON(['success' => false, 'message' => 'Kamu tidak bertugas piket hari ini']);
             }
 
             $this->prayerSessionModel->deactivateAll($guruPiket['id']);
@@ -274,9 +264,21 @@ class AbsensiShalatController extends BaseController
             $todayAttendance = $this->absensiShalatModel->getTodayAttendance();
             $totalHadir = count($todayAttendance);
 
+            $totalSiswa = 0;
+            $totalGuru = 0;
+            foreach ($todayAttendance as $item) {
+                if (($item['user_type'] ?? 'siswa') === 'guru') {
+                    $totalGuru++;
+                } else {
+                    $totalSiswa++;
+                }
+            }
+
             return $this->response->setJSON([
                 'success'     => true,
                 'total_hadir' => $totalHadir,
+                'total_siswa' => $totalSiswa,
+                'total_guru'  => $totalGuru,
                 'sessions'    => $todaySessions,
                 'attendance'  => $todayAttendance,
             ]);
@@ -290,7 +292,7 @@ class AbsensiShalatController extends BaseController
     }
 
     /**
-     * Search siswa via AJAX for manual attendance
+     * Search siswa or guru via AJAX for manual attendance
      */
     public function searchSiswaAjax()
     {
@@ -306,27 +308,48 @@ class AbsensiShalatController extends BaseController
                 return $this->response->setStatusCode(401)->setJSON(['success' => false, 'message' => 'Unauthorized']);
             }
 
-            $keyword = $this->request->getGet('q') ?? '';
-            $siswaModel = new \App\Models\SiswaModel();
-            
-            // Search active students
-            $students = $siswaModel->select('siswa.id, siswa.nama_lengkap, siswa.nis, kelas.nama_kelas')
-                ->join('users', 'users.id = siswa.user_id')
-                ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
-                ->where('users.is_active', 1)
-                ->groupStart()
-                    ->like('siswa.nama_lengkap', $keyword)
-                    ->orLike('siswa.nis', $keyword)
-                ->groupEnd()
-                ->limit(20)
-                ->findAll();
+            $keyword  = $this->request->getGet('q') ?? '';
+            $userType = $this->request->getGet('type') ?? 'siswa';
 
             $results = [];
-            foreach ($students as $s) {
-                $results[] = [
-                    'id'   => $s['id'],
-                    'text' => $s['nama_lengkap'] . ' (' . $s['nis'] . ' - ' . ($s['nama_kelas'] ?? '-') . ')'
-                ];
+
+            if ($userType === 'guru') {
+                $guruModel = new \App\Models\GuruModel();
+                $teachers = $guruModel->select('guru.id, guru.nama_lengkap, guru.nip')
+                    ->join('users', 'users.id = guru.user_id')
+                    ->where('users.is_active', 1)
+                    ->groupStart()
+                        ->like('guru.nama_lengkap', $keyword)
+                        ->orLike('guru.nip', $keyword)
+                    ->groupEnd()
+                    ->limit(20)
+                    ->findAll();
+
+                foreach ($teachers as $t) {
+                    $results[] = [
+                        'id'   => $t['id'],
+                        'text' => '[GURU] ' . $t['nama_lengkap'] . ' (' . ($t['nip'] ? 'NIP: ' . $t['nip'] : 'Tanpa NIP') . ')'
+                    ];
+                }
+            } else {
+                $siswaModel = new \App\Models\SiswaModel();
+                $students = $siswaModel->select('siswa.id, siswa.nama_lengkap, siswa.nis, kelas.nama_kelas')
+                    ->join('users', 'users.id = siswa.user_id')
+                    ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
+                    ->where('users.is_active', 1)
+                    ->groupStart()
+                        ->like('siswa.nama_lengkap', $keyword)
+                        ->orLike('siswa.nis', $keyword)
+                    ->groupEnd()
+                    ->limit(20)
+                    ->findAll();
+
+                foreach ($students as $s) {
+                    $results[] = [
+                        'id'   => $s['id'],
+                        'text' => '[SISWA] ' . $s['nama_lengkap'] . ' (' . $s['nis'] . ' - ' . ($s['nama_kelas'] ?? '-') . ')'
+                    ];
+                }
             }
 
             return $this->response->setJSON(['results' => $results]);
@@ -340,7 +363,7 @@ class AbsensiShalatController extends BaseController
     }
 
     /**
-     * Submit manual attendance for a student
+     * Submit manual attendance for a student or teacher
      */
     public function absenManual()
     {
@@ -356,20 +379,10 @@ class AbsensiShalatController extends BaseController
                 return $this->response->setStatusCode(401)->setJSON(['success' => false, 'message' => 'Unauthorized']);
             }
 
-            $hariIni = $this->getHariIndo(date('l'));
-            $tahunAjaran = get_active_tahun_ajaran();
-            $semester = $this->determineSemester();
-
-            $guruPiket = $this->guruPiketModel
-                ->where('guru_id', $guru['id'])
-                ->where('hari', $hariIni)
-                ->where('tahun_ajaran', $tahunAjaran)
-                ->where('semester', $semester)
-                ->where('is_active', 1)
-                ->first();
+            $guruPiket = $this->getGuruPiketForSession($guru['id']);
 
             if (!$guruPiket) {
-                return $this->response->setStatusCode(403)->setJSON(['success' => false, 'message' => 'Kamu nggak piket hari ini']);
+                return $this->response->setStatusCode(403)->setJSON(['success' => false, 'message' => 'Kamu tidak bertugas piket hari ini']);
             }
 
             $activeSession = $this->prayerSessionModel->getActiveSession($guruPiket['id']);
@@ -378,25 +391,35 @@ class AbsensiShalatController extends BaseController
                 return $this->response->setStatusCode(400)->setJSON(['success' => false, 'message' => 'Tidak ada sesi aktif. Harap mulai sesi shalat terlebih dahulu.']);
             }
 
-            $siswaId = $this->request->getPost('siswa_id');
-            if (empty($siswaId)) {
-                return $this->response->setStatusCode(400)->setJSON(['success' => false, 'message' => 'Siswa harus dipilih.']);
+            $userType = $this->request->getPost('user_type') ?? 'siswa';
+            $targetId = $this->request->getPost('target_id') ?: $this->request->getPost('siswa_id');
+
+            if (empty($targetId)) {
+                return $this->response->setStatusCode(400)->setJSON(['success' => false, 'message' => 'Peserta shalat harus dipilih.']);
             }
 
-            // Get student info to make sure they exist
-            $siswaModel = new \App\Models\SiswaModel();
-            $siswa = $siswaModel->find($siswaId);
-            if (!$siswa) {
-                return $this->response->setStatusCode(404)->setJSON(['success' => false, 'message' => 'Data siswa tidak ditemukan.']);
+            if ($userType === 'guru') {
+                $guruModel = new \App\Models\GuruModel();
+                $targetGuru = $guruModel->find($targetId);
+                if (!$targetGuru) {
+                    return $this->response->setStatusCode(404)->setJSON(['success' => false, 'message' => 'Data guru tidak ditemukan.']);
+                }
+                $result = $this->absensiShalatModel->recordAttendance($activeSession['id'], null, $targetId, 'guru');
+                $namaTarget = 'Guru: ' . $targetGuru['nama_lengkap'];
+            } else {
+                $siswaModel = new \App\Models\SiswaModel();
+                $targetSiswa = $siswaModel->find($targetId);
+                if (!$targetSiswa) {
+                    return $this->response->setStatusCode(404)->setJSON(['success' => false, 'message' => 'Data siswa tidak ditemukan.']);
+                }
+                $result = $this->absensiShalatModel->recordAttendance($activeSession['id'], $targetId, null, 'siswa');
+                $namaTarget = 'Siswa: ' . $targetSiswa['nama_lengkap'];
             }
-
-            // Record attendance
-            $result = $this->absensiShalatModel->recordAttendance($activeSession['id'], $siswaId);
 
             if ($result === 'duplicate') {
                 return $this->response->setJSON([
                     'success'   => false,
-                    'message'   => 'Siswa tersebut sudah absen sebelumnya.',
+                    'message'   => $namaTarget . ' sudah absen sebelumnya.',
                 ]);
             }
 
@@ -409,7 +432,7 @@ class AbsensiShalatController extends BaseController
 
             return $this->response->setJSON([
                 'success' => true,
-                'message' => 'Absensi shalat manual berhasil untuk ' . $siswa['nama_lengkap'],
+                'message' => 'Absensi shalat manual berhasil untuk ' . $namaTarget,
             ]);
         } catch (Throwable $e) {
             log_message('error', 'absenManual error: ' . $e->getMessage());
@@ -418,6 +441,28 @@ class AbsensiShalatController extends BaseController
                 'message' => 'Terjadi kesalahan server. Coba lagi.',
             ]);
         }
+    }
+
+    /**
+     * Helper to get active guru piket record for today
+     */
+    private function getGuruPiketForSession(int $guruId): ?array
+    {
+        $hariIni = strtolower($this->getHariIndo(date('l')));
+        $tahunAjaran = get_active_tahun_ajaran();
+        $semester = $this->determineSemester();
+
+        // Also clean up any temporary quick test entries if they exist
+        $db = \Config\Database::connect();
+        $db->table('guru_piket')->where('keterangan', 'Quick Test Piket')->delete();
+
+        return $this->guruPiketModel
+            ->where('guru_id', $guruId)
+            ->where('LOWER(hari)', $hariIni)
+            ->where('tahun_ajaran', $tahunAjaran)
+            ->where('semester', $semester)
+            ->where('is_active', 1)
+            ->first();
     }
 
     private function getHariIndo(string $day): string
@@ -445,3 +490,4 @@ class AbsensiShalatController extends BaseController
         return ($month >= 7) ? 'ganjil' : 'genap';
     }
 }
+

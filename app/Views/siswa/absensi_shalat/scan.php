@@ -57,9 +57,9 @@
             <div class="px-6 py-3 bg-teal-50">
                 <p class="text-sm text-center text-gray-600">
                     <i class="fas fa-user mr-1 text-teal-600"></i>
-                    <strong><?= $siswa['nama_lengkap'] ?? 'Siswa' ?></strong>
+                    <strong><?= $siswa['nama_lengkap'] ?? 'Peserta' ?></strong>
                     <span class="text-gray-400 mx-1">|</span>
-                    <span class="text-teal-700"><?= $siswa['nama_kelas'] ?? '' ?></span>
+                    <span class="text-teal-700"><?= (isset($userType) && $userType === 'guru') ? 'Guru' : ($siswa['nama_kelas'] ?? 'Siswa') ?></span>
                 </p>
             </div>
         </div>

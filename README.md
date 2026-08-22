@@ -7,8 +7,8 @@
 **Framework:** CodeIgniter 4.6.4  
 **Database:** MySQL  
 **Styling:** Tailwind CSS  
-**Version:** 3.0.0  
-**Last Updated:** 2026-08-02
+**Version:** 3.1.0  
+**Last Updated:** 2026-08-23
 
 ---
 
@@ -21,6 +21,7 @@ SIMACCA adalah sistem informasi berbasis web untuk monitoring absensi siswa dan 
 - 🔐 **Multi-Role System** - Admin, Guru Mapel, Wali Kelas, Siswa, Wakakur, Instruktur, Ketua Jurusan
 - 📊 **Dashboard Interaktif** - Statistik real-time untuk setiap role
 - ✅ **Absensi Digital** - Input cepat dengan UI mobile-friendly
+- 🕌 **Absensi Shalat Berjamaah** - QR Code dinamis 15s untuk Siswa & Guru, Auto-Stop otomatis, & kontrol jam via Admin
 - 👨‍🏫 **Absensi Guru** - Self check-in/check-out dengan foto & kamera
 - 📝 **Jurnal KBM** - Dokumentasi kegiatan belajar mengajar
 - 🏭 **Jurnal PKL (Task-Oriented)** - Jurnal praktik kerja lapangan berbasis tugas
@@ -32,7 +33,7 @@ SIMACCA adalah sistem informasi berbasis web untuk monitoring absensi siswa dan 
 - 📧 **Email Notifications** - Password reset, welcome, perubahan password/email, notifikasi
 - 📄 **Export Reports** - Download laporan dalam format Excel (browser print untuk PDF)
 - 🏭 **Manajemen PKL** - Pembimbing, tempat, siswa, kategori, dan task PKL
-- 📋 **Izin Guru** - Sistem pengajuan izin guru dengan persetujuan wakakur (routes belum terdaftar)
+- 📋 **Izin Guru** - Sistem pengajuan izin guru dengan persetujuan wakakur (controllers & views siap, routes belum terdaftar)
 - 📊 **Laporan Mingguan** - Cetak laporan mengajar mingguan
 - 🔄 **Rollover Tahun Ajaran** - Backup & restore data antar tahun ajaran
 - 👥 **Multi-Role Users** - Satu user bisa memiliki beberapa role sekaligus
@@ -207,6 +208,15 @@ docs/
 - **Export Excel** - Export laporan absensi guru ke Excel
 - **Keterangan** - Catatan keterangan untuk absensi guru
 
+### 🕌 Absensi Shalat Berjamaah & Auto-Stop Sesi (v3.1.0) [NEW]
+- **QR Code Dinamis (15s)** - Token QR berganti otomatis setiap 15 detik untuk mencegah kecurangan.
+- **Perluasan Presensi Siswa & Guru** - Presensi terpadu untuk Seluruh Siswa dan Guru dengan indikator badge `[Siswa]` dan `[Guru]`.
+- **Auto-Stop Sesi Otomatis** - Sesi shalat otomatis dihentikan jika mencapai batas durasi (default 45m) atau jam tutup operasional.
+- **Pengaturan Jam Operasional Admin** - Konfigurasi Jam Buka, Jam Tutup Otomatis, dan Durasi Maksimal Sesi via `/admin/pengaturan`.
+- **Absensi Manual Dual-Type** - Input presensi manual untuk siswa maupun guru oleh guru piket.
+- **Laporan & Rekap Detail** - Rincian statistik siswa/guru hadir dan tabel detail presensi guru pada laporan Admin & Guru Piket.
+
+
 ### 🔍 Verifikasi Jurnal PKL (v3.0.0) [NEW]
 - **2-Tahap Verifikasi** - Pembimbing → Instruktur
 - **Status Flow** - draft → submitted → revision → approved → verified
@@ -328,7 +338,8 @@ Setelah server berjalan (`php spark serve`):
 | Instruktur Module | ✅ Complete | 100% | 2026-07-28 |
 | Ketua Jurusan Module | ✅ Complete | 100% | 2026-07-28 |
 | Absensi Guru | ✅ Complete | 100% | 2026-02-12 |
-| Izin Guru | 🚧 In Progress | 90% | 2026-02-12 |
+| Absensi Shalat (Guru & Siswa) | ✅ Complete | 100% | 2026-08-23 |
+| Izin Guru | 🚧 In Progress (Routes belum terdaftar) | 90% | 2026-02-12 |
 | Weekly Report | ✅ Complete | 100% | 2026-07-28 |
 | Rollover System | ✅ Complete | 100% | 2026-07-11 |
 | Multi-Role Users | ✅ Complete | 100% | 2026-07-21 |

@@ -18,6 +18,7 @@ class PrayerSessionModel extends Model
         'is_active',
         'created_at',
         'expires_at',
+        'session_expires_at',
     ];
 
     protected bool $allowEmptyInserts = false;
@@ -54,7 +55,7 @@ class PrayerSessionModel extends Model
     /**
      * Generate a new session token and deactivate old ones for this guru_piket
      */
-    public function generateNewToken(int $guruPiketId): array
+    public function generateNewToken(int $guruPiketId, ?int $overrideSessionSeconds = null): array
     {
         $db = \Config\Database::connect();
 
@@ -70,29 +71,53 @@ class PrayerSessionModel extends Model
         $now = date('Y-m-d H:i:s');
         $expiresAt = date('Y-m-d H:i:s', strtotime('+15 seconds'));
 
+        // Calculate session overall expiry (duration & closing time)
+        if ($overrideSessionSeconds !== null && $overrideSessionSeconds > 0) {
+            $finalSessionExpiresAt = date('Y-m-d H:i:s', strtotime("+$overrideSessionSeconds seconds", strtotime($now)));
+        } else {
+            $durasiMaks = get_absensi_shalat_durasi_maks();
+            $jamTutup   = get_absensi_shalat_jam_tutup();
+            $timeDurasi = strtotime("+$durasiMaks minutes", strtotime($now));
+            $timeTutup  = strtotime(date('Y-m-d') . ' ' . $jamTutup);
+            $finalSessionExpiresAt = date('Y-m-d H:i:s', min($timeDurasi, $timeTutup));
+        }
+
         if ($existing) {
-            // Reuse existing session — same prayer_session_id
+            // If test mode parameter is specified, overwrite session_expires_at with test duration
+            $sessionExpiresAt = ($overrideSessionSeconds !== null && $overrideSessionSeconds > 0)
+                ? $finalSessionExpiresAt
+                : (!empty($existing['session_expires_at']) ? $existing['session_expires_at'] : $finalSessionExpiresAt);
+
+            // If overall session already expired, deactivate it and start clean
+            if (time() > strtotime($sessionExpiresAt)) {
+                $db->table('prayer_sessions')
+                    ->where('id', $existing['id'])
+                    ->update(['is_active' => 0]);
+                $sessionExpiresAt = $finalSessionExpiresAt;
+            }
+
             $db->table('prayer_sessions')
                 ->where('id', $existing['id'])
                 ->update([
-                    'token'      => $token,
-                    'expires_at' => $expiresAt,
-                    'created_at' => $now,
+                    'token'              => $token,
+                    'expires_at'         => $expiresAt,
+                    'session_expires_at' => $sessionExpiresAt,
                 ]);
         } else {
-            // No active session — create new
             $db->table('prayer_sessions')->insert([
-                'token'          => $token,
-                'guru_piket_id'  => $guruPiketId,
-                'is_active'      => 1,
-                'created_at'     => $now,
-                'expires_at'     => $expiresAt,
+                'token'              => $token,
+                'guru_piket_id'      => $guruPiketId,
+                'is_active'          => 1,
+                'created_at'         => $now,
+                'expires_at'         => $expiresAt,
+                'session_expires_at' => $finalSessionExpiresAt,
             ]);
         }
 
         return [
-            'token'      => $token,
-            'expires_at' => $expiresAt,
+            'token'              => $token,
+            'expires_at'         => $expiresAt,
+            'session_expires_at' => $sessionExpiresAt,
         ];
     }
 
@@ -109,16 +134,20 @@ class PrayerSessionModel extends Model
             return null;
         }
 
-        // Check expiry
         $now = time();
-        $expires = strtotime($session['expires_at']);
 
-        if ($now > $expires) {
-            // Token expired, deactivate it
+        // 1. Check overall session auto-stop expiry
+        if (!empty($session['session_expires_at']) && $now > strtotime($session['session_expires_at'])) {
             $db = \Config\Database::connect();
             $db->table('prayer_sessions')
                 ->where('id', $session['id'])
                 ->update(['is_active' => 0]);
+            return null;
+        }
+
+        // 2. Check 15-second dynamic QR token expiry
+        $expires = strtotime($session['expires_at']);
+        if ($now > $expires) {
             return null;
         }
 
@@ -130,9 +159,24 @@ class PrayerSessionModel extends Model
      */
     public function getActiveSession(int $guruPiketId): ?array
     {
-        return $this->where('guru_piket_id', $guruPiketId)
+        $session = $this->where('guru_piket_id', $guruPiketId)
             ->where('is_active', 1)
             ->first();
+
+        if (!$session) {
+            return null;
+        }
+
+        // Check if overall session expired
+        if (!empty($session['session_expires_at']) && time() > strtotime($session['session_expires_at'])) {
+            $db = \Config\Database::connect();
+            $db->table('prayer_sessions')
+                ->where('id', $session['id'])
+                ->update(['is_active' => 0]);
+            return null;
+        }
+
+        return $session;
     }
 
     /**

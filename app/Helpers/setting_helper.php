@@ -359,3 +359,53 @@ if (!function_exists('is_hari_libur')) {
         return $model->isHariLibur($tanggal);
     }
 }
+
+if (!function_exists('get_absensi_shalat_jam_mulai')) {
+    function get_absensi_shalat_jam_mulai(): string
+    {
+        $settingModel = model(SettingModel::class);
+        return $settingModel->get('absensi_shalat_jam_mulai') ?: '11:30';
+    }
+}
+
+if (!function_exists('set_absensi_shalat_jam_mulai')) {
+    function set_absensi_shalat_jam_mulai(string $jam): bool
+    {
+        $settingModel = model(SettingModel::class);
+        return $settingModel->setSetting('absensi_shalat_jam_mulai', $jam);
+    }
+}
+
+if (!function_exists('get_absensi_shalat_jam_tutup')) {
+    function get_absensi_shalat_jam_tutup(): string
+    {
+        $settingModel = model(SettingModel::class);
+        return $settingModel->get('absensi_shalat_jam_tutup') ?: '13:30';
+    }
+}
+
+if (!function_exists('set_absensi_shalat_jam_tutup')) {
+    function set_absensi_shalat_jam_tutup(string $jam): bool
+    {
+        $settingModel = model(SettingModel::class);
+        return $settingModel->setSetting('absensi_shalat_jam_tutup', $jam);
+    }
+}
+
+if (!function_exists('get_absensi_shalat_durasi_maks')) {
+    function get_absensi_shalat_durasi_maks(): int
+    {
+        $settingModel = model(SettingModel::class);
+        $val = $settingModel->get('absensi_shalat_durasi_maks');
+        return $val ? (int) $val : 45;
+    }
+}
+
+if (!function_exists('set_absensi_shalat_durasi_maks')) {
+    function set_absensi_shalat_durasi_maks(int $menit): bool
+    {
+        $settingModel = model(SettingModel::class);
+        return $settingModel->setSetting('absensi_shalat_durasi_maks', (string) $menit);
+    }
+}
+

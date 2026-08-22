@@ -567,6 +567,62 @@
         </div>
     </div>
 
+    <!-- Card: Pengaturan Jam Operasional Sesi Shalat -->
+    <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" id="jam-absensi-shalat">
+        <div class="px-4 md:px-6 py-3 md:py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2.5 md:gap-3">
+            <div class="w-8 h-8 md:w-10 md:h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-mosque text-emerald-600 text-sm md:text-base"></i>
+            </div>
+            <div class="min-w-0">
+                <h3 class="font-semibold text-gray-800 text-sm md:text-base truncate">Pengaturan Operasional Sesi Shalat</h3>
+                <p class="text-xs text-gray-500 truncate">Atur jam mulai buka sesi, jam tutup otomatis, dan durasi maksimal sesi shalat</p>
+            </div>
+        </div>
+        <div class="p-4 md:p-6">
+            <form action="<?= base_url('admin/pengaturan/update-absensi-shalat-jam') ?>" method="post" class="max-w-xl">
+                <?= csrf_field() ?>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Jam Buka Sesi</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <i class="fas fa-clock fa-sm"></i>
+                            </div>
+                            <input type="time" name="jam_mulai" value="<?= old('jam_mulai', $absensiShalatJamMulai ?? '11:30') ?>" required
+                                   class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm">
+                        </div>
+                        <p class="text-[11px] text-gray-400 mt-1">Sesi baru dapat dibuka mulai jam ini.</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Jam Tutup Otomatis</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <i class="fas fa-power-off fa-sm"></i>
+                            </div>
+                            <input type="time" name="jam_tutup" value="<?= old('jam_tutup', $absensiShalatJamTutup ?? '13:30') ?>" required
+                                   class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm">
+                        </div>
+                        <p class="text-[11px] text-gray-400 mt-1">Sesi otomatis dihentikan jika melewati jam ini.</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Durasi Maks Sesi</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <i class="fas fa-hourglass-half fa-sm"></i>
+                            </div>
+                            <input type="number" min="5" max="180" name="durasi_maks" value="<?= old('durasi_maks', $absensiShalatDurasiMaks ?? 45) ?>" required
+                                   class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm">
+                        </div>
+                        <p class="text-[11px] text-gray-400 mt-1">Maksimal durasi sesi berjalan (menit).</p>
+                    </div>
+                </div>
+                <button type="submit" class="inline-flex items-center px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors text-sm font-medium shadow-sm">
+                    <i class="fas fa-save mr-2"></i> Simpan Pengaturan Shalat
+                </button>
+            </form>
+        </div>
+    </div>
+
     <script>
     // Logo preview & delete
     (function () {

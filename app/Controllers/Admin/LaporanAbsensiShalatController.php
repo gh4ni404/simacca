@@ -25,22 +25,26 @@ class LaporanAbsensiShalatController extends BaseController
 
         $rekapKelas = $this->absensiShalatModel->getRekapPerKelas($from, $to);
         $rekapSiswa = $this->absensiShalatModel->getRekapPerSiswa($from, $to, $kelasId);
+        $rekapGuru  = $this->absensiShalatModel->getRekapPerGuru($from, $to);
         $rekapHarian = $this->absensiShalatModel->getRekapHarian($from, $to);
         $totalSessions = $this->absensiShalatModel->getTotalSessions($from, $to);
         $totalSiswaHadir = count($rekapSiswa);
+        $totalGuruHadir  = count($rekapGuru);
         $kelasList = $this->kelasModel->getListKelas(get_active_tahun_ajaran());
 
         $data = [
-            'title'        => 'Laporan Absensi Shalat',
-            'from'         => $from,
-            'to'           => $to,
-            'kelasId'      => $kelasId,
-            'kelasList'    => $kelasList,
-            'rekapKelas'   => $rekapKelas,
-            'rekapSiswa'   => $rekapSiswa,
-            'rekapHarian'  => $rekapHarian,
-            'totalSessions'=> $totalSessions,
+            'title'           => 'Laporan Absensi Shalat',
+            'from'            => $from,
+            'to'              => $to,
+            'kelasId'         => $kelasId,
+            'kelasList'       => $kelasList,
+            'rekapKelas'      => $rekapKelas,
+            'rekapSiswa'      => $rekapSiswa,
+            'rekapGuru'       => $rekapGuru,
+            'rekapHarian'     => $rekapHarian,
+            'totalSessions'   => $totalSessions,
             'totalSiswaHadir' => $totalSiswaHadir,
+            'totalGuruHadir'  => $totalGuruHadir,
         ];
 
         return view('admin/laporan_absensi_shalat/index', $data);

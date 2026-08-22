@@ -312,7 +312,7 @@
             </div>
 
             <!-- Content -->
-            <div class="desktop-container mx-auto px-6 lg:px-8 py-6">
+            <div class="desktop-container mx-auto p-4">
                 <!-- Flash Messages -->
                 <?= render_alerts() ?>
 

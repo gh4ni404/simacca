@@ -23,8 +23,8 @@ class AttendanceScanController extends BaseController
     /**
      * POST /api/attendance/scan
      * 
-     * Student scans QR code and submits the token.
-     * Identity is derived from the active session (student must be logged in).
+     * Student or Guru scans QR code and submits the token.
+     * Identity is derived from the active session.
      * 
      * Payload: { "token": "abc123xyz" }
      */
@@ -35,17 +35,6 @@ class AttendanceScanController extends BaseController
             return $this->response->setStatusCode(401)->setJSON([
                 'success' => false,
                 'message' => 'Silakan login terlebih dahulu',
-            ]);
-        }
-
-        // Only siswa can scan
-        $userId = session()->get('user_id') ?? session()->get('userId');
-        $allRoles = session()->get('all_roles') ?? [session()->get('role')];
-
-        if (!in_array('siswa', $allRoles)) {
-            return $this->response->setStatusCode(403)->setJSON([
-                'success' => false,
-                'message' => 'Hanya siswa yang dapat melakukan absensi',
             ]);
         }
 
@@ -65,13 +54,21 @@ class AttendanceScanController extends BaseController
             ]);
         }
 
-        // Get siswa data
-        $siswa = $this->siswaModel->getByUserId($userId);
+        $userId = session()->get('user_id') ?? session()->get('userId');
+        $guruModel = new \App\Models\GuruModel();
 
-        if (!$siswa) {
+        // Check if user is a Guru or a Siswa
+        $guru  = $guruModel->getByUserId($userId);
+        $siswa = null;
+
+        if (!$guru) {
+            $siswa = $this->siswaModel->getByUserId($userId);
+        }
+
+        if (!$guru && !$siswa) {
             return $this->response->setStatusCode(404)->setJSON([
                 'success' => false,
-                'message' => 'Data siswa tidak ditemukan',
+                'message' => 'Data profil siswa/guru tidak ditemukan',
             ]);
         }
 
@@ -86,7 +83,15 @@ class AttendanceScanController extends BaseController
         }
 
         // Record attendance (INSERT IGNORE via unique index)
-        $result = $this->absensiShalatModel->recordAttendance($session['id'], $siswa['id']);
+        if ($guru) {
+            $result = $this->absensiShalatModel->recordAttendance($session['id'], null, $guru['id'], 'guru');
+            $nama = $guru['nama_lengkap'];
+            $unit = 'Guru';
+        } else {
+            $result = $this->absensiShalatModel->recordAttendance($session['id'], $siswa['id'], null, 'siswa');
+            $nama = $siswa['nama_lengkap'];
+            $unit = $siswa['nama_kelas'] ?? 'Siswa';
+        }
 
         if ($result === 'duplicate') {
             return $this->response->setJSON([
@@ -109,36 +114,46 @@ class AttendanceScanController extends BaseController
             'message'   => 'Absensi shalat berhasil!',
             'status'    => 'inserted',
             'waktu'     => date('H:i:s'),
-            'siswa'     => $siswa['nama_lengkap'],
-            'kelas'     => $siswa['nama_kelas'] ?? '',
+            'siswa'     => $nama,
+            'kelas'     => $unit,
         ]);
     }
 
     /**
      * GET /api/attendance/scan-page
      * 
-     * Render the scan page for students
+     * Render the scan page for students or teachers
      */
     public function scanPage()
     {
         $token = $this->request->getGet('token');
 
-        // If student is not logged in, redirect to login
+        // If user is not logged in, redirect to login
         if (!session()->get('isLoggedIn')) {
             session()->set('redirect_url', current_url());
             return redirect()->to('/login')->with('error', 'Silakan login untuk melakukan absensi');
         }
 
-        // Get student data
+        // Get user data
         $userId = session()->get('user_id') ?? session()->get('userId');
-        $siswa = $this->siswaModel->getByUserId($userId);
+        $guruModel = new \App\Models\GuruModel();
+
+        $guru  = $guruModel->getByUserId($userId);
+        $siswa = null;
+        if (!$guru) {
+            $siswa = $this->siswaModel->getByUserId($userId);
+        }
+
+        $userProfile = $guru ?: $siswa;
 
         $data = [
-            'title'  => 'Absensi Shalat',
-            'token'  => $token,
-            'siswa'  => $siswa,
+            'title'       => 'Absensi Shalat',
+            'token'       => $token,
+            'siswa'       => $userProfile,
+            'userType'    => $guru ? 'guru' : 'siswa',
         ];
 
         return view('siswa/absensi_shalat/scan', $data);
     }
+
 }

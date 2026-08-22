@@ -276,7 +276,17 @@ if (!function_exists('get_sidebar_menu')) {
                 [
                     'title' => 'Absensi Shalat',
                     'icon' => 'fas fa-mosque',
-                    'url' => '/guru/absensi-shalat'
+                    'url' => '#',
+                    'submenu' => [
+                        [
+                            'title' => 'Scan QR Shalat',
+                            'url' => '/scan',
+                        ],
+                        [
+                            'title' => 'Portal QR (Guru Piket)',
+                            'url' => '/guru/absensi-shalat',
+                        ],
+                    ]
                 ],
                 [
                     'title' => 'Jurnal KBM',
