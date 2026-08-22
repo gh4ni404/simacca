@@ -45,11 +45,15 @@ class RoleModel extends Model
             ->findAll();
     }
 
-    public function getDropdown(): array
+    public function getDropdown(?array $excludeRoles = ['siswa', 'instruktur']): array
     {
+        $this->ensureDefaultRoles();
         $roles = $this->getAllActive();
         $dropdown = [];
         foreach ($roles as $r) {
+            if ($excludeRoles !== null && in_array($r['name'], $excludeRoles)) {
+                continue;
+            }
             $dropdown[$r['name']] = $r['display_name'];
         }
         return $dropdown;
