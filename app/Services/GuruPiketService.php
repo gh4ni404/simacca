@@ -79,13 +79,35 @@ class GuruPiketService extends BaseService
             'is_active'     => 'permit_empty|in_list[0,1]',
         ];
 
-        if (!$this->validate($data, $rules)) {
-            return $this->errorResponse('Validasi gagal');
+        $messages = [
+            'guru_id' => [
+                'required' => 'Pilih guru yang akan ditugaskan piket.',
+                'integer'  => 'ID guru tidak valid.',
+            ],
+            'tahun_ajaran' => [
+                'required' => 'Tahun ajaran wajib diisi.',
+            ],
+            'semester' => [
+                'required' => 'Semester wajib ditentukan.',
+                'in_list'  => 'Semester harus ganjil atau genap.',
+            ],
+            'hari' => [
+                'required' => 'Hari piket wajib dipilih.',
+                'in_list'  => 'Hari piket tidak valid (harus Senin - Sabtu).',
+            ],
+        ];
+
+        if (!$this->validate($data, $rules, $messages)) {
+            $errors = $this->getErrors();
+            $errorSummary = 'Validasi gagal: ' . implode('. ', array_values($errors));
+            return $this->errorResponse($errorSummary, $errors);
         }
 
         // Check if guru already assigned on this day
         if ($this->guruPiketModel->isGuruAssigned($data['guru_id'], $data['hari'], $data['tahun_ajaran'], $data['semester'])) {
-            return $this->errorResponse('Guru ini sudah dijadwalkan piket pada hari ' . ucfirst($data['hari']));
+            return $this->errorResponse('Guru ini sudah dijadwalkan piket pada hari ' . ucfirst($data['hari']), [
+                'guru_id' => 'Guru ini sudah memiliki jadwal piket pada hari ' . ucfirst($data['hari']) . '.'
+            ]);
         }
 
         // If jobdesk_id is provided but rincian_tugas is empty, load rincian_tugas from master jobdesk
@@ -145,13 +167,35 @@ class GuruPiketService extends BaseService
             'is_active'     => 'permit_empty|in_list[0,1]',
         ];
 
-        if (!$this->validate($data, $rules)) {
-            return $this->errorResponse('Validasi gagal');
+        $messages = [
+            'guru_id' => [
+                'required' => 'Pilih guru yang akan ditugaskan piket.',
+                'integer'  => 'ID guru tidak valid.',
+            ],
+            'tahun_ajaran' => [
+                'required' => 'Tahun ajaran wajib diisi.',
+            ],
+            'semester' => [
+                'required' => 'Semester wajib ditentukan.',
+                'in_list'  => 'Semester harus ganjil atau genap.',
+            ],
+            'hari' => [
+                'required' => 'Hari piket wajib dipilih.',
+                'in_list'  => 'Hari piket tidak valid (harus Senin - Sabtu).',
+            ],
+        ];
+
+        if (!$this->validate($data, $rules, $messages)) {
+            $errors = $this->getErrors();
+            $errorSummary = 'Validasi gagal: ' . implode('. ', array_values($errors));
+            return $this->errorResponse($errorSummary, $errors);
         }
 
         // Check if guru already assigned on this day (exclude current record)
         if ($this->guruPiketModel->isGuruAssigned($data['guru_id'], $data['hari'], $data['tahun_ajaran'], $data['semester'], $id)) {
-            return $this->errorResponse('Guru ini sudah dijadwalkan piket pada hari ' . ucfirst($data['hari']));
+            return $this->errorResponse('Guru ini sudah dijadwalkan piket pada hari ' . ucfirst($data['hari']), [
+                'guru_id' => 'Guru ini sudah memiliki jadwal piket pada hari ' . ucfirst($data['hari']) . '.'
+            ]);
         }
 
         // If jobdesk_id is provided but rincian_tugas is empty, load rincian_tugas from master jobdesk

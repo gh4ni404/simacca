@@ -59,17 +59,17 @@ if (!function_exists('optimize_image')) {
         $sourceImage = null;
         switch ($imageType) {
             case IMAGETYPE_JPEG:
-                $sourceImage = imagecreatefromjpeg($sourcePath);
+                $sourceImage = @imagecreatefromjpeg($sourcePath);
                 break;
             case IMAGETYPE_PNG:
-                $sourceImage = imagecreatefrompng($sourcePath);
+                $sourceImage = @imagecreatefrompng($sourcePath);
                 break;
             case IMAGETYPE_GIF:
-                $sourceImage = imagecreatefromgif($sourcePath);
+                $sourceImage = @imagecreatefromgif($sourcePath);
                 break;
             case IMAGETYPE_WEBP:
                 if (function_exists('imagecreatefromwebp')) {
-                    $sourceImage = imagecreatefromwebp($sourcePath);
+                    $sourceImage = @imagecreatefromwebp($sourcePath);
                 }
                 break;
             default:

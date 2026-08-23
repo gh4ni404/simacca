@@ -74,6 +74,9 @@ class GuruPiketController extends BaseController
 
         if (!$result['success']) {
             session()->setFlashdata('error', $result['message']);
+            if (!empty($result['errors'])) {
+                session()->setFlashdata('errors', $result['errors']);
+            }
             return redirect()->back()->withInput();
         }
 
@@ -108,6 +111,9 @@ class GuruPiketController extends BaseController
 
         if (!$result['success']) {
             session()->setFlashdata('error', $result['message']);
+            if (!empty($result['errors'])) {
+                session()->setFlashdata('errors', $result['errors']);
+            }
             return redirect()->back()->withInput();
         }
 

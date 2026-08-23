@@ -31,7 +31,6 @@ if (!function_exists('render_alerts')) {
         
         // Priority order for single alert display
         $priorities = [
-            'errors',
             'import_errors',
             'error', 
             'warning',
@@ -172,14 +171,13 @@ if (!function_exists('render_single_alert')) {
                 break;
                 
             case 'import_errors':
-            case 'errors':
                 $output .= '<div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm mb-6 animate-fade-in" role="alert">';
                 $output .= '<div class="flex items-start">';
                 $output .= '<div class="flex-shrink-0">';
                 $output .= '<i class="fas fa-exclamation-circle text-red-500 text-xl mt-0.5"></i>';
                 $output .= '</div>';
                 $output .= '<div class="ml-3 flex-1">';
-                $output .= '<p class="text-red-800 font-semibold mb-2">Terjadi beberapa kesalahan:</p>';
+                $output .= '<p class="text-red-800 font-semibold mb-2">Terjadi beberapa kesalahan saat import:</p>';
                 $output .= '<ul class="list-disc list-inside text-sm text-red-700 space-y-1">';
                 foreach ($data as $error) {
                     $output .= '<li>' . esc($error) . '</li>';
@@ -367,3 +365,64 @@ if (!function_exists('render_task_progress_bar')) {
         return $html;
     }
 }
+
+if (!function_exists('date_to_indo')) {
+    /**
+     * Convert date string or format to Indonesian day name / date format
+     *
+     * @param string $date Date string (Y-m-d or datetime)
+     * @param bool $withDay Include Indonesian day name (e.g., "Senin, 24 Agustus 2026")
+     * @return string
+     */
+    function date_to_indo($date, $withDay = false)
+    {
+        if (empty($date)) {
+            return '';
+        }
+
+        $timestamp = strtotime($date);
+        if ($timestamp === false) {
+            return $date;
+        }
+
+        $days = [
+            'Sunday'    => 'Minggu',
+            'Monday'    => 'Senin',
+            'Tuesday'   => 'Selasa',
+            'Wednesday' => 'Rabu',
+            'Thursday'  => 'Kamis',
+            'Friday'    => 'Jumat',
+            'Saturday'  => 'Sabtu',
+        ];
+
+        $months = [
+            1  => 'Januari',
+            2  => 'Februari',
+            3  => 'Maret',
+            4  => 'April',
+            5  => 'Mei',
+            6  => 'Juni',
+            7  => 'Juli',
+            8  => 'Agustus',
+            9  => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
+        ];
+
+        $dayEnglish = date('l', $timestamp);
+        $dayIndo = $days[$dayEnglish] ?? $dayEnglish;
+
+        $dayNum = date('j', $timestamp);
+        $monthNum = (int) date('n', $timestamp);
+        $monthIndo = $months[$monthNum] ?? date('F', $timestamp);
+        $year = date('Y', $timestamp);
+
+        if ($withDay) {
+            return "{$dayIndo}, {$dayNum} {$monthIndo} {$year}";
+        }
+
+        return $dayIndo;
+    }
+}
+

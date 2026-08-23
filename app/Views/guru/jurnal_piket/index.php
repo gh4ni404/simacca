@@ -119,16 +119,16 @@
 
                         <!-- Card Footer / Actions -->
                         <div class="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between gap-2">
-                            <a href="<?= base_url('guru/jurnal-piket/detail/' . $row['id']) ?>" class="px-3 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 rounded-lg transition">
-                                <i class="fas fa-eye mr-1"></i> Detail
+                            <a href="<?= base_url('guru/jurnal-piket/detail/' . $row['id']) ?>" class="px-3 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 rounded-lg transition inline-flex items-center gap-1">
+                                <i class="fas fa-eye"></i> Detail
                             </a>
                             <div class="flex items-center gap-1">
                                 <a href="<?= base_url('guru/jurnal-piket/edit/' . $row['id']) ?>" class="p-2 text-gray-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg text-xs transition" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="<?= base_url('guru/jurnal-piket/hapus/' . $row['id']) ?>" onclick="return confirm('Apakah Anda yakin ingin menghapus jurnal piket ini?');" class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg text-xs transition" title="Hapus">
+                                <button type="button" onclick="confirmDelete('<?= base_url('guru/jurnal-piket/hapus/' . $row['id']) ?>')" class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg text-xs transition" title="Hapus">
                                     <i class="fas fa-trash-alt"></i>
-                                </a>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -137,4 +137,45 @@
         <?php endif; ?>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function confirmDelete(url) {
+    Swal.fire({
+        title: 'Hapus Jurnal Piket?',
+        text: 'Data laporan jurnal piket ini akan dihapus secara permanen.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#EF4444',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: '<i class="fas fa-trash-alt mr-1"></i> Ya, Hapus',
+        cancelButtonText: 'Batal',
+        customClass: {
+            popup: 'rounded-2xl shadow-2xl border border-gray-100',
+            confirmButton: 'rounded-xl px-5 py-2.5 font-semibold text-sm',
+            cancelButton: 'rounded-xl px-5 py-2.5 font-semibold text-sm'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = url;
+        }
+    });
+}
+
+<?php if (session()->getFlashdata('success')): ?>
+document.addEventListener('DOMContentLoaded', function() {
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+    });
+    Toast.fire({
+        icon: 'success',
+        title: <?= json_encode(session()->getFlashdata('success')) ?>
+    });
+});
+<?php endif; ?>
+</script>
 <?= $this->endSection() ?>

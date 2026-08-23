@@ -110,8 +110,26 @@ class MasterJobdeskPiketController extends BaseController
             'rincian_tugas' => 'required',
         ];
 
-        if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('error', 'Validasi gagal. Pastikan kode jobdesk unik.');
+        $messages = [
+            'kode_jobdesk' => [
+                'required'   => 'Kode jobdesk wajib diisi.',
+                'min_length' => 'Kode jobdesk minimal 3 karakter.',
+                'max_length' => 'Kode jobdesk maksimal 20 karakter.',
+                'is_unique'  => 'Kode jobdesk sudah digunakan. Silakan gunakan kode lain.',
+            ],
+            'nama_jobdesk' => [
+                'required'   => 'Nama jobdesk wajib diisi.',
+                'min_length' => 'Nama jobdesk minimal 3 karakter.',
+                'max_length' => 'Nama jobdesk maksimal 100 karakter.',
+            ],
+            'rincian_tugas' => [
+                'required' => 'Rincian panduan tugas wajib diisi.',
+            ],
+        ];
+
+        if (!$this->validate($rules, $messages)) {
+            $errors = $this->validator->getErrors();
+            return redirect()->back()->withInput()->with('error', 'Validasi gagal: ' . implode('. ', array_values($errors)))->with('errors', $errors);
         }
 
         $data = [
@@ -144,8 +162,26 @@ class MasterJobdeskPiketController extends BaseController
             'rincian_tugas' => 'required',
         ];
 
-        if (!$this->validate($rules)) {
-            return redirect()->back()->withInput()->with('error', 'Validasi gagal. Pastikan kode jobdesk unik.');
+        $messages = [
+            'kode_jobdesk' => [
+                'required'   => 'Kode jobdesk wajib diisi.',
+                'min_length' => 'Kode jobdesk minimal 3 karakter.',
+                'max_length' => 'Kode jobdesk maksimal 20 karakter.',
+                'is_unique'  => 'Kode jobdesk sudah digunakan. Silakan gunakan kode lain.',
+            ],
+            'nama_jobdesk' => [
+                'required'   => 'Nama jobdesk wajib diisi.',
+                'min_length' => 'Nama jobdesk minimal 3 karakter.',
+                'max_length' => 'Nama jobdesk maksimal 100 karakter.',
+            ],
+            'rincian_tugas' => [
+                'required' => 'Rincian panduan tugas wajib diisi.',
+            ],
+        ];
+
+        if (!$this->validate($rules, $messages)) {
+            $errors = $this->validator->getErrors();
+            return redirect()->back()->withInput()->with('error', 'Validasi gagal: ' . implode('. ', array_values($errors)))->with('errors', $errors);
         }
 
         $data = [

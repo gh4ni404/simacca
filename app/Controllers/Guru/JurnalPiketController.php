@@ -111,12 +111,33 @@ class JurnalPiketController extends BaseController
 
         $result = $this->jurnalPiketService->create($data, $file);
 
-        if (!$result['success']) {
-            $errorMsg = $result['message'];
-            if (!empty($result['errors'])) {
-                $errorMsg .= ': ' . implode(', ', (array) $result['errors']);
+        if ($this->request->isAJAX() || str_contains($this->request->getHeaderLine('Accept'), 'application/json')) {
+            if (!$result['success']) {
+                return $this->response->setJSON([
+                    'success'    => false,
+                    'message'    => $result['message'],
+                    'errors'     => $result['errors'] ?? [],
+                    'csrf_token' => csrf_token(),
+                    'csrf_hash'  => csrf_hash(),
+                ]);
             }
-            return redirect()->back()->withInput()->with('error', $errorMsg);
+
+            session()->setFlashdata('success', 'Jurnal piket berhasil disimpan');
+            return $this->response->setJSON([
+                'success'      => true,
+                'message'      => 'Jurnal piket berhasil disimpan',
+                'redirect_url' => base_url('guru/jurnal-piket'),
+                'csrf_token'   => csrf_token(),
+                'csrf_hash'    => csrf_hash(),
+            ]);
+        }
+
+        if (!$result['success']) {
+            $redirect = redirect()->back()->withInput()->with('error', $result['message']);
+            if (!empty($result['errors'])) {
+                $redirect->with('errors', $result['errors']);
+            }
+            return $redirect;
         }
 
         return redirect()->to('/guru/jurnal-piket')->with('success', 'Jurnal piket berhasil disimpan');
@@ -189,11 +210,17 @@ class JurnalPiketController extends BaseController
     {
         $guru = $this->getGuruDataOrRedirect();
         if (!$guru) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Data guru tidak ditemukan']);
+            }
             return redirect()->to('/guru/dashboard')->with('error', 'Data guru tidak ditemukan');
         }
 
         $resultCheck = $this->jurnalPiketService->getById((int) $id);
         if (!$resultCheck['success'] || $resultCheck['data']['guru_id'] != $guru['id']) {
+            if ($this->request->isAJAX()) {
+                return $this->response->setJSON(['success' => false, 'message' => 'Akses ditolak / data tidak ditemukan']);
+            }
             return redirect()->to('/guru/jurnal-piket')->with('error', 'Akses ditolak / data tidak ditemukan');
         }
 
@@ -210,12 +237,33 @@ class JurnalPiketController extends BaseController
 
         $result = $this->jurnalPiketService->update((int) $id, $data, $file);
 
-        if (!$result['success']) {
-            $errorMsg = $result['message'];
-            if (!empty($result['errors'])) {
-                $errorMsg .= ': ' . implode(', ', (array) $result['errors']);
+        if ($this->request->isAJAX() || str_contains($this->request->getHeaderLine('Accept'), 'application/json')) {
+            if (!$result['success']) {
+                return $this->response->setJSON([
+                    'success'    => false,
+                    'message'    => $result['message'],
+                    'errors'     => $result['errors'] ?? [],
+                    'csrf_token' => csrf_token(),
+                    'csrf_hash'  => csrf_hash(),
+                ]);
             }
-            return redirect()->back()->withInput()->with('error', $errorMsg);
+
+            session()->setFlashdata('success', 'Jurnal piket berhasil diperbarui');
+            return $this->response->setJSON([
+                'success'      => true,
+                'message'      => 'Jurnal piket berhasil diperbarui',
+                'redirect_url' => base_url('guru/jurnal-piket'),
+                'csrf_token'   => csrf_token(),
+                'csrf_hash'    => csrf_hash(),
+            ]);
+        }
+
+        if (!$result['success']) {
+            $redirect = redirect()->back()->withInput()->with('error', $result['message']);
+            if (!empty($result['errors'])) {
+                $redirect->with('errors', $result['errors']);
+            }
+            return $redirect;
         }
 
         return redirect()->to('/guru/jurnal-piket')->with('success', 'Jurnal piket berhasil diperbarui');

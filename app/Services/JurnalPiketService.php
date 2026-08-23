@@ -118,14 +118,38 @@ class JurnalPiketService extends BaseService
     {
         $rules = [
             'guru_id'      => 'required|integer',
-            'tanggal'      => 'required|valid_date',
+            'tanggal'      => 'required|valid_date[Y-m-d]',
             'tahun_ajaran' => 'required',
-            'semester'     => 'required|in_list[ganjil,genap,Ganjil,Genap]',
-            'deskripsi'    => 'required',
+            'semester'     => 'required|in_list[ganjil,genap]',
+            'deskripsi'    => 'required|min_length[5]',
         ];
 
-        if (!$this->validate($data, $rules)) {
-            return $this->errorResponse('Validasi gagal', $this->getErrors());
+        $messages = [
+            'guru_id' => [
+                'required' => 'Identitas guru piket tidak valid.',
+                'integer'  => 'Identitas guru piket harus berupa angka.',
+            ],
+            'tanggal' => [
+                'required'   => 'Tanggal piket wajib diisi.',
+                'valid_date' => 'Format tanggal piket tidak valid (YYYY-MM-DD).',
+            ],
+            'tahun_ajaran' => [
+                'required' => 'Tahun ajaran aktif belum ditentukan.',
+            ],
+            'semester' => [
+                'required' => 'Semester wajib ditentukan.',
+                'in_list'  => 'Semester harus berupa ganjil atau genap.',
+            ],
+            'deskripsi' => [
+                'required'   => 'Uraian / deskripsi kegiatan piket wajib diisi.',
+                'min_length' => 'Uraian kegiatan piket minimal 5 karakter agar informasi lebih jelas.',
+            ],
+        ];
+
+        if (!$this->validate($data, $rules, $messages)) {
+            $errors = $this->getErrors();
+            $errorSummary = 'Validasi gagal: ' . implode('. ', array_values($errors));
+            return $this->errorResponse($errorSummary, $errors);
         }
 
         // Check if journal already exists for this guru & date
@@ -136,6 +160,18 @@ class JurnalPiketService extends BaseService
         // Handle photo upload
         $fotoName = null;
         if ($file && $file->isValid() && !$file->hasMoved()) {
+            $validMimes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+            $mimeType = $file->getMimeType();
+            if (!in_array($mimeType, $validMimes)) {
+                $err = ['foto_dokumentasi' => 'Format file foto tidak didukung. Gunakan format JPG, JPEG, PNG, atau WEBP.'];
+                return $this->errorResponse('Validasi gagal: Format foto harus JPG, JPEG, PNG, atau WEBP.', $err);
+            }
+
+            if ($file->getSizeByUnit('mb') > 2) {
+                $err = ['foto_dokumentasi' => 'Ukuran file foto melebihi batas 2MB. Silakan pilih foto dengan ukuran lebih kecil.'];
+                return $this->errorResponse('Validasi gagal: Ukuran file foto melebihi 2MB.', $err);
+            }
+
             $uploadPath = WRITEPATH . 'uploads/jurnal_piket';
             if (!is_dir($uploadPath)) {
                 mkdir($uploadPath, 0777, true);
@@ -145,12 +181,15 @@ class JurnalPiketService extends BaseService
             $file->move($uploadPath, $fotoName);
 
             $filePath = $uploadPath . '/' . $fotoName;
-            if (file_exists($filePath) && $file->isImage()) {
+            if (file_exists($filePath)) {
                 helper('image');
                 if (function_exists('optimize_jurnal_photo')) {
                     optimize_jurnal_photo($filePath, $filePath);
                 }
             }
+        } elseif ($file && !$file->isValid() && $file->getError() !== UPLOAD_ERR_NO_FILE) {
+            $err = ['foto_dokumentasi' => 'Gagal mengunggah file foto: ' . $file->getErrorString()];
+            return $this->errorResponse('Validasi gagal: Gagal mengunggah file foto dokumentasi.', $err);
         }
 
         return $this->executeInTransaction(function () use ($data, $fotoName) {
@@ -158,7 +197,7 @@ class JurnalPiketService extends BaseService
                 'guru_id'          => $data['guru_id'],
                 'tanggal'          => $data['tanggal'],
                 'tahun_ajaran'     => $data['tahun_ajaran'],
-                'semester'         => strtolower($data['semester']),
+                'semester'         => $data['semester'],
                 'rincian_tugas'    => $data['rincian_tugas'] ?? null,
                 'deskripsi'        => $data['deskripsi'],
                 'catatan'          => $data['catatan'] ?? null,
@@ -192,12 +231,29 @@ class JurnalPiketService extends BaseService
 
         $rules = [
             'guru_id'   => 'required|integer',
-            'tanggal'   => 'required|valid_date',
-            'deskripsi' => 'required',
+            'tanggal'   => 'required|valid_date[Y-m-d]',
+            'deskripsi' => 'required|min_length[5]',
         ];
 
-        if (!$this->validate($data, $rules)) {
-            return $this->errorResponse('Validasi gagal', $this->getErrors());
+        $messages = [
+            'guru_id' => [
+                'required' => 'Identitas guru piket tidak valid.',
+                'integer'  => 'Identitas guru piket harus berupa angka.',
+            ],
+            'tanggal' => [
+                'required'   => 'Tanggal piket wajib diisi.',
+                'valid_date' => 'Format tanggal piket tidak valid (YYYY-MM-DD).',
+            ],
+            'deskripsi' => [
+                'required'   => 'Uraian / deskripsi kegiatan piket wajib diisi.',
+                'min_length' => 'Uraian kegiatan piket minimal 5 karakter agar informasi lebih jelas.',
+            ],
+        ];
+
+        if (!$this->validate($data, $rules, $messages)) {
+            $errors = $this->getErrors();
+            $errorSummary = 'Validasi gagal: ' . implode('. ', array_values($errors));
+            return $this->errorResponse($errorSummary, $errors);
         }
 
         // Check if journal already exists for this guru & date (excluding current record)
@@ -209,6 +265,18 @@ class JurnalPiketService extends BaseService
 
         // Handle new photo upload if provided
         if ($file && $file->isValid() && !$file->hasMoved()) {
+            $validMimes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+            $mimeType = $file->getMimeType();
+            if (!in_array($mimeType, $validMimes)) {
+                $err = ['foto_dokumentasi' => 'Format file foto tidak didukung. Gunakan format JPG, JPEG, PNG, atau WEBP.'];
+                return $this->errorResponse('Validasi gagal: Format foto harus JPG, JPEG, PNG, atau WEBP.', $err);
+            }
+
+            if ($file->getSizeByUnit('mb') > 2) {
+                $err = ['foto_dokumentasi' => 'Ukuran file foto melebihi batas 2MB. Silakan pilih foto dengan ukuran lebih kecil.'];
+                return $this->errorResponse('Validasi gagal: Ukuran file foto melebihi 2MB.', $err);
+            }
+
             $uploadPath = WRITEPATH . 'uploads/jurnal_piket';
             if (!is_dir($uploadPath)) {
                 mkdir($uploadPath, 0777, true);
@@ -216,19 +284,22 @@ class JurnalPiketService extends BaseService
 
             // Remove old photo if exists
             if ($fotoName && file_exists($uploadPath . '/' . $fotoName)) {
-                unlink($uploadPath . '/' . $fotoName);
+                @unlink($uploadPath . '/' . $fotoName);
             }
 
             $fotoName = $file->getRandomName();
             $file->move($uploadPath, $fotoName);
 
             $filePath = $uploadPath . '/' . $fotoName;
-            if (file_exists($filePath) && $file->isImage()) {
+            if (file_exists($filePath)) {
                 helper('image');
                 if (function_exists('optimize_jurnal_photo')) {
                     optimize_jurnal_photo($filePath, $filePath);
                 }
             }
+        } elseif ($file && !$file->isValid() && $file->getError() !== UPLOAD_ERR_NO_FILE) {
+            $err = ['foto_dokumentasi' => 'Gagal mengunggah file foto: ' . $file->getErrorString()];
+            return $this->errorResponse('Validasi gagal: Gagal mengunggah file foto dokumentasi.', $err);
         }
 
         return $this->executeInTransaction(function () use ($id, $data, $fotoName) {
