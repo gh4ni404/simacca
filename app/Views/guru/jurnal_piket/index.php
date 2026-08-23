@@ -58,9 +58,6 @@
                 </div>
                 <h3 class="text-lg font-semibold text-gray-800">Belum ada jurnal piket</h3>
                 <p class="text-gray-500 text-sm mt-1 mb-6">Silakan isi jurnal kegiatan piket harian Anda.</p>
-                <a href="<?= base_url('guru/jurnal-piket/tambah') ?>" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition">
-                    <i class="fas fa-plus mr-2"></i> Buat Jurnal Pertama
-                </a>
             </div>
         <?php else: ?>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
