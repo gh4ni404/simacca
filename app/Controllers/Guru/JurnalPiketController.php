@@ -349,24 +349,4 @@ class JurnalPiketController extends BaseController
 
         return view('guru/jurnal_piket/print_single', $data);
     }
-
-    /**
-     * AJAX endpoint to get rincian tugas for a selected date
-     */
-    public function getRincianTugas()
-    {
-        $guru = $this->getGuruDataOrRedirect();
-        if (!$guru) {
-            return $this->response->setJSON(['success' => false, 'rincian_tugas' => '']);
-        }
-
-        $tanggal = $this->request->getGet('tanggal') ?: date('Y-m-d');
-        $rincianTugas = $this->jurnalPiketService->getRincianTugasForGuruAndDate($guru['id'], $tanggal);
-
-        return $this->response->setJSON([
-            'success'       => true,
-            'tanggal'       => $tanggal,
-            'rincian_tugas' => $rincianTugas,
-        ]);
-    }
 }

@@ -44,7 +44,7 @@
                         <input type="date" id="tanggal" name="tanggal" 
                             value="<?= esc(old('tanggal', $tanggal ?? date('Y-m-d'))) ?>" 
                             class="w-full px-4 py-3 rounded-xl border <?= session('errors.tanggal') ? 'is-field-error border-red-500' : 'border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500' ?> text-sm transition"
-                            onchange="onTanggalChange(this)">
+                            onchange="clearFieldError(this)">
                     </div>
                     <?php if (session('errors.tanggal')): ?>
                         <p id="error_msg_tanggal" class="mt-1.5 text-xs text-red-600 font-semibold flex items-center gap-1.5 animate-bounce">
@@ -418,41 +418,11 @@ document.getElementById('jurnalForm').addEventListener('submit', async function(
     }
 });
 
-function onTanggalChange(el) {
-    clearFieldError(el);
-    fetchRincianTugas(el.value);
-}
-
-async function fetchRincianTugas(tanggal) {
-    if (!tanggal) return;
-    const rincianEl = document.getElementById('rincian_tugas');
-    try {
-        const res = await fetch(`<?= base_url('guru/jurnal-piket/get-rincian-tugas') ?>?tanggal=${tanggal}`, {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        });
-        const data = await res.json();
-        if (data.success && data.rincian_tugas) {
-            if (rincianEl && (!rincianEl.value || rincianEl.value.trim() === '' || rincianEl.dataset.autoFilled === 'true')) {
-                rincianEl.value = data.rincian_tugas;
-                rincianEl.dataset.autoFilled = 'true';
-            }
-        }
-    } catch (e) {
-        console.error('Error fetching rincian tugas:', e);
-    }
-}
-
 // Auto focus and smooth scroll to first error if present on initial load
 document.addEventListener('DOMContentLoaded', function() {
     const deskripsi = document.getElementById('deskripsi');
     if (deskripsi && deskripsi.value) {
         updateCharCount(deskripsi);
-    }
-
-    const rincianEl = document.getElementById('rincian_tugas');
-    const tanggalEl = document.getElementById('tanggal');
-    if (rincianEl && !rincianEl.value.trim() && tanggalEl && tanggalEl.value) {
-        fetchRincianTugas(tanggalEl.value);
     }
 
     const firstInvalid = document.querySelector('.is-field-error');
