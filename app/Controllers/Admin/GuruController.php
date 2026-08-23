@@ -529,15 +529,23 @@ class GuruController extends BaseController
 
             $roleMap = [
                 'guru mapel'               => 'guru_mapel',
+                'guru mata pelajaran'      => 'guru_mapel',
                 'guru'                     => 'guru_mapel',
                 'guru_mapel'               => 'guru_mapel',
+                'pengajar'                 => 'guru_mapel',
                 'wali kelas'               => 'wali_kelas',
                 'walikelas'                => 'wali_kelas',
                 'wali_kelas'               => 'wali_kelas',
+                'wali'                     => 'wali_kelas',
                 'wakakur'                  => 'wakakur',
                 'wakil kepala kurikulum'   => 'wakakur',
+                'waka kurikulum'           => 'wakakur',
+                'wakil kurikulum'          => 'wakakur',
                 'ketua jurusan'            => 'ketua_jurusan',
                 'kajur'                    => 'ketua_jurusan',
+                'kaprog'                   => 'ketua_jurusan',
+                'kepala program'           => 'ketua_jurusan',
+                'ketua program keahlian'   => 'ketua_jurusan',
                 'ketua_jurusan'            => 'ketua_jurusan',
                 'kepala sekolah'           => 'kepala_sekolah',
                 'kepsek'                   => 'kepala_sekolah',
@@ -546,15 +554,33 @@ class GuruController extends BaseController
                 'tenaga pendidik'          => 'tendik',
                 'staf'                     => 'tendik',
                 'tu'                       => 'tendik',
+                'tata usaha'               => 'tendik',
                 'admin'                    => 'admin',
                 'administrator'            => 'admin',
             ];
+
+            // Pre-cache all existing NIPs and Usernames for O(1) fast lookup (eliminates N+1 queries)
+            $guruModelCheck = new \App\Models\GuruModel();
+            $userModelCheck = new \App\Models\UserModel();
+            $allGurusCheck  = $guruModelCheck->select('nip, nama_lengkap')->findAll();
+            $existingNipMap = [];
+            foreach ($allGurusCheck as $gCheck) {
+                $existingNipMap[trim($gCheck['nip'])] = $gCheck['nama_lengkap'];
+            }
+            $allUsersCheck     = $userModelCheck->select('username')->findAll();
+            $existingUsernames = array_flip(array_column($allUsersCheck, 'username'));
 
             foreach ($rows as $index => $row) {
                 if (empty($row[0])) continue; // Skip empty rows
 
                 try {
-                    $nip          = trim($row[0]);
+                    $rawNip       = $row[0] ?? '';
+                    if (is_numeric($rawNip) || (is_string($rawNip) && preg_match('/^[0-9.]+[eE]\+[0-9]+$/', trim($rawNip)))) {
+                        $nip = sprintf('%.0f', (float)$rawNip);
+                    } else {
+                        $nip = trim((string)$rawNip);
+                    }
+                    $nip          = preg_replace('/\s+/', '', $nip);
                     $namaLengkap  = trim($row[1]);
                     $jkInput      = strtolower(trim($row[2] ?? ''));
                     $username     = trim($row[3] ?? '');
@@ -586,8 +612,11 @@ class GuruController extends BaseController
                     if (!empty($roleRaw)) {
                         $parts = array_map('trim', explode(',', $roleRaw));
                         foreach ($parts as $p) {
-                            $lowerP = strtolower($p);
-                            if (isset($roleMap[$lowerP])) {
+                            $lowerP = strtolower(trim($p));
+                            $cleanP = strtolower(trim(preg_replace('/\s+/', ' ', str_replace(['_', '-'], ' ', $p))));
+                            if (isset($roleMap[$cleanP])) {
+                                $parsedRoles[] = $roleMap[$cleanP];
+                            } elseif (isset($roleMap[$lowerP])) {
                                 $parsedRoles[] = $roleMap[$lowerP];
                             }
                         }
@@ -645,7 +674,16 @@ class GuruController extends BaseController
                         }
                     }
 
-                    // Create guru using service
+                    // Pre-check duplicate NIP & Username using O(1) in-memory lookup
+                    if (isset($existingNipMap[$nip])) {
+                        throw new \Exception("NIP '{$nip}' ({$namaLengkap}) sudah terdaftar di sistem (milik {$existingNipMap[$nip]})");
+                    }
+
+                    if (isset($existingUsernames[$username])) {
+                        throw new \Exception("Username '{$username}' ({$namaLengkap}) sudah terdaftar di sistem");
+                    }
+
+                    // Create guru using service (disable synchronous welcome email for fast bulk import)
                     $guruData = [
                         'nip'               => $nip,
                         'nama_lengkap'      => $namaLengkap,
@@ -653,6 +691,7 @@ class GuruController extends BaseController
                         'username'          => $username,
                         'password'          => $password,
                         'email'             => !empty($email) ? $email : null,
+                        'send_email'        => false,
                         'roles'             => array_unique($parsedRoles),
                         'mata_pelajaran_id' => $mapelId,
                         'kelas_id'          => $kelasId,
@@ -664,6 +703,10 @@ class GuruController extends BaseController
                     if (!$result['success']) {
                         throw new \Exception(implode(', ', $result['errors']));
                     }
+
+                    // Cache freshly created items to prevent intra-file duplicates
+                    $existingNipMap[$nip] = $namaLengkap;
+                    $existingUsernames[$username] = true;
 
                     $successCount++;
                 } catch (\Exception $e) {

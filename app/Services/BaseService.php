@@ -251,11 +251,11 @@ abstract class BaseService
      * @param array $rules
      * @return bool
      */
-    protected function validate(array $data, array $rules): bool
+    protected function validate(array $data, array $rules, array $messages = []): bool
     {
         $validation = \Config\Services::validation();
         
-        $validation->setRules($rules);
+        $validation->setRules($rules, $messages);
         
         if (!$validation->run($data)) {
             $this->errors = $validation->getErrors();

@@ -146,20 +146,55 @@ class GuruService extends BaseService
             $rules['jurusan'] = 'required';
         }
 
-        if (!$this->validate($data, $rules)) {
+        $messages = [
+            'nip' => [
+                'required'  => 'NIP wajib diisi',
+                'is_unique' => 'NIP sudah terdaftar di sistem',
+            ],
+            'username' => [
+                'required'  => 'Username wajib diisi',
+                'is_unique' => 'Username sudah terdaftar di sistem',
+            ],
+            'nama_lengkap' => [
+                'required'  => 'Nama lengkap wajib diisi',
+            ],
+            'jenis_kelamin' => [
+                'required' => 'Jenis kelamin wajib diisi',
+                'in_list'  => 'Jenis kelamin harus L atau P',
+            ],
+            'password' => [
+                'required'   => 'Password wajib diisi',
+                'min_length' => 'Password minimal 6 karakter',
+            ],
+            'email' => [
+                'valid_email' => 'Format email tidak valid',
+            ],
+            'kelas_id' => [
+                'required' => 'Wali Kelas wajib memilih kelas',
+            ],
+            'jurusan' => [
+                'required' => 'Ketua Jurusan wajib mengisi jurusan',
+            ],
+        ];
+
+        if (!$this->validate($data, $rules, $messages)) {
             return $this->errorResponse('Validasi gagal');
         }
 
         return $this->executeInTransaction(function () use ($data, $roles, $isWaliKelas, $isKetuaJurusan) {
-            $primaryRole = $roles[0];
+            $primaryRole = $roles[0] ?? 'guru_mapel';
+            $knownRoles  = ['admin', 'guru_mapel', 'wali_kelas', 'wakakur', 'ketua_jurusan', 'kepala_sekolah', 'tendik', 'siswa', 'instruktur'];
+            if (!in_array($primaryRole, $knownRoles)) {
+                $primaryRole = 'guru_mapel';
+            }
 
             // 1. Create user account
             $userData = [
-                'username' => $data['username'],
-                'password' => $data['password'],
-                'role' => $primaryRole,
-                'email' => $data['email'] ?? null,
-                'is_active' => 1,
+                'username'   => $data['username'],
+                'password'   => $data['password'],
+                'role'       => substr($primaryRole, 0, 50),
+                'email'      => $data['email'] ?? null,
+                'is_active'  => 1,
                 'created_at' => date('Y-m-d H:i:s')
             ];
 
@@ -176,7 +211,7 @@ class GuruService extends BaseService
             // 3. Create guru data
             $guruData = [
                 'user_id'          => $userId,
-                'nip'              => $data['nip'],
+                'nip'              => substr(trim((string)$data['nip']), 0, 50),
                 'nama_lengkap'     => $data['nama_lengkap'],
                 'jenis_kelamin'    => $data['jenis_kelamin'],
                 'mata_pelajaran_id' => $data['mata_pelajaran_id'] ?? null,
@@ -200,8 +235,8 @@ class GuruService extends BaseService
 
             $this->log('info', "Guru created successfully: {$data['nama_lengkap']} (ID: {$guruId})");
 
-            // 5. Send welcome email if email is provided
-            if (!empty($data['email'])) {
+            // 5. Send welcome email if email is provided and send_email option is true
+            if (!empty($data['email']) && ($data['send_email'] ?? true) !== false) {
                 $this->sendWelcomeEmail(
                     $data['email'],
                     $data['username'],
