@@ -435,7 +435,7 @@
             <div class="header">
                 <div class="header-content">
                     <div class="logo">
-                        <img src="<?= base_url('assets/images/sekolah.png') ?>" alt="Logo Sekolah" onerror="this.style.display='none'">
+                        <img src="<?= base_url('assets/images/provinsi.png') ?>" alt="Logo Provinsi" onerror="this.style.display='none'">
                     </div>
                     <div class="header-text">
                         <h3>PEMERINTAH PROVINSI SULAWESI SELATAN</h3>
@@ -446,7 +446,7 @@
                         <p><em>Email: smkn8bone@gmail.com &bull; Website: smkn8bone.sch.id</em></p>
                     </div>
                     <div class="logo">
-                        <img src="<?= base_url('assets/images/provinsi.png') ?>" alt="Logo Provinsi" onerror="this.style.display='none'">
+                        <img src="<?= base_url('assets/images/sekolah.png') ?>" alt="Logo Sekolah" onerror="this.style.display='none'">
                     </div>
                 </div>
             </div>
