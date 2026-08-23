@@ -10,11 +10,14 @@
                 <p class="text-sm text-gray-600 mt-1">Laporan kegiatan piket pada <?= date('d F Y', strtotime($jurnal['tanggal'])) ?></p>
             </div>
             <div class="flex items-center gap-2">
-                <a href="<?= base_url('guru/jurnal-piket/edit/' . $jurnal['id']) ?>" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-xl transition">
-                    <i class="fas fa-edit mr-1.5"></i> Edit
+                <a href="<?= base_url('guru/jurnal-piket/cetak/' . $jurnal['id']) ?>" target="_blank" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-xl transition inline-flex items-center gap-1.5 shadow-sm">
+                    <i class="fas fa-print"></i> Cetak Jurnal
                 </a>
-                <a href="<?= base_url('guru/jurnal-piket') ?>" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-xl transition">
-                    <i class="fas fa-arrow-left mr-1.5"></i> Kembali
+                <a href="<?= base_url('guru/jurnal-piket/edit/' . $jurnal['id']) ?>" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-xl transition inline-flex items-center gap-1.5 shadow-sm">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a href="<?= base_url('guru/jurnal-piket') ?>" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-xl transition inline-flex items-center gap-1.5 shadow-sm">
+                    <i class="fas fa-arrow-left"></i> Kembali
                 </a>
             </div>
         </div>

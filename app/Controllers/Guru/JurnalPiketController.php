@@ -292,4 +292,61 @@ class JurnalPiketController extends BaseController
 
         return redirect()->to('/guru/jurnal-piket')->with('success', 'Jurnal piket berhasil dihapus');
     }
+
+    /**
+     * Print multiple / recap of jurnal piket
+     */
+    public function print()
+    {
+        $guru = $this->getGuruDataOrRedirect();
+        if (!$guru) {
+            return redirect()->to('/guru/dashboard')->with('error', 'Data guru tidak ditemukan');
+        }
+
+        $startDate = $this->request->getGet('start_date');
+        $endDate   = $this->request->getGet('end_date');
+
+        $result = $this->jurnalPiketService->getJurnalByGuru($guru['id'], $startDate, $endDate);
+
+        $data = [
+            'title'       => 'Laporan Jurnal Piket - ' . $guru['nama_lengkap'],
+            'guru'        => $guru,
+            'jurnalList'  => $result['data'] ?? [],
+            'startDate'   => $startDate,
+            'endDate'     => $endDate,
+            'tahunAjaran' => get_active_tahun_ajaran(),
+        ];
+
+        return view('guru/jurnal_piket/print', $data);
+    }
+
+    /**
+     * Print single detailed jurnal piket entry
+     */
+    public function printSingle($id)
+    {
+        $guru = $this->getGuruDataOrRedirect();
+        if (!$guru) {
+            return redirect()->to('/guru/dashboard')->with('error', 'Data guru tidak ditemukan');
+        }
+
+        $result = $this->jurnalPiketService->getById((int) $id);
+        if (!$result['success']) {
+            return redirect()->to('/guru/jurnal-piket')->with('error', $result['message']);
+        }
+
+        $jurnal = $result['data'];
+        if ($jurnal['guru_id'] != $guru['id']) {
+            return redirect()->to('/guru/jurnal-piket')->with('error', 'Akses ditolak');
+        }
+
+        $data = [
+            'title'       => 'Lembar Jurnal Piket - ' . date('d/m/Y', strtotime($jurnal['tanggal'])),
+            'guru'        => $guru,
+            'jurnal'      => $jurnal,
+            'tahunAjaran' => $jurnal['tahun_ajaran'] ?? get_active_tahun_ajaran(),
+        ];
+
+        return view('guru/jurnal_piket/print_single', $data);
+    }
 }

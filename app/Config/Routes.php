@@ -317,6 +317,8 @@ $routes->group('guru', ['filter' => 'role:guru_mapel,wakakur'], function ($route
     $routes->get('jurnal-piket/edit/(:num)', 'Guru\JurnalPiketController::edit/$1');
     $routes->post('jurnal-piket/update/(:num)', 'Guru\JurnalPiketController::update/$1');
     $routes->get('jurnal-piket/hapus/(:num)', 'Guru\JurnalPiketController::delete/$1');
+    $routes->get('jurnal-piket/cetak', 'Guru\JurnalPiketController::print');
+    $routes->get('jurnal-piket/cetak/(:num)', 'Guru\JurnalPiketController::printSingle/$1');
     
     // Laporan Routes
     $routes->get('laporan', 'Guru\LaporanController::index', ['as' => 'guru.laporan']);

@@ -16,6 +16,9 @@
                     <p class="text-gray-600 mt-1">Dokumentasi dan laporan kegiatan tugas piket harian</p>
                 </div>
                 <div class="flex items-center gap-3">
+                    <a href="<?= base_url('guru/jurnal-piket/cetak' . (!empty($startDate) || !empty($endDate) ? '?start_date=' . esc($startDate) . '&end_date=' . esc($endDate) : '')) ?>" target="_blank" class="inline-flex items-center px-4 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium rounded-xl shadow-sm transition">
+                        <i class="fas fa-print mr-2 text-indigo-600"></i> Cetak Laporan
+                    </a>
                     <a href="<?= base_url('guru/jurnal-piket/tambah') ?>" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-xl shadow-lg hover:shadow-indigo-500/25 transition-all transform hover:-translate-y-0.5">
                         <i class="fas fa-plus mr-2"></i> Isi Jurnal Piket
                     </a>
@@ -120,6 +123,9 @@
                                 <i class="fas fa-eye"></i> Detail
                             </a>
                             <div class="flex items-center gap-1">
+                                <a href="<?= base_url('guru/jurnal-piket/cetak/' . $row['id']) ?>" target="_blank" class="p-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg text-xs transition" title="Cetak Lembar Jurnal">
+                                    <i class="fas fa-print"></i>
+                                </a>
                                 <a href="<?= base_url('guru/jurnal-piket/edit/' . $row['id']) ?>" class="p-2 text-gray-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg text-xs transition" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
