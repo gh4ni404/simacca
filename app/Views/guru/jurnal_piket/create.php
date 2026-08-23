@@ -66,7 +66,7 @@
                     </div>
                     <textarea id="rincian_tugas" name="rincian_tugas" rows="4" 
                         class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-gray-50/70 text-gray-700 transition" 
-                        placeholder="Rincian tugas piket..."><?= esc(old('rincian_tugas', $rincianTugas ?? '')) ?></textarea>
+                        placeholder="Rincian tugas piket..."><?= esc(old('rincian_tugas') ?: ($rincianTugas ?? '')) ?></textarea>
                     <p class="text-xs text-gray-500 mt-1.5 flex items-center gap-1">
                         <i class="fas fa-info-circle text-indigo-500"></i> Diisi otomatis dari panduan tugas Anda. Anda dapat menyesuaikannya jika ada tugas tambahan.
                     </p>
