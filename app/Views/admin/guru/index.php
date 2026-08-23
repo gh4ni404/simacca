@@ -244,7 +244,7 @@
                                                 </span>
                                             <?php elseif ($r === 'kepala_sekolah'): ?>
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800">
-                                                    <i class="fas fa-user-shield mr-1 text-[10px]"></i> Kepsek
+                                                    <i class="fas fa-user-shield mr-1 text-[10px]"></i> Kepala Sekolah
                                                 </span>
                                             <?php elseif ($r === 'tendik'): ?>
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-100 text-teal-800">
