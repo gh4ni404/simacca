@@ -8,6 +8,7 @@ use App\Models\SiswaModel;
 use App\Models\KelasModel;
 use App\Models\AbsensiModel;
 use App\Models\AbsensiDetailModel;
+use App\Models\AbsensiGuruModel;
 use App\Models\TempatPklModel;
 use App\Models\JurnalPiketModel;
 use App\Models\DashboardModel;
