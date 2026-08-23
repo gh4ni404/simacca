@@ -71,6 +71,12 @@
                         <label class="block text-sm font-medium mb-2">Role *</label>
                         <div class="space-y-2" id="rolesGroup">
                             <?php foreach ($roleList as $roleName => $roleLabel): ?>
+                                <?php 
+                                $rLower = strtolower($roleName . ' ' . $roleLabel);
+                                if (strpos($rLower, 'admin') !== false || strpos($rLower, 'super') !== false) {
+                                    continue;
+                                }
+                                ?>
                                 <label class="inline-flex items-center cursor-pointer">
                                     <input type="checkbox" name="roles[]" value="<?= $roleName ?>"
                                         class="rounded text-indigo-600 focus:ring-indigo-500 mr-2 role-checkbox"

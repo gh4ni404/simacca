@@ -69,6 +69,7 @@ class GuruModel extends Model
             ->join('users', 'users.id = guru.user_id')
             ->join('mata_pelajaran', 'mata_pelajaran.id = guru.mata_pelajaran_id', 'left')
             ->join('kelas', 'kelas.id = guru.kelas_id', 'left')
+            ->whereNotIn('users.role', ['admin', 'superadmin'])
             ->orderBy('guru.nama_lengkap', 'ASC')
             ->findAll();
     }

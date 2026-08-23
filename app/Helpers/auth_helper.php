@@ -91,6 +91,18 @@ if (!function_exists('get_role_name')) {
     }
 }
 
+if (!function_exists('get_role_name_from_role')) {
+    /**
+     * Get display name for a given role name
+     */
+    function get_role_name_from_role($role)
+    {
+        $roleModel = new \App\Models\RoleModel();
+        return $roleModel->getDisplayName($role);
+    }
+}
+
+
 if (!function_exists('get_greeting')) {
     /**
      * Get greeting based on time

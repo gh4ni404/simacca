@@ -243,6 +243,12 @@
         
         <div class="space-y-3" id="roleCheckboxes">
             <?php foreach ($roleList as $roleName => $roleLabel): ?>
+                <?php 
+                $rLower = strtolower($roleName . ' ' . $roleLabel);
+                if (strpos($rLower, 'admin') !== false || strpos($rLower, 'super') !== false) {
+                    continue;
+                }
+                ?>
                 <label class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
                     <input type="checkbox" name="modal_roles[]" value="<?= $roleName ?>"
                         class="rounded text-indigo-600 focus:ring-indigo-500 mr-3 modal-role-checkbox"
@@ -428,18 +434,11 @@
 
 <?php 
 // Helper function to get role name
-function get_role_name_from_role($role) {
-    $roleNames = [
-        'admin' => 'Administrator',
-        'guru_mapel' => 'Guru Mata Pelajaran',
-        'wali_kelas' => 'Wali Kelas',
-        'wakakur' => 'Wakil Kepala Kurikulum',
-        'siswa'          => 'Siswa',
-        'ketua_jurusan'  => 'Ketua Jurusan',
-        'kepala_sekolah' => 'Kepala Sekolah',
-        'tendik'         => 'Tenaga Pendidik / Staf'
-    ];
-    return $roleNames[$role] ?? ucfirst(str_replace('_', ' ', $role));
+if (!function_exists('get_role_name_from_role')) {
+    function get_role_name_from_role($role) {
+        $roleModel = new \App\Models\RoleModel();
+        return $roleModel->getDisplayName($role);
+    }
 }
 ?>
 <?= $this->endSection() ?>

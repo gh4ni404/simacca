@@ -46,70 +46,98 @@
     </div>
 
     <!-- Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 shadow-sm">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
-                    <i class="fas fa-chalkboard-teacher text-xl"></i>
+                <div class="p-3 rounded-xl bg-blue-600 text-white mr-4 shadow-sm">
+                    <i class="fas fa-users text-xl"></i>
                 </div>
                 <div>
-                    <p class="text-sm text-blue-600">Total Guru</p>
-                    <p class="text-2xl font-bold text-blue-600"><?= $totalGuru; ?></p>
+                    <p class="text-xs uppercase tracking-wider font-semibold text-blue-700">Total Guru</p>
+                    <p class="text-2xl font-black text-blue-900"><?= $totalGuru; ?></p>
                 </div>
             </div>
         </div>
-        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+        <div class="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-4 shadow-sm">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
-                    <i class="fas fa-chalkboard-teacher text-xl"></i>
+                <div class="p-3 rounded-xl bg-emerald-600 text-white mr-4 shadow-sm">
+                    <i class="fas fa-user-tie text-xl"></i>
                 </div>
                 <div>
-                    <p class="text-sm text-green-600">Wali Kelas</p>
-                    <p class="text-2xl font-bold text-green-600"><?= count($waliKelas); ?></p>
+                    <p class="text-xs uppercase tracking-wider font-semibold text-emerald-700">Wali Kelas</p>
+                    <p class="text-2xl font-black text-emerald-900"><?= $stats['waliKelasCount'] ?? count($waliKelas); ?></p>
                 </div>
             </div>
         </div>
-        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+        <div class="bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-200 rounded-xl p-4 shadow-sm">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
-                    <i class="fas fa-chalkboard-teacher text-xl"></i>
+                <div class="p-3 rounded-xl bg-indigo-600 text-white mr-4 shadow-sm">
+                    <i class="fas fa-book-reader text-xl"></i>
                 </div>
                 <div>
-                    <p class="text-sm text-purple-600">Guru Mapel</p>
-                    <p class="text-2xl font-bold text-purple-600"><?= count($guruNonWali); ?></p>
+                    <p class="text-xs uppercase tracking-wider font-semibold text-indigo-700">Guru Mapel</p>
+                    <p class="text-2xl font-black text-indigo-900"><?= $stats['guruMapelCount'] ?? 0; ?></p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4 shadow-sm">
+            <div class="flex items-center">
+                <div class="p-3 rounded-xl bg-amber-600 text-white mr-4 shadow-sm">
+                    <i class="fas fa-user-shield text-xl"></i>
+                </div>
+                <div>
+                    <p class="text-xs uppercase tracking-wider font-semibold text-amber-700">Kajur & Role Lain</p>
+                    <p class="text-2xl font-black text-amber-900"><?= ($stats['ketuaJurusanCount'] ?? 0) + ($stats['wakakurCount'] ?? 0) + ($stats['roleLainnyaCount'] ?? 0); ?></p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Search and Filter -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <div class="w-full md:w-1/3 mb-4 md:mb-0">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
+        <div class="w-full md:w-1/3 mb-2 md:mb-0">
             <div class="relative">
                 <input type="text" id="searchInput"
-                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="Cari Guru...">
+                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"
+                    placeholder="Cari Nama Guru, NIP, Mapel...">
                 <div class="absolute left-3 top-2.5 text-gray-400">
                     <i class="fas fa-search"></i>
                 </div>
             </div>
         </div>
-        <div class="flex space-x-2">
+        <div class="flex flex-wrap gap-2 w-full md:w-auto">
             <select name="" id="filterRole"
-                class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <option value="">Semua Role</option>
-                <option value="guru_mapel">Guru Mapel</option>
-                <option value="wali_kelas">Wali Kelas</option>
-                <option value="wakakur">Wakakur</option>
+                <?php if (!empty($roleList)): ?>
+                    <?php foreach ($roleList as $roleKey => $roleLabel): ?>
+                        <?php 
+                        $rLower = strtolower($roleKey . ' ' . $roleLabel);
+                        if (strpos($rLower, 'admin') !== false || strpos($rLower, 'super') !== false) {
+                            continue;
+                        }
+                        ?>
+                        <option value="<?= esc($roleKey) ?>"><?= esc($roleLabel) ?></option>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <option value="guru_mapel">Guru Mapel</option>
+                    <option value="wali_kelas">Wali Kelas</option>
+                    <option value="wakakur">Wakakur</option>
+                    <option value="ketua_jurusan">Ketua Jurusan</option>
+                    <option value="kepala_sekolah">Kepala Sekolah</option>
+                    <option value="tendik">Tendik / Staf</option>
+                <?php endif; ?>
             </select>
             <select name="" id="filterStatus"
-                class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <option value="">Semua Status</option>
                 <option value="active">Aktif</option>
                 <option value="inactive">Nonaktif</option>
             </select>
             <button id="resetFilter"
-                class="border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-50">Reset</button>
+                class="border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center">
+                <i class="fas fa-redo-alt mr-1.5 text-xs text-gray-500"></i> Reset
+            </button>
         </div>
     </div>
     <!-- Tabel -->
@@ -166,7 +194,7 @@
                                     </div>
                                     <div class="ml-4">
                                         <div class="text-sm font-medium text-gray-900"><?= esc($g['nama_lengkap']); ?></div>
-                                        <div class="text-sm text-gray-500"><?= esc($g['jenis_kelamin']) == 'L' ? 'Laki-laki' : 'Wanita'; ?></div>
+                                        <div class="text-xs text-gray-500"><?= esc($g['jenis_kelamin']) == 'L' ? 'Laki-laki' : 'Wanita'; ?></div>
                                     </div>
                                 </div>
                             </td>
@@ -174,30 +202,73 @@
                                 <div class="text-sm font-medium text-gray-900"> <?= esc($g['nip']); ?></div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900"><?= esc($g['nama_mapel']) ?? '-'; ?></div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap" data-role="<?= esc($g['role']); ?>">
-                                <?php if ($g['role'] === 'wakakur'): ?>
-                                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
-                                        <i class="fas fa-user-graduate mr-1"></i>Wakakur
-                                    </span>
-                                <?php elseif ($g['is_wali_kelas']): ?>
-                                    <span class="px-2 py-1 text-xs font-medium rounded-full badge-wali"><i class="fas fa-user-tie mr-1"></i>Wali Kelas</span>
-                                    <?php if ($g['kelas_id']): ?>
-                                        <div class="text-xs text-gray-500 mt-1 ml-2">Kelas: <?= $g['nama_kelas']; ?></div>
-                                    <?php endif; ?>
+                                <?php if (!empty($g['nama_mapel'])): ?>
+                                    <span class="text-sm font-medium text-gray-900"><?= esc($g['nama_mapel']); ?></span>
                                 <?php else: ?>
-                                    <span class="px-2 py-1 text-xs font-medium rounded-full badde-guru">
-                                        <i class="fas fa-chalkboard-teacher mr-1"></i> Guru Mapel
+                                    <span class="text-xs text-gray-400 italic flex items-center">
+                                        <i class="fas fa-minus text-[10px] mr-1"></i> Tidak Mengajar Mapel
                                     </span>
                                 <?php endif; ?>
                             </td>
+                            <td class="px-6 py-4 whitespace-nowrap" data-roles="<?= esc(implode(',', $g['roles'] ?? [])); ?>" data-role="<?= esc($g['role'] ?? ''); ?>">
+                                <div class="flex flex-wrap gap-1 items-center">
+                                    <?php 
+                                    $userRoles = $g['roles'] ?? ( !empty($g['role']) ? [$g['role']] : [] );
+                                    if (empty($userRoles)) {
+                                        if ($g['is_wali_kelas']) $userRoles[] = 'wali_kelas';
+                                        if ($g['is_ketua_jurusan']) $userRoles[] = 'ketua_jurusan';
+                                        if (!empty($g['mata_pelajaran_id'])) $userRoles[] = 'guru_mapel';
+                                    }
+                                    ?>
+                                    <?php if (empty($userRoles)): ?>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                            <i class="fas fa-user mr-1 text-[10px]"></i> Tanpa Role
+                                        </span>
+                                    <?php else: ?>
+                                        <?php foreach ($userRoles as $r): ?>
+                                            <?php if ($r === 'guru_mapel'): ?>
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                                                    <i class="fas fa-book-reader mr-1 text-[10px]"></i> Guru Mapel
+                                                </span>
+                                            <?php elseif ($r === 'wali_kelas'): ?>
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                                                    <i class="fas fa-user-tie mr-1 text-[10px]"></i> Wali Kelas<?= !empty($g['nama_kelas']) ? ' (' . esc($g['nama_kelas']) . ')' : '' ?>
+                                                </span>
+                                            <?php elseif ($r === 'ketua_jurusan'): ?>
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800">
+                                                    <i class="fas fa-award mr-1 text-[10px]"></i> Kajur<?= !empty($g['jurusan']) ? ' (' . esc($g['jurusan']) . ')' : '' ?>
+                                                </span>
+                                            <?php elseif ($r === 'wakakur'): ?>
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
+                                                    <i class="fas fa-user-graduate mr-1 text-[10px]"></i> Wakakur
+                                                </span>
+                                            <?php elseif ($r === 'kepala_sekolah'): ?>
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800">
+                                                    <i class="fas fa-user-shield mr-1 text-[10px]"></i> Kepsek
+                                                </span>
+                                            <?php elseif ($r === 'tendik'): ?>
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-100 text-teal-800">
+                                                    <i class="fas fa-id-badge mr-1 text-[10px]"></i> Tendik
+                                                </span>
+                                            <?php elseif ($r === 'admin'): ?>
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-200 text-slate-800">
+                                                    <i class="fas fa-user-cog mr-1 text-[10px]"></i> Admin
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">
+                                                    <i class="fas fa-user-tag mr-1 text-[10px]"></i> <?= esc(get_role_name_from_role($r)) ?>
+                                                </span>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <?php if ($g['is_active']): ?>
-                                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800"><i class="fas fa-user-tie mr-1"></i>Aktif</span>
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800"><i class="fas fa-check-circle mr-1"></i>Aktif</span>
                                 <?php else: ?>
                                     <span class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
-                                        <i class="fas fa-chalkboard-teacher mr-1"></i> Nonaktif
+                                        <i class="fas fa-minus-circle mr-1"></i> Nonaktif
                                     </span>
                                 <?php endif; ?>
                             </td>
@@ -296,19 +367,17 @@
             const roleCell = row.cells[3];
             const statusCell = row.cells[4];
 
-            const roleData = roleCell.getAttribute('data-role');
-            const isActive = statusCell.textContent.includes('Aktif');
+            const rolesAttr = roleCell ? (roleCell.getAttribute('data-roles') || roleCell.getAttribute('data-role') || '') : '';
+            const teacherRoles = rolesAttr.split(',').map(r => r.trim()).filter(r => r.length > 0);
+            const isActive = statusCell ? statusCell.textContent.includes('Aktif') : true;
 
-            const roleMatch = roleValue === '' ||
-                (roleValue === 'wakakur' && roleData === 'wakakur') ||
-                (roleValue === 'wali_kelas' && roleData === 'wali_kelas') ||
-                (roleValue === 'guru_mapel' && roleData === 'guru_mapel');
+            const roleMatch = roleValue === '' || teacherRoles.includes(roleValue);
 
             const statusMatch = statusValue === '' ||
                 (statusValue === 'active' && isActive) ||
                 (statusValue === 'inactive' && !isActive);
 
-                row.style.display = (roleMatch && statusMatch) ? '' : 'none';
+            row.style.display = (roleMatch && statusMatch) ? '' : 'none';
         });
     }
 

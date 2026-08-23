@@ -43,7 +43,63 @@ class GuruService extends BaseService
     {
         try {
             $guru = $this->guruModel->getAllGuru();
-            
+
+            if (!empty($guru)) {
+                $userRoleModel = new UserRoleModel();
+                $roleModel = new \App\Models\RoleModel();
+
+                $adminUserIds = array_merge(
+                    $userRoleModel->getUserIdsByRole('admin'),
+                    $userRoleModel->getUserIdsByRole('superadmin')
+                );
+
+                $allUserRoles = $userRoleModel->findAll();
+                $rolesByUserId = [];
+                foreach ($allUserRoles as $ur) {
+                    $rolesByUserId[$ur['user_id']][] = $ur['role'];
+                }
+
+                $filteredGuru = [];
+                foreach ($guru as $g) {
+                    $userId = $g['user_id'];
+
+                    // Exclude super administrator / admin account
+                    if (in_array($userId, $adminUserIds) || $g['role'] === 'admin' || $g['role'] === 'superadmin') {
+                        continue;
+                    }
+
+                    $userRoles = $rolesByUserId[$userId] ?? [];
+                    if (empty($userRoles) && !empty($g['role'])) {
+                        $userRoles = [$g['role']];
+                    }
+                    if (empty($userRoles)) {
+                        if (!empty($g['is_wali_kelas'])) {
+                            $userRoles[] = 'wali_kelas';
+                        }
+                        if (!empty($g['is_ketua_jurusan'])) {
+                            $userRoles[] = 'ketua_jurusan';
+                        }
+                        if (!empty($g['mata_pelajaran_id'])) {
+                            $userRoles[] = 'guru_mapel';
+                        }
+                    }
+
+                    // Strip out admin/superadmin roles if present
+                    $userRoles = array_diff($userRoles, ['admin', 'superadmin']);
+
+                    $g['roles'] = array_values(array_unique($userRoles));
+
+                    $roleLabels = [];
+                    foreach ($g['roles'] as $r) {
+                        $roleLabels[] = $roleModel->getDisplayName($r);
+                    }
+                    $g['role_labels'] = $roleLabels;
+
+                    $filteredGuru[] = $g;
+                }
+                $guru = $filteredGuru;
+            }
+
             return $this->successResponse($guru);
         } catch (\Exception $e) {
             $this->log('error', 'Failed to get all guru: ' . $e->getMessage());
@@ -96,10 +152,52 @@ class GuruService extends BaseService
     public function getStatistics(): array
     {
         try {
+            $allGuruResult = $this->getAllGuru();
+            $allGuru = $allGuruResult['data'] ?? [];
+
+            $totalGuru = count($allGuru);
+            $waliKelasCount = 0;
+            $guruMapelCount = 0;
+            $ketuaJurusanCount = 0;
+            $wakakurCount = 0;
+            $roleLainnyaCount = 0;
+
+            foreach ($allGuru as $g) {
+                $roles = $g['roles'] ?? [];
+                if (in_array('wali_kelas', $roles) || !empty($g['is_wali_kelas'])) {
+                    $waliKelasCount++;
+                }
+                if (in_array('guru_mapel', $roles) || !empty($g['mata_pelajaran_id'])) {
+                    $guruMapelCount++;
+                }
+                if (in_array('ketua_jurusan', $roles) || !empty($g['is_ketua_jurusan'])) {
+                    $ketuaJurusanCount++;
+                }
+                if (in_array('wakakur', $roles)) {
+                    $wakakurCount++;
+                }
+
+                $hasOther = false;
+                foreach ($roles as $r) {
+                    if (!in_array($r, ['guru_mapel', 'wali_kelas'])) {
+                        $hasOther = true;
+                        break;
+                    }
+                }
+                if ($hasOther) {
+                    $roleLainnyaCount++;
+                }
+            }
+
             $data = [
-                'totalGuru' => $this->guruModel->countAll(),
-                'waliKelas' => $this->guruModel->getWaliKelas(),
-                'guruNonWali' => $this->guruModel->getGuruNonWali()
+                'totalGuru'         => $totalGuru,
+                'waliKelas'         => $this->guruModel->getWaliKelas(),
+                'waliKelasCount'    => $waliKelasCount,
+                'guruMapelCount'    => $guruMapelCount,
+                'ketuaJurusanCount' => $ketuaJurusanCount,
+                'wakakurCount'      => $wakakurCount,
+                'roleLainnyaCount'  => $roleLainnyaCount,
+                'guruNonWali'       => $this->guruModel->getGuruNonWali()
             ];
 
             return $this->successResponse($data);

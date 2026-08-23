@@ -51,8 +51,18 @@ class RoleModel extends Model
         $roles = $this->getAllActive();
         $dropdown = [];
         foreach ($roles as $r) {
-            if ($excludeRoles !== null && in_array($r['name'], $excludeRoles)) {
-                continue;
+            $rName = strtolower($r['name']);
+            $rDisplay = strtolower($r['display_name'] ?? '');
+
+            if ($excludeRoles !== null) {
+                if (in_array($r['name'], $excludeRoles) || in_array($rName, $excludeRoles)) {
+                    continue;
+                }
+                if (in_array('admin', $excludeRoles) || in_array('superadmin', $excludeRoles)) {
+                    if (strpos($rName, 'admin') !== false || strpos($rName, 'super') !== false || strpos($rDisplay, 'admin') !== false) {
+                        continue;
+                    }
+                }
             }
             $dropdown[$r['name']] = $r['display_name'];
         }

@@ -28,16 +28,19 @@ class GuruController extends BaseController
     {
         $guruResult = $this->guruService->getAllGuru();
         $statsResult = $this->guruService->getStatistics();
+        $roleModel = new RoleModel();
 
         $data = [
-            'title' => 'Manajemen Guru',
-            'pageTitle' => 'Data Guru',
-            'pageDescription' => 'Kelola data guru dan wali kelas',
-            'user' => $this->getUserData(),
-            'guru' => $guruResult['data'] ?? [],
-            'totalGuru' => $statsResult['data']['totalGuru'] ?? 0,
-            'waliKelas' => $statsResult['data']['waliKelas'] ?? [],
-            'guruNonWali' => $statsResult['data']['guruNonWali'] ?? []
+            'title'           => 'Manajemen Guru',
+            'pageTitle'       => 'Data Guru',
+            'pageDescription' => 'Kelola data guru dan role staf pengajar',
+            'user'            => $this->getUserData(),
+            'guru'            => $guruResult['data'] ?? [],
+            'stats'           => $statsResult['data'] ?? [],
+            'totalGuru'       => $statsResult['data']['totalGuru'] ?? 0,
+            'waliKelas'       => $statsResult['data']['waliKelas'] ?? [],
+            'guruNonWali'     => $statsResult['data']['guruNonWali'] ?? [],
+            'roleList'        => $roleModel->getDropdown(['siswa', 'instruktur', 'admin', 'superadmin'])
         ];
 
         return view('admin/guru/index', $data);
@@ -58,7 +61,7 @@ class GuruController extends BaseController
             'user' => $this->getUserData(),
             'mapelList' => $listsResult['data']['mapelList'] ?? [],
             'kelasList' => $listsResult['data']['kelasList'] ?? [],
-            'roleList' => $roleModel->getDropdown(),
+            'roleList' => $roleModel->getDropdown(['siswa', 'instruktur', 'admin', 'superadmin']),
             'validation' => \Config\Services::validation()
         ];
 
@@ -124,7 +127,7 @@ class GuruController extends BaseController
             'userData' => $guruResult['data']['user'],
             'mapelList' => $listsResult['data']['mapelList'] ?? [],
             'kelasList' => $listsResult['data']['kelasList'] ?? [],
-            'roleList' => $roleModel->getDropdown(),
+            'roleList' => $roleModel->getDropdown(['siswa', 'instruktur', 'admin', 'superadmin']),
             'allRoles' => $allRoles,
             'validation' => \Config\Services::validation()
         ];
@@ -209,7 +212,7 @@ class GuruController extends BaseController
             'kelas' => $guruResult['data']['kelas'],
             'kelasList' => $listsResult['data']['kelasList'] ?? [],
             'allRoles' => $allRoles,
-            'roleList' => $roleModel->getDropdown()
+            'roleList' => $roleModel->getDropdown(['siswa', 'instruktur', 'admin', 'superadmin'])
         ];
 
         return view('admin/guru/show', $data);
@@ -416,12 +419,13 @@ class GuruController extends BaseController
         $row = 2;
         $no = 1;
         foreach ($guru as $g) {
+            $rolesStr = !empty($g['role_labels']) ? implode(', ', $g['role_labels']) : ($g['is_wali_kelas'] ? 'Wali Kelas' : 'Guru Mapel');
             $sheet->setCellValue('A' . $row, $no++);
             $sheet->setCellValue('B' . $row, $g['nip']);
             $sheet->setCellValue('C' . $row, $g['nama_lengkap']);
             $sheet->setCellValue('D' . $row, $g['jenis_kelamin'] == 'L' ? 'Laki-laki' : 'Perempuan');
             $sheet->setCellValue('E' . $row, $g['nama_mapel'] ?? '-');
-            $sheet->setCellValue('F' . $row, $g['is_wali_kelas'] ? 'Wali Kelas' : 'Guru Mapel');
+            $sheet->setCellValue('F' . $row, $rolesStr);
             $sheet->setCellValue('G' . $row, $g['is_active'] ? 'Aktif' : 'Nonaktif');
             $sheet->setCellValue('H' . $row, $g['email'] ?? '-');
             $sheet->setCellValue('I' . $row, $g['username']);
