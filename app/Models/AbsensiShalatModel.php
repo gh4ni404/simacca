@@ -138,7 +138,7 @@ class AbsensiShalatModel extends Model
                               COALESCE(siswa.nama_lengkap, guru.nama_lengkap) as nama_lengkap,
                               COALESCE(siswa.nis, guru.nip) as identifier,
                               COALESCE(kelas.nama_kelas, "Guru") as unit,
-                              prayer_sessions.token')
+                              prayer_sessions.token, prayer_sessions.nama_sesi')
             ->join('siswa', 'siswa.id = absensi_shalat.siswa_id', 'left')
             ->join('kelas', 'kelas.id = siswa.kelas_id', 'left')
             ->join('guru', 'guru.id = absensi_shalat.guru_id', 'left')

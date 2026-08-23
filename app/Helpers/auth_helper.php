@@ -249,10 +249,6 @@ if (!function_exists('get_sidebar_menu')) {
                             'title' => 'Jurnal Piket Guru',
                             'url' => '/admin/jurnal-piket',
                         ],
-                        [
-                            'title' => 'Simulasi Test Piket',
-                            'url' => '/admin/simulasi-piket',
-                        ],
                     ]
                 ],
 

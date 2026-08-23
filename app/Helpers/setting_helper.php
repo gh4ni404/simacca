@@ -392,6 +392,56 @@ if (!function_exists('set_absensi_shalat_jam_tutup')) {
     }
 }
 
+if (!function_exists('get_absensi_shalat_sesi_list')) {
+    function get_absensi_shalat_sesi_list(): array
+    {
+        $settingModel = model(SettingModel::class);
+        $val = $settingModel->get('absensi_shalat_sesi_list');
+        if (!empty($val)) {
+            $decoded = json_decode($val, true);
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        // Default list if not yet configured
+        return [
+            [
+                'id'          => 1,
+                'nama_sesi'   => 'Shalat Dhuha',
+                'jam_mulai'   => '07:00',
+                'jam_tutup'   => '08:30',
+                'durasi_maks' => 30,
+                'is_active'   => 1,
+            ],
+            [
+                'id'          => 2,
+                'nama_sesi'   => 'Shalat Dzuhur',
+                'jam_mulai'   => '11:30',
+                'jam_tutup'   => '13:30',
+                'durasi_maks' => 45,
+                'is_active'   => 1,
+            ],
+            [
+                'id'          => 3,
+                'nama_sesi'   => 'Shalat Ashar',
+                'jam_mulai'   => '15:00',
+                'jam_tutup'   => '16:30',
+                'durasi_maks' => 45,
+                'is_active'   => 1,
+            ],
+            [
+                'id'          => 4,
+                'nama_sesi'   => 'Shalat Jumat',
+                'jam_mulai'   => '11:30',
+                'jam_tutup'   => '13:30',
+                'durasi_maks' => 60,
+                'is_active'   => 1,
+            ],
+        ];
+    }
+}
+
 if (!function_exists('get_absensi_shalat_durasi_maks')) {
     function get_absensi_shalat_durasi_maks(): int
     {
@@ -406,6 +456,14 @@ if (!function_exists('set_absensi_shalat_durasi_maks')) {
     {
         $settingModel = model(SettingModel::class);
         return $settingModel->setSetting('absensi_shalat_durasi_maks', (string) $menit);
+    }
+}
+
+if (!function_exists('set_absensi_shalat_sesi_list')) {
+    function set_absensi_shalat_sesi_list(array $sesiList): bool
+    {
+        $settingModel = model(SettingModel::class);
+        return $settingModel->setSetting('absensi_shalat_sesi_list', json_encode(array_values($sesiList)));
     }
 }
 

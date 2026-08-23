@@ -47,21 +47,65 @@ class AbsensiShalatController extends BaseController
             return redirect()->to('/guru/dashboard');
         }
 
-        $activeSession = $this->prayerSessionModel->getActiveSession($guruPiket['id']);
-        $todaySessions = $this->prayerSessionModel->getTodaySessionsWithStats();
+        $activeSession   = $this->prayerSessionModel->getActiveSession($guruPiket['id']);
+        $todaySessions   = $this->prayerSessionModel->getTodaySessionsWithStats();
         $todayAttendance = $this->absensiShalatModel->getTodayAttendance();
+        $sesiList        = get_absensi_shalat_sesi_list();
+        $autoDetected    = $this->autoDetectSesiShalat($sesiList, date('H:i'));
 
         $data = [
-            'title'           => 'Absensi Shalat',
-            'guru'            => $guru,
-            'guruPiket'       => $guruPiket,
-            'hariIni'         => $hariIni,
-            'activeSession'   => $activeSession,
-            'todaySessions'   => $todaySessions,
-            'todayAttendance' => $todayAttendance,
+            'title'            => 'Absensi Shalat',
+            'guru'             => $guru,
+            'guruPiket'        => $guruPiket,
+            'hariIni'          => $hariIni,
+            'activeSession'    => $activeSession,
+            'todaySessions'    => $todaySessions,
+            'todayAttendance'  => $todayAttendance,
+            'sesiList'         => $sesiList,
+            'autoDetectedSesi' => $autoDetected,
         ];
 
         return view('guru/absensi_shalat/index', $data);
+    }
+
+    /**
+     * Auto detect prayer session based on current time HH:MM
+     */
+    private function autoDetectSesiShalat(array $sesiList, string $nowTime): ?array
+    {
+        if (empty($sesiList)) {
+            return null;
+        }
+
+        // 1. Match current time inside jam_mulai and jam_tutup
+        foreach ($sesiList as $s) {
+            if (!empty($s['is_active']) && $nowTime >= $s['jam_mulai'] && $nowTime <= $s['jam_tutup']) {
+                return $s;
+            }
+        }
+
+        // 2. Match nearest upcoming session today
+        $upcoming = null;
+        foreach ($sesiList as $s) {
+            if (!empty($s['is_active']) && $s['jam_mulai'] > $nowTime) {
+                if ($upcoming === null || $s['jam_mulai'] < $upcoming['jam_mulai']) {
+                    $upcoming = $s;
+                }
+            }
+        }
+
+        if ($upcoming !== null) {
+            return $upcoming;
+        }
+
+        // 3. Fallback: return first active session
+        foreach ($sesiList as $s) {
+            if (!empty($s['is_active'])) {
+                return $s;
+            }
+        }
+
+        return $sesiList[0];
     }
 
     /**
@@ -74,7 +118,7 @@ class AbsensiShalatController extends BaseController
                 return $this->response->setStatusCode(403)->setJSON(['error' => 'Forbidden']);
             }
 
-            $userId = $this->session->get('userId');
+            $userId = $this->session->get('user_id') ?? $this->session->get('userId');
             $guru = $this->guruModel->getByUserId($userId);
 
             if (!$guru) {
@@ -87,30 +131,60 @@ class AbsensiShalatController extends BaseController
                 return $this->response->setStatusCode(403)->setJSON(['success' => false, 'message' => 'Kamu tidak bertugas piket hari ini']);
             }
 
-            // Check operational hours
+            $namaSesiParam = trim($this->request->getPost('nama_sesi') ?? '');
+            $sesiList = get_absensi_shalat_sesi_list();
+            $targetSesi = null;
+
+            if ($namaSesiParam !== '') {
+                foreach ($sesiList as $s) {
+                    if (strcasecmp($s['nama_sesi'], $namaSesiParam) === 0) {
+                        $targetSesi = $s;
+                        break;
+                    }
+                }
+            }
+
+            if (!$targetSesi) {
+                $targetSesi = $this->autoDetectSesiShalat($sesiList, date('H:i'));
+            }
+
+            $namaSesi   = $targetSesi['nama_sesi'] ?? 'Shalat Dzuhur';
+            $jamMulai   = $targetSesi['jam_mulai'] ?? get_absensi_shalat_jam_mulai();
+            $jamTutup   = $targetSesi['jam_tutup'] ?? get_absensi_shalat_jam_tutup();
+            $durasiMaks = (int) ($targetSesi['durasi_maks'] ?? get_absensi_shalat_durasi_maks());
+
+            // Check operational hours for the selected prayer session
             $nowTime = date('H:i');
-            $jamMulai = get_absensi_shalat_jam_mulai();
-            $jamTutup = get_absensi_shalat_jam_tutup();
 
             if ($nowTime < $jamMulai) {
                 return $this->response->setStatusCode(400)->setJSON([
                     'success' => false,
-                    'message' => 'Sesi shalat belum dapat dibuka. Jam operasional dimulai pukul ' . $jamMulai,
+                    'message' => "Sesi '{$namaSesi}' belum dapat dibuka. Jam operasional dimulai pukul {$jamMulai}.",
                 ]);
             }
 
             if ($nowTime > $jamTutup) {
                 return $this->response->setStatusCode(400)->setJSON([
                     'success' => false,
-                    'message' => 'Jam operasional absensi shalat hari ini telah berakhir (maksimal pukul ' . $jamTutup . ')',
+                    'message' => "Jam operasional sesi '{$namaSesi}' hari ini telah berakhir (maksimal pukul {$jamTutup}).",
                 ]);
             }
 
-            $result = $this->prayerSessionModel->generateNewToken($guruPiket['id']);
+            $result = $this->prayerSessionModel->generateNewToken(
+                $guruPiket['id'],
+                null,
+                $namaSesi,
+                $durasiMaks,
+                $jamTutup
+            );
 
             return $this->response->setJSON([
                 'success'            => true,
                 'token'              => $result['token'],
+                'nama_sesi'          => $namaSesi,
+                'jam_mulai'          => $jamMulai,
+                'jam_tutup'          => $jamTutup,
+                'durasi_maks'        => $durasiMaks,
                 'expires_at'         => $result['expires_at'],
                 'session_expires_at' => $result['session_expires_at'] ?? null,
                 'scan_url'           => base_url('/scan?token=' . $result['token']),
@@ -458,29 +532,6 @@ class AbsensiShalatController extends BaseController
             ->where('semester', $semester)
             ->where('is_active', 1)
             ->first();
-
-        if (!$res && session()->get('is_impersonating')) {
-            // Mode Simulasi Admin: allow any active scheduled piket entry of this guru for testing
-            $res = $this->guruPiketModel
-                ->where('guru_id', $guruId)
-                ->where('tahun_ajaran', $tahunAjaran)
-                ->where('semester', $semester)
-                ->where('is_active', 1)
-                ->first();
-
-            if (!$res) {
-                // Virtual dummy piket assignment for testing in Mode Simulasi
-                $res = [
-                    'id'            => 0,
-                    'guru_id'       => $guruId,
-                    'hari'          => strtolower($this->getHariIndo(date('l'))),
-                    'tahun_ajaran'  => $tahunAjaran,
-                    'semester'      => $semester,
-                    'is_active'     => 1,
-                    'rincian_tugas' => 'Simulasi Testing Piket Admin',
-                ];
-            }
-        }
 
         return $res;
     }

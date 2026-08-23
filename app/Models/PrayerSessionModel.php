@@ -15,6 +15,7 @@ class PrayerSessionModel extends Model
     protected $allowedFields    = [
         'token',
         'guru_piket_id',
+        'nama_sesi',
         'is_active',
         'created_at',
         'expires_at',
@@ -55,9 +56,15 @@ class PrayerSessionModel extends Model
     /**
      * Generate a new session token and deactivate old ones for this guru_piket
      */
-    public function generateNewToken(int $guruPiketId, ?int $overrideSessionSeconds = null): array
-    {
+    public function generateNewToken(
+        int $guruPiketId,
+        ?int $overrideSessionSeconds = null,
+        ?string $namaSesi = null,
+        ?int $durasiMaksOverride = null,
+        ?string $jamTutupOverride = null
+    ): array {
         $db = \Config\Database::connect();
+        $namaSesi = $namaSesi ?: 'Shalat Dzuhur';
 
         // Check if there's already an active session — update it, don't create new
         $existing = $db->table('prayer_sessions')
@@ -75,11 +82,16 @@ class PrayerSessionModel extends Model
         if ($overrideSessionSeconds !== null && $overrideSessionSeconds > 0) {
             $finalSessionExpiresAt = date('Y-m-d H:i:s', strtotime("+$overrideSessionSeconds seconds", strtotime($now)));
         } else {
-            $durasiMaks = get_absensi_shalat_durasi_maks();
-            $jamTutup   = get_absensi_shalat_jam_tutup();
+            $durasiMaks = $durasiMaksOverride ?: get_absensi_shalat_durasi_maks();
+            $jamTutup   = $jamTutupOverride ?: get_absensi_shalat_jam_tutup();
             $timeDurasi = strtotime("+$durasiMaks minutes", strtotime($now));
             $timeTutup  = strtotime(date('Y-m-d') . ' ' . $jamTutup);
-            $finalSessionExpiresAt = date('Y-m-d H:i:s', min($timeDurasi, $timeTutup));
+
+            if ($timeTutup > strtotime($now)) {
+                $finalSessionExpiresAt = date('Y-m-d H:i:s', min($timeDurasi, $timeTutup));
+            } else {
+                $finalSessionExpiresAt = date('Y-m-d H:i:s', $timeDurasi);
+            }
         }
 
         if ($existing) {
@@ -100,6 +112,7 @@ class PrayerSessionModel extends Model
                 ->where('id', $existing['id'])
                 ->update([
                     'token'              => $token,
+                    'nama_sesi'          => $namaSesi,
                     'expires_at'         => $expiresAt,
                     'session_expires_at' => $sessionExpiresAt,
                 ]);
@@ -108,6 +121,7 @@ class PrayerSessionModel extends Model
             $db->table('prayer_sessions')->insert([
                 'token'              => $token,
                 'guru_piket_id'      => $guruPiketId,
+                'nama_sesi'          => $namaSesi,
                 'is_active'          => 1,
                 'created_at'         => $now,
                 'expires_at'         => $expiresAt,
@@ -117,6 +131,7 @@ class PrayerSessionModel extends Model
 
         return [
             'token'              => $token,
+            'nama_sesi'          => $namaSesi,
             'expires_at'         => $expiresAt,
             'session_expires_at' => $sessionExpiresAt,
         ];

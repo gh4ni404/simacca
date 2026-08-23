@@ -83,6 +83,44 @@
                     </div>
                 </div>
 
+                <!-- Prayer Session Selection & Admin Settings Indicator -->
+                <div class="mb-4 bg-emerald-50/80 p-4 rounded-xl border border-emerald-100 space-y-3">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <label for="select-nama-sesi" class="text-xs font-bold text-emerald-900 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fas fa-kaaba text-emerald-600"></i> Pilih Jam & Sesi Shalat
+                        </label>
+                        <span class="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[11px] font-bold rounded-full">
+                            <i class="fas fa-check-circle mr-1"></i> Terhubung Pengaturan Operasional Admin
+                        </span>
+                    </div>
+                    
+                    <select id="select-nama-sesi" onchange="updateSesiInfo()" class="w-full px-3.5 py-2.5 bg-white border border-emerald-300 rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-sm text-gray-800 shadow-sm">
+                        <?php if (!empty($sesiList)): ?>
+                            <?php 
+                                $detectedName = $autoDetectedSesi['nama_sesi'] ?? '';
+                            ?>
+                            <?php foreach ($sesiList as $s): ?>
+                                <?php $isSelected = (strcasecmp($s['nama_sesi'], $detectedName) === 0); ?>
+                                <option value="<?= esc($s['nama_sesi']) ?>" 
+                                        data-jam-mulai="<?= esc($s['jam_mulai']) ?>" 
+                                        data-jam-tutup="<?= esc($s['jam_tutup']) ?>" 
+                                        data-durasi="<?= esc($s['durasi_maks']) ?>"
+                                        <?= $isSelected ? 'selected' : '' ?>>
+                                    🕌 <?= esc($s['nama_sesi']) ?> (<?= esc($s['jam_mulai']) ?> - <?= esc($s['jam_tutup']) ?> WIB) — Max <?= esc($s['durasi_maks']) ?> Menit <?= $isSelected ? '⚡ (Otomatis Jam Sekarang)' : '' ?>
+                                </option>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <option value="Shalat Dzuhur" data-jam-mulai="11:30" data-jam-tutup="13:30" data-durasi="45">🕌 Shalat Dzuhur (11:30 - 13:30 WIB) — Max 45 Menit</option>
+                        <?php endif; ?>
+                    </select>
+
+                    <div id="sesi-info-badge" class="text-xs text-emerald-700 font-medium flex flex-wrap items-center gap-4 pt-1">
+                        <span><i class="far fa-clock text-emerald-600 mr-1"></i> Jam Buka: <strong id="info-jam-mulai">11:30</strong></span>
+                        <span><i class="fas fa-power-off text-red-500 mr-1"></i> Tutup Otomatis: <strong id="info-jam-tutup">13:30</strong></span>
+                        <span><i class="fas fa-hourglass-half text-amber-600 mr-1"></i> Durasi Maks: <strong id="info-durasi">45</strong> Menit</span>
+                    </div>
+                </div>
+
                 <!-- Action Buttons -->
                 <div class="flex flex-col sm:flex-row gap-3 justify-center mt-4">
                     <button id="btn-start" onclick="startSession()" 
@@ -190,15 +228,18 @@
                         <p class="text-gray-400 text-center py-4 text-sm">Belum ada sesi</p>
                     <?php else: ?>
                         <?php foreach ($todaySessions as $session): ?>
-                            <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg text-sm">
+                            <div class="flex items-center justify-between p-2.5 bg-gray-50 rounded-xl text-sm border border-gray-100">
                                 <div>
-                                    <span class="font-mono text-xs"><?= substr($session['token'], 0, 8) ?>...</span>
-                                    <span class="text-gray-400 mx-1">|</span>
-                                    <span class="text-green-600 font-semibold"><?= $session['total_hadir'] ?> hadir</span>
-                                    <span class="text-gray-400 mx-1">|</span>
-                                    <span class="text-xs text-gray-500"><?= esc($session['nama_guru'] ?? '-') ?></span>
+                                    <span class="font-bold text-gray-800 flex items-center gap-1.5 text-xs">
+                                        <i class="fas fa-kaaba text-emerald-600"></i> <?= esc($session['nama_sesi'] ?? 'Shalat Dzuhur') ?>
+                                    </span>
+                                    <div class="text-[11px] text-gray-500 mt-0.5 flex items-center gap-1.5">
+                                        <span class="text-green-600 font-semibold"><?= $session['total_hadir'] ?> hadir</span>
+                                        <span>•</span>
+                                        <span>Petugas: <?= esc($session['nama_guru'] ?? '-') ?></span>
+                                    </div>
                                 </div>
-                                <span class="text-xs text-gray-400"><?= date('H:i', strtotime($session['created_at'])) ?></span>
+                                <span class="text-xs text-gray-400 font-mono"><?= date('H:i', strtotime($session['created_at'])) ?></span>
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -210,7 +251,7 @@
         <div class="bg-white rounded-xl shadow-lg overflow-hidden">
             <div class="bg-gradient-to-r from-teal-600 to-teal-700 text-white px-6 py-4 flex justify-between items-center">
                 <h3 class="text-lg font-semibold">
-                    <i class="fas fa-users mr-2"></i>Daftar Hadir
+                    <i class="fas fa-users mr-2"></i>Daftar Hadir Real-time
                 </h3>
             </div>
             <div class="p-4">
@@ -220,22 +261,25 @@
                     <?php else: ?>
                         <?php foreach ($todayAttendance as $att): ?>
                             <?php $isGuru = ($att['user_type'] ?? 'siswa') === 'guru'; ?>
-                            <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg text-sm attendance-item">
+                            <div class="flex items-center justify-between p-2.5 bg-gray-50 rounded-xl text-sm border border-gray-100 attendance-item">
                                 <div class="flex items-center gap-2">
-                                    <i class="fas fa-check-circle text-green-500"></i>
+                                    <i class="fas fa-check-circle text-green-500 text-base"></i>
                                     <div>
-                                        <p class="font-medium flex items-center gap-1.5">
+                                        <p class="font-bold text-gray-800 text-xs flex flex-wrap items-center gap-1.5">
                                             <?= esc($att['nama_lengkap']) ?>
+                                            <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-full">
+                                                <?= esc(ucwords($att['jenis_shalat'] ?? ($att['nama_sesi'] ?? 'Dzuhur'))) ?>
+                                            </span>
                                             <?php if ($isGuru): ?>
                                                 <span class="px-1.5 py-0.5 text-[10px] font-semibold bg-purple-100 text-purple-700 rounded">Guru</span>
                                             <?php else: ?>
                                                 <span class="px-1.5 py-0.5 text-[10px] font-semibold bg-blue-100 text-blue-700 rounded">Siswa</span>
                                             <?php endif; ?>
                                         </p>
-                                        <p class="text-xs text-gray-400"><?= esc($att['identifier'] ?? $att['nis'] ?? '') ?> - <?= esc($att['unit'] ?? $att['nama_kelas'] ?? '') ?></p>
+                                        <p class="text-[11px] text-gray-500 mt-0.5"><?= esc($att['identifier'] ?? $att['nis'] ?? '') ?> - <?= esc($att['unit'] ?? $att['nama_kelas'] ?? '') ?></p>
                                     </div>
                                 </div>
-                                <span class="text-xs text-gray-400"><?= date('H:i:s', strtotime($att['waktu_absen'])) ?></span>
+                                <span class="text-xs text-gray-400 font-mono"><?= date('H:i:s', strtotime($att['waktu_absen'])) ?></span>
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -289,7 +333,31 @@ async function postRequest(url, callback, extraData = {}) {
     }
 }
 
+function updateSesiInfo() {
+    const selectElem = document.getElementById('select-nama-sesi');
+    if (!selectElem) return;
+    const selectedOpt = selectElem.options[selectElem.selectedIndex];
+    if (!selectedOpt) return;
+
+    const jmMulai = selectedOpt.getAttribute('data-jam-mulai') || '11:30';
+    const jmTutup = selectedOpt.getAttribute('data-jam-tutup') || '13:30';
+    const durasi  = selectedOpt.getAttribute('data-durasi') || '45';
+
+    const elemMulai = document.getElementById('info-jam-mulai');
+    const elemTutup = document.getElementById('info-jam-tutup');
+    const elemDurasi = document.getElementById('info-durasi');
+
+    if (elemMulai) elemMulai.innerText = jmMulai;
+    if (elemTutup) elemTutup.innerText = jmTutup;
+    if (elemDurasi) elemDurasi.innerText = durasi;
+}
+
+document.addEventListener('DOMContentLoaded', updateSesiInfo);
+
 function startSession() {
+    const selectElem = document.getElementById('select-nama-sesi');
+    const selectedSesi = selectElem ? selectElem.value : '';
+
     postRequest('<?= base_url("/guru/absensi-shalat/generate-token") ?>', data => {
         if (data.success) {
             isSessionActive = true;
@@ -305,7 +373,7 @@ function startSession() {
                 confirmButtonColor: '#10b981'
             });
         }
-    });
+    }, { nama_sesi: selectedSesi });
 }
 
 function handleSessionAutoStopped() {
@@ -462,23 +530,24 @@ function refreshStats() {
                     const badgeHtml = isGuru 
                         ? '<span class="px-1.5 py-0.5 text-[10px] font-semibold bg-purple-100 text-purple-700 rounded">Guru</span>'
                         : '<span class="px-1.5 py-0.5 text-[10px] font-semibold bg-blue-100 text-blue-700 rounded">Siswa</span>';
+                    const sesiBadge = `<span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-full">${att.jenis_shalat || att.nama_sesi || 'Dzuhur'}</span>`;
                     const detail = isGuru
                         ? `${att.identifier || att.nip || ''} - Guru`
                         : `${att.identifier || att.nis || ''} - ${att.unit || att.nama_kelas || ''}`;
 
                     const div = document.createElement('div');
-                    div.className = 'flex items-center justify-between p-2 bg-gray-50 rounded-lg text-sm';
+                    div.className = 'flex items-center justify-between p-2.5 bg-gray-50 rounded-xl text-sm border border-gray-100 attendance-item';
                     div.innerHTML = `
                         <div class="flex items-center gap-2">
-                            <i class="fas fa-check-circle text-green-500"></i>
+                            <i class="fas fa-check-circle text-green-500 text-base"></i>
                             <div>
-                                <p class="font-medium flex items-center gap-1.5">
-                                    ${att.nama_lengkap} ${badgeHtml}
+                                <p class="font-bold text-gray-800 text-xs flex flex-wrap items-center gap-1.5">
+                                    ${att.nama_lengkap} ${sesiBadge} ${badgeHtml}
                                 </p>
-                                <p class="text-xs text-gray-400">${detail}</p>
+                                <p class="text-[11px] text-gray-500 mt-0.5">${detail}</p>
                             </div>
                         </div>
-                        <span class="text-xs text-gray-400">${att.waktu_absen ? att.waktu_absen.substring(11, 19) : ''}</span>
+                        <span class="text-xs text-gray-400 font-mono">${att.waktu_absen ? att.waktu_absen.substring(11, 19) : ''}</span>
                     `;
                     attList.appendChild(div);
                 });
@@ -492,16 +561,20 @@ function refreshStats() {
                 sessList.innerHTML = '';
                 data.sessions.forEach(sess => {
                     const div = document.createElement('div');
-                    div.className = 'flex items-center justify-between p-2 bg-gray-50 rounded-lg text-sm';
+                    div.className = 'flex items-center justify-between p-2.5 bg-gray-50 rounded-xl text-sm border border-gray-100';
+                    const namaSesi = sess.nama_sesi || 'Shalat Dzuhur';
                     div.innerHTML = `
                         <div>
-                            <span class="font-mono text-xs">${sess.token.substring(0, 8)}...</span>
-                            <span class="text-gray-400 mx-1">|</span>
-                            <span class="text-green-600 font-semibold">${sess.total_hadir} hadir</span>
-                            <span class="text-gray-400 mx-1">|</span>
-                            <span class="text-xs text-gray-500">${sess.nama_guru || '-'}</span>
+                            <span class="font-bold text-gray-800 flex items-center gap-1.5 text-xs">
+                                <i class="fas fa-kaaba text-emerald-600"></i> ${namaSesi}
+                            </span>
+                            <div class="text-[11px] text-gray-500 mt-0.5 flex items-center gap-1.5">
+                                <span class="text-green-600 font-semibold">${sess.total_hadir} hadir</span>
+                                <span>•</span>
+                                <span>Petugas: ${sess.nama_guru || '-'}</span>
+                            </div>
                         </div>
-                        <span class="text-xs text-gray-400">${new Date(sess.created_at).toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'})}</span>
+                        <span class="text-xs text-gray-400 font-mono">${sess.created_at ? sess.created_at.substring(11, 16) : ''}</span>
                     `;
                     sessList.appendChild(div);
                 });

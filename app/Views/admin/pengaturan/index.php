@@ -569,59 +569,196 @@
 
     <!-- Card: Pengaturan Jam Operasional Sesi Shalat -->
     <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" id="jam-absensi-shalat">
-        <div class="px-4 md:px-6 py-3 md:py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2.5 md:gap-3">
-            <div class="w-8 h-8 md:w-10 md:h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                <i class="fas fa-mosque text-emerald-600 text-sm md:text-base"></i>
+        <div class="px-4 md:px-6 py-3 md:py-4 border-b border-gray-100 bg-gray-50/50 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5 md:gap-3">
+                <div class="w-8 h-8 md:w-10 md:h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-mosque text-emerald-600 text-sm md:text-base"></i>
+                </div>
+                <div class="min-w-0">
+                    <h3 class="font-semibold text-gray-800 text-sm md:text-base truncate">Pengaturan Operasional Sesi Shalat</h3>
+                    <p class="text-xs text-gray-500 truncate">Atur daftar sesi shalat (Dhuha, Dzuhur, Ashar, Jumat, dll) dan jam operasionalnya</p>
+                </div>
             </div>
-            <div class="min-w-0">
-                <h3 class="font-semibold text-gray-800 text-sm md:text-base truncate">Pengaturan Operasional Sesi Shalat</h3>
-                <p class="text-xs text-gray-500 truncate">Atur jam mulai buka sesi, jam tutup otomatis, dan durasi maksimal sesi shalat</p>
-            </div>
+            <button type="button" onclick="openTambahSesiShalatModal()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+                <i class="fas fa-plus"></i> Tambah Jam/Sesi Shalat Baru
+            </button>
         </div>
-        <div class="p-4 md:p-6">
-            <form action="<?= base_url('admin/pengaturan/update-absensi-shalat-jam') ?>" method="post" class="max-w-xl">
+
+        <div class="p-4 md:p-6 space-y-6">
+            <!-- Global Default Timings -->
+            <form action="<?= base_url('admin/pengaturan/update-absensi-shalat-jam') ?>" method="post" class="p-4 bg-gray-50/70 rounded-xl border border-gray-100">
                 <?= csrf_field() ?>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                <p class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                    <i class="fas fa-clock text-emerald-600"></i> Jam Operasional Default (Fallback Global)
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-3">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Jam Buka Sesi</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                                <i class="fas fa-clock fa-sm"></i>
-                            </div>
-                            <input type="time" name="jam_mulai" value="<?= old('jam_mulai', $absensiShalatJamMulai ?? '11:30') ?>" required
-                                   class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm">
-                        </div>
-                        <p class="text-[11px] text-gray-400 mt-1">Sesi baru dapat dibuka mulai jam ini.</p>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Jam Buka Default</label>
+                        <input type="time" name="jam_mulai" value="<?= old('jam_mulai', $absensiShalatJamMulai ?? '11:30') ?>" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Jam Tutup Otomatis</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                                <i class="fas fa-power-off fa-sm"></i>
-                            </div>
-                            <input type="time" name="jam_tutup" value="<?= old('jam_tutup', $absensiShalatJamTutup ?? '13:30') ?>" required
-                                   class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm">
-                        </div>
-                        <p class="text-[11px] text-gray-400 mt-1">Sesi otomatis dihentikan jika melewati jam ini.</p>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Jam Tutup Default</label>
+                        <input type="time" name="jam_tutup" value="<?= old('jam_tutup', $absensiShalatJamTutup ?? '13:30') ?>" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1.5">Durasi Maks Sesi</label>
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                                <i class="fas fa-hourglass-half fa-sm"></i>
-                            </div>
-                            <input type="number" min="5" max="180" name="durasi_maks" value="<?= old('durasi_maks', $absensiShalatDurasiMaks ?? 45) ?>" required
-                                   class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm">
-                        </div>
-                        <p class="text-[11px] text-gray-400 mt-1">Maksimal durasi sesi berjalan (menit).</p>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Durasi Maks Default (Menit)</label>
+                        <input type="number" min="5" max="180" name="durasi_maks" value="<?= old('durasi_maks', $absensiShalatDurasiMaks ?? 45) ?>" required class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
                     </div>
                 </div>
-                <button type="submit" class="inline-flex items-center px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors text-sm font-medium shadow-sm">
-                    <i class="fas fa-save mr-2"></i> Simpan Pengaturan Shalat
+                <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition text-xs font-semibold">
+                    <i class="fas fa-save mr-1"></i> Simpan Default Global
                 </button>
             </form>
+
+            <!-- Table of Dynamic Prayer Sessions -->
+            <div>
+                <p class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3 flex items-center justify-between">
+                    <span><i class="fas fa-list-ul text-emerald-600 mr-1.5"></i> Daftar Jam & Sesi Shalat (Dhuha, Dzuhur, Ashar, Jumat, dll)</span>
+                    <span class="text-xs text-gray-400 font-normal"><?= count($absensiShalatSesiList ?? []) ?> Sesi Terdaftar</span>
+                </p>
+
+                <div class="overflow-x-auto rounded-xl border border-gray-200">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead class="bg-gray-50 text-gray-700 uppercase text-[11px] font-bold">
+                            <tr>
+                                <th class="px-4 py-3 border-b">Nama Sesi Shalat</th>
+                                <th class="px-4 py-3 border-b">Jam Buka Sesi</th>
+                                <th class="px-4 py-3 border-b">Jam Tutup Otomatis</th>
+                                <th class="px-4 py-3 border-b">Durasi Maks</th>
+                                <th class="px-4 py-3 border-b">Status</th>
+                                <th class="px-4 py-3 border-b text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            <?php if (empty($absensiShalatSesiList)): ?>
+                                <tr>
+                                    <td colspan="6" class="px-4 py-6 text-center text-gray-400 text-xs">Belum ada sesi shalat yang ditambahkan.</td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($absensiShalatSesiList as $sesi): ?>
+                                    <tr class="hover:bg-gray-50/50 transition">
+                                        <td class="px-4 py-3.5 font-bold text-gray-800 flex items-center gap-2">
+                                            <span class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center text-xs">
+                                                <i class="fas fa-kaaba"></i>
+                                            </span>
+                                            <?= esc($sesi['nama_sesi']) ?>
+                                        </td>
+                                        <td class="px-4 py-3.5 font-mono text-xs text-gray-700">
+                                            <i class="far fa-clock text-emerald-600 mr-1"></i> <?= esc($sesi['jam_mulai']) ?>
+                                        </td>
+                                        <td class="px-4 py-3.5 font-mono text-xs text-gray-700">
+                                            <i class="fas fa-power-off text-red-500 mr-1"></i> <?= esc($sesi['jam_tutup']) ?>
+                                        </td>
+                                        <td class="px-4 py-3.5 font-semibold text-xs text-gray-700">
+                                            <?= esc($sesi['durasi_maks']) ?> Menit
+                                        </td>
+                                        <td class="px-4 py-3.5">
+                                            <?php if (!empty($sesi['is_active'])): ?>
+                                                <span class="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[11px] font-semibold rounded-full">Aktif</span>
+                                            <?php else: ?>
+                                                <span class="px-2.5 py-0.5 bg-gray-100 text-gray-600 text-[11px] font-semibold rounded-full">Non-aktif</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="px-4 py-3.5 text-right space-x-2">
+                                            <button type="button" onclick='openEditSesiShalatModal(<?= json_encode($sesi) ?>)' class="text-indigo-600 hover:text-indigo-800 font-semibold text-xs transition">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </button>
+                                            <a href="<?= base_url('admin/pengaturan/hapus-sesi-shalat/' . $sesi['id']) ?>" onclick="return confirm('Apakah Anda yakin ingin menghapus sesi shalat ini?')" class="text-red-600 hover:text-red-800 font-semibold text-xs transition">
+                                                <i class="fas fa-trash-alt"></i> Hapus
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Modal Tambah / Edit Sesi Shalat -->
+    <div id="sesiShalatModal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeSesiShalatModal()"></div>
+        <div class="fixed inset-0 flex items-center justify-center p-4">
+            <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4">
+                <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                    <h3 id="sesiShalatModalTitle" class="text-base font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-mosque text-emerald-600"></i> Tambah Jam/Sesi Shalat
+                    </h3>
+                    <button type="button" onclick="closeSesiShalatModal()" class="text-gray-400 hover:text-gray-600 p-1">
+                        <i class="fas fa-times text-lg"></i>
+                    </button>
+                </div>
+
+                <form id="sesiShalatForm" action="<?= base_url('admin/pengaturan/simpan-sesi-shalat') ?>" method="POST" class="space-y-4">
+                    <?= csrf_field() ?>
+                    <div>
+                        <label for="nama_sesi" class="block text-xs font-semibold text-gray-700 uppercase mb-1">Nama Jam / Sesi Shalat <span class="text-red-500">*</span></label>
+                        <input type="text" id="nama_sesi" name="nama_sesi" required placeholder="Contoh: Shalat Dhuha, Shalat Ashar, dll" class="w-full px-3.5 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 text-sm">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label for="sesi_jam_mulai" class="block text-xs font-semibold text-gray-700 uppercase mb-1">Jam Buka Sesi <span class="text-red-500">*</span></label>
+                            <input type="time" id="sesi_jam_mulai" name="jam_mulai" required class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 text-sm">
+                        </div>
+                        <div>
+                            <label for="sesi_jam_tutup" class="block text-xs font-semibold text-gray-700 uppercase mb-1">Jam Tutup Otomatis <span class="text-red-500">*</span></label>
+                            <input type="time" id="sesi_jam_tutup" name="jam_tutup" required class="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 text-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="sesi_durasi_maks" class="block text-xs font-semibold text-gray-700 uppercase mb-1">Durasi Maksimal Sesi (Menit) <span class="text-red-500">*</span></label>
+                        <input type="number" id="sesi_durasi_maks" name="durasi_maks" min="5" max="180" value="45" required class="w-full px-3.5 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 text-sm">
+                    </div>
+
+                    <div id="statusGroup" class="hidden">
+                        <label for="sesi_is_active" class="block text-xs font-semibold text-gray-700 uppercase mb-1">Status Sesi</label>
+                        <select id="sesi_is_active" name="is_active" class="w-full px-3.5 py-2 border border-gray-300 rounded-xl text-sm">
+                            <option value="1">Aktif</option>
+                            <option value="0">Non-aktif</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
+                        <button type="button" onclick="closeSesiShalatModal()" class="px-4 py-2 bg-gray-100 text-gray-700 font-semibold text-xs rounded-xl">Batal</button>
+                        <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow">Simpan Sesi Shalat</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function openTambahSesiShalatModal() {
+        document.getElementById('sesiShalatModalTitle').innerHTML = '<i class="fas fa-mosque text-emerald-600"></i> Tambah Jam/Sesi Shalat Baru';
+        document.getElementById('sesiShalatForm').action = '<?= base_url('admin/pengaturan/simpan-sesi-shalat') ?>';
+        document.getElementById('nama_sesi').value = '';
+        document.getElementById('sesi_jam_mulai').value = '11:30';
+        document.getElementById('sesi_jam_tutup').value = '13:30';
+        document.getElementById('sesi_durasi_maks').value = '45';
+        document.getElementById('statusGroup').classList.add('hidden');
+        document.getElementById('sesiShalatModal').classList.remove('hidden');
+    }
+
+    function openEditSesiShalatModal(sesi) {
+        document.getElementById('sesiShalatModalTitle').innerHTML = '<i class="fas fa-edit text-emerald-600"></i> Edit Jam/Sesi Shalat';
+        document.getElementById('sesiShalatForm').action = '<?= base_url('admin/pengaturan/update-sesi-shalat/') ?>' + sesi.id;
+        document.getElementById('nama_sesi').value = sesi.nama_sesi;
+        document.getElementById('sesi_jam_mulai').value = sesi.jam_mulai;
+        document.getElementById('sesi_jam_tutup').value = sesi.jam_tutup;
+        document.getElementById('sesi_durasi_maks').value = sesi.durasi_maks;
+        document.getElementById('sesi_is_active').value = sesi.is_active || '1';
+        document.getElementById('statusGroup').classList.remove('hidden');
+        document.getElementById('sesiShalatModal').classList.remove('hidden');
+    }
+
+    function closeSesiShalatModal() {
+        document.getElementById('sesiShalatModal').classList.add('hidden');
+    }
+    </script>
 
     <script>
     // Logo preview & delete

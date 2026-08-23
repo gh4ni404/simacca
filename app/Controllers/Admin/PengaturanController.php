@@ -59,6 +59,7 @@ class PengaturanController extends BaseController
         $data['absensiShalatJamMulai']   = get_absensi_shalat_jam_mulai();
         $data['absensiShalatJamTutup']   = get_absensi_shalat_jam_tutup();
         $data['absensiShalatDurasiMaks'] = get_absensi_shalat_durasi_maks();
+        $data['absensiShalatSesiList']   = get_absensi_shalat_sesi_list();
 
         return view('admin/pengaturan/index', $data);
     }
@@ -497,6 +498,108 @@ class PengaturanController extends BaseController
         set_absensi_shalat_durasi_maks($durasiMaks);
 
         session()->setFlashdata('success', 'Pengaturan jam operasional sesi shalat berhasil disimpan (Buka: ' . $jamMulai . ', Tutup Otomatis: ' . $jamTutup . ', Durasi Maks: ' . $durasiMaks . ' menit)');
+        return redirect()->to('/admin/pengaturan#jam-absensi-shalat');
+    }
+
+    /**
+     * Store new prayer session
+     */
+    public function simpanSesiShalat()
+    {
+        $namaSesi   = trim($this->request->getPost('nama_sesi') ?? '');
+        $jamMulai   = trim($this->request->getPost('jam_mulai') ?? '');
+        $jamTutup   = trim($this->request->getPost('jam_tutup') ?? '');
+        $durasiMaks = (int) $this->request->getPost('durasi_maks');
+
+        if (!$namaSesi || !$jamMulai || !$jamTutup || $durasiMaks <= 0) {
+            session()->setFlashdata('error', 'Semua bidang nama sesi, jam mulai, jam tutup, dan durasi harus diisi dengan benar.');
+            return redirect()->to('/admin/pengaturan#jam-absensi-shalat');
+        }
+
+        $list = get_absensi_shalat_sesi_list();
+        $nextId = 1;
+        foreach ($list as $item) {
+            if (isset($item['id']) && $item['id'] >= $nextId) {
+                $nextId = $item['id'] + 1;
+            }
+        }
+
+        $list[] = [
+            'id'          => $nextId,
+            'nama_sesi'   => $namaSesi,
+            'jam_mulai'   => $jamMulai,
+            'jam_tutup'   => $jamTutup,
+            'durasi_maks' => $durasiMaks,
+            'is_active'   => 1,
+        ];
+
+        set_absensi_shalat_sesi_list($list);
+
+        session()->setFlashdata('success', "Sesi shalat '{$namaSesi}' berhasil ditambahkan.");
+        return redirect()->to('/admin/pengaturan#jam-absensi-shalat');
+    }
+
+    /**
+     * Update existing prayer session
+     */
+    public function updateSesiShalat($id)
+    {
+        $id = (int) $id;
+        $namaSesi   = trim($this->request->getPost('nama_sesi') ?? '');
+        $jamMulai   = trim($this->request->getPost('jam_mulai') ?? '');
+        $jamTutup   = trim($this->request->getPost('jam_tutup') ?? '');
+        $durasiMaks = (int) $this->request->getPost('durasi_maks');
+        $isActive   = (int) ($this->request->getPost('is_active') ?? 1);
+
+        if (!$namaSesi || !$jamMulai || !$jamTutup || $durasiMaks <= 0) {
+            session()->setFlashdata('error', 'Semua bidang nama sesi, jam mulai, jam tutup, dan durasi harus diisi dengan benar.');
+            return redirect()->to('/admin/pengaturan#jam-absensi-shalat');
+        }
+
+        $list = get_absensi_shalat_sesi_list();
+        $found = false;
+
+        foreach ($list as &$item) {
+            if (isset($item['id']) && (int)$item['id'] === $id) {
+                $item['nama_sesi']   = $namaSesi;
+                $item['jam_mulai']   = $jamMulai;
+                $item['jam_tutup']   = $jamTutup;
+                $item['durasi_maks'] = $durasiMaks;
+                $item['is_active']   = $isActive;
+                $found = true;
+                break;
+            }
+        }
+
+        if ($found) {
+            set_absensi_shalat_sesi_list($list);
+            session()->setFlashdata('success', "Sesi shalat '{$namaSesi}' berhasil diperbarui.");
+        } else {
+            session()->setFlashdata('error', 'Sesi shalat tidak ditemukan.');
+        }
+
+        return redirect()->to('/admin/pengaturan#jam-absensi-shalat');
+    }
+
+    /**
+     * Delete prayer session
+     */
+    public function hapusSesiShalat($id)
+    {
+        $id = (int) $id;
+        $list = get_absensi_shalat_sesi_list();
+        $newList = [];
+
+        foreach ($list as $item) {
+            if (isset($item['id']) && (int)$item['id'] === $id) {
+                continue;
+            }
+            $newList[] = $item;
+        }
+
+        set_absensi_shalat_sesi_list($newList);
+
+        session()->setFlashdata('success', 'Sesi shalat berhasil dihapus.');
         return redirect()->to('/admin/pengaturan#jam-absensi-shalat');
     }
 }

@@ -211,6 +211,9 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('pengaturan/import-hari-minggu', 'Admin\PengaturanController::importHariMinggu', ['filter' => 'role:admin']);
     $routes->post('pengaturan/update-absensi-pkl-jam', 'Admin\PengaturanController::updateAbsensiPklJam', ['filter' => 'role:admin']);
     $routes->post('pengaturan/update-absensi-shalat-jam', 'Admin\PengaturanController::updateAbsensiShalatJam', ['filter' => 'role:admin']);
+    $routes->post('pengaturan/simpan-sesi-shalat', 'Admin\PengaturanController::simpanSesiShalat', ['filter' => 'role:admin']);
+    $routes->post('pengaturan/update-sesi-shalat/(:num)', 'Admin\PengaturanController::updateSesiShalat/$1', ['filter' => 'role:admin']);
+    $routes->get('pengaturan/hapus-sesi-shalat/(:num)', 'Admin\PengaturanController::hapusSesiShalat/$1', ['filter' => 'role:admin']);
 
     // Arsip Jurnal PKL (Task-Oriented)
     $routes->get('jurnal-pkl-archive', 'Admin\PklArchiveController::index', ['filter' => 'role:admin']);
@@ -266,25 +269,11 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('jurnal-piket/detail/(:num)', 'Admin\JurnalPiketController::detail/$1', ['filter' => 'role:admin']);
     $routes->get('jurnal-piket/print', 'Admin\JurnalPiketController::print', ['filter' => 'role:admin']);
 
-    // Simulasi & Test End-to-End Piket Guru (Admin Test Tool)
-    $routes->get('simulasi-piket', 'Admin\SimulasiPiketController::index', ['filter' => 'role:admin']);
-    $routes->post('simulasi-piket/simpan-jurnal', 'Admin\SimulasiPiketController::simulasiJurnal', ['filter' => 'role:admin']);
-    $routes->get('simulasi-piket/impersonate/(:num)', 'Admin\SimulasiPiketController::impersonate/$1', ['filter' => 'role:admin']);
-    $routes->get('simulasi-piket/stop-impersonate', 'Admin\SimulasiPiketController::stopImpersonate');
-
-
-    // Laporan
-    $routes->get('laporan/absensi', 'Admin\LaporanController::absensi', ['filter' => 'role:admin']);
-    $routes->get('laporan/absensi-detail', 'Admin\LaporanController::absensiDetail', ['filter' => 'role:admin']);
-    $routes->get('laporan/absensi-detail/print', 'Admin\LaporanController::printAbsensiDetail', ['filter' => 'role:admin']);
-    $routes->get('laporan/statistik', 'Admin\LaporanController::statistik', ['filter' => 'role:admin']);
-
     // Laporan Absensi Shalat
     $routes->get('laporan/absensi-shalat', 'Admin\LaporanAbsensiShalatController::index', ['filter' => 'role:admin']);
     $routes->get('laporan/absensi-shalat/print', 'Admin\LaporanAbsensiShalatController::print', ['filter' => 'role:admin']);
     $routes->get('laporan/absensi-shalat/preview-guru', 'Admin\LaporanAbsensiShalatController::previewGuru', ['filter' => 'role:admin']);
     $routes->get('laporan/absensi-shalat/preview-guru-print', 'Admin\LaporanAbsensiShalatController::previewGuruPrint', ['filter' => 'role:admin']);
-    $routes->post('laporan/absensi-shalat/generate-test-data', 'Admin\LaporanAbsensiShalatController::generateTestData', ['filter' => 'role:admin']);
 });
 
 // Guru Routes (accessible by guru_mapel and wakakur who teach)
