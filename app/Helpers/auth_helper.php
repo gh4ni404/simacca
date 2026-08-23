@@ -549,11 +549,87 @@ if (!function_exists('get_sidebar_menu')) {
                     'active' => ['kepala-sekolah/dashboard']
                 ],
                 [
+                    'title' => 'Data Master Sekolah',
+                    'icon' => 'fas fa-school',
+                    'url' => '#',
+                    'submenu' => [
+                        [
+                            'title' => 'Data Guru & Staf',
+                            'url' => '/admin/guru',
+                        ],
+                        [
+                            'title' => 'Data Peserta Didik',
+                            'url' => '/admin/siswa',
+                        ],
+                        [
+                            'title' => 'Data Kelas & Rombel',
+                            'url' => '/admin/kelas',
+                        ],
+                        [
+                            'title' => 'Jadwal Mengajar',
+                            'url' => '/admin/jadwal',
+                        ],
+                    ]
+                ],
+                [
+                    'title' => 'Monitoring Kehadiran',
+                    'icon' => 'fas fa-clipboard-check',
+                    'url' => '#',
+                    'submenu' => [
+                        [
+                            'title' => 'Absensi Siswa',
+                            'url' => '/admin/absensi',
+                        ],
+                        [
+                            'title' => 'Absensi Guru & Staf',
+                            'url' => '/admin/absensi-guru',
+                        ],
+                        [
+                            'title' => 'Jurnal Piket Guru',
+                            'url' => '/admin/jurnal-piket',
+                        ],
+                        [
+                            'title' => 'Rekap Absensi Shalat',
+                            'url' => '/admin/laporan/absensi-shalat',
+                        ],
+                    ]
+                ],
+                [
+                    'title' => 'Monitoring PKL',
+                    'icon' => 'fas fa-building',
+                    'url' => '#',
+                    'submenu' => [
+                        [
+                            'title' => 'Absensi PKL',
+                            'url' => '/admin/absensi-pkl',
+                        ],
+                        [
+                            'title' => 'Arsip Jurnal PKL',
+                            'url' => '/admin/jurnal-pkl-archive',
+                        ],
+                    ]
+                ],
+                [
                     'title' => 'Laporan Eksekutif',
                     'icon' => 'fas fa-file-alt',
-                    'url' => '/kepala-sekolah/dashboard#laporan',
-                    'active' => ['kepala-sekolah/dashboard']
+                    'url' => '#',
+                    'submenu' => [
+                        [
+                            'title' => 'Rekap Absensi Detail',
+                            'url' => '/admin/laporan/absensi-detail',
+                        ],
+                        [
+                            'title' => 'Statistik Sekolah',
+                            'url' => '/admin/laporan/statistik',
+                        ],
+                    ]
                 ],
+                [
+                    'title' => 'Pengaturan Sekolah',
+                    'icon' => 'fas fa-cog',
+                    'url' => '/admin/pengaturan',
+                    'active' => ['admin/pengaturan']
+                ]
             ],
             'tendik' => [
                 [

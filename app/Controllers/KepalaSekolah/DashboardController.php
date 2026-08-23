@@ -8,6 +8,9 @@ use App\Models\SiswaModel;
 use App\Models\KelasModel;
 use App\Models\AbsensiModel;
 use App\Models\AbsensiGuruModel;
+use App\Models\TempatPklModel;
+use App\Models\JurnalPiketModel;
+use App\Models\DashboardModel;
 
 class DashboardController extends BaseController
 {
@@ -16,6 +19,9 @@ class DashboardController extends BaseController
     protected $kelasModel;
     protected $absensiModel;
     protected $absensiGuruModel;
+    protected $tempatPklModel;
+    protected $jurnalPiketModel;
+    protected $dashboardModel;
 
     public function __construct()
     {
@@ -24,6 +30,9 @@ class DashboardController extends BaseController
         $this->kelasModel       = new KelasModel();
         $this->absensiModel     = new AbsensiModel();
         $this->absensiGuruModel = new AbsensiGuruModel();
+        $this->tempatPklModel   = new TempatPklModel();
+        $this->jurnalPiketModel = new JurnalPiketModel();
+        $this->dashboardModel    = new DashboardModel();
     }
 
     public function index()
@@ -36,10 +45,15 @@ class DashboardController extends BaseController
         $totalSiswa = $this->siswaModel->where('tahun_ajaran', $activeTA)->where('deleted_at', null)->countAllResults();
         $totalGuru  = $this->guruModel->countAllResults();
         $totalKelas = $this->kelasModel->where('tahun_ajaran', $activeTA)->countAllResults();
+        $totalTempatPkl = $this->tempatPklModel->countAllResults();
 
-        // Absensi Siswa hari ini
+        // Absensi Siswa hari ini (per status)
         $absensiSiswaToday = $this->absensiModel
-            ->select('COUNT(*) as total, SUM(CASE WHEN status = "hadir" THEN 1 ELSE 0 END) as hadir')
+            ->select('COUNT(*) as total, 
+                      SUM(CASE WHEN status = "hadir" THEN 1 ELSE 0 END) as hadir,
+                      SUM(CASE WHEN status = "izin" THEN 1 ELSE 0 END) as izin,
+                      SUM(CASE WHEN status = "sakit" THEN 1 ELSE 0 END) as sakit,
+                      SUM(CASE WHEN status = "alpa" THEN 1 ELSE 0 END) as alpa')
             ->where('tahun_ajaran', $activeTA)
             ->where('tanggal', $today)
             ->first();
@@ -50,6 +64,16 @@ class DashboardController extends BaseController
             ->where('tanggal', $today)
             ->first();
 
+        // Piket log hari ini
+        $piketHariIni = $this->jurnalPiketModel
+            ->select('jurnal_piket.*, guru.nama_lengkap as nama_guru')
+            ->join('guru', 'guru.id = jurnal_piket.guru_id', 'left')
+            ->where('jurnal_piket.tanggal', $today)
+            ->findAll();
+
+        // Chart Data
+        $chartData = $this->dashboardModel->getChartData();
+
         $data = [
             'title'           => 'Executive Dashboard Kepala Sekolah',
             'pageTitle'       => 'Executive Dashboard Kepala Sekolah',
@@ -57,12 +81,19 @@ class DashboardController extends BaseController
             'user'            => $this->getUserData(),
             'activeTA'        => $activeTA,
             'stats'           => [
-                'total_siswa'   => $totalSiswa,
-                'total_guru'    => $totalGuru,
-                'total_kelas'   => $totalKelas,
+                'total_siswa'       => $totalSiswa,
+                'total_guru'        => $totalGuru,
+                'total_kelas'       => $totalKelas,
+                'total_tempat_pkl'  => $totalTempatPkl,
                 'siswa_hadir_today' => $absensiSiswaToday['hadir'] ?? 0,
+                'siswa_izin_today'  => $absensiSiswaToday['izin'] ?? 0,
+                'siswa_sakit_today' => $absensiSiswaToday['sakit'] ?? 0,
+                'siswa_alpa_today'  => $absensiSiswaToday['alpa'] ?? 0,
                 'guru_hadir_today'  => $absensiGuruToday['hadir'] ?? 0,
+                'guru_total_today'  => $absensiGuruToday['total'] ?? 0,
             ],
+            'piketHariIni'      => $piketHariIni,
+            'chartData'         => $chartData,
             'kepalaSekolahNama' => get_kepala_sekolah_nama(),
             'kepalaSekolahNip'  => get_kepala_sekolah_nip(),
         ];
@@ -70,3 +101,4 @@ class DashboardController extends BaseController
         return view('kepala_sekolah/dashboard', $data);
     }
 }
+

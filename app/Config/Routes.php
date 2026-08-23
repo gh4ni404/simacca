@@ -79,13 +79,13 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
 
     // Guru Management
     // Dalam group 'admin'
-    $routes->get('guru', 'Admin\GuruController::index', ['filter' => 'role:admin']);
+    $routes->get('guru', 'Admin\GuruController::index', ['filter' => 'role:admin,kepala_sekolah']);
     $routes->get('guru/tambah', 'Admin\GuruController::create', ['filter' => 'role:admin']);
     $routes->post('guru/simpan', 'Admin\GuruController::store', ['filter' => 'role:admin']);
     $routes->get('guru/edit/(:num)', 'Admin\GuruController::edit/$1', ['filter' => 'role:admin']);
     $routes->post('guru/update/(:num)', 'Admin\GuruController::update/$1', ['filter' => 'role:admin']);
     $routes->get('guru/hapus/(:num)', 'Admin\GuruController::delete/$1', ['filter' => 'role:admin']);
-    $routes->get('guru/detail/(:num)', 'Admin\GuruController::show/$1', ['filter' => 'role:admin']);
+    $routes->get('guru/detail/(:num)', 'Admin\GuruController::show/$1', ['filter' => 'role:admin,kepala_sekolah']);
     $routes->get('guru/nonaktifkan/(:num)', 'Admin\GuruController::changeStatus/$1', ['filter' => 'role:admin']);
     $routes->get('guru/aktifkan/(:num)', 'Admin\GuruController::changeStatus/$1', ['filter' => 'role:admin']);
     $routes->post('guru/check-nip', 'Admin\GuruController::checkNip', ['filter' => 'role:admin']);
@@ -100,13 +100,13 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
 
     // Siswa Management
     // Dalam group 'admin'
-    $routes->get('siswa', 'Admin\SiswaController::index', ['filter' => 'role:admin']);
+    $routes->get('siswa', 'Admin\SiswaController::index', ['filter' => 'role:admin,kepala_sekolah']);
     $routes->get('siswa/tambah', 'Admin\SiswaController::create', ['filter' => 'role:admin']);
     $routes->post('siswa/simpan', 'Admin\SiswaController::store', ['filter' => 'role:admin']);
     $routes->get('siswa/edit/(:num)', 'Admin\SiswaController::edit/$1', ['filter' => 'role:admin']);
     $routes->post('siswa/update/(:num)', 'Admin\SiswaController::update/$1', ['filter' => 'role:admin']);
     $routes->get('siswa/hapus/(:num)', 'Admin\SiswaController::delete/$1', ['filter' => 'role:admin']);
-    $routes->get('siswa/detail/(:num)', 'Admin\SiswaController::show/$1', ['filter' => 'role:admin']);
+    $routes->get('siswa/detail/(:num)', 'Admin\SiswaController::show/$1', ['filter' => 'role:admin,kepala_sekolah']);
     $routes->get('siswa/nonaktifkan/(:num)', 'Admin\SiswaController::changeStatus/$1', ['filter' => 'role:admin']);
     $routes->get('siswa/aktifkan/(:num)', 'Admin\SiswaController::changeStatus/$1', ['filter' => 'role:admin']);
     $routes->post('siswa/check-nis', 'Admin\SiswaController::checkNis', ['filter' => 'role:admin']);
@@ -120,21 +120,21 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('siswa/get-all-ids', 'Admin\SiswaController::getAllIds', ['filter' => 'role:admin']);
 
     // Kelas Management
-    $routes->get('kelas', 'Admin\KelasController::index', ['filter' => 'role:admin']);
+    $routes->get('kelas', 'Admin\KelasController::index', ['filter' => 'role:admin,kepala_sekolah']);
     $routes->get('kelas/tambah', 'Admin\KelasController::create', ['filter' => 'role:admin']);
     $routes->post('kelas/simpan', 'Admin\KelasController::store', ['filter' => 'role:admin']);
     $routes->get('kelas/edit/(:num)', 'Admin\KelasController::edit/$1', ['filter' => 'role:admin']);
     $routes->post('kelas/update/(:num)', 'Admin\KelasController::update/$1', ['filter' => 'role:admin']);
     $routes->get('kelas/hapus/(:num)', 'Admin\KelasController::delete/$1', ['filter' => 'role:admin']);
-    $routes->get('kelas/detail/(:num)', 'Admin\KelasController::show/$1', ['filter' => 'role:admin']);
+    $routes->get('kelas/detail/(:num)', 'Admin\KelasController::show/$1', ['filter' => 'role:admin,kepala_sekolah']);
     $routes->post('kelas/assign-wali-kelas/(:num)', 'Admin\KelasController::assignWaliKelas/$1', ['filter' => 'role:admin']);
     $routes->post('kelas/remove-wali-kelas/(:num)', 'Admin\KelasController::removeWaliKelas/$1', ['filter' => 'role:admin']);
     $routes->post('kelas/move-siswa/(:num)', 'Admin\KelasController::moveSiswa/$1', ['filter' => 'role:admin']);
     $routes->get('kelas/export', 'Admin\KelasController::export', ['filter' => 'role:admin']);
-    $routes->get('kelas/statistics', 'Admin\KelasController::statistics', ['filter' => 'role:admin']);
+    $routes->get('kelas/statistics', 'Admin\KelasController::statistics', ['filter' => 'role:admin,kepala_sekolah']);
 
     // Mata Pelajaran Management
-    $routes->get('mata-pelajaran', 'Admin\MataPelajaranController::index', ['filter' => 'role:admin']);
+    $routes->get('mata-pelajaran', 'Admin\MataPelajaranController::index', ['filter' => 'role:admin,kepala_sekolah']);
     $routes->get('mata-pelajaran/tambah', 'Admin\MataPelajaranController::create', ['filter' => 'role:admin']);
     $routes->post('mata-pelajaran/simpan', 'Admin\MataPelajaranController::store', ['filter' => 'role:admin']);
     $routes->get('mata-pelajaran/edit/(:num)', 'Admin\MataPelajaranController::edit/$1', ['filter' => 'role:admin']);
@@ -142,7 +142,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('mata-pelajaran/hapus/(:num)', 'Admin\MataPelajaranController::delete/$1', ['filter' => 'role:admin']);
 
     // Jadwal Management
-    $routes->get('jadwal', 'Admin\\JadwalController::index', ['filter' => 'role:admin']);
+    $routes->get('jadwal', 'Admin\\JadwalController::index', ['filter' => 'role:admin,kepala_sekolah']);
     $routes->get('jadwal/tambah', 'Admin\\JadwalController::create', ['filter' => 'role:admin']);
     $routes->post('jadwal/simpan', 'Admin\\JadwalController::store', ['filter' => 'role:admin']);
     $routes->get('jadwal/edit/(:num)', 'Admin\\JadwalController::edit/$1', ['filter' => 'role:admin']);
@@ -156,19 +156,19 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('jadwal/export', 'Admin\\JadwalController::export', ['filter' => 'role:admin']);
 
     // Absensi Management (Unlock Feature)
-    $routes->get('absensi', 'Admin\AbsensiController::index', ['filter' => 'role:admin']);
+    $routes->get('absensi', 'Admin\AbsensiController::index', ['filter' => 'role:admin,kepala_sekolah']);
     $routes->get('absensi/unlock/(:num)', 'Admin\AbsensiController::unlock/$1', ['filter' => 'role:admin']);
     $routes->post('absensi/bulk-unlock', 'Admin\AbsensiController::bulkUnlock', ['filter' => 'role:admin']);
 
     // Absensi Guru Management
-    $routes->get('absensi-guru', 'Admin\AbsensiGuruController::index', ['filter' => 'role:admin']);
-    $routes->get('absensi-guru/laporan', 'Admin\AbsensiGuruController::laporan', ['filter' => 'role:admin']);
-    $routes->get('absensi-guru/detail/(:num)', 'Admin\AbsensiGuruController::detail/$1', ['filter' => 'role:admin']);
+    $routes->get('absensi-guru', 'Admin\AbsensiGuruController::index', ['filter' => 'role:admin,kepala_sekolah']);
+    $routes->get('absensi-guru/laporan', 'Admin\AbsensiGuruController::laporan', ['filter' => 'role:admin,kepala_sekolah']);
+    $routes->get('absensi-guru/detail/(:num)', 'Admin\AbsensiGuruController::detail/$1', ['filter' => 'role:admin,kepala_sekolah']);
     $routes->post('absensi-guru/update-status', 'Admin\AbsensiGuruController::updateStatus', ['filter' => 'role:admin']);
     $routes->get('absensi-guru/export-excel', 'Admin\AbsensiGuruController::exportExcel', ['filter' => 'role:admin']);
 
     // Pembimbing PKL
-    $routes->get('pembimbing-pkl', 'Admin\PembimbingPklController::index', ['filter' => 'role:admin']);
+    $routes->get('pembimbing-pkl', 'Admin\PembimbingPklController::index', ['filter' => 'role:admin,kepala_sekolah']);
     $routes->get('pembimbing-pkl/tambah', 'Admin\PembimbingPklController::create', ['filter' => 'role:admin']);
     $routes->post('pembimbing-pkl/simpan', 'Admin\PembimbingPklController::store', ['filter' => 'role:admin']);
     $routes->get('pembimbing-pkl/edit/(:num)', 'Admin\PembimbingPklController::edit/$1', ['filter' => 'role:admin']);
@@ -195,7 +195,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('pembimbing-pkl/get-siswa-xii-unplaced', 'Admin\PembimbingPklController::getSiswaXIIUnplaced', ['filter' => 'role:admin']);
 
     // Pengaturan
-    $routes->get('pengaturan', 'Admin\PengaturanController::index', ['filter' => 'role:admin']);
+    $routes->get('pengaturan', 'Admin\PengaturanController::index', ['filter' => 'role:admin,kepala_sekolah']);
     $routes->post('pengaturan/update', 'Admin\PengaturanController::update', ['filter' => 'role:admin']);
     $routes->post('pengaturan/rollover', 'Admin\PengaturanController::rollover', ['filter' => 'role:admin']);
     $routes->post('pengaturan/revert', 'Admin\PengaturanController::revert', ['filter' => 'role:admin']);
@@ -216,7 +216,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('pengaturan/hapus-sesi-shalat/(:num)', 'Admin\PengaturanController::hapusSesiShalat/$1', ['filter' => 'role:admin']);
 
     // Arsip Jurnal PKL (Task-Oriented)
-    $routes->get('jurnal-pkl-archive', 'Admin\PklArchiveController::index', ['filter' => 'role:admin']);
+    $routes->get('jurnal-pkl-archive', 'Admin\PklArchiveController::index', ['filter' => 'role:admin,kepala_sekolah']);
 
     // Master Task PKL
     $routes->get('pkl-task', 'Admin\PklTaskController::index', ['filter' => 'role:admin']);
@@ -238,16 +238,16 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('kategori-pkl-mapping/summary', 'Admin\KategoriPklMappingController::getMappingSummary', ['filter' => 'role:admin']);
 
     // Absensi PKL
-    $routes->get('absensi-pkl', 'Admin\AbsensiPklController::index', ['filter' => 'role:admin']);
-    $routes->get('absensi-pkl/detail/(:num)', 'Admin\AbsensiPklController::show/$1', ['filter' => 'role:admin']);
-    $routes->get('absensi-pkl/rekap/(:num)', 'Admin\AbsensiPklController::rekap/$1', ['filter' => 'role:admin']);
+    $routes->get('absensi-pkl', 'Admin\AbsensiPklController::index', ['filter' => 'role:admin,kepala_sekolah']);
+    $routes->get('absensi-pkl/detail/(:num)', 'Admin\AbsensiPklController::show/$1', ['filter' => 'role:admin,kepala_sekolah']);
+    $routes->get('absensi-pkl/rekap/(:num)', 'Admin\AbsensiPklController::rekap/$1', ['filter' => 'role:admin,kepala_sekolah']);
     $routes->post('absensi-pkl/update-waktu', 'Admin\AbsensiPklController::updateWaktuAbsen', ['filter' => 'role:admin']);
     $routes->post('absensi-pkl/bulk-update-waktu-all', 'Admin\AbsensiPklController::bulkUpdateWaktuAll', ['filter' => 'role:admin']);
     $routes->post('absensi-pkl/bulk-update-waktu-by-pembimbing', 'Admin\AbsensiPklController::bulkUpdateWaktuByPembimbing', ['filter' => 'role:admin']);
     $routes->post('absensi-pkl/get-times-by-pembimbing', 'Admin\AbsensiPklController::getTimesByPembimbing', ['filter' => 'role:admin']);
 
     // Guru Piket Management
-    $routes->get('guru-piket', 'Admin\GuruPiketController::index', ['filter' => 'role:admin']);
+    $routes->get('guru-piket', 'Admin\GuruPiketController::index', ['filter' => 'role:admin,kepala_sekolah']);
     $routes->post('guru-piket/simpan', 'Admin\GuruPiketController::store', ['filter' => 'role:admin']);
     $routes->post('guru-piket/update/(:num)', 'Admin\GuruPiketController::update/$1', ['filter' => 'role:admin']);
     $routes->get('guru-piket/hapus/(:num)', 'Admin\GuruPiketController::delete/$1', ['filter' => 'role:admin']);
@@ -265,15 +265,15 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
 
 
     // Jurnal Piket Monitoring (Admin)
-    $routes->get('jurnal-piket', 'Admin\JurnalPiketController::index', ['filter' => 'role:admin']);
-    $routes->get('jurnal-piket/detail/(:num)', 'Admin\JurnalPiketController::detail/$1', ['filter' => 'role:admin']);
-    $routes->get('jurnal-piket/print', 'Admin\JurnalPiketController::print', ['filter' => 'role:admin']);
+    $routes->get('jurnal-piket', 'Admin\JurnalPiketController::index', ['filter' => 'role:admin,kepala_sekolah']);
+    $routes->get('jurnal-piket/detail/(:num)', 'Admin\JurnalPiketController::detail/$1', ['filter' => 'role:admin,kepala_sekolah']);
+    $routes->get('jurnal-piket/print', 'Admin\JurnalPiketController::print', ['filter' => 'role:admin,kepala_sekolah']);
 
     // Laporan Absensi Shalat
-    $routes->get('laporan/absensi-shalat', 'Admin\LaporanAbsensiShalatController::index', ['filter' => 'role:admin']);
-    $routes->get('laporan/absensi-shalat/print', 'Admin\LaporanAbsensiShalatController::print', ['filter' => 'role:admin']);
-    $routes->get('laporan/absensi-shalat/preview-guru', 'Admin\LaporanAbsensiShalatController::previewGuru', ['filter' => 'role:admin']);
-    $routes->get('laporan/absensi-shalat/preview-guru-print', 'Admin\LaporanAbsensiShalatController::previewGuruPrint', ['filter' => 'role:admin']);
+    $routes->get('laporan/absensi-shalat', 'Admin\LaporanAbsensiShalatController::index', ['filter' => 'role:admin,kepala_sekolah']);
+    $routes->get('laporan/absensi-shalat/print', 'Admin\LaporanAbsensiShalatController::print', ['filter' => 'role:admin,kepala_sekolah']);
+    $routes->get('laporan/absensi-shalat/preview-guru', 'Admin\LaporanAbsensiShalatController::previewGuru', ['filter' => 'role:admin,kepala_sekolah']);
+    $routes->get('laporan/absensi-shalat/preview-guru-print', 'Admin\LaporanAbsensiShalatController::previewGuruPrint', ['filter' => 'role:admin,kepala_sekolah']);
 });
 
 // Guru Routes (accessible by guru_mapel and wakakur who teach)

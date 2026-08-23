@@ -232,6 +232,21 @@ class DashboardModel extends Model
             }
         }
 
+        $startDate = date('Y-m-d', strtotime("-6 days"));
+        $endDate   = date('Y-m-d');
+
+        $dailyCounts = $absensiModel
+            ->select('tanggal, COUNT(*) as total')
+            ->where('tanggal >=', $startDate)
+            ->where('tanggal <=', $endDate)
+            ->groupBy('tanggal')
+            ->findAll();
+
+        $dailyMap = [];
+        foreach ($dailyCounts as $row) {
+            $dailyMap[$row['tanggal']] = (int)$row['total'];
+        }
+
         $last7Days = [];
         $attendanceLast7Days = [];
 
@@ -239,10 +254,8 @@ class DashboardModel extends Model
             $date = date('Y-m-d', strtotime("-$i days"));
             $dayname = date('D', strtotime($date));
 
-            $count = $absensiModel->where('tanggal', $date)->countAllResults();
-
             $last7Days[] = $dayname;
-            $attendanceLast7Days[] = $count;
+            $attendanceLast7Days[] = $dailyMap[$date] ?? 0;
         }
 
         // Data siswa per kelas
