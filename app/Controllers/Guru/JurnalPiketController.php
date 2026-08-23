@@ -69,7 +69,7 @@ class JurnalPiketController extends BaseController
         }
 
         $tanggal = $this->request->getGet('tanggal') ?: date('Y-m-d');
-        $rincianTugas = $this->jurnalPiketService->getRincianTugasForGuruAndDate($guru['id'], $tanggal);
+        $rincianTugas = $this->jurnalPiketService->getRincianTugasForGuru($guru['id'], $tanggal);
 
         $data = [
             'title'        => 'Tambah Jurnal Piket',

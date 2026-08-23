@@ -77,48 +77,24 @@ class JurnalPiketService extends BaseService
     }
 
     /**
-     * Get rincian tugas for a guru on a specific date
+     * Get rincian tugas for a guru based on active master jobdesk mapping
      */
-    public function getRincianTugasForGuruAndDate(int $guruId, string $tanggal): string
+    public function getRincianTugasForGuru(int $guruId, ?string $tanggal = null): string
     {
-        $dayEnglish = date('l', strtotime($tanggal));
-        $dayMap = [
-            'Monday'    => 'senin',
-            'Tuesday'   => 'selasa',
-            'Wednesday' => 'rabu',
-            'Thursday'  => 'kamis',
-            'Friday'    => 'jumat',
-            'Saturday'  => 'sabtu',
-            'Sunday'    => 'minggu',
-        ];
-        $hari = $dayMap[$dayEnglish] ?? 'senin';
-
+        $tanggal = $tanggal ?: date('Y-m-d');
         $tahunAjaran = get_active_tahun_ajaran();
         $month = (int) date('m', strtotime($tanggal));
         $semester = ($month >= 7 && $month <= 12) ? 'ganjil' : 'genap';
 
-        // 1. Primary: Cari penugasan piket pada hari dan semester yang sesuai
+        // Ambil mapping jobdesk guru pada tahun ajaran & semester aktif (tidak terikat hari tertentu)
         $assignment = $this->guruPiketModel
             ->select('guru_piket.rincian_tugas, master_jobdesk_piket.rincian_tugas AS master_rincian_tugas')
             ->join('master_jobdesk_piket', 'master_jobdesk_piket.id = guru_piket.jobdesk_id', 'left')
             ->where('guru_piket.guru_id', $guruId)
-            ->where('LOWER(TRIM(guru_piket.hari))', strtolower(trim($hari)))
-            ->where('TRIM(guru_piket.tahun_ajaran)', trim($tahunAjaran))
-            ->where('LOWER(TRIM(guru_piket.semester))', strtolower(trim($semester)))
+            ->where('guru_piket.tahun_ajaran', $tahunAjaran)
+            ->where('guru_piket.semester', $semester)
             ->where('guru_piket.is_active', 1)
             ->first();
-
-        // 2. Jika tidak terjadwal di hari tersebut, ambil mapping jobdesk guru pada tahun ajaran & semester aktif
-        if (!$assignment) {
-            $assignment = $this->guruPiketModel
-                ->select('guru_piket.rincian_tugas, master_jobdesk_piket.rincian_tugas AS master_rincian_tugas')
-                ->join('master_jobdesk_piket', 'master_jobdesk_piket.id = guru_piket.jobdesk_id', 'left')
-                ->where('guru_piket.guru_id', $guruId)
-                ->where('TRIM(guru_piket.tahun_ajaran)', trim($tahunAjaran))
-                ->where('LOWER(TRIM(guru_piket.semester))', strtolower(trim($semester)))
-                ->where('guru_piket.is_active', 1)
-                ->first();
-        }
 
         if ($assignment) {
             $customRincian = trim($assignment['rincian_tugas'] ?? '');
