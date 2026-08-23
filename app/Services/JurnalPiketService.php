@@ -97,15 +97,23 @@ class JurnalPiketService extends BaseService
         $month = (int) date('m', strtotime($tanggal));
         $semester = ($month >= 7 && $month <= 12) ? 'ganjil' : 'genap';
 
-        $assignment = $this->guruPiketModel->where('guru_id', $guruId)
-            ->where('hari', $hari)
-            ->where('tahun_ajaran', $tahunAjaran)
-            ->where('semester', $semester)
-            ->where('is_active', 1)
+        $assignment = $this->guruPiketModel
+            ->select('guru_piket.rincian_tugas, master_jobdesk_piket.rincian_tugas AS master_rincian_tugas')
+            ->join('master_jobdesk_piket', 'master_jobdesk_piket.id = guru_piket.jobdesk_id', 'left')
+            ->where('guru_piket.guru_id', $guruId)
+            ->where('guru_piket.hari', $hari)
+            ->where('guru_piket.tahun_ajaran', $tahunAjaran)
+            ->where('guru_piket.semester', $semester)
+            ->where('guru_piket.is_active', 1)
             ->first();
 
-        if ($assignment && !empty($assignment['jobdesk_id']) && !empty($assignment['rincian_tugas'])) {
-            return $assignment['rincian_tugas'];
+        if ($assignment) {
+            if (!empty($assignment['rincian_tugas'])) {
+                return trim($assignment['rincian_tugas']);
+            }
+            if (!empty($assignment['master_rincian_tugas'])) {
+                return trim($assignment['master_rincian_tugas']);
+            }
         }
 
         return '';
