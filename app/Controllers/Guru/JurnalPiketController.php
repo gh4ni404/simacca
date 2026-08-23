@@ -112,7 +112,11 @@ class JurnalPiketController extends BaseController
         $result = $this->jurnalPiketService->create($data, $file);
 
         if (!$result['success']) {
-            return redirect()->back()->withInput()->with('error', $result['message']);
+            $errorMsg = $result['message'];
+            if (!empty($result['errors'])) {
+                $errorMsg .= ': ' . implode(', ', (array) $result['errors']);
+            }
+            return redirect()->back()->withInput()->with('error', $errorMsg);
         }
 
         return redirect()->to('/guru/jurnal-piket')->with('success', 'Jurnal piket berhasil disimpan');
@@ -207,7 +211,11 @@ class JurnalPiketController extends BaseController
         $result = $this->jurnalPiketService->update((int) $id, $data, $file);
 
         if (!$result['success']) {
-            return redirect()->back()->withInput()->with('error', $result['message']);
+            $errorMsg = $result['message'];
+            if (!empty($result['errors'])) {
+                $errorMsg .= ': ' . implode(', ', (array) $result['errors']);
+            }
+            return redirect()->back()->withInput()->with('error', $errorMsg);
         }
 
         return redirect()->to('/guru/jurnal-piket')->with('success', 'Jurnal piket berhasil diperbarui');

@@ -118,10 +118,10 @@ class JurnalPiketService extends BaseService
     {
         $rules = [
             'guru_id'      => 'required|integer',
-            'tanggal'      => 'required|valid_date[Y-m-d]',
+            'tanggal'      => 'required|valid_date',
             'tahun_ajaran' => 'required',
-            'semester'     => 'required|in_list[ganjil,genap]',
-            'deskripsi'    => 'required|min_length[5]',
+            'semester'     => 'required|in_list[ganjil,genap,Ganjil,Genap]',
+            'deskripsi'    => 'required',
         ];
 
         if (!$this->validate($data, $rules)) {
@@ -158,7 +158,7 @@ class JurnalPiketService extends BaseService
                 'guru_id'          => $data['guru_id'],
                 'tanggal'          => $data['tanggal'],
                 'tahun_ajaran'     => $data['tahun_ajaran'],
-                'semester'         => $data['semester'],
+                'semester'         => strtolower($data['semester']),
                 'rincian_tugas'    => $data['rincian_tugas'] ?? null,
                 'deskripsi'        => $data['deskripsi'],
                 'catatan'          => $data['catatan'] ?? null,
@@ -192,8 +192,8 @@ class JurnalPiketService extends BaseService
 
         $rules = [
             'guru_id'   => 'required|integer',
-            'tanggal'   => 'required|valid_date[Y-m-d]',
-            'deskripsi' => 'required|min_length[5]',
+            'tanggal'   => 'required|valid_date',
+            'deskripsi' => 'required',
         ];
 
         if (!$this->validate($data, $rules)) {

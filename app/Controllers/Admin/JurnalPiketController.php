@@ -16,7 +16,7 @@ class JurnalPiketController extends BaseController
         $this->jurnalPiketService = new JurnalPiketService();
         $this->guruModel          = new GuruModel();
 
-        if (!session()->get('isLoggedIn') || session()->get('role') !== 'admin') {
+        if (!is_logged_in() || !has_role(['admin', 'kepala_sekolah'])) {
             return redirect()->to('/access-denied');
         }
     }

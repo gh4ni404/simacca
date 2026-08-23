@@ -30,13 +30,7 @@ class JurnalPiketModel extends Model
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
 
-    protected $validationRules = [
-        'guru_id'      => 'required|integer',
-        'tanggal'      => 'required|valid_date[Y-m-d]',
-        'tahun_ajaran' => 'required',
-        'semester'     => 'required|in_list[ganjil,genap]',
-        'deskripsi'    => 'required|min_length[5]',
-    ];
+    protected $validationRules = [];
 
     /**
      * Get journals by specific guru with date range filter
