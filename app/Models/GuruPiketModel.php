@@ -14,6 +14,7 @@ class GuruPiketModel extends Model
     protected $protectFields    = true;
     protected $allowedFields    = [
         'guru_id',
+        'jobdesk_id',
         'tahun_ajaran',
         'semester',
         'hari',
@@ -58,13 +59,14 @@ class GuruPiketModel extends Model
     protected $afterDelete    = [];
 
     /**
-     * Get all guru piket with guru data for a specific tahun ajaran and semester
+     * Get all guru piket with guru & jobdesk data for a specific tahun ajaran and semester
      */
     public function getAllWithGuru(string $tahunAjaran, string $semester): array
     {
-        return $this->select('guru_piket.*, guru.nama_lengkap, guru.nip, guru.jenis_kelamin, users.profile_photo')
+        return $this->select('guru_piket.*, guru.nama_lengkap, guru.nip, guru.jenis_kelamin, users.profile_photo, master_jobdesk_piket.nama_jobdesk, master_jobdesk_piket.kode_jobdesk')
             ->join('guru', 'guru.id = guru_piket.guru_id')
             ->join('users', 'users.id = guru.user_id', 'left')
+            ->join('master_jobdesk_piket', 'master_jobdesk_piket.id = guru_piket.jobdesk_id', 'left')
             ->where('guru_piket.tahun_ajaran', $tahunAjaran)
             ->where('guru_piket.semester', $semester)
             ->orderBy('guru_piket.hari', 'ASC')
@@ -103,8 +105,9 @@ class GuruPiketModel extends Model
      */
     public function getByHari(string $hari, string $tahunAjaran, string $semester): array
     {
-        return $this->select('guru_piket.*, guru.nama_lengkap, guru.nip, guru.jenis_kelamin')
+        return $this->select('guru_piket.*, guru.nama_lengkap, guru.nip, guru.jenis_kelamin, master_jobdesk_piket.nama_jobdesk, master_jobdesk_piket.kode_jobdesk')
             ->join('guru', 'guru.id = guru_piket.guru_id')
+            ->join('master_jobdesk_piket', 'master_jobdesk_piket.id = guru_piket.jobdesk_id', 'left')
             ->where('guru_piket.hari', $hari)
             ->where('guru_piket.tahun_ajaran', $tahunAjaran)
             ->where('guru_piket.semester', $semester)

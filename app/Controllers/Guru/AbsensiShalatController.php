@@ -31,7 +31,7 @@ class AbsensiShalatController extends BaseController
      */
     public function index()
     {
-        $userId = $this->session->get('userId');
+        $userId = $this->session->get('user_id') ?? $this->session->get('userId');
         $guru = $this->guruModel->getByUserId($userId);
 
         if (!$guru) {
@@ -59,7 +59,6 @@ class AbsensiShalatController extends BaseController
             'activeSession'   => $activeSession,
             'todaySessions'   => $todaySessions,
             'todayAttendance' => $todayAttendance,
-            'baseUrl'         => base_url(),
         ];
 
         return view('guru/absensi_shalat/index', $data);
@@ -452,17 +451,38 @@ class AbsensiShalatController extends BaseController
         $tahunAjaran = get_active_tahun_ajaran();
         $semester = $this->determineSemester();
 
-        // Also clean up any temporary quick test entries if they exist
-        $db = \Config\Database::connect();
-        $db->table('guru_piket')->where('keterangan', 'Quick Test Piket')->delete();
-
-        return $this->guruPiketModel
+        $res = $this->guruPiketModel
             ->where('guru_id', $guruId)
             ->where('LOWER(hari)', $hariIni)
             ->where('tahun_ajaran', $tahunAjaran)
             ->where('semester', $semester)
             ->where('is_active', 1)
             ->first();
+
+        if (!$res && session()->get('is_impersonating')) {
+            // Mode Simulasi Admin: allow any active scheduled piket entry of this guru for testing
+            $res = $this->guruPiketModel
+                ->where('guru_id', $guruId)
+                ->where('tahun_ajaran', $tahunAjaran)
+                ->where('semester', $semester)
+                ->where('is_active', 1)
+                ->first();
+
+            if (!$res) {
+                // Virtual dummy piket assignment for testing in Mode Simulasi
+                $res = [
+                    'id'            => 0,
+                    'guru_id'       => $guruId,
+                    'hari'          => strtolower($this->getHariIndo(date('l'))),
+                    'tahun_ajaran'  => $tahunAjaran,
+                    'semester'      => $semester,
+                    'is_active'     => 1,
+                    'rincian_tugas' => 'Simulasi Testing Piket Admin',
+                ];
+            }
+        }
+
+        return $res;
     }
 
     private function getHariIndo(string $day): string

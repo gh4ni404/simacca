@@ -235,9 +235,27 @@ if (!function_exists('get_sidebar_menu')) {
                 [
                     'title' => 'Guru Piket',
                     'icon' => 'fas fa-clipboard-list',
-                    'url' => '/admin/guru-piket',
-                    'active' => ['admin/guru-piket']
+                    'url' => '#',
+                    'submenu' => [
+                        [
+                            'title' => 'Jadwal Piket',
+                            'url' => '/admin/guru-piket',
+                        ],
+                        [
+                            'title' => 'Master Jobdesk',
+                            'url' => '/admin/master-jobdesk',
+                        ],
+                        [
+                            'title' => 'Jurnal Piket Guru',
+                            'url' => '/admin/jurnal-piket',
+                        ],
+                        [
+                            'title' => 'Simulasi Test Piket',
+                            'url' => '/admin/simulasi-piket',
+                        ],
+                    ]
                 ],
+
                 [
                     'title' => 'Laporan',
                     'icon' => 'fas fa-chart-bar',
@@ -305,6 +323,13 @@ if (!function_exists('get_sidebar_menu')) {
                     'icon' => 'fas fa-book',
                     'url' => '/guru/jurnal'
                 ],
+                [
+                    'title' => 'Jurnal Piket',
+                    'icon' => 'fas fa-file-signature',
+                    'url' => '/guru/jurnal-piket',
+                    'active' => ['guru/jurnal-piket']
+                ],
+
                 [
                     'title' => 'Praktik Kerja Lapangan',
                     'icon' => 'fas fa-building',

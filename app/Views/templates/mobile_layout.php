@@ -402,6 +402,9 @@
                         <a href="<?= base_url('guru/jurnal'); ?>">
                             <i class="fas fa-book-open"></i> Jurnal KBM
                         </a>
+                        <a href="<?= base_url('guru/jurnal-piket'); ?>">
+                            <i class="fas fa-clipboard-check"></i> Jurnal Piket
+                        </a>
                         <a href="<?= base_url('guru/jurnal-pkl'); ?>">
                             <i class="fas fa-clipboard-list"></i> Verifikasi PKL
                         </a>

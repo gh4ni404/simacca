@@ -27,17 +27,21 @@ class GuruPiketController extends BaseController
         $semester = $this->request->getGet('semester') ?: 'ganjil';
         $result = $this->guruPiketService->getAllGroupedByHari($tahunAjaran, $semester);
 
+        $masterJobdeskModel = new \App\Models\MasterJobdeskPiketModel();
+        $masterJobdeskList = $masterJobdeskModel->where('is_active', 1)->orderBy('nama_jobdesk', 'ASC')->findAll();
+
         $data = [
-            'title'         => 'Manajemen Guru Piket',
-            'pageTitle'     => 'Jadwal Guru Piket',
-            'pageDescription' => 'Kelola jadwal piket guru berdasarkan hari',
-            'user'          => $this->getUserData(),
-            'tahunAjaran'   => $tahunAjaran,
-            'semester'      => $semester,
+            'title'               => 'Manajemen Guru Piket',
+            'pageTitle'           => 'Jadwal Guru Piket',
+            'pageDescription'     => 'Kelola jadwal piket guru berdasarkan hari',
+            'user'                => $this->getUserData(),
+            'tahunAjaran'         => $tahunAjaran,
+            'semester'            => $semester,
             'grouped'             => $result['data']['grouped'] ?? [],
             'stats'               => $result['data']['stats'] ?? [],
             'hariList'            => ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'],
             'defaultRincianTugas' => $this->guruPiketService->getDefaultRincianTugas(),
+            'masterJobdeskList'   => $masterJobdeskList,
         ];
 
         return view('admin/guru_piket/index', $data);
@@ -52,6 +56,7 @@ class GuruPiketController extends BaseController
 
         $data = [
             'guru_id'      => $this->request->getPost('guru_id'),
+            'jobdesk_id'   => $this->request->getPost('jobdesk_id'),
             'tahun_ajaran' => $tahunAjaran,
             'semester'     => $this->request->getPost('semester'),
             'hari'          => $this->request->getPost('hari'),
@@ -85,6 +90,7 @@ class GuruPiketController extends BaseController
 
         $data = [
             'guru_id'      => $this->request->getPost('guru_id'),
+            'jobdesk_id'   => $this->request->getPost('jobdesk_id'),
             'tahun_ajaran' => $tahunAjaran,
             'semester'     => $this->request->getPost('semester'),
             'hari'          => $this->request->getPost('hari'),
@@ -155,10 +161,11 @@ class GuruPiketController extends BaseController
         $semester = $this->request->getPost('semester') ?: 'ganjil';
         $guruIds = $this->request->getPost('guru_ids') ?? [];
         $hari = $this->request->getPost('hari');
+        $jobdeskId = $this->request->getPost('jobdesk_id') ? (int)$this->request->getPost('jobdesk_id') : null;
         $keterangan = $this->request->getPost('keterangan');
         $rincianTugas = $this->request->getPost('rincian_tugas');
 
-        $result = $this->guruPiketService->bulkAssign($guruIds, $hari, $tahunAjaran, $semester, $keterangan, $rincianTugas);
+        $result = $this->guruPiketService->bulkAssign($guruIds, $hari, $tahunAjaran, $semester, $keterangan, $rincianTugas, $jobdeskId);
 
         return $this->response->setJSON($result);
     }

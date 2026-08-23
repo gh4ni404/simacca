@@ -33,12 +33,16 @@
                     <i class="fas fa-book mr-1"></i> Genap
                 </a>
             </div>
+            <a href="<?= base_url('admin/master-jobdesk'); ?>" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium text-sm flex items-center transition">
+                <i class="fas fa-tasks mr-2 text-indigo-600"></i> Master Jobdesk
+            </a>
             <button onclick="openAddModalForHari(document.getElementById('addHari').value)"
                 class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center">
                 <i class="fas fa-plus mr-2"></i> Tambah Jadwal Piket
             </button>
         </div>
     </div>
+
 
     <!-- Stats -->
     <?php
@@ -249,11 +253,23 @@
                         <p id="addGuruSelected" class="text-sm text-indigo-600 mt-1 hidden"><i class="fas fa-check-circle mr-1"></i> <span id="addSelectedCount">0</span> guru dipilih</p>
                     </div>
 
+                    <!-- Master Jobdesk Mapping -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Mapping Master Jobdesk <span class="text-gray-400 font-normal">(opsional)</span></label>
+                        <select name="jobdesk_id" id="addJobdesk" onchange="onJobdeskSelectChange('addJobdesk', 'addRincianTugas')" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                            <option value="">-- Tanpa Mapping Master Jobdesk --</option>
+                            <?php foreach ($masterJobdeskList as $mj): ?>
+                                <option value="<?= $mj['id']; ?>"><?= esc($mj['nama_jobdesk']); ?> (<?= esc($mj['kode_jobdesk']); ?>)</option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
                     <!-- Keterangan -->
                     <div class="mb-4">
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Keterangan <span class="text-gray-400 font-normal">(opsional)</span></label>
                         <textarea name="keterangan" id="addKeterangan" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" rows="2" placeholder="Catatan tambahan..."></textarea>
                     </div>
+
 
                     <!-- Rincian Tugas -->
                     <div class="mb-4">
@@ -318,11 +334,23 @@
                         </select>
                     </div>
 
+                    <!-- Master Jobdesk Mapping -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Mapping Master Jobdesk <span class="text-gray-400 font-normal">(opsional)</span></label>
+                        <select name="jobdesk_id" id="editJobdesk" onchange="onJobdeskSelectChange('editJobdesk', 'editRincianTugas')" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                            <option value="">-- Tanpa Mapping Master Jobdesk --</option>
+                            <?php foreach ($masterJobdeskList as $mj): ?>
+                                <option value="<?= $mj['id']; ?>"><?= esc($mj['nama_jobdesk']); ?> (<?= esc($mj['kode_jobdesk']); ?>)</option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
                     <!-- Keterangan -->
                     <div class="mb-4">
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Keterangan <span class="text-gray-400 font-normal">(opsional)</span></label>
                         <textarea name="keterangan" id="editKeterangan" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" rows="2" placeholder="Catatan tambahan..."></textarea>
                     </div>
+
 
                     <!-- Rincian Tugas -->
                     <div class="mb-4">
@@ -384,10 +412,10 @@
                 <div>
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Nama Guru</p>
                     <p id="detailGuruNama" class="text-base font-bold text-gray-900 mt-0.5"></p>
-                    <p id="detailGuruHari" class="text-xs text-indigo-600 font-medium mt-0.5"></p>
+                    <div id="detailJobdeskBadge" class="mt-1"></div>
                 </div>
                 <div class="border-t border-gray-100 pt-3">
-                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Tugas, Kewajiban & Tanggung Jawab</p>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Rincian Panduan Tugas Piket</p>
                     <div id="detailRincianTugas" class="bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm text-gray-700 whitespace-pre-line leading-relaxed"></div>
                 </div>
             </div>
@@ -662,11 +690,13 @@
         // Fetch fresh CSRF token before write request
         await getFreshCsrfToken();
 
+        const jobdeskId = document.getElementById('addJobdesk').value;
         const params = new URLSearchParams();
         params.append('hari', hari);
         params.append('semester', '<?= $semester; ?>');
         params.append('keterangan', keterangan);
         params.append('rincian_tugas', rincianTugas);
+        if (jobdeskId) params.append('jobdesk_id', jobdeskId);
         params.append(csrfName, csrfHash);
         guruIds.forEach(id => params.append('guru_ids[]', id));
 
@@ -702,6 +732,7 @@
     function openEditModal(piket) {
         document.getElementById('editId').value = piket.id;
         document.getElementById('editHari').value = piket.hari;
+        document.getElementById('editJobdesk').value = piket.jobdesk_id || '';
         document.getElementById('editKeterangan').value = piket.keterangan || '';
         document.getElementById('editRincianTugas').value = piket.rincian_tugas || '';
         document.getElementById('editError').classList.add('hidden');
@@ -819,8 +850,20 @@
             });
         }
     });
-    // ==================== RINCIAN TUGAS HELPERS ====================
+    // ==================== RINCIAN TUGAS & MASTER JOBDESK HELPERS ====================
     const DEFAULT_RINCIAN_TUGAS = <?= json_encode($defaultRincianTugas); ?>;
+    const MASTER_JOBDESKS = <?= json_encode($masterJobdeskList ?? []); ?>;
+
+    function onJobdeskSelectChange(selectId, textareaId) {
+        const jobdeskId = document.getElementById(selectId).value;
+        const textarea = document.getElementById(textareaId);
+        if (!jobdeskId) return;
+
+        const found = MASTER_JOBDESKS.find(j => j.id == jobdeskId);
+        if (found && found.rincian_tugas && textarea) {
+            textarea.value = found.rincian_tugas;
+        }
+    }
 
     function fillDefaultRincianTugas(targetId) {
         const el = document.getElementById(targetId);
@@ -831,9 +874,17 @@
 
     function viewDetailTugas(piket) {
         document.getElementById('detailGuruNama').textContent = piket.nama_lengkap + (piket.nip ? ' (NIP: ' + piket.nip + ')' : '');
-        document.getElementById('detailGuruHari').textContent = 'Jadwal Piket Hari ' + piket.hari.charAt(0).toUpperCase() + piket.hari.slice(1);
-        document.getElementById('detailRincianTugas').textContent = piket.rincian_tugas || DEFAULT_RINCIAN_TUGAS;
+
+        const badgeContainer = document.getElementById('detailJobdeskBadge');
+        if (piket.kode_jobdesk && piket.nama_jobdesk) {
+            badgeContainer.innerHTML = '<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200"><i class="fas fa-tag mr-1.5 text-indigo-500"></i>' + piket.kode_jobdesk + ' - ' + piket.nama_jobdesk + '</span>';
+        } else {
+            badgeContainer.innerHTML = '<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200"><i class="fas fa-exclamation-circle mr-1.5 text-gray-400"></i>Tanpa Master Jobdesk</span>';
+        }
+
+        document.getElementById('detailRincianTugas').textContent = piket.rincian_tugas || 'Belum ada rincian jobdesk piket yang dipetakan untuk guru ini.';
         openModal('detailModal');
     }
 </script>
 <?= $this->endSection() ?>
+

@@ -70,6 +70,7 @@ class GuruPiketService extends BaseService
     {
         $rules = [
             'guru_id'      => 'required|integer',
+            'jobdesk_id'   => 'permit_empty|integer',
             'tahun_ajaran' => 'required',
             'semester'     => 'required|in_list[ganjil,genap]',
             'hari'         => 'required|in_list[senin,selasa,rabu,kamis,jumat,sabtu]',
@@ -87,14 +88,25 @@ class GuruPiketService extends BaseService
             return $this->errorResponse('Guru ini sudah dijadwalkan piket pada hari ' . ucfirst($data['hari']));
         }
 
-        return $this->executeInTransaction(function () use ($data) {
+        // If jobdesk_id is provided but rincian_tugas is empty, load rincian_tugas from master jobdesk
+        $rincianTugas = $data['rincian_tugas'] ?? null;
+        if (!empty($data['jobdesk_id']) && empty($rincianTugas)) {
+            $masterJobdeskModel = new \App\Models\MasterJobdeskPiketModel();
+            $jobdesk = $masterJobdeskModel->find($data['jobdesk_id']);
+            if ($jobdesk) {
+                $rincianTugas = $jobdesk['rincian_tugas'];
+            }
+        }
+
+        return $this->executeInTransaction(function () use ($data, $rincianTugas) {
             $piketData = [
                 'guru_id'       => $data['guru_id'],
+                'jobdesk_id'    => !empty($data['jobdesk_id']) ? $data['jobdesk_id'] : null,
                 'tahun_ajaran'  => $data['tahun_ajaran'],
                 'semester'      => $data['semester'],
                 'hari'          => $data['hari'],
                 'keterangan'    => $data['keterangan'] ?? null,
-                'rincian_tugas' => $data['rincian_tugas'] ?? null,
+                'rincian_tugas' => $rincianTugas,
                 'is_active'     => $data['is_active'] ?? 1,
                 'created_at'    => date('Y-m-d H:i:s'),
             ];
@@ -124,6 +136,7 @@ class GuruPiketService extends BaseService
 
         $rules = [
             'guru_id'      => 'required|integer',
+            'jobdesk_id'   => 'permit_empty|integer',
             'tahun_ajaran' => 'required',
             'semester'     => 'required|in_list[ganjil,genap]',
             'hari'         => 'required|in_list[senin,selasa,rabu,kamis,jumat,sabtu]',
@@ -141,14 +154,25 @@ class GuruPiketService extends BaseService
             return $this->errorResponse('Guru ini sudah dijadwalkan piket pada hari ' . ucfirst($data['hari']));
         }
 
-        return $this->executeInTransaction(function () use ($id, $data) {
+        // If jobdesk_id is provided but rincian_tugas is empty, load rincian_tugas from master jobdesk
+        $rincianTugas = $data['rincian_tugas'] ?? null;
+        if (!empty($data['jobdesk_id']) && empty($rincianTugas)) {
+            $masterJobdeskModel = new \App\Models\MasterJobdeskPiketModel();
+            $jobdesk = $masterJobdeskModel->find($data['jobdesk_id']);
+            if ($jobdesk) {
+                $rincianTugas = $jobdesk['rincian_tugas'];
+            }
+        }
+
+        return $this->executeInTransaction(function () use ($id, $data, $rincianTugas) {
             $updateData = [
                 'guru_id'       => $data['guru_id'],
+                'jobdesk_id'    => !empty($data['jobdesk_id']) ? $data['jobdesk_id'] : null,
                 'tahun_ajaran'  => $data['tahun_ajaran'],
                 'semester'      => $data['semester'],
                 'hari'          => $data['hari'],
                 'keterangan'    => $data['keterangan'] ?? null,
-                'rincian_tugas' => $data['rincian_tugas'] ?? null,
+                'rincian_tugas' => $rincianTugas,
                 'is_active'     => $data['is_active'] ?? 1,
             ];
 
@@ -208,7 +232,7 @@ class GuruPiketService extends BaseService
     /**
      * Bulk assign multiple guru to a day (optimized: single query check + batch insert)
      */
-    public function bulkAssign(array $guruIds, string $hari, string $tahunAjaran, string $semester, ?string $keterangan = null, ?string $rincianTugas = null): array
+    public function bulkAssign(array $guruIds, string $hari, string $tahunAjaran, string $semester, ?string $keterangan = null, ?string $rincianTugas = null, ?int $jobdeskId = null): array
     {
         if (empty($guruIds)) {
             return $this->errorResponse('Pilih minimal satu guru');
@@ -225,7 +249,15 @@ class GuruPiketService extends BaseService
             return $this->errorResponse('Validasi gagal');
         }
 
-        return $this->executeInTransaction(function () use ($guruIds, $hari, $tahunAjaran, $semester, $keterangan, $rincianTugas) {
+        if (!empty($jobdeskId) && empty($rincianTugas)) {
+            $masterJobdeskModel = new \App\Models\MasterJobdeskPiketModel();
+            $jobdesk = $masterJobdeskModel->find($jobdeskId);
+            if ($jobdesk) {
+                $rincianTugas = $jobdesk['rincian_tugas'];
+            }
+        }
+
+        return $this->executeInTransaction(function () use ($guruIds, $hari, $tahunAjaran, $semester, $keterangan, $rincianTugas, $jobdeskId) {
             // Single query: get all already-assigned (active) guru_ids for this day, tahun ajaran & semester
             $alreadyAssigned = $this->guruPiketModel->select('guru_id')
                 ->where('hari', $hari)
@@ -243,6 +275,7 @@ class GuruPiketService extends BaseService
                 }
                 $toInsert[] = [
                     'guru_id'       => $guruId,
+                    'jobdesk_id'    => $jobdeskId,
                     'tahun_ajaran'  => $tahunAjaran,
                     'semester'      => $semester,
                     'hari'          => $hari,
@@ -271,6 +304,7 @@ class GuruPiketService extends BaseService
                 foreach ($deletedRecords as $record) {
                     $restoredIds[] = $record['guru_id'];
                     $this->guruPiketModel->update($record['id'], [
+                        'jobdesk_id'    => $jobdeskId,
                         'keterangan'    => $keterangan,
                         'rincian_tugas' => $rincianTugas,
                         'is_active'     => 1,
@@ -296,6 +330,100 @@ class GuruPiketService extends BaseService
             ];
         });
     }
+
+    /**
+     * Bulk assign/map a Master Jobdesk to multiple guru utilizing existing guru_piket table
+     */
+    public function bulkAssignJobdesk(array $guruIds, int $jobdeskId, string $hari, string $tahunAjaran, string $semester, ?string $keterangan = null): array
+    {
+        $masterJobdeskModel = new \App\Models\MasterJobdeskPiketModel();
+        $jobdesk = $masterJobdeskModel->find($jobdeskId);
+        if (!$jobdesk) {
+            return $this->errorResponse('Master jobdesk tidak ditemukan');
+        }
+
+        $rules = [
+            'tahun_ajaran' => 'required',
+            'semester'     => 'required|in_list[ganjil,genap]',
+        ];
+
+        $validationData = ['tahun_ajaran' => $tahunAjaran, 'semester' => $semester];
+        if (!$this->validate($validationData, $rules)) {
+            return $this->errorResponse('Validasi gagal');
+        }
+
+        // Validate that all selected teachers already have a piket schedule in guru_piket
+        if (!empty($guruIds)) {
+            $unscheduledGuru = [];
+            foreach ($guruIds as $guruId) {
+                $hasSchedule = $this->guruPiketModel->where('guru_id', $guruId)
+                    ->where('tahun_ajaran', $tahunAjaran)
+                    ->where('semester', $semester)
+                    ->where('is_active', 1)
+                    ->first();
+
+                if (!$hasSchedule) {
+                    $guruModel = new \App\Models\GuruModel();
+                    $g = $guruModel->find($guruId);
+                    $unscheduledGuru[] = $g ? $g['nama_lengkap'] : "ID {$guruId}";
+                }
+            }
+
+            if (!empty($unscheduledGuru)) {
+                return $this->errorResponse('Validasi gagal: Guru berikut belum diatur jadwal piket shalatnya: ' . implode(', ', $unscheduledGuru) . '. Sila atur jadwal piket shalat terlebih dahulu.');
+            }
+        }
+
+        return $this->executeInTransaction(function () use ($guruIds, $jobdeskId, $jobdesk, $tahunAjaran, $semester, $keterangan) {
+            // Unassign teachers who were unchecked for this jobdesk in active semester
+            $unassignQuery = $this->guruPiketModel->where('jobdesk_id', $jobdeskId)
+                ->where('tahun_ajaran', $tahunAjaran)
+                ->where('semester', $semester);
+
+            if (!empty($guruIds)) {
+                $unassignQuery->whereNotIn('guru_id', $guruIds);
+            }
+            $unassignQuery->set(['jobdesk_id' => null])->update();
+
+            $updatedCount = 0;
+            $insertedCount = 0;
+
+            if (!empty($guruIds)) {
+                foreach ($guruIds as $guruId) {
+                    // Update existing assignment(s) with new jobdesk and rincian_tugas
+                    $existingRecords = $this->guruPiketModel->where('guru_id', $guruId)
+                        ->where('tahun_ajaran', $tahunAjaran)
+                        ->where('semester', $semester)
+                        ->findAll();
+
+                    if (!empty($existingRecords)) {
+                        foreach ($existingRecords as $rec) {
+                            $updateData = [
+                                'jobdesk_id'    => $jobdeskId,
+                                'rincian_tugas' => $jobdesk['rincian_tugas'],
+                                'is_active'     => 1,
+                            ];
+                            if (!empty($keterangan)) {
+                                $updateData['keterangan'] = $keterangan;
+                            }
+                            $this->guruPiketModel->update($rec['id'], $updateData);
+                        }
+                        $updatedCount++;
+                    }
+                }
+            }
+
+            $totalSuccess = $updatedCount + $insertedCount;
+            $this->log('info', "Bulk assign jobdesk ID {$jobdeskId} to {$totalSuccess} guru");
+
+            return $this->successResponse([
+                'updated_count'  => $updatedCount,
+                'inserted_count' => $insertedCount,
+                'total_success'  => $totalSuccess,
+            ], "Berhasil memperbarui pemetaan " . count($guruIds) . " guru ke jobdesk {$jobdesk['nama_jobdesk']}");
+        });
+    }
+
 
     /**
      * Get available guru for a specific day

@@ -252,6 +252,27 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('guru-piket/bulk-assign', 'Admin\GuruPiketController::bulkAssign', ['filter' => 'role:admin']);
     $routes->post('guru-piket/get-available-guru', 'Admin\GuruPiketController::getAvailableGuru', ['filter' => 'role:admin']);
 
+    // Master Jobdesk Piket (Admin)
+    $routes->get('master-jobdesk', 'Admin\MasterJobdeskPiketController::index', ['filter' => 'role:admin']);
+    $routes->post('master-jobdesk/simpan', 'Admin\MasterJobdeskPiketController::store', ['filter' => 'role:admin']);
+    $routes->post('master-jobdesk/update/(:num)', 'Admin\MasterJobdeskPiketController::update/$1', ['filter' => 'role:admin']);
+    $routes->get('master-jobdesk/hapus/(:num)', 'Admin\MasterJobdeskPiketController::delete/$1', ['filter' => 'role:admin']);
+    $routes->get('master-jobdesk/toggle-status/(:num)', 'Admin\MasterJobdeskPiketController::toggleStatus/$1', ['filter' => 'role:admin']);
+    $routes->post('master-jobdesk/bulk-assign', 'Admin\MasterJobdeskPiketController::bulkAssign', ['filter' => 'role:admin']);
+
+
+    // Jurnal Piket Monitoring (Admin)
+    $routes->get('jurnal-piket', 'Admin\JurnalPiketController::index', ['filter' => 'role:admin']);
+    $routes->get('jurnal-piket/detail/(:num)', 'Admin\JurnalPiketController::detail/$1', ['filter' => 'role:admin']);
+    $routes->get('jurnal-piket/print', 'Admin\JurnalPiketController::print', ['filter' => 'role:admin']);
+
+    // Simulasi & Test End-to-End Piket Guru (Admin Test Tool)
+    $routes->get('simulasi-piket', 'Admin\SimulasiPiketController::index', ['filter' => 'role:admin']);
+    $routes->post('simulasi-piket/simpan-jurnal', 'Admin\SimulasiPiketController::simulasiJurnal', ['filter' => 'role:admin']);
+    $routes->get('simulasi-piket/impersonate/(:num)', 'Admin\SimulasiPiketController::impersonate/$1', ['filter' => 'role:admin']);
+    $routes->get('simulasi-piket/stop-impersonate', 'Admin\SimulasiPiketController::stopImpersonate');
+
+
     // Laporan
     $routes->get('laporan/absensi', 'Admin\LaporanController::absensi', ['filter' => 'role:admin']);
     $routes->get('laporan/absensi-detail', 'Admin\LaporanController::absensiDetail', ['filter' => 'role:admin']);
@@ -296,8 +317,17 @@ $routes->group('guru', ['filter' => 'role:guru_mapel,wakakur'], function ($route
     $routes->post('jurnal/simpan', 'Guru\JurnalController::store');
     $routes->get('jurnal/show/(:num)', 'Guru\JurnalController::show/$1');
     $routes->get('jurnal/print/(:num)', 'Guru\JurnalController::print/$1');
-    $routes->get('jurnal/edit/(:num)', 'Guru\\JurnalController::edit/$1');
-    $routes->match(['POST', 'PUT'], 'jurnal/update/(:num)', 'Guru\\JurnalController::update/$1');
+    $routes->get('jurnal/edit/(:num)', 'Guru\JurnalController::edit/$1');
+    $routes->match(['POST', 'PUT'], 'jurnal/update/(:num)', 'Guru\JurnalController::update/$1');
+
+    // Jurnal Piket Routes (Guru)
+    $routes->get('jurnal-piket', 'Guru\JurnalPiketController::index', ['as' => 'guru.jurnal_piket']);
+    $routes->get('jurnal-piket/tambah', 'Guru\JurnalPiketController::create');
+    $routes->post('jurnal-piket/simpan', 'Guru\JurnalPiketController::store');
+    $routes->get('jurnal-piket/detail/(:num)', 'Guru\JurnalPiketController::show/$1');
+    $routes->get('jurnal-piket/edit/(:num)', 'Guru\JurnalPiketController::edit/$1');
+    $routes->post('jurnal-piket/update/(:num)', 'Guru\JurnalPiketController::update/$1');
+    $routes->get('jurnal-piket/hapus/(:num)', 'Guru\JurnalPiketController::delete/$1');
     
     // Laporan Routes
     $routes->get('laporan', 'Guru\LaporanController::index', ['as' => 'guru.laporan']);
@@ -501,6 +531,8 @@ $routes->group('profile', ['filter' => 'auth'], function ($routes) {
 
 // File Routes (for serving uploaded files)
 $routes->get('files/jurnal/(:segment)', 'FileController::jurnalFoto/$1');
+$routes->get('files/jurnal-piket/(:segment)', 'FileController::jurnalPiketFoto/$1');
+$routes->get('uploads/jurnal-piket/(:segment)', 'FileController::jurnalPiketFoto/$1');
 $routes->get('files/jurnal-pkl/(:segment)', 'FileController::jurnalPklFoto/$1');
 $routes->get('files/pkl-progress/(:segment)', 'FileController::pklProgressFoto/$1');
 $routes->get('files/absensi-guru/(:segment)/(:segment)/(:segment)/(:segment)', 'FileController::absensiGuruFoto/$1/$2/$3/$4');
