@@ -7,7 +7,7 @@ use App\Models\GuruModel;
 use App\Models\SiswaModel;
 use App\Models\KelasModel;
 use App\Models\AbsensiModel;
-use App\Models\AbsensiGuruModel;
+use App\Models\AbsensiDetailModel;
 use App\Models\TempatPklModel;
 use App\Models\JurnalPiketModel;
 use App\Models\DashboardModel;
@@ -18,6 +18,7 @@ class DashboardController extends BaseController
     protected $siswaModel;
     protected $kelasModel;
     protected $absensiModel;
+    protected $absensiDetailModel;
     protected $absensiGuruModel;
     protected $tempatPklModel;
     protected $jurnalPiketModel;
@@ -29,10 +30,11 @@ class DashboardController extends BaseController
         $this->siswaModel       = new SiswaModel();
         $this->kelasModel       = new KelasModel();
         $this->absensiModel     = new AbsensiModel();
+        $this->absensiDetailModel = new AbsensiDetailModel();
         $this->absensiGuruModel = new AbsensiGuruModel();
         $this->tempatPklModel   = new TempatPklModel();
         $this->jurnalPiketModel = new JurnalPiketModel();
-        $this->dashboardModel    = new DashboardModel();
+        $this->dashboardModel   = new DashboardModel();
     }
 
     public function index()
@@ -48,19 +50,19 @@ class DashboardController extends BaseController
         $totalTempatPkl = $this->tempatPklModel->countAllResults();
 
         // Absensi Siswa hari ini (per status)
-        $absensiSiswaToday = $this->absensiModel
+        $absensiSiswaToday = $this->absensiDetailModel
             ->select('COUNT(*) as total, 
-                      SUM(CASE WHEN status = "hadir" THEN 1 ELSE 0 END) as hadir,
-                      SUM(CASE WHEN status = "izin" THEN 1 ELSE 0 END) as izin,
-                      SUM(CASE WHEN status = "sakit" THEN 1 ELSE 0 END) as sakit,
-                      SUM(CASE WHEN status = "alpa" THEN 1 ELSE 0 END) as alpa')
-            ->where('tahun_ajaran', $activeTA)
-            ->where('tanggal', $today)
+                      SUM(CASE WHEN absensi_detail.status = "hadir" THEN 1 ELSE 0 END) as hadir,
+                      SUM(CASE WHEN absensi_detail.status = "izin" THEN 1 ELSE 0 END) as izin,
+                      SUM(CASE WHEN absensi_detail.status = "sakit" THEN 1 ELSE 0 END) as sakit,
+                      SUM(CASE WHEN absensi_detail.status = "alpa" THEN 1 ELSE 0 END) as alpa')
+            ->join('absensi', 'absensi.id = absensi_detail.absensi_id')
+            ->where('absensi.tanggal', $today)
             ->first();
 
         // Absensi Guru hari ini
         $absensiGuruToday = $this->absensiGuruModel
-            ->select('COUNT(*) as total, SUM(CASE WHEN status = "hadir" THEN 1 ELSE 0 END) as hadir')
+            ->select('COUNT(*) as total, SUM(CASE WHEN status IN ("hadir", "terlambat") THEN 1 ELSE 0 END) as hadir')
             ->where('tanggal', $today)
             ->first();
 
