@@ -86,7 +86,7 @@
                     <i class="fas fa-user-shield text-xl"></i>
                 </div>
                 <div>
-                    <p class="text-xs uppercase tracking-wider font-semibold text-amber-700">Kajur & Role Lain</p>
+                    <p class="text-xs uppercase tracking-wider font-semibold text-amber-700">Ketua Jurusan & Role Lain</p>
                     <p class="text-2xl font-black text-amber-900"><?= ($stats['ketuaJurusanCount'] ?? 0) + ($stats['wakakurCount'] ?? 0) + ($stats['roleLainnyaCount'] ?? 0); ?></p>
                 </div>
             </div>
@@ -234,13 +234,13 @@
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
                                                     <i class="fas fa-user-tie mr-1 text-[10px]"></i> Wali Kelas<?= !empty($g['nama_kelas']) ? ' (' . esc($g['nama_kelas']) . ')' : '' ?>
                                                 </span>
-                                            <?php elseif ($r === 'ketua_jurusan'): ?>
+                                             <?php elseif ($r === 'ketua_jurusan'): ?>
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800">
-                                                    <i class="fas fa-award mr-1 text-[10px]"></i> Kajur<?= !empty($g['jurusan']) ? ' (' . esc($g['jurusan']) . ')' : '' ?>
+                                                    <i class="fas fa-award mr-1 text-[10px]"></i> Ketua Jurusan<?= !empty($g['jurusan']) ? ' (' . esc($g['jurusan']) . ')' : '' ?>
                                                 </span>
                                             <?php elseif ($r === 'wakakur'): ?>
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
-                                                    <i class="fas fa-user-graduate mr-1 text-[10px]"></i> Wakakur
+                                                    <i class="fas fa-user-graduate mr-1 text-[10px]"></i> Wakil Kepala Kurikulum
                                                 </span>
                                             <?php elseif ($r === 'kepala_sekolah'): ?>
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800">
@@ -248,7 +248,7 @@
                                                 </span>
                                             <?php elseif ($r === 'tendik'): ?>
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-100 text-teal-800">
-                                                    <i class="fas fa-id-badge mr-1 text-[10px]"></i> Tendik
+                                                    <i class="fas fa-id-badge mr-1 text-[10px]"></i> Tenaga Pendidik / Staf
                                                 </span>
                                             <?php elseif ($r === 'admin'): ?>
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-200 text-slate-800">
