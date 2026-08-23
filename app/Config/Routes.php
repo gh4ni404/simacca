@@ -260,6 +260,10 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
 
     // Laporan Absensi Shalat
     $routes->get('laporan/absensi-shalat', 'Admin\LaporanAbsensiShalatController::index', ['filter' => 'role:admin']);
+    $routes->get('laporan/absensi-shalat/print', 'Admin\LaporanAbsensiShalatController::print', ['filter' => 'role:admin']);
+    $routes->get('laporan/absensi-shalat/preview-guru', 'Admin\LaporanAbsensiShalatController::previewGuru', ['filter' => 'role:admin']);
+    $routes->get('laporan/absensi-shalat/preview-guru-print', 'Admin\LaporanAbsensiShalatController::previewGuruPrint', ['filter' => 'role:admin']);
+    $routes->post('laporan/absensi-shalat/generate-test-data', 'Admin\LaporanAbsensiShalatController::generateTestData', ['filter' => 'role:admin']);
 });
 
 // Guru Routes (accessible by guru_mapel and wakakur who teach)
@@ -342,6 +346,7 @@ $routes->group('guru', ['filter' => 'role:guru_mapel,wakakur'], function ($route
 
     // Laporan Absensi Shalat
     $routes->get('laporan/absensi-shalat', 'Guru\LaporanAbsensiShalatController::index');
+    $routes->get('laporan/absensi-shalat/print', 'Guru\LaporanAbsensiShalatController::print');
 });
 
 // Wali Kelas Routes

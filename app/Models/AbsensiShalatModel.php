@@ -220,9 +220,10 @@ class AbsensiShalatModel extends Model
     /**
      * Get per-siswa attendance list for a date range
      */
-    public function getRekapPerSiswa(string $from, string $to, ?int $kelasId = null): array
+    public function getRekapPerSiswa(string $from, string $to, int|string|null $kelasId = null): array
     {
         $db = \Config\Database::connect();
+        $kelasId = !empty($kelasId) ? (int) $kelasId : null;
 
         $builder = $db->table('absensi_shalat')
             ->select('siswa.nama_lengkap, siswa.nis, kelas.nama_kelas,
@@ -299,11 +300,12 @@ class AbsensiShalatModel extends Model
     }
 
     /**
-     * Get all attendance for a date range (all guru piket sessions)
+     * Get all attendance for a date range for sessions led by a specific guru piket
      */
-    public function getRekapByGuru(int $guruId, string $from, string $to, ?int $kelasId = null): array
+    public function getRekapByGuru(int $guruId, string $from, string $to, int|string|null $kelasId = null): array
     {
         $db = \Config\Database::connect();
+        $kelasId = !empty($kelasId) ? (int) $kelasId : null;
 
         $builder = $db->table('absensi_shalat')
             ->select('absensi_shalat.waktu_absen, absensi_shalat.user_type,
@@ -320,6 +322,7 @@ class AbsensiShalatModel extends Model
             ->join('prayer_sessions', 'prayer_sessions.id = absensi_shalat.prayer_session_id')
             ->join('guru_piket', 'guru_piket.id = prayer_sessions.guru_piket_id')
             ->join('guru', 'guru.id = guru_piket.guru_id')
+            ->where('guru_piket.guru_id', $guruId)
             ->where('absensi_shalat.waktu_absen >=', $from . ' 00:00:00')
             ->where('absensi_shalat.waktu_absen <=', $to . ' 23:59:59');
 
@@ -328,6 +331,29 @@ class AbsensiShalatModel extends Model
         }
 
         return $builder->orderBy('absensi_shalat.waktu_absen', 'DESC')
+            ->get()
+            ->getResultArray();
+    }
+
+    /**
+     * Get teacher's personal prayer attendance history (when teacher is attendee)
+     */
+    public function getRekapByGuruPersonal(int $guruId, string $from, string $to): array
+    {
+        $db = \Config\Database::connect();
+
+        return $db->table('absensi_shalat')
+            ->select('absensi_shalat.waktu_absen,
+                      prayer_sessions.created_at as waktu_sesi,
+                      guru_piket_user.nama_lengkap as nama_guru_piket')
+            ->join('prayer_sessions', 'prayer_sessions.id = absensi_shalat.prayer_session_id')
+            ->join('guru_piket', 'guru_piket.id = prayer_sessions.guru_piket_id', 'left')
+            ->join('guru as guru_piket_user', 'guru_piket_user.id = guru_piket.guru_id', 'left')
+            ->where('absensi_shalat.guru_id', $guruId)
+            ->where('absensi_shalat.user_type', 'guru')
+            ->where('absensi_shalat.waktu_absen >=', $from . ' 00:00:00')
+            ->where('absensi_shalat.waktu_absen <=', $to . ' 23:59:59')
+            ->orderBy('absensi_shalat.waktu_absen', 'DESC')
             ->get()
             ->getResultArray();
     }
