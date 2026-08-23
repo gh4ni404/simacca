@@ -34,9 +34,10 @@ class GuruPiketController extends BaseController
             'user'          => $this->getUserData(),
             'tahunAjaran'   => $tahunAjaran,
             'semester'      => $semester,
-            'grouped'       => $result['data']['grouped'] ?? [],
-            'stats'         => $result['data']['stats'] ?? [],
-            'hariList'      => ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'],
+            'grouped'             => $result['data']['grouped'] ?? [],
+            'stats'               => $result['data']['stats'] ?? [],
+            'hariList'            => ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'],
+            'defaultRincianTugas' => $this->guruPiketService->getDefaultRincianTugas(),
         ];
 
         return view('admin/guru_piket/index', $data);
@@ -53,9 +54,10 @@ class GuruPiketController extends BaseController
             'guru_id'      => $this->request->getPost('guru_id'),
             'tahun_ajaran' => $tahunAjaran,
             'semester'     => $this->request->getPost('semester'),
-            'hari'         => $this->request->getPost('hari'),
-            'keterangan'   => $this->request->getPost('keterangan'),
-            'is_active'    => $this->request->getPost('is_active') ?? 1,
+            'hari'          => $this->request->getPost('hari'),
+            'keterangan'    => $this->request->getPost('keterangan'),
+            'rincian_tugas' => $this->request->getPost('rincian_tugas'),
+            'is_active'     => $this->request->getPost('is_active') ?? 1,
         ];
 
         $result = $this->guruPiketService->create($data);
@@ -85,9 +87,10 @@ class GuruPiketController extends BaseController
             'guru_id'      => $this->request->getPost('guru_id'),
             'tahun_ajaran' => $tahunAjaran,
             'semester'     => $this->request->getPost('semester'),
-            'hari'         => $this->request->getPost('hari'),
-            'keterangan'   => $this->request->getPost('keterangan'),
-            'is_active'    => $this->request->getPost('is_active') ?? 1,
+            'hari'          => $this->request->getPost('hari'),
+            'keterangan'    => $this->request->getPost('keterangan'),
+            'rincian_tugas' => $this->request->getPost('rincian_tugas'),
+            'is_active'     => $this->request->getPost('is_active') ?? 1,
         ];
 
         $result = $this->guruPiketService->update($id, $data);
@@ -153,8 +156,9 @@ class GuruPiketController extends BaseController
         $guruIds = $this->request->getPost('guru_ids') ?? [];
         $hari = $this->request->getPost('hari');
         $keterangan = $this->request->getPost('keterangan');
+        $rincianTugas = $this->request->getPost('rincian_tugas');
 
-        $result = $this->guruPiketService->bulkAssign($guruIds, $hari, $tahunAjaran, $semester, $keterangan);
+        $result = $this->guruPiketService->bulkAssign($guruIds, $hari, $tahunAjaran, $semester, $keterangan, $rincianTugas);
 
         return $this->response->setJSON($result);
     }

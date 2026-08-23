@@ -104,13 +104,14 @@ class PrayerSessionModel extends Model
                     'session_expires_at' => $sessionExpiresAt,
                 ]);
         } else {
+            $sessionExpiresAt = $finalSessionExpiresAt;
             $db->table('prayer_sessions')->insert([
                 'token'              => $token,
                 'guru_piket_id'      => $guruPiketId,
                 'is_active'          => 1,
                 'created_at'         => $now,
                 'expires_at'         => $expiresAt,
-                'session_expires_at' => $finalSessionExpiresAt,
+                'session_expires_at' => $sessionExpiresAt,
             ]);
         }
 

@@ -22,6 +22,27 @@
 
 <?= view('components/alerts') ?>
 
+<!-- Rincian Tugas Guru Piket Card -->
+<div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 mb-6 transition-all">
+    <div class="flex items-center justify-between cursor-pointer" onclick="document.getElementById('tugas-piket-content').classList.toggle('hidden'); document.getElementById('tugas-icon').classList.toggle('rotate-180');">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-bold shadow-sm">
+                <i class="fas fa-clipboard-list text-lg"></i>
+            </div>
+            <div>
+                <h4 class="font-bold text-indigo-950 text-sm sm:text-base">Rincian Tugas, Peran & Tanggung Jawab Piket Hari Ini</h4>
+                <p class="text-xs text-indigo-600">Klik untuk melihat/menyembunyikan rincian kewajiban piket Anda</p>
+            </div>
+        </div>
+        <button type="button" class="text-indigo-600 hover:text-indigo-800 p-2 transition-transform duration-200" id="tugas-icon">
+            <i class="fas fa-chevron-down text-sm"></i>
+        </button>
+    </div>
+    <div id="tugas-piket-content" class="mt-3 pt-3 border-t border-indigo-200/60 text-xs sm:text-sm text-indigo-900 leading-relaxed whitespace-pre-line bg-white/60 p-3 rounded-lg border border-indigo-100">
+<?= esc($guruPiket['rincian_tugas'] ?? "1. Hadir dan menyambut kedatangan siswa di gerbang sekolah.\n2. Memantau kedisiplinan dan K7 (Keamanan, Kebersihan, Ketertiban) lingkungan sekolah.\n3. Membuka & mengelola Portal Presensi Shalat Berjamaah (Dzuhur/Ashar/Jumat).\n4. Mengawasi ketertiban ibadah shalat serta mencatat siswa yang izin/sakit.\n5. Menangani & mencatat presensi siswa yang terlambat atau meninggalkan sekolah."); ?>
+    </div>
+</div>
+
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- QR Code Section -->
     <div class="lg:col-span-2 space-y-6">

@@ -73,8 +73,9 @@ class GuruPiketService extends BaseService
             'tahun_ajaran' => 'required',
             'semester'     => 'required|in_list[ganjil,genap]',
             'hari'         => 'required|in_list[senin,selasa,rabu,kamis,jumat,sabtu]',
-            'keterangan'   => 'permit_empty|string',
-            'is_active'    => 'permit_empty|in_list[0,1]',
+            'keterangan'    => 'permit_empty|string',
+            'rincian_tugas' => 'permit_empty|string',
+            'is_active'     => 'permit_empty|in_list[0,1]',
         ];
 
         if (!$this->validate($data, $rules)) {
@@ -88,13 +89,14 @@ class GuruPiketService extends BaseService
 
         return $this->executeInTransaction(function () use ($data) {
             $piketData = [
-                'guru_id'      => $data['guru_id'],
-                'tahun_ajaran' => $data['tahun_ajaran'],
-                'semester'     => $data['semester'],
-                'hari'         => $data['hari'],
-                'keterangan'   => $data['keterangan'] ?? null,
-                'is_active'    => $data['is_active'] ?? 1,
-                'created_at'   => date('Y-m-d H:i:s'),
+                'guru_id'       => $data['guru_id'],
+                'tahun_ajaran'  => $data['tahun_ajaran'],
+                'semester'      => $data['semester'],
+                'hari'          => $data['hari'],
+                'keterangan'    => $data['keterangan'] ?? null,
+                'rincian_tugas' => $data['rincian_tugas'] ?? null,
+                'is_active'     => $data['is_active'] ?? 1,
+                'created_at'    => date('Y-m-d H:i:s'),
             ];
 
             $id = $this->guruPiketModel->insert($piketData);
@@ -125,8 +127,9 @@ class GuruPiketService extends BaseService
             'tahun_ajaran' => 'required',
             'semester'     => 'required|in_list[ganjil,genap]',
             'hari'         => 'required|in_list[senin,selasa,rabu,kamis,jumat,sabtu]',
-            'keterangan'   => 'permit_empty|string',
-            'is_active'    => 'permit_empty|in_list[0,1]',
+            'keterangan'    => 'permit_empty|string',
+            'rincian_tugas' => 'permit_empty|string',
+            'is_active'     => 'permit_empty|in_list[0,1]',
         ];
 
         if (!$this->validate($data, $rules)) {
@@ -140,12 +143,13 @@ class GuruPiketService extends BaseService
 
         return $this->executeInTransaction(function () use ($id, $data) {
             $updateData = [
-                'guru_id'      => $data['guru_id'],
-                'tahun_ajaran' => $data['tahun_ajaran'],
-                'semester'     => $data['semester'],
-                'hari'         => $data['hari'],
-                'keterangan'   => $data['keterangan'] ?? null,
-                'is_active'    => $data['is_active'] ?? 1,
+                'guru_id'       => $data['guru_id'],
+                'tahun_ajaran'  => $data['tahun_ajaran'],
+                'semester'      => $data['semester'],
+                'hari'          => $data['hari'],
+                'keterangan'    => $data['keterangan'] ?? null,
+                'rincian_tugas' => $data['rincian_tugas'] ?? null,
+                'is_active'     => $data['is_active'] ?? 1,
             ];
 
             $this->guruPiketModel->update($id, $updateData);
@@ -204,7 +208,7 @@ class GuruPiketService extends BaseService
     /**
      * Bulk assign multiple guru to a day (optimized: single query check + batch insert)
      */
-    public function bulkAssign(array $guruIds, string $hari, string $tahunAjaran, string $semester, ?string $keterangan = null): array
+    public function bulkAssign(array $guruIds, string $hari, string $tahunAjaran, string $semester, ?string $keterangan = null, ?string $rincianTugas = null): array
     {
         if (empty($guruIds)) {
             return $this->errorResponse('Pilih minimal satu guru');
@@ -221,7 +225,7 @@ class GuruPiketService extends BaseService
             return $this->errorResponse('Validasi gagal');
         }
 
-        return $this->executeInTransaction(function () use ($guruIds, $hari, $tahunAjaran, $semester, $keterangan) {
+        return $this->executeInTransaction(function () use ($guruIds, $hari, $tahunAjaran, $semester, $keterangan, $rincianTugas) {
             // Single query: get all already-assigned (active) guru_ids for this day, tahun ajaran & semester
             $alreadyAssigned = $this->guruPiketModel->select('guru_id')
                 ->where('hari', $hari)
@@ -238,13 +242,14 @@ class GuruPiketService extends BaseService
                     continue;
                 }
                 $toInsert[] = [
-                    'guru_id'      => $guruId,
-                    'tahun_ajaran' => $tahunAjaran,
-                    'semester'     => $semester,
-                    'hari'         => $hari,
-                    'keterangan'   => $keterangan,
-                    'is_active'    => 1,
-                    'created_at'   => date('Y-m-d H:i:s'),
+                    'guru_id'       => $guruId,
+                    'tahun_ajaran'  => $tahunAjaran,
+                    'semester'      => $semester,
+                    'hari'          => $hari,
+                    'keterangan'    => $keterangan,
+                    'rincian_tugas' => $rincianTugas,
+                    'is_active'     => 1,
+                    'created_at'    => date('Y-m-d H:i:s'),
                 ];
             }
 
@@ -266,9 +271,10 @@ class GuruPiketService extends BaseService
                 foreach ($deletedRecords as $record) {
                     $restoredIds[] = $record['guru_id'];
                     $this->guruPiketModel->update($record['id'], [
-                        'keterangan'   => $keterangan,
-                        'is_active'    => 1,
-                        'deleted_at'   => null,
+                        'keterangan'    => $keterangan,
+                        'rincian_tugas' => $rincianTugas,
+                        'is_active'     => 1,
+                        'deleted_at'    => null,
                     ]);
                     $successCount++;
                 }
@@ -318,4 +324,17 @@ class GuruPiketService extends BaseService
             return $this->errorResponse('Gagal mengambil data guru');
         }
     }
+
+    /**
+     * Get default template for rincian tugas guru piket
+     */
+    public function getDefaultRincianTugas(): string
+    {
+        return "1. Hadir dan menyambut kedatangan siswa di gerbang sekolah.\n"
+             . "2. Memantau kedisiplinan dan K7 (Keamanan, Kebersihan, Ketertiban) lingkungan sekolah.\n"
+             . "3. Membuka & mengelola Portal Presensi Shalat Berjamaah (Dzuhur/Ashar/Jumat).\n"
+             . "4. Mengawasi ketertiban ibadah shalat serta mencatat siswa yang izin/sakit.\n"
+             . "5. Menangani & mencatat presensi siswa yang terlambat atau meninggalkan sekolah.";
+    }
 }
+

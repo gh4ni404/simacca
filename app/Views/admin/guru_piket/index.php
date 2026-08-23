@@ -160,6 +160,10 @@
                                                 <?php if (!empty($piket['keterangan'])): ?>
                                                     <p class="text-xs text-gray-400 mt-0.5 truncate" title="<?= esc($piket['keterangan']); ?>"><i class="fas fa-info-circle mr-1"></i><?= esc($piket['keterangan']); ?></p>
                                                 <?php endif; ?>
+                                                <button type="button" onclick="viewDetailTugas(<?= htmlspecialchars(json_encode($piket), ENT_QUOTES); ?>)" 
+                                                    class="mt-1 text-[11px] font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded inline-flex items-center transition-colors">
+                                                    <i class="fas fa-tasks mr-1 text-indigo-500"></i> Rincian Tugas
+                                                </button>
                                             </div>
                                         </div>
                                         <div class="flex items-center space-x-1">
@@ -251,6 +255,17 @@
                         <textarea name="keterangan" id="addKeterangan" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" rows="2" placeholder="Catatan tambahan..."></textarea>
                     </div>
 
+                    <!-- Rincian Tugas -->
+                    <div class="mb-4">
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-sm font-semibold text-gray-700">Rincian Tugas & Tanggung Jawab <span class="text-gray-400 font-normal">(opsional)</span></label>
+                            <button type="button" onclick="fillDefaultRincianTugas('addRincianTugas')" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1 bg-indigo-50 px-2 py-1 rounded transition-colors">
+                                <i class="fas fa-magic text-xs"></i> Gunakan Template Standar
+                            </button>
+                        </div>
+                        <textarea name="rincian_tugas" id="addRincianTugas" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm" rows="3" placeholder="Tuliskan rincian tugas, kewajiban, peran, dan tanggung jawab..."></textarea>
+                    </div>
+
                     <!-- Error message -->
                     <div id="addError" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"></div>
                 </form>
@@ -309,6 +324,17 @@
                         <textarea name="keterangan" id="editKeterangan" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" rows="2" placeholder="Catatan tambahan..."></textarea>
                     </div>
 
+                    <!-- Rincian Tugas -->
+                    <div class="mb-4">
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-sm font-semibold text-gray-700">Rincian Tugas & Tanggung Jawab <span class="text-gray-400 font-normal">(opsional)</span></label>
+                            <button type="button" onclick="fillDefaultRincianTugas('editRincianTugas')" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1 bg-indigo-50 px-2 py-1 rounded transition-colors">
+                                <i class="fas fa-magic text-xs"></i> Gunakan Template Standar
+                            </button>
+                        </div>
+                        <textarea name="rincian_tugas" id="editRincianTugas" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm" rows="3" placeholder="Tuliskan rincian tugas, kewajiban, peran, dan tanggung jawab..."></textarea>
+                    </div>
+
                     <!-- Status -->
                     <div class="mb-2">
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Status</label>
@@ -334,6 +360,40 @@
                 <button type="submit" form="editForm" id="editSubmitBtn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition-colors">
                     <i class="fas fa-save mr-1"></i> Perbarui
                 </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MODAL DETAIL RINCIAN TUGAS ==================== -->
+<div id="detailModal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeModal('detailModal')"></div>
+    <div class="fixed inset-0 flex items-center justify-center p-4">
+        <div class="relative bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col transform transition-all">
+            <!-- Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 flex-shrink-0">
+                <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-clipboard-list text-indigo-600 mr-2"></i> Rincian Tugas Guru Piket
+                </h3>
+                <button onclick="closeModal('detailModal')" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <!-- Body -->
+            <div class="px-6 py-5 overflow-y-auto flex-1 space-y-4">
+                <div>
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Nama Guru</p>
+                    <p id="detailGuruNama" class="text-base font-bold text-gray-900 mt-0.5"></p>
+                    <p id="detailGuruHari" class="text-xs text-indigo-600 font-medium mt-0.5"></p>
+                </div>
+                <div class="border-t border-gray-100 pt-3">
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Tugas, Kewajiban & Tanggung Jawab</p>
+                    <div id="detailRincianTugas" class="bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm text-gray-700 whitespace-pre-line leading-relaxed"></div>
+                </div>
+            </div>
+            <!-- Footer -->
+            <div class="flex justify-end px-6 py-4 border-t border-gray-200 flex-shrink-0 bg-gray-50">
+                <button type="button" onclick="closeModal('detailModal')" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-semibold text-sm transition-colors">Tutup</button>
             </div>
         </div>
     </div>
@@ -586,6 +646,7 @@
         const errorDiv = document.getElementById('addError');
         const hari = document.getElementById('addHari').value;
         const keterangan = document.getElementById('addKeterangan').value;
+        const rincianTugas = document.getElementById('addRincianTugas').value;
         const guruIds = Array.from(document.querySelectorAll('.guru-checkbox:checked')).map(cb => cb.value);
 
         if (guruIds.length === 0) {
@@ -605,6 +666,7 @@
         params.append('hari', hari);
         params.append('semester', '<?= $semester; ?>');
         params.append('keterangan', keterangan);
+        params.append('rincian_tugas', rincianTugas);
         params.append(csrfName, csrfHash);
         guruIds.forEach(id => params.append('guru_ids[]', id));
 
@@ -641,6 +703,7 @@
         document.getElementById('editId').value = piket.id;
         document.getElementById('editHari').value = piket.hari;
         document.getElementById('editKeterangan').value = piket.keterangan || '';
+        document.getElementById('editRincianTugas').value = piket.rincian_tugas || '';
         document.getElementById('editError').classList.add('hidden');
         
         if (piket.is_active == 1) {
@@ -756,5 +819,21 @@
             });
         }
     });
+    // ==================== RINCIAN TUGAS HELPERS ====================
+    const DEFAULT_RINCIAN_TUGAS = <?= json_encode($defaultRincianTugas); ?>;
+
+    function fillDefaultRincianTugas(targetId) {
+        const el = document.getElementById(targetId);
+        if (el) {
+            el.value = DEFAULT_RINCIAN_TUGAS;
+        }
+    }
+
+    function viewDetailTugas(piket) {
+        document.getElementById('detailGuruNama').textContent = piket.nama_lengkap + (piket.nip ? ' (NIP: ' + piket.nip + ')' : '');
+        document.getElementById('detailGuruHari').textContent = 'Jadwal Piket Hari ' + piket.hari.charAt(0).toUpperCase() + piket.hari.slice(1);
+        document.getElementById('detailRincianTugas').textContent = piket.rincian_tugas || DEFAULT_RINCIAN_TUGAS;
+        openModal('detailModal');
+    }
 </script>
 <?= $this->endSection() ?>
