@@ -41,7 +41,7 @@ class JurnalPiketModel extends Model
     /**
      * Get journals by specific guru with date range filter
      */
-    public function getJurnalByGuru(int $guruId, ?string $startDate = null, ?string $endDate = null): array
+    public function getJurnalByGuru(int $guruId, ?string $startDate = null, ?string $endDate = null, string $order = 'DESC'): array
     {
         $builder = $this->select('jurnal_piket.*, guru.nama_lengkap, guru.nip')
             ->join('guru', 'guru.id = jurnal_piket.guru_id')
@@ -55,15 +55,16 @@ class JurnalPiketModel extends Model
             $builder->where('jurnal_piket.tanggal <=', $endDate);
         }
 
-        return $builder->orderBy('jurnal_piket.tanggal', 'DESC')
-            ->orderBy('jurnal_piket.created_at', 'DESC')
+        $orderDirection = strtoupper($order) === 'ASC' ? 'ASC' : 'DESC';
+        return $builder->orderBy('jurnal_piket.tanggal', $orderDirection)
+            ->orderBy('jurnal_piket.created_at', $orderDirection)
             ->findAll();
     }
 
     /**
      * Get journals with guru info for admin view with date range & guru filter
      */
-    public function getJurnalWithGuru(?string $startDate = null, ?string $endDate = null, ?int $guruId = null): array
+    public function getJurnalWithGuru(?string $startDate = null, ?string $endDate = null, ?int $guruId = null, string $order = 'DESC'): array
     {
         $builder = $this->select('jurnal_piket.*, guru.nama_lengkap, guru.nip, users.profile_photo')
             ->join('guru', 'guru.id = jurnal_piket.guru_id')
@@ -81,8 +82,9 @@ class JurnalPiketModel extends Model
             $builder->where('jurnal_piket.guru_id', $guruId);
         }
 
-        return $builder->orderBy('jurnal_piket.tanggal', 'DESC')
-            ->orderBy('jurnal_piket.created_at', 'DESC')
+        $orderDirection = strtoupper($order) === 'ASC' ? 'ASC' : 'DESC';
+        return $builder->orderBy('jurnal_piket.tanggal', $orderDirection)
+            ->orderBy('jurnal_piket.created_at', $orderDirection)
             ->findAll();
     }
 

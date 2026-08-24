@@ -74,7 +74,7 @@
                                         <?= esc(ucfirst(date_to_indo($row['tanggal']))) ?>
                                     </div>
                                     <div class="text-sm font-bold text-gray-800 mt-0.5">
-                                        <?= date('d F Y', strtotime($row['tanggal'])) ?>
+                                        <?= format_tanggal_indo($row['tanggal']) ?>
                                     </div>
                                 </div>
                                 <div>

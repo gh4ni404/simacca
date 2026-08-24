@@ -72,7 +72,6 @@ class CreateJurnalPiketTable extends Migration
         ]);
 
         $this->forge->addPrimaryKey('id');
-        $this->forge->addUniqueKey(['guru_id', 'tanggal']);
         $this->forge->addKey('guru_id');
         $this->forge->addKey('tanggal');
         $this->forge->addKey('tahun_ajaran');

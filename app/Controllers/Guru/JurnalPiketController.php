@@ -307,7 +307,8 @@ class JurnalPiketController extends BaseController
         $startDate = $this->request->getGet('start_date');
         $endDate   = $this->request->getGet('end_date');
 
-        $result = $this->jurnalPiketService->getJurnalByGuru($guru['id'], $startDate, $endDate);
+        // Urutkan tanggal dari lama ke baru (ASC) untuk cetak laporan
+        $result = $this->jurnalPiketService->getJurnalByGuru($guru['id'], $startDate, $endDate, 'ASC');
 
         $data = [
             'title'       => 'Laporan Jurnal Piket - ' . $guru['nama_lengkap'],

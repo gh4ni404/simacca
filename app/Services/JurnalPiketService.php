@@ -28,10 +28,10 @@ class JurnalPiketService extends BaseService
     /**
      * Get journals by specific guru
      */
-    public function getJurnalByGuru(int $guruId, ?string $startDate = null, ?string $endDate = null): array
+    public function getJurnalByGuru(int $guruId, ?string $startDate = null, ?string $endDate = null, string $order = 'DESC'): array
     {
         try {
-            $data = $this->jurnalPiketModel->getJurnalByGuru($guruId, $startDate, $endDate);
+            $data = $this->jurnalPiketModel->getJurnalByGuru($guruId, $startDate, $endDate, $order);
             return $this->successResponse($data);
         } catch (\Exception $e) {
             $this->log('error', 'Failed to get jurnal piket by guru: ' . $e->getMessage());
@@ -42,10 +42,10 @@ class JurnalPiketService extends BaseService
     /**
      * Get journals for admin monitoring
      */
-    public function getJurnalWithGuru(?string $startDate = null, ?string $endDate = null, ?int $guruId = null): array
+    public function getJurnalWithGuru(?string $startDate = null, ?string $endDate = null, ?int $guruId = null, string $order = 'DESC'): array
     {
         try {
-            $data = $this->jurnalPiketModel->getJurnalWithGuru($startDate, $endDate, $guruId);
+            $data = $this->jurnalPiketModel->getJurnalWithGuru($startDate, $endDate, $guruId, $order);
             return $this->successResponse($data);
         } catch (\Exception $e) {
             $this->log('error', 'Failed to get jurnal piket with guru: ' . $e->getMessage());
@@ -148,11 +148,6 @@ class JurnalPiketService extends BaseService
             $errors = $this->getErrors();
             $errorSummary = 'Validasi gagal: ' . implode('. ', array_values($errors));
             return $this->errorResponse($errorSummary, $errors);
-        }
-
-        // Check if journal already exists for this guru & date
-        if ($this->jurnalPiketModel->isJurnalExist($data['guru_id'], $data['tanggal'])) {
-            return $this->errorResponse('Jurnal piket untuk tanggal ' . date('d/m/Y', strtotime($data['tanggal'])) . ' sudah pernah diisi');
         }
 
         // Handle photo upload
@@ -270,11 +265,6 @@ class JurnalPiketService extends BaseService
             $errors = $this->getErrors();
             $errorSummary = 'Validasi gagal: ' . implode('. ', array_values($errors));
             return $this->errorResponse($errorSummary, $errors);
-        }
-
-        // Check if journal already exists for this guru & date (excluding current record)
-        if ($this->jurnalPiketModel->isJurnalExist($data['guru_id'], $data['tanggal'], $id)) {
-            return $this->errorResponse('Jurnal piket untuk tanggal ' . date('d/m/Y', strtotime($data['tanggal'])) . ' sudah ada');
         }
 
         // Handle existing photos to keep

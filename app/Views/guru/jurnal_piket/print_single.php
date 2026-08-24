@@ -517,7 +517,7 @@
                             <tr>
                                 <td class="label">Hari / Tanggal Piket</td>
                                 <td class="colon">:</td>
-                                <td><strong><?= esc(ucfirst(date_to_indo($jurnal['tanggal']))) ?>, <?= date('d F Y', strtotime($jurnal['tanggal'])) ?></strong></td>
+                                <td><strong><?= esc(date_to_indo($jurnal['tanggal'], true)) ?></strong></td>
                             </tr>
                         </table>
                     </div>
@@ -584,13 +584,13 @@
                                 Mengetahui,<br>
                                 Kepala UPT SMKN 8 Bone
                             </div>
-                            <div class="name">_______________________</div>
-                            <div class="nip">NIP. ........................................</div>
+                            <div class="name"><?= function_exists('get_kepala_sekolah_nama') && get_kepala_sekolah_nama() ? esc(get_kepala_sekolah_nama()) : '_______________________' ?></div>
+                            <div class="nip">NIP. <?= function_exists('get_kepala_sekolah_nip') && get_kepala_sekolah_nip() ? esc(get_kepala_sekolah_nip()) : '........................................' ?></div>
                         </div>
 
                         <div class="signature-box">
                             <div class="title">
-                                Welado, <?= date('d F Y', strtotime($jurnal['tanggal'])) ?><br>
+                                Welado, <?= format_tanggal_indo($jurnal['tanggal']) ?><br>
                                 Guru Piket Pelaksana
                             </div>
                             <div class="name"><?= esc($guru['nama_lengkap']) ?></div>

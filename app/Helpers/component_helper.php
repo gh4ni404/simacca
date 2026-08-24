@@ -426,3 +426,63 @@ if (!function_exists('date_to_indo')) {
     }
 }
 
+if (!function_exists('format_tanggal_indo')) {
+    /**
+     * Format date string to Indonesian date format (e.g., "24 Agustus 2026" or "Senin, 24 Agustus 2026")
+     *
+     * @param string $date Date string (Y-m-d or datetime)
+     * @param bool $withDay Include Indonesian day name
+     * @return string
+     */
+    function format_tanggal_indo($date, $withDay = false)
+    {
+        if (empty($date)) {
+            return '';
+        }
+
+        $timestamp = strtotime($date);
+        if ($timestamp === false) {
+            return $date;
+        }
+
+        $days = [
+            'Sunday'    => 'Minggu',
+            'Monday'    => 'Senin',
+            'Tuesday'   => 'Selasa',
+            'Wednesday' => 'Rabu',
+            'Thursday'  => 'Kamis',
+            'Friday'    => 'Jumat',
+            'Saturday'  => 'Sabtu',
+        ];
+
+        $months = [
+            1  => 'Januari',
+            2  => 'Februari',
+            3  => 'Maret',
+            4  => 'April',
+            5  => 'Mei',
+            6  => 'Juni',
+            7  => 'Juli',
+            8  => 'Agustus',
+            9  => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
+        ];
+
+        $dayEnglish = date('l', $timestamp);
+        $dayIndo = $days[$dayEnglish] ?? $dayEnglish;
+
+        $dayNum = date('j', $timestamp);
+        $monthNum = (int) date('n', $timestamp);
+        $monthIndo = $months[$monthNum] ?? date('F', $timestamp);
+        $year = date('Y', $timestamp);
+
+        if ($withDay) {
+            return "{$dayIndo}, {$dayNum} {$monthIndo} {$year}";
+        }
+
+        return "{$dayNum} {$monthIndo} {$year}";
+    }
+}
+

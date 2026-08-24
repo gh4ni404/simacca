@@ -123,12 +123,13 @@
     <div class="footer-sig">
         <div class="sig-box">
             <p>Mengetahui,</p>
-            <p>Kepala Sekolah</p>
+            <p>Kepala UPT SMKN 8 Bone</p>
             <div class="sig-space"></div>
-            <p>_______________________</p>
+            <p style="font-weight: bold; text-decoration: underline;"><?= function_exists('get_kepala_sekolah_nama') && get_kepala_sekolah_nama() ? esc(get_kepala_sekolah_nama()) : '_______________________' ?></p>
+            <p style="font-size: 9pt; margin-top: 2px;">NIP. <?= function_exists('get_kepala_sekolah_nip') && get_kepala_sekolah_nip() ? esc(get_kepala_sekolah_nip()) : '........................................' ?></p>
         </div>
         <div class="sig-box">
-            <p><?= date('d F Y') ?></p>
+            <p><?= format_tanggal_indo(date('Y-m-d')) ?></p>
             <p>Koordinator Guru Piket</p>
             <div class="sig-space"></div>
             <p>_______________________</p>

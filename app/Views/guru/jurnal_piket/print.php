@@ -531,7 +531,7 @@
                     <td><strong><?= esc($guru['nama_lengkap']) ?></strong></td>
                     <td class="label" style="width: 110px;">Tanggal Cetak</td>
                     <td class="colon">:</td>
-                    <td style="width: 150px;"><?= date('d F Y') ?></td>
+                    <td style="width: 150px;"><?= format_tanggal_indo(date('Y-m-d')) ?></td>
                 </tr>
                 <tr>
                     <td class="label">NIP</td>
@@ -557,7 +557,7 @@
                                 <div class="journal-text">
                                     <div style="font-size: 9.5pt; color: #555; font-weight: normal; margin-bottom: 4px;">
                                         <i class="fas fa-calendar-alt" style="margin-right: 4px; color: #10b981;"></i>
-                                        <?= esc(ucfirst(date_to_indo($row['tanggal']))) ?>
+                                        <?= esc(date_to_indo($row['tanggal'], true)) ?>
                                     </div>
                                     <?= nl2br(esc($row['deskripsi'])) ?>
                                 </div>
@@ -578,7 +578,7 @@
                                 ?>
                                     <div class="journal-photos">
                                         <?php foreach ($validFotos as $vf): ?>
-                                            <div class="journal-photo-wrapper">
+                                             <div class="journal-photo-wrapper">
                                                 <img src="<?= base_url('files/jurnal-piket/' . $vf) ?>" class="journal-photo-img" alt="Foto Dokumentasi">
                                             </div>
                                         <?php endforeach; ?>
@@ -597,13 +597,13 @@
                         Mengetahui,<br>
                         Kepala UPT SMKN 8 Bone
                     </div>
-                    <div class="name">_______________________</div>
-                    <div class="nip">NIP. ........................................</div>
+                    <div class="name"><?= function_exists('get_kepala_sekolah_nama') && get_kepala_sekolah_nama() ? esc(get_kepala_sekolah_nama()) : '_______________________' ?></div>
+                    <div class="nip">NIP. <?= function_exists('get_kepala_sekolah_nip') && get_kepala_sekolah_nip() ? esc(get_kepala_sekolah_nip()) : '........................................' ?></div>
                 </div>
 
                 <div class="signature-box">
                     <div class="title">
-                        Welado, <?= date('d F Y') ?><br>
+                        Welado, <?= format_tanggal_indo(date('Y-m-d')) ?><br>
                         Guru Piket Pelaksana
                     </div>
                     <div class="name"><?= esc($guru['nama_lengkap']) ?></div>

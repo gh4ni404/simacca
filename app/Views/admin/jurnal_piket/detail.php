@@ -21,7 +21,7 @@
                         <?= esc(ucfirst(date_to_indo($jurnal['tanggal']))) ?>
                     </span>
                     <h2 class="text-2xl font-bold mt-0.5">
-                        <?= date('d F Y', strtotime($jurnal['tanggal'])) ?>
+                        <?= format_tanggal_indo($jurnal['tanggal']) ?>
                     </h2>
                     <p class="text-xs text-indigo-100 mt-1">
                         Tahun Ajaran <?= esc($jurnal['tahun_ajaran']) ?> (Semester <?= esc(ucfirst($jurnal['semester'])) ?>)
