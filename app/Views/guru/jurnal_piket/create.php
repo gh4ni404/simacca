@@ -110,32 +110,34 @@
                 <!-- Foto Dokumentasi -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">
-                        Foto Dokumentasi Piket <span class="text-xs font-normal text-gray-500">(Opsional)</span>
+                        Foto Dokumentasi Piket <span class="text-xs font-normal text-gray-500">(Maksimal 4 Foto, Opsional)</span>
                     </label>
                     <div id="foto_dropzone" class="border-2 border-dashed <?= session('errors.foto_dokumentasi') ? 'is-field-error border-red-400 bg-red-50/30' : 'border-gray-200 bg-gray-50/50 hover:border-indigo-400' ?> rounded-2xl p-6 text-center transition">
-                        <input type="file" id="foto_dokumentasi" name="foto_dokumentasi" accept="image/jpeg,image/png,image/jpg,image/webp" class="hidden" onchange="previewImage(this)">
+                        <input type="file" id="foto_dokumentasi" accept="image/jpeg,image/png,image/jpg,image/webp" class="hidden" multiple onchange="handleFileSelect(this)">
                         
                         <label for="foto_dokumentasi" class="cursor-pointer block">
+                            <!-- Upload Placeholder -->
                             <div id="upload_placeholder">
                                 <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl shadow-sm border border-indigo-100 group-hover:scale-105 transition">
                                     <i class="fas fa-camera"></i>
                                 </div>
                                 <p class="text-sm font-bold text-gray-700">Klik untuk mengunggah foto dokumentasi</p>
-                                <p class="text-xs text-gray-400 mt-1">Format: JPG, JPEG, PNG, WEBP &bull; Maksimal: 2 MB</p>
+                                <p class="text-xs text-gray-400 mt-1">Format: JPG, JPEG, PNG, WEBP &bull; Maksimal: 2 MB per foto &bull; Maksimal 4 foto</p>
                             </div>
                         </label>
 
+                        <!-- Multi Image Previews -->
                         <div id="image_preview_container" class="hidden">
-                            <div class="relative inline-block max-w-sm mx-auto">
-                                <img id="image_preview" src="#" alt="Preview Foto" class="max-h-64 rounded-xl shadow-md border border-gray-200 object-cover mx-auto">
-                                <div class="mt-3 flex items-center justify-center gap-2">
-                                    <label for="foto_dokumentasi" class="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-lg transition border border-indigo-200">
-                                        <i class="fas fa-sync-alt"></i> Ganti Foto
-                                    </label>
-                                    <button type="button" onclick="cancelPhoto()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold rounded-lg transition border border-red-200">
-                                        <i class="fas fa-trash-alt"></i> Hapus Foto
-                                    </button>
-                                </div>
+                            <div id="preview_grid" class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto mb-4">
+                                <!-- Previews rendered dynamically via JS -->
+                            </div>
+                            <div class="flex items-center justify-center gap-2">
+                                <label id="add_more_photos_btn" for="foto_dokumentasi" class="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-xl transition border border-indigo-200">
+                                    <i class="fas fa-plus"></i> Tambah Foto
+                                </label>
+                                <button type="button" onclick="cancelAllPhotos()" class="inline-flex items-center gap-1.5 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold rounded-xl transition border border-red-200">
+                                    <i class="fas fa-trash-alt"></i> Hapus Semua Foto
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -226,33 +228,16 @@ function showFieldError(field, message) {
     }
 }
 
-function cancelPhoto() {
-    const input = document.getElementById('foto_dokumentasi');
-    const placeholder = document.getElementById('upload_placeholder');
-    const previewContainer = document.getElementById('image_preview_container');
-    const preview = document.getElementById('image_preview');
+let selectedFiles = [];
 
-    input.value = '';
-    preview.src = '#';
-    previewContainer.classList.add('hidden');
-    placeholder.classList.remove('hidden');
-
-    const msgEl = document.getElementById('error_msg_foto_dokumentasi');
-    if (msgEl) {
-        msgEl.classList.add('hidden');
-        msgEl.innerHTML = '';
-    }
-    const dropzone = document.getElementById('foto_dropzone');
-    if (dropzone) {
-        dropzone.classList.remove('is-field-error', 'border-red-400');
-    }
+function handleFileSelect(input) {
+    if (!input.files || input.files.length === 0) return;
+    addFiles(input.files);
+    input.value = ''; // Reset input so the same files can be re-selected if removed
 }
 
-function previewImage(input) {
-    const placeholder = document.getElementById('upload_placeholder');
-    const previewContainer = document.getElementById('image_preview_container');
-    const preview = document.getElementById('image_preview');
-
+function addFiles(fileList) {
+    const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
     const msgEl = document.getElementById('error_msg_foto_dokumentasi');
     if (msgEl) {
         msgEl.classList.add('hidden');
@@ -263,52 +248,104 @@ function previewImage(input) {
         dropzone.classList.remove('is-field-error', 'border-red-400');
     }
 
-    if (input.files && input.files[0]) {
-        const file = input.files[0];
-        const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+    for (let i = 0; i < fileList.length; i++) {
+        const file = fileList[i];
 
-        // SweetAlert for invalid format
+        if (selectedFiles.length >= 4) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Batas Maksimal Terpenuhi',
+                text: 'Maksimal hanya diperbolehkan mengunggah 4 foto dokumentasi.',
+                confirmButtonColor: '#4F46E5',
+                customClass: {
+                    popup: 'rounded-2xl shadow-2xl border border-gray-100',
+                    confirmButton: 'rounded-xl px-5 py-2.5 font-semibold text-sm'
+                }
+            });
+            break;
+        }
+
         if (!validTypes.includes(file.type)) {
-            input.value = '';
             Swal.fire({
                 icon: 'error',
                 title: 'Format Foto Tidak Didukung',
-                html: '<p class="text-sm text-gray-600">File yang Anda pilih memiliki format <b>' + (file.type || 'tidak dikenal') + '</b>.<br>Silakan pilih file berformat <b>JPG, JPEG, PNG, atau WEBP</b>.</p>',
+                html: '<p class="text-sm text-gray-600">File <b>' + file.name + '</b> memiliki format tidak didukung.<br>Silakan pilih file berformat <b>JPG, JPEG, PNG, atau WEBP</b>.</p>',
                 confirmButtonColor: '#4F46E5',
-                confirmButtonText: '<i class="fas fa-redo mr-1"></i> Pilih Ulang',
                 customClass: {
                     popup: 'rounded-2xl shadow-2xl border border-gray-100',
                     confirmButton: 'rounded-xl px-5 py-2.5 font-semibold text-sm'
                 }
             });
-            return;
+            continue;
         }
 
-        // SweetAlert for oversize file
         if (file.size > 2 * 1024 * 1024) {
-            const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-            input.value = '';
             Swal.fire({
                 icon: 'warning',
                 title: 'Ukuran Foto Terlalu Besar',
-                html: '<div class="text-center"><p class="text-sm text-gray-600">Ukuran foto: <span class="font-bold text-red-600">' + sizeMB + ' MB</span></p><p class="text-xs text-gray-500 mt-1">Batas maksimal ukuran foto yang diperbolehkan adalah <b>2 MB</b>.</p></div>',
+                html: '<p class="text-sm text-gray-600">File <b>' + file.name + '</b> melebihi batas 2 MB.</p>',
                 confirmButtonColor: '#4F46E5',
-                confirmButtonText: '<i class="fas fa-check mr-1"></i> Mengerti, Pilih Foto Lain',
                 customClass: {
                     popup: 'rounded-2xl shadow-2xl border border-gray-100',
                     confirmButton: 'rounded-xl px-5 py-2.5 font-semibold text-sm'
                 }
             });
-            return;
+            continue;
         }
 
+        selectedFiles.push(file);
+    }
+
+    renderPreviews();
+}
+
+function removeFile(index) {
+    selectedFiles.splice(index, 1);
+    renderPreviews();
+}
+
+function cancelAllPhotos() {
+    selectedFiles = [];
+    renderPreviews();
+}
+
+function renderPreviews() {
+    const grid = document.getElementById('preview_grid');
+    grid.innerHTML = '';
+
+    selectedFiles.forEach((file, index) => {
         const reader = new FileReader();
         reader.onload = function(e) {
-            preview.src = e.target.result;
-            placeholder.classList.add('hidden');
-            previewContainer.classList.remove('hidden');
-        }
+            const div = document.createElement('div');
+            div.className = 'relative group aspect-square rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-white';
+            div.innerHTML = `
+                <img src="${e.target.result}" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button type="button" onclick="removeFile(${index})" class="h-8 w-8 rounded-lg bg-red-600 hover:bg-red-700 text-white flex items-center justify-center transition shadow-md">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            `;
+            grid.appendChild(div);
+        };
         reader.readAsDataURL(file);
+    });
+
+    const previewContainer = document.getElementById('image_preview_container');
+    const placeholder = document.getElementById('upload_placeholder');
+    const addBtn = document.getElementById('add_more_photos_btn');
+
+    if (selectedFiles.length > 0) {
+        placeholder.classList.add('hidden');
+        previewContainer.classList.remove('hidden');
+        if (selectedFiles.length < 4) {
+            addBtn.classList.remove('hidden');
+        } else {
+            addBtn.classList.add('hidden');
+        }
+    } else {
+        placeholder.classList.remove('hidden');
+        previewContainer.classList.add('hidden');
     }
 }
 
@@ -355,6 +392,12 @@ document.getElementById('jurnalForm').addEventListener('submit', async function(
 
     try {
         const formData = new FormData(form);
+        formData.delete('foto_dokumentasi');
+        formData.delete('foto_dokumentasi[]');
+        selectedFiles.forEach((file) => {
+            formData.append('foto_dokumentasi[]', file);
+        });
+
         const response = await fetch(form.action, {
             method: 'POST',
             body: formData,

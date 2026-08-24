@@ -107,9 +107,9 @@ class JurnalPiketController extends BaseController
             'catatan'       => $this->request->getPost('catatan'),
         ];
 
-        $file = $this->request->getFile('foto_dokumentasi');
+        $files = $this->request->getFileMultiple('foto_dokumentasi');
 
-        $result = $this->jurnalPiketService->create($data, $file);
+        $result = $this->jurnalPiketService->create($data, $files);
 
         if ($this->request->isAJAX() || str_contains($this->request->getHeaderLine('Accept'), 'application/json')) {
             if (!$result['success']) {
@@ -231,11 +231,12 @@ class JurnalPiketController extends BaseController
             'rincian_tugas' => $this->request->getPost('rincian_tugas'),
             'deskripsi'     => $this->request->getPost('deskripsi'),
             'catatan'       => $this->request->getPost('catatan'),
+            'keep_photos'   => $this->request->getPost('keep_photos') ?? [],
         ];
 
-        $file = $this->request->getFile('foto_dokumentasi');
+        $files = $this->request->getFileMultiple('foto_dokumentasi');
 
-        $result = $this->jurnalPiketService->update((int) $id, $data, $file);
+        $result = $this->jurnalPiketService->update((int) $id, $data, $files);
 
         if ($this->request->isAJAX() || str_contains($this->request->getHeaderLine('Accept'), 'application/json')) {
             if (!$result['success']) {

@@ -79,8 +79,12 @@
                                 </div>
                                 <div>
                                     <?php if (!empty($row['foto_dokumentasi'])): ?>
+                                        <?php 
+                                        $fotos = explode(',', $row['foto_dokumentasi']);
+                                        $count = count($fotos);
+                                        ?>
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            <i class="fas fa-camera mr-1"></i> Foto
+                                            <i class="fas fa-camera mr-1"></i> <?= $count > 1 ? $count . ' Foto' : 'Foto' ?>
                                         </span>
                                     <?php else: ?>
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">

@@ -83,12 +83,17 @@
 
                 <!-- Foto Dokumentasi -->
                 <?php if (!empty($jurnal['foto_dokumentasi'])): ?>
+                    <?php $fotos = explode(',', $jurnal['foto_dokumentasi']); ?>
                     <div>
                         <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center">
                             <i class="fas fa-image mr-2 text-emerald-600"></i> Foto Dokumentasi Piket
                         </h3>
-                        <div class="rounded-2xl border border-gray-200 overflow-hidden max-w-xl shadow-sm bg-gray-50 p-2">
-                            <img src="<?= base_url('files/jurnal-piket/' . $jurnal['foto_dokumentasi']) ?>" alt="Foto Dokumentasi Piket" class="w-full h-auto max-h-96 object-contain rounded-xl">
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl">
+                            <?php foreach ($fotos as $f): ?>
+                                <div class="rounded-xl border border-gray-200 overflow-hidden shadow-sm bg-gray-50 p-1 flex items-center justify-center cursor-pointer hover:shadow-md transition-shadow">
+                                    <img src="<?= base_url('files/jurnal-piket/' . trim($f)) ?>" alt="Foto Dokumentasi Piket" class="w-full h-28 object-cover rounded-lg" onclick="window.open(this.src, '_blank')">
+                                </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                 <?php endif; ?>

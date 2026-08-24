@@ -552,13 +552,29 @@
                     </div>
 
                     <!-- Foto Dokumentasi -->
-                    <?php if (!empty($jurnal['foto_dokumentasi']) && file_exists(WRITEPATH . 'uploads/jurnal_piket/' . $jurnal['foto_dokumentasi'])): ?>
-                        <div class="section-box" id="photo-section-box">
-                            <div class="section-title"><?= !empty($jurnal['rincian_tugas']) ? 'V.' : 'IV.' ?> FOTO DOKUMENTASI KEGIATAN</div>
-                            <div class="photo-wrapper">
-                                <img src="<?= base_url('files/jurnal-piket/' . $jurnal['foto_dokumentasi']) ?>" alt="Foto Dokumentasi Piket" class="photo-img">
+                    <?php if (!empty($jurnal['foto_dokumentasi'])): ?>
+                        <?php 
+                        $fotos = explode(',', $jurnal['foto_dokumentasi']);
+                        $validFotos = [];
+                        foreach ($fotos as $f) {
+                            $f = trim($f);
+                            if (file_exists(WRITEPATH . 'uploads/jurnal_piket/' . $f)) {
+                                $validFotos[] = $f;
+                            }
+                        }
+                        if (!empty($validFotos)):
+                        ?>
+                            <div class="section-box" id="photo-section-box">
+                                <div class="section-title"><?= !empty($jurnal['rincian_tugas']) ? 'V.' : 'IV.' ?> FOTO DOKUMENTASI KEGIATAN</div>
+                                <div style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-top: 10px;">
+                                    <?php foreach ($validFotos as $vf): ?>
+                                        <div class="photo-wrapper" style="flex: 1 1 200px; max-width: 240px; border: 1px solid #ddd; padding: 4px; border-radius: 8px;">
+                                            <img src="<?= base_url('files/jurnal-piket/' . $vf) ?>" alt="Foto Dokumentasi Piket" class="photo-img" style="width: 100%; height: 160px; object-fit: cover; border-radius: 6px;">
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
                             </div>
-                        </div>
+                        <?php endif; ?>
                     <?php endif; ?>
 
                     <!-- Signature Section -->

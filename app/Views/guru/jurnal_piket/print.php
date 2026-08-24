@@ -524,10 +524,25 @@
                                     <?= !empty($row['catatan']) ? nl2br(esc($row['catatan'])) : '<em style="color:#888;">-</em>' ?>
                                 </td>
                                 <td class="text-center col-photo">
-                                    <?php if (!empty($row['foto_dokumentasi']) && file_exists(WRITEPATH . 'uploads/jurnal_piket/' . $row['foto_dokumentasi'])): ?>
-                                        <img src="<?= base_url('files/jurnal-piket/' . $row['foto_dokumentasi']) ?>" alt="Foto" class="thumb-photo">
-                                    <?php elseif (!empty($row['foto_dokumentasi'])): ?>
-                                        <span style="font-size: 8pt; color: #059669;">Ada Foto</span>
+                                    <?php if (!empty($row['foto_dokumentasi'])): ?>
+                                        <?php 
+                                        $fotos = explode(',', $row['foto_dokumentasi']);
+                                        $printed = false;
+                                        foreach ($fotos as $f):
+                                            $f = trim($f);
+                                            if (file_exists(WRITEPATH . 'uploads/jurnal_piket/' . $f)):
+                                                $printed = true;
+                                        ?>
+                                                <img src="<?= base_url('files/jurnal-piket/' . $f) ?>" alt="Foto" class="thumb-photo" style="margin: 2px; max-width: 40px; max-height: 40px; object-fit: cover;">
+                                        <?php 
+                                            endif;
+                                        endforeach;
+                                        if (!$printed):
+                                        ?>
+                                            <span style="font-size: 8pt; color: #059669;">Ada Foto</span>
+                                        <?php 
+                                        endif;
+                                        ?>
                                     <?php else: ?>
                                         <span style="color: #999;">-</span>
                                     <?php endif; ?>

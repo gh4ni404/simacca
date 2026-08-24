@@ -110,11 +110,15 @@
                                         <?php endif; ?>
                                     </td>
                                     <td class="px-5 py-4 text-center whitespace-nowrap">
-                                        <?php if (!empty($j['foto_dokumentasi'])): ?>
-                                            <a href="<?= base_url('files/jurnal-piket/' . $j['foto_dokumentasi']) ?>" target="_blank" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition">
-                                                <i class="fas fa-image mr-1"></i> Lihat Foto
-                                            </a>
-                                        <?php else: ?>
+                                         <?php if (!empty($j['foto_dokumentasi'])): ?>
+                                             <?php 
+                                             $fotos = explode(',', $j['foto_dokumentasi']);
+                                             $count = count($fotos);
+                                             ?>
+                                             <a href="<?= base_url('files/jurnal-piket/' . trim($fotos[0])) ?>" target="_blank" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition">
+                                                 <i class="fas fa-image mr-1"></i> Lihat <?= $count > 1 ? $count . ' Foto' : 'Foto' ?>
+                                             </a>
+                                         <?php else: ?>
                                             <span class="text-xs text-gray-400 font-medium">-</span>
                                         <?php endif; ?>
                                     </td>

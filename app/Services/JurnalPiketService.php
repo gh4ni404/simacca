@@ -114,7 +114,7 @@ class JurnalPiketService extends BaseService
     /**
      * Create new jurnal piket entry
      */
-    public function create(array $data, ?object $file = null): array
+    public function create(array $data, ?array $files = null): array
     {
         $rules = [
             'guru_id'      => 'required|integer',
@@ -158,41 +158,59 @@ class JurnalPiketService extends BaseService
         }
 
         // Handle photo upload
-        $fotoName = null;
-        if ($file && $file->isValid() && !$file->hasMoved()) {
-            $validMimes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
-            $mimeType = $file->getMimeType();
-            if (!in_array($mimeType, $validMimes)) {
-                $err = ['foto_dokumentasi' => 'Format file foto tidak didukung. Gunakan format JPG, JPEG, PNG, atau WEBP.'];
-                return $this->errorResponse('Validasi gagal: Format foto harus JPG, JPEG, PNG, atau WEBP.', $err);
-            }
-
-            if ($file->getSizeByUnit('mb') > 2) {
-                $err = ['foto_dokumentasi' => 'Ukuran file foto melebihi batas 2MB. Silakan pilih foto dengan ukuran lebih kecil.'];
-                return $this->errorResponse('Validasi gagal: Ukuran file foto melebihi 2MB.', $err);
-            }
-
-            $uploadPath = WRITEPATH . 'uploads/jurnal_piket';
-            if (!is_dir($uploadPath)) {
-                mkdir($uploadPath, 0777, true);
-            }
-
-            $fotoName = $file->getRandomName();
-            $file->move($uploadPath, $fotoName);
-
-            $filePath = $uploadPath . '/' . $fotoName;
-            if (file_exists($filePath)) {
-                helper('image');
-                if (function_exists('optimize_jurnal_photo')) {
-                    optimize_jurnal_photo($filePath, $filePath);
+        $uploadedPhotos = [];
+        if (!empty($files)) {
+            $validFilesCount = 0;
+            foreach ($files as $file) {
+                if ($file && $file->isValid() && $file->getError() !== UPLOAD_ERR_NO_FILE) {
+                    $validFilesCount++;
                 }
             }
-        } elseif ($file && !$file->isValid() && $file->getError() !== UPLOAD_ERR_NO_FILE) {
-            $err = ['foto_dokumentasi' => 'Gagal mengunggah file foto: ' . $file->getErrorString()];
-            return $this->errorResponse('Validasi gagal: Gagal mengunggah file foto dokumentasi.', $err);
+
+            if ($validFilesCount > 4) {
+                return $this->errorResponse('Validasi gagal: Jumlah foto melebihi batas maksimal 4 foto.');
+            }
+
+            foreach ($files as $file) {
+                if ($file && $file->isValid() && !$file->hasMoved()) {
+                    $validMimes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+                    $mimeType = $file->getMimeType();
+                    if (!in_array($mimeType, $validMimes)) {
+                        $err = ['foto_dokumentasi' => 'Format file foto tidak didukung. Gunakan format JPG, JPEG, PNG, atau WEBP.'];
+                        return $this->errorResponse('Validasi gagal: Format foto harus JPG, JPEG, PNG, atau WEBP.', $err);
+                    }
+
+                    if ($file->getSizeByUnit('mb') > 2) {
+                        $err = ['foto_dokumentasi' => 'Ukuran file foto melebihi batas 2MB. Silakan pilih foto dengan ukuran lebih kecil.'];
+                        return $this->errorResponse('Validasi gagal: Ukuran file foto melebihi 2MB.', $err);
+                    }
+
+                    $uploadPath = WRITEPATH . 'uploads/jurnal_piket';
+                    if (!is_dir($uploadPath)) {
+                        mkdir($uploadPath, 0777, true);
+                    }
+
+                    $fotoName = $file->getRandomName();
+                    $file->move($uploadPath, $fotoName);
+
+                    $filePath = $uploadPath . '/' . $fotoName;
+                    if (file_exists($filePath)) {
+                        helper('image');
+                        if (function_exists('optimize_jurnal_photo')) {
+                            optimize_jurnal_photo($filePath, $filePath);
+                        }
+                    }
+                    $uploadedPhotos[] = $fotoName;
+                } elseif ($file && !$file->isValid() && $file->getError() !== UPLOAD_ERR_NO_FILE) {
+                    $err = ['foto_dokumentasi' => 'Gagal mengunggah file foto: ' . $file->getErrorString()];
+                    return $this->errorResponse('Validasi gagal: Gagal mengunggah file foto dokumentasi.', $err);
+                }
+            }
         }
 
-        return $this->executeInTransaction(function () use ($data, $fotoName) {
+        $fotoNamesString = !empty($uploadedPhotos) ? implode(',', $uploadedPhotos) : null;
+
+        return $this->executeInTransaction(function () use ($data, $fotoNamesString) {
             $insertData = [
                 'guru_id'          => $data['guru_id'],
                 'tanggal'          => $data['tanggal'],
@@ -201,7 +219,7 @@ class JurnalPiketService extends BaseService
                 'rincian_tugas'    => $data['rincian_tugas'] ?? null,
                 'deskripsi'        => $data['deskripsi'],
                 'catatan'          => $data['catatan'] ?? null,
-                'foto_dokumentasi' => $fotoName,
+                'foto_dokumentasi' => $fotoNamesString,
                 'created_at'       => date('Y-m-d H:i:s'),
                 'updated_at'       => date('Y-m-d H:i:s'),
             ];
@@ -221,7 +239,7 @@ class JurnalPiketService extends BaseService
     /**
      * Update existing jurnal piket entry
      */
-    public function update(int $id, array $data, ?object $file = null): array
+    public function update(int $id, array $data, ?array $files = null): array
     {
         $jurnal = $this->jurnalPiketModel->find($id);
 
@@ -261,54 +279,87 @@ class JurnalPiketService extends BaseService
             return $this->errorResponse('Jurnal piket untuk tanggal ' . date('d/m/Y', strtotime($data['tanggal'])) . ' sudah ada');
         }
 
-        $fotoName = $jurnal['foto_dokumentasi'];
+        // Handle existing photos to keep
+        $existingPhotos = !empty($jurnal['foto_dokumentasi']) ? explode(',', $jurnal['foto_dokumentasi']) : [];
+        $keepPhotos = $data['keep_photos'] ?? [];
+        if (!is_array($keepPhotos)) {
+            $keepPhotos = [];
+        }
+        $keepPhotos = array_map('trim', $keepPhotos);
+        $keepPhotos = array_intersect($existingPhotos, $keepPhotos);
 
-        // Handle new photo upload if provided
-        if ($file && $file->isValid() && !$file->hasMoved()) {
-            $validMimes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
-            $mimeType = $file->getMimeType();
-            if (!in_array($mimeType, $validMimes)) {
-                $err = ['foto_dokumentasi' => 'Format file foto tidak didukung. Gunakan format JPG, JPEG, PNG, atau WEBP.'];
-                return $this->errorResponse('Validasi gagal: Format foto harus JPG, JPEG, PNG, atau WEBP.', $err);
+        $uploadPath = WRITEPATH . 'uploads/jurnal_piket';
+
+        // Delete photos that are not kept
+        $photosToDelete = array_diff($existingPhotos, $keepPhotos);
+        foreach ($photosToDelete as $ptd) {
+            if (!empty($ptd) && file_exists($uploadPath . '/' . $ptd)) {
+                @unlink($uploadPath . '/' . $ptd);
             }
-
-            if ($file->getSizeByUnit('mb') > 2) {
-                $err = ['foto_dokumentasi' => 'Ukuran file foto melebihi batas 2MB. Silakan pilih foto dengan ukuran lebih kecil.'];
-                return $this->errorResponse('Validasi gagal: Ukuran file foto melebihi 2MB.', $err);
-            }
-
-            $uploadPath = WRITEPATH . 'uploads/jurnal_piket';
-            if (!is_dir($uploadPath)) {
-                mkdir($uploadPath, 0777, true);
-            }
-
-            // Remove old photo if exists
-            if ($fotoName && file_exists($uploadPath . '/' . $fotoName)) {
-                @unlink($uploadPath . '/' . $fotoName);
-            }
-
-            $fotoName = $file->getRandomName();
-            $file->move($uploadPath, $fotoName);
-
-            $filePath = $uploadPath . '/' . $fotoName;
-            if (file_exists($filePath)) {
-                helper('image');
-                if (function_exists('optimize_jurnal_photo')) {
-                    optimize_jurnal_photo($filePath, $filePath);
-                }
-            }
-        } elseif ($file && !$file->isValid() && $file->getError() !== UPLOAD_ERR_NO_FILE) {
-            $err = ['foto_dokumentasi' => 'Gagal mengunggah file foto: ' . $file->getErrorString()];
-            return $this->errorResponse('Validasi gagal: Gagal mengunggah file foto dokumentasi.', $err);
         }
 
-        return $this->executeInTransaction(function () use ($id, $data, $fotoName) {
+        // Validate file count (keep + new)
+        $validFilesCount = 0;
+        if (!empty($files)) {
+            foreach ($files as $file) {
+                if ($file && $file->isValid() && $file->getError() !== UPLOAD_ERR_NO_FILE) {
+                    $validFilesCount++;
+                }
+            }
+        }
+
+        if (count($keepPhotos) + $validFilesCount > 4) {
+            return $this->errorResponse('Validasi gagal: Total foto (foto lama + foto baru) melebihi batas maksimal 4 foto.');
+        }
+
+        // Handle new photo uploads
+        $uploadedPhotos = $keepPhotos;
+        if (!empty($files)) {
+            foreach ($files as $file) {
+                if ($file && $file->isValid() && !$file->hasMoved()) {
+                    $validMimes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+                    $mimeType = $file->getMimeType();
+                    if (!in_array($mimeType, $validMimes)) {
+                        $err = ['foto_dokumentasi' => 'Format file foto tidak didukung. Gunakan format JPG, JPEG, PNG, atau WEBP.'];
+                        return $this->errorResponse('Validasi gagal: Format foto harus JPG, JPEG, PNG, atau WEBP.', $err);
+                    }
+
+                    if ($file->getSizeByUnit('mb') > 2) {
+                        $err = ['foto_dokumentasi' => 'Ukuran file foto melebihi batas 2MB. Silakan pilih foto dengan ukuran lebih kecil.'];
+                        return $this->errorResponse('Validasi gagal: Ukuran file foto melebihi 2MB.', $err);
+                    }
+
+                    if (!is_dir($uploadPath)) {
+                        mkdir($uploadPath, 0777, true);
+                    }
+
+                    $fotoName = $file->getRandomName();
+                    $file->move($uploadPath, $fotoName);
+
+                    $filePath = $uploadPath . '/' . $fotoName;
+                    if (file_exists($filePath)) {
+                        helper('image');
+                        if (function_exists('optimize_jurnal_photo')) {
+                            optimize_jurnal_photo($filePath, $filePath);
+                        }
+                    }
+                    $uploadedPhotos[] = $fotoName;
+                } elseif ($file && !$file->isValid() && $file->getError() !== UPLOAD_ERR_NO_FILE) {
+                    $err = ['foto_dokumentasi' => 'Gagal mengunggah file foto: ' . $file->getErrorString()];
+                    return $this->errorResponse('Validasi gagal: Gagal mengunggah file foto dokumentasi.', $err);
+                }
+            }
+        }
+
+        $fotoNamesString = !empty($uploadedPhotos) ? implode(',', $uploadedPhotos) : null;
+
+        return $this->executeInTransaction(function () use ($id, $data, $fotoNamesString) {
             $updateData = [
                 'tanggal'          => $data['tanggal'],
                 'rincian_tugas'    => $data['rincian_tugas'] ?? null,
                 'deskripsi'        => $data['deskripsi'],
                 'catatan'          => $data['catatan'] ?? null,
-                'foto_dokumentasi' => $fotoName,
+                'foto_dokumentasi' => $fotoNamesString,
                 'updated_at'       => date('Y-m-d H:i:s'),
             ];
 
@@ -332,11 +383,17 @@ class JurnalPiketService extends BaseService
         }
 
         return $this->executeInTransaction(function () use ($id, $jurnal) {
-            // Delete photo file if exists
+            // Delete photo files if they exist
             if (!empty($jurnal['foto_dokumentasi'])) {
-                $filePath = WRITEPATH . 'uploads/jurnal_piket/' . $jurnal['foto_dokumentasi'];
-                if (file_exists($filePath)) {
-                    unlink($filePath);
+                $fotos = explode(',', $jurnal['foto_dokumentasi']);
+                foreach ($fotos as $f) {
+                    $f = trim($f);
+                    if (!empty($f)) {
+                        $filePath = WRITEPATH . 'uploads/jurnal_piket/' . $f;
+                        if (file_exists($filePath)) {
+                            @unlink($filePath);
+                        }
+                    }
                 }
             }
 
@@ -344,7 +401,6 @@ class JurnalPiketService extends BaseService
 
             $this->log('info', "Jurnal piket deleted: ID={$id}");
 
-            return ['id' => $id];
         });
     }
 }
