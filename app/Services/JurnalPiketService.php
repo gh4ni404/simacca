@@ -88,7 +88,7 @@ class JurnalPiketService extends BaseService
 
         // Ambil mapping jobdesk guru pada tahun ajaran & semester aktif (tidak terikat hari tertentu)
         $assignment = $this->guruPiketModel
-            ->select('guru_piket.rincian_tugas, master_jobdesk_piket.rincian_tugas AS master_rincian_tugas')
+            ->select('master_jobdesk_piket.nama_jobdesk, master_jobdesk_piket.rincian_tugas AS master_rincian_tugas')
             ->join('master_jobdesk_piket', 'master_jobdesk_piket.id = guru_piket.jobdesk_id', 'left')
             ->where('guru_piket.guru_id', $guruId)
             ->where('guru_piket.tahun_ajaran', $tahunAjaran)
@@ -97,15 +97,13 @@ class JurnalPiketService extends BaseService
             ->first();
 
         if ($assignment) {
-            $customRincian = trim($assignment['rincian_tugas'] ?? '');
+            $namaJobdesk = trim($assignment['nama_jobdesk'] ?? '');
             $masterRincian = trim($assignment['master_rincian_tugas'] ?? '');
 
-            if ($customRincian !== '') {
-                return $customRincian;
+            if ($namaJobdesk !== '') {
+                return "Jobdesk: " . $namaJobdesk . "\n\n" . $masterRincian;
             }
-            if ($masterRincian !== '') {
-                return $masterRincian;
-            }
+            return $masterRincian;
         }
 
         return '';

@@ -59,17 +59,13 @@
                 <!-- Rincian Tugas Guidelines -->
                 <div>
                     <div class="flex items-center justify-between mb-2">
-                        <label for="rincian_tugas" class="block text-sm font-semibold text-gray-700">
+                        <label class="block text-sm font-semibold text-gray-700">
                             Rincian / Panduan Tugas Piket
                         </label>
                         <span class="text-xs text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full font-medium border border-indigo-100">Panduan Tersimpan</span>
                     </div>
-                    <textarea id="rincian_tugas" name="rincian_tugas" rows="4" 
-                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-gray-50/70 text-gray-700 transition" 
-                        placeholder="Rincian tugas piket..."><?= esc(old('rincian_tugas', $jurnal['rincian_tugas'] ?? '')) ?></textarea>
-                    <p class="text-xs text-gray-500 mt-1.5 flex items-center gap-1">
-                        <i class="fas fa-info-circle text-indigo-500"></i> Panduan tugas yang tercatat pada saat jurnal ini dibuat.
-                    </p>
+                    <input type="hidden" name="rincian_tugas" value="<?= esc(old('rincian_tugas', $jurnal['rincian_tugas'] ?? '')) ?>">
+                    <div class="p-4 rounded-xl bg-gray-50 border border-gray-200 text-sm text-gray-700 whitespace-pre-line"><?= esc(old('rincian_tugas', $jurnal['rincian_tugas'] ?? 'Tidak ada rincian panduan tugas piket.')) ?></div>
                 </div>
 
                 <!-- Deskripsi Kegiatan -->
@@ -95,16 +91,6 @@
                     <p id="deskripsi_hint" class="text-xs text-gray-500 mt-1 flex items-center gap-1">
                         <i class="fas fa-check-circle text-indigo-500 text-[10px]"></i> Minimal 5 karakter agar laporan informatif dan lengkap.
                     </p>
-                </div>
-
-                <!-- Catatan / Kejadian Khusus -->
-                <div>
-                    <label for="catatan" class="block text-sm font-semibold text-gray-700 mb-2">
-                        Catatan Kejadian / Kejadian Khusus <span class="text-xs font-normal text-gray-500">(Opsional)</span>
-                    </label>
-                    <textarea id="catatan" name="catatan" rows="3" 
-                        placeholder="Contoh: Siswa terlambat 3 orang sudah dicatat dan diberi pembinaan, situasi gerbang tertib dan kondusif..." 
-                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition"><?= esc(old('catatan', $jurnal['catatan'] ?? '')) ?></textarea>
                 </div>
 
                 <!-- Foto Dokumentasi -->

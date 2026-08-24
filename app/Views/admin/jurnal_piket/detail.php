@@ -41,9 +41,7 @@
                         <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 flex items-center">
                             <i class="fas fa-tasks mr-2 text-indigo-600"></i> Rincian Panduan Tugas
                         </h3>
-                        <p class="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
-                            <?= esc($jurnal['rincian_tugas']) ?>
-                        </p>
+                        <p class="text-sm text-gray-700 whitespace-pre-line leading-relaxed"><?= esc($jurnal['rincian_tugas']) ?></p>
                     </div>
                 <?php endif; ?>
 
@@ -51,9 +49,7 @@
                     <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 flex items-center">
                         <i class="fas fa-align-left mr-2 text-indigo-600"></i> Uraian / Deskripsi Kegiatan Piket
                     </h3>
-                    <div class="p-4 rounded-xl bg-indigo-50/40 border border-indigo-100 text-sm text-gray-800 whitespace-pre-line leading-relaxed font-medium">
-                        <?= esc($jurnal['deskripsi']) ?>
-                    </div>
+                    <div class="p-4 rounded-xl bg-indigo-50/40 border border-indigo-100 text-sm text-gray-800 whitespace-pre-line leading-relaxed font-medium"><?= esc($jurnal['deskripsi']) ?></div>
                 </div>
 
                 <?php if (!empty($jurnal['catatan'])): ?>
@@ -61,9 +57,7 @@
                         <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 flex items-center">
                             <i class="fas fa-sticky-note mr-2 text-amber-500"></i> Catatan Kejadian Khusus
                         </h3>
-                        <div class="p-4 rounded-xl bg-amber-50 border border-amber-100 text-sm text-amber-900 whitespace-pre-line">
-                            <?= esc($jurnal['catatan']) ?>
-                        </div>
+                        <div class="p-4 rounded-xl bg-amber-50 border border-amber-100 text-sm text-amber-900 whitespace-pre-line"><?= esc($jurnal['catatan']) ?></div>
                     </div>
                 <?php endif; ?>
 
