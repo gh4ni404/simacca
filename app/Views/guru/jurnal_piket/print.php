@@ -8,7 +8,7 @@
     
     <style id="print-dynamic-style">
         @page {
-            size: A4 landscape;
+            size: A4 portrait;
             margin: 10mm 12mm;
         }
     </style>
@@ -320,6 +320,63 @@
             margin: 0 auto;
         }
 
+        /* List-based Journal Item Mockup styles */
+        .journal-item {
+            margin-bottom: 25px;
+            page-break-inside: avoid;
+        }
+        .journal-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .journal-num {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: #10b981;
+            color: #fff;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11pt;
+            border: 2px solid #047857;
+        }
+        .journal-text {
+            font-size: 11pt;
+            font-weight: bold;
+            line-height: 1.4;
+            color: #000;
+        }
+        .journal-photos {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-left: 36px;
+            margin-top: 8px;
+            max-width: 650px;
+        }
+        .journal-photo-wrapper {
+            border: 1px solid #ddd;
+            padding: 6px;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .journal-photo-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+            display: block;
+        }
+        .hide-photos .journal-photos {
+            display: none !important;
+        }
+
         /* Signature Section */
         .signature-section {
             margin-top: 25px;
@@ -392,10 +449,10 @@
             <div class="tool-group">
                 <label><i class="fas fa-compass"></i> Orientasi:</label>
                 <div class="btn-group-toggle">
-                    <button type="button" id="btn-landscape" class="btn-toggle active" onclick="setOrientation('landscape')">
+                    <button type="button" id="btn-landscape" class="btn-toggle" onclick="setOrientation('landscape')">
                         <i class="fas fa-image"></i> Landscape
                     </button>
-                    <button type="button" id="btn-portrait" class="btn-toggle" onclick="setOrientation('portrait')">
+                    <button type="button" id="btn-portrait" class="btn-toggle active" onclick="setOrientation('portrait')">
                         <i class="fas fa-file-alt"></i> Portrait
                     </button>
                 </div>
@@ -430,7 +487,7 @@
     </div>
 
     <div class="sheet-container">
-        <div id="page-sheet" class="page-sheet landscape">
+        <div id="page-sheet" class="page-sheet portrait">
             <!-- Header Kop Surat -->
             <div class="header">
                 <div class="header-content">
@@ -486,72 +543,46 @@
                 </tr>
             </table>
 
-            <!-- Table Data -->
-            <table class="data-table" id="jurnal-table">
-                <thead>
-                    <tr>
-                        <th style="width: 4%;">No</th>
-                        <th style="width: 13%;">Hari & Tanggal</th>
-                        <th style="width: 24%;">Rincian Panduan Tugas</th>
-                        <th style="width: 32%;">Uraian Pelaksanaan Kegiatan</th>
-                        <th style="width: 19%;">Catatan Kejadian Khusus</th>
-                        <th style="width: 8%;" class="col-photo">Foto</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($jurnalList)): ?>
-                        <tr>
-                            <td colspan="6" class="text-center" style="padding: 20px; color: #666;">
-                                Tidak ada catatan jurnal piket pada periode yang dipilih.
-                            </td>
-                        </tr>
-                    <?php else: ?>
-                        <?php $no = 1; foreach ($jurnalList as $row): ?>
-                            <tr>
-                                <td class="text-center"><?= $no++ ?></td>
-                                <td>
-                                    <strong><?= esc(ucfirst(date_to_indo($row['tanggal']))) ?></strong><br>
-                                    <span><?= date('d/m/Y', strtotime($row['tanggal'])) ?></span><br>
-                                    <small style="color:#555;">Sem. <?= esc(ucfirst($row['semester'] ?? '')) ?></small>
-                                </td>
-                                <td>
-                                    <?= !empty($row['rincian_tugas']) ? nl2br(esc($row['rincian_tugas'])) : '<em style="color:#888;">-</em>' ?>
-                                </td>
-                                <td>
-                                    <?= nl2br(esc($row['deskripsi'])) ?>
-                                </td>
-                                <td>
-                                    <?= !empty($row['catatan']) ? nl2br(esc($row['catatan'])) : '<em style="color:#888;">-</em>' ?>
-                                </td>
-                                <td class="text-center col-photo">
-                                    <?php if (!empty($row['foto_dokumentasi'])): ?>
-                                        <?php 
-                                        $fotos = explode(',', $row['foto_dokumentasi']);
-                                        $printed = false;
-                                        foreach ($fotos as $f):
-                                            $f = trim($f);
-                                            if (file_exists(WRITEPATH . 'uploads/jurnal_piket/' . $f)):
-                                                $printed = true;
-                                        ?>
-                                                <img src="<?= base_url('files/jurnal-piket/' . $f) ?>" alt="Foto" class="thumb-photo" style="margin: 2px; max-width: 40px; max-height: 40px; object-fit: cover;">
-                                        <?php 
-                                            endif;
-                                        endforeach;
-                                        if (!$printed):
-                                        ?>
-                                            <span style="font-size: 8pt; color: #059669;">Ada Foto</span>
-                                        <?php 
-                                        endif;
-                                        ?>
-                                    <?php else: ?>
-                                        <span style="color: #999;">-</span>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+            <!-- Jurnal Items List -->
+            <div id="jurnal-items" style="margin-top: 15px; margin-bottom: 25px;">
+                <?php if (empty($jurnalList)): ?>
+                    <p style="text-align: center; padding: 20px; color: #666; font-style: italic;">
+                        Tidak ada catatan jurnal piket pada periode yang dipilih.
+                    </p>
+                <?php else: ?>
+                    <?php $no = 1; foreach ($jurnalList as $row): ?>
+                        <div class="journal-item">
+                            <div class="journal-header">
+                                <div class="journal-num"><?= $no++ ?></div>
+                                <div class="journal-text"><?= nl2br(esc($row['deskripsi'])) ?></div>
+                            </div>
+                            
+                            <!-- Foto Dokumentasi -->
+                            <?php if (!empty($row['foto_dokumentasi'])): ?>
+                                <?php 
+                                $fotos = explode(',', $row['foto_dokumentasi']);
+                                $validFotos = [];
+                                foreach ($fotos as $f) {
+                                    $f = trim($f);
+                                    if (file_exists(WRITEPATH . 'uploads/jurnal_piket/' . $f)) {
+                                        $validFotos[] = $f;
+                                    }
+                                }
+                                if (!empty($validFotos)):
+                                ?>
+                                    <div class="journal-photos">
+                                        <?php foreach ($validFotos as $vf): ?>
+                                            <div class="journal-photo-wrapper">
+                                                <img src="<?= base_url('files/jurnal-piket/' . $vf) ?>" class="journal-photo-img" alt="Foto Dokumentasi">
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
 
             <!-- Signature Section -->
             <div class="signature-section">
@@ -577,7 +608,7 @@
     </div>
 
     <script>
-    let currentOrientation = 'landscape';
+    let currentOrientation = 'portrait';
     let currentPaperSize = 'A4';
 
     function updatePageStyles() {
@@ -601,11 +632,11 @@
     }
 
     function togglePhotos(show) {
-        const table = document.getElementById('jurnal-table');
+        const container = document.getElementById('jurnal-items');
         if (show) {
-            table.classList.remove('hide-photos');
+            container.classList.remove('hide-photos');
         } else {
-            table.classList.add('hide-photos');
+            container.classList.add('hide-photos');
         }
     }
     </script>
