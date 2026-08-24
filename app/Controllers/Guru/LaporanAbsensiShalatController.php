@@ -31,7 +31,8 @@ class LaporanAbsensiShalatController extends BaseController
 
         if (!$guru) {
             $this->session->setFlashdata('error', 'Data guru tidak ditemukan');
-            return redirect()->to('/guru/dashboard');
+            $redirectUrl = session()->get('role') === 'tendik' ? '/tendik/dashboard' : '/guru/dashboard';
+            return redirect()->to($redirectUrl);
         }
 
         $from       = $this->request->getGet('from') ?: date('Y-m-01');
@@ -104,7 +105,8 @@ class LaporanAbsensiShalatController extends BaseController
 
         if (!$guru) {
             $this->session->setFlashdata('error', 'Data guru tidak ditemukan');
-            return redirect()->to('/guru/dashboard');
+            $redirectUrl = session()->get('role') === 'tendik' ? '/tendik/dashboard' : '/guru/dashboard';
+            return redirect()->to($redirectUrl);
         }
 
         $from       = $this->request->getGet('from') ?: date('Y-m-01');

@@ -309,17 +309,6 @@ $routes->group('guru', ['filter' => 'role:guru_mapel,wakakur'], function ($route
     $routes->get('jurnal/edit/(:num)', 'Guru\JurnalController::edit/$1');
     $routes->match(['POST', 'PUT'], 'jurnal/update/(:num)', 'Guru\JurnalController::update/$1');
 
-    // Jurnal Piket Routes (Guru)
-    $routes->get('jurnal-piket', 'Guru\JurnalPiketController::index', ['as' => 'guru.jurnal_piket']);
-    $routes->get('jurnal-piket/tambah', 'Guru\JurnalPiketController::create');
-    $routes->post('jurnal-piket/simpan', 'Guru\JurnalPiketController::store');
-    $routes->get('jurnal-piket/detail/(:num)', 'Guru\JurnalPiketController::show/$1');
-    $routes->get('jurnal-piket/edit/(:num)', 'Guru\JurnalPiketController::edit/$1');
-    $routes->post('jurnal-piket/update/(:num)', 'Guru\JurnalPiketController::update/$1');
-    $routes->get('jurnal-piket/hapus/(:num)', 'Guru\JurnalPiketController::delete/$1');
-    $routes->get('jurnal-piket/cetak', 'Guru\JurnalPiketController::print');
-    $routes->get('jurnal-piket/cetak/(:num)', 'Guru\JurnalPiketController::printSingle/$1');
-    
     // Laporan Routes
     $routes->get('laporan', 'Guru\LaporanController::index', ['as' => 'guru.laporan']);
     $routes->get('laporan/print', 'Guru\LaporanController::print');
@@ -354,6 +343,21 @@ $routes->group('guru', ['filter' => 'role:guru_mapel,wakakur'], function ($route
     $routes->get('absensi-guru/history', 'Guru\AbsensiGuruController::history');
     $routes->get('absensi-guru/show/(:num)', 'Guru\AbsensiGuruController::show/$1');
     $routes->get('absensi-guru/camera', 'Guru\AbsensiGuruController::camera');
+
+});
+
+// Jurnal Piket & Absensi Shalat Routes (Shared for Guru Mapel, Wakakur, and Tendik/Staff)
+$routes->group('guru', ['filter' => 'role:guru_mapel,wakakur,tendik'], function ($routes) {
+    // Jurnal Piket Routes
+    $routes->get('jurnal-piket', 'Guru\JurnalPiketController::index', ['as' => 'guru.jurnal_piket']);
+    $routes->get('jurnal-piket/tambah', 'Guru\JurnalPiketController::create');
+    $routes->post('jurnal-piket/simpan', 'Guru\JurnalPiketController::store');
+    $routes->get('jurnal-piket/detail/(:num)', 'Guru\JurnalPiketController::show/$1');
+    $routes->get('jurnal-piket/edit/(:num)', 'Guru\JurnalPiketController::edit/$1');
+    $routes->post('jurnal-piket/update/(:num)', 'Guru\JurnalPiketController::update/$1');
+    $routes->get('jurnal-piket/hapus/(:num)', 'Guru\JurnalPiketController::delete/$1');
+    $routes->get('jurnal-piket/cetak', 'Guru\JurnalPiketController::print');
+    $routes->get('jurnal-piket/cetak/(:num)', 'Guru\JurnalPiketController::printSingle/$1');
 
     // Absensi Shalat (QR Code Portal)
     $routes->get('absensi-shalat', 'Guru\AbsensiShalatController::index', ['as' => 'guru.absensi_shalat']);

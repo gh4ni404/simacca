@@ -632,6 +632,31 @@ if (!function_exists('get_sidebar_menu')) {
                     'url' => '/tendik/dashboard',
                     'active' => ['tendik/dashboard']
                 ],
+                [
+                    'title' => 'Jurnal Piket',
+                    'icon' => 'fas fa-file-signature',
+                    'url' => '/guru/jurnal-piket',
+                    'active' => ['guru/jurnal-piket']
+                ],
+                [
+                    'title' => 'Absensi Shalat',
+                    'icon' => 'fas fa-mosque',
+                    'url' => '#',
+                    'submenu' => [
+                        [
+                            'title' => 'Scan QR Shalat',
+                            'url' => '/scan',
+                        ],
+                        [
+                            'title' => 'Portal QR (Guru Piket)',
+                            'url' => '/guru/absensi-shalat',
+                        ],
+                        [
+                            'title' => 'Rekap Absensi Shalat',
+                            'url' => '/guru/laporan/absensi-shalat',
+                        ],
+                    ]
+                ],
             ]
         ];
 

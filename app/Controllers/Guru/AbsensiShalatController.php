@@ -44,7 +44,8 @@ class AbsensiShalatController extends BaseController
 
         if (!$guruPiket) {
             $this->session->setFlashdata('error', 'Kamu tidak bertugas piket hari ini (' . $hariIni . ')');
-            return redirect()->to('/guru/dashboard');
+            $redirectUrl = session()->get('role') === 'tendik' ? '/tendik/dashboard' : '/guru/dashboard';
+            return redirect()->to($redirectUrl);
         }
 
         $activeSession   = $this->prayerSessionModel->getActiveSession($guruPiket['id']);
