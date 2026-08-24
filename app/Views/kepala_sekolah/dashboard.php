@@ -266,6 +266,7 @@
                     <div>
                         <span class="text-xs font-bold text-gray-800 block">Absensi Shalat</span>
                         <span class="text-[11px] text-gray-400">Monitoring Ibadah</span>
+                    </div>
                 </a>
             </div>
         </div>
