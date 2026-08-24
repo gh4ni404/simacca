@@ -554,7 +554,13 @@
                         <div class="journal-item">
                             <div class="journal-header">
                                 <div class="journal-num"><?= $no++ ?></div>
-                                <div class="journal-text"><?= nl2br(esc($row['deskripsi'])) ?></div>
+                                <div class="journal-text">
+                                    <div style="font-size: 9.5pt; color: #555; font-weight: normal; margin-bottom: 4px;">
+                                        <i class="fas fa-calendar-alt" style="margin-right: 4px; color: #10b981;"></i>
+                                        <?= esc(ucfirst(date_to_indo($row['tanggal']))) ?>
+                                    </div>
+                                    <?= nl2br(esc($row['deskripsi'])) ?>
+                                </div>
                             </div>
                             
                             <!-- Foto Dokumentasi -->

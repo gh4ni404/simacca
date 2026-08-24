@@ -223,7 +223,67 @@ function handleFileSelect(input) {
     input.value = ''; // Reset input so the same files can be re-selected if removed
 }
 
-function addFiles(fileList) {
+function compressImage(file, targetSizeKb = 900, quality = 0.8) {
+    return new Promise((resolve) => {
+        if (!file.type.startsWith('image/') || file.size <= targetSizeKb * 1024) {
+            resolve(file);
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                // Scale down very large camera photos (e.g. 4000x3000 -> max 1920)
+                const maxDimension = 1920;
+                if (width > maxDimension || height > maxDimension) {
+                    if (width > height) {
+                        height = Math.round((height * maxDimension) / width);
+                        width = maxDimension;
+                    } else {
+                        width = Math.round((width * maxDimension) / height);
+                        height = maxDimension;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                canvas.toBlob((blob) => {
+                    if (!blob) {
+                        resolve(file);
+                        return;
+                    }
+                    
+                    const compressedFile = new File([blob], file.name, {
+                        type: 'image/jpeg',
+                        lastModified: Date.now()
+                    });
+
+                    // Recursively compress if still too large, up to minimum quality of 0.4
+                    if (compressedFile.size > targetSizeKb * 1024 && quality > 0.4) {
+                        compressImage(compressedFile, targetSizeKb, quality - 0.15).then(resolve);
+                    } else {
+                        resolve(compressedFile);
+                    }
+                }, 'image/jpeg', quality);
+            };
+            img.onerror = () => resolve(file);
+        };
+        reader.onerror = () => resolve(file);
+    });
+}
+
+async function addFiles(fileList) {
     const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
     const msgEl = document.getElementById('error_msg_foto_dokumentasi');
     if (msgEl) {
@@ -235,52 +295,86 @@ function addFiles(fileList) {
         dropzone.classList.remove('is-field-error', 'border-red-400');
     }
 
+    // Check if compression is needed for any file to show loader
+    let needsCompression = false;
     for (let i = 0; i < fileList.length; i++) {
         const file = fileList[i];
-
-        if (existingPhotos.length + selectedFiles.length >= 4) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Batas Maksimal Terpenuhi',
-                text: 'Maksimal hanya diperbolehkan mengunggah 4 foto dokumentasi.',
-                confirmButtonColor: '#4F46E5',
-                customClass: {
-                    popup: 'rounded-2xl shadow-2xl border border-gray-100',
-                    confirmButton: 'rounded-xl px-5 py-2.5 font-semibold text-sm'
-                }
-            });
+        if (validTypes.includes(file.type) && file.size > 900 * 1024) {
+            needsCompression = true;
             break;
         }
+    }
 
-        if (!validTypes.includes(file.type)) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Format Foto Tidak Didukung',
-                html: '<p class="text-sm text-gray-600">File <b>' + file.name + '</b> memiliki format tidak didukung.<br>Silakan pilih file berformat <b>JPG, JPEG, PNG, atau WEBP</b>.</p>',
-                confirmButtonColor: '#4F46E5',
-                customClass: {
-                    popup: 'rounded-2xl shadow-2xl border border-gray-100',
-                    confirmButton: 'rounded-xl px-5 py-2.5 font-semibold text-sm'
-                }
-            });
-            continue;
+    if (needsCompression) {
+        Swal.fire({
+            title: 'Mengoptimalkan Gambar...',
+            text: 'Mohon tunggu, sedang mengompresi foto kamera.',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+    }
+
+    try {
+        for (let i = 0; i < fileList.length; i++) {
+            let file = fileList[i];
+
+            if (existingPhotos.length + selectedFiles.length >= 4) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Batas Maksimal Terpenuhi',
+                    text: 'Maksimal hanya diperbolehkan mengunggah 4 foto dokumentasi.',
+                    confirmButtonColor: '#4F46E5',
+                    customClass: {
+                        popup: 'rounded-2xl shadow-2xl border border-gray-100',
+                        confirmButton: 'rounded-xl px-5 py-2.5 font-semibold text-sm'
+                    }
+                });
+                break;
+            }
+
+            if (!validTypes.includes(file.type)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Format Foto Tidak Didukung',
+                    html: '<p class="text-sm text-gray-600">File <b>' + file.name + '</b> memiliki format tidak didukung.<br>Silakan pilih file berformat <b>JPG, JPEG, PNG, atau WEBP</b>.</p>',
+                    confirmButtonColor: '#4F46E5',
+                    customClass: {
+                        popup: 'rounded-2xl shadow-2xl border border-gray-100',
+                        confirmButton: 'rounded-xl px-5 py-2.5 font-semibold text-sm'
+                    }
+                });
+                continue;
+            }
+
+            // Perform compression if needed
+            if (file.size > 900 * 1024) {
+                file = await compressImage(file, 900);
+            }
+
+            if (file.size > 2 * 1024 * 1024) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Ukuran Foto Terlalu Besar',
+                    html: '<p class="text-sm text-gray-600">File <b>' + file.name + '</b> masih melebihi batas 2 MB setelah kompresi.</p>',
+                    confirmButtonColor: '#4F46E5',
+                    customClass: {
+                        popup: 'rounded-2xl shadow-2xl border border-gray-100',
+                        confirmButton: 'rounded-xl px-5 py-2.5 font-semibold text-sm'
+                    }
+                });
+                continue;
+            }
+
+            selectedFiles.push(file);
         }
-
-        if (file.size > 2 * 1024 * 1024) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Ukuran Foto Terlalu Besar',
-                html: '<p class="text-sm text-gray-600">File <b>' + file.name + '</b> melebihi batas 2 MB.</p>',
-                confirmButtonColor: '#4F46E5',
-                customClass: {
-                    popup: 'rounded-2xl shadow-2xl border border-gray-100',
-                    confirmButton: 'rounded-xl px-5 py-2.5 font-semibold text-sm'
-                }
-            });
-            continue;
+    } finally {
+        if (needsCompression) {
+            Swal.close();
         }
-
-        selectedFiles.push(file);
     }
 
     renderPreviews();
