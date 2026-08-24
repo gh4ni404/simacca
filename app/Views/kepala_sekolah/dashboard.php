@@ -266,17 +266,6 @@
                     <div>
                         <span class="text-xs font-bold text-gray-800 block">Absensi Shalat</span>
                         <span class="text-[11px] text-gray-400">Monitoring Ibadah</span>
-                    </div>
-                </a>
-
-                <a href="<?= base_url('admin/pengaturan') ?>" class="p-3.5 bg-slate-50 hover:bg-slate-100 border border-slate-200/60 hover:border-slate-300 rounded-xl transition-all group flex flex-col justify-between">
-                    <div class="w-9 h-9 rounded-lg bg-slate-200 text-slate-700 flex items-center justify-center text-lg mb-2 group-hover:scale-110 transition-transform">
-                        <i class="fas fa-cogs"></i>
-                    </div>
-                    <div>
-                        <span class="text-xs font-bold text-gray-800 block">Pengaturan</span>
-                        <span class="text-[11px] text-gray-400">Profil & SK Sekolah</span>
-                    </div>
                 </a>
             </div>
         </div>

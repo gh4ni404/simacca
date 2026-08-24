@@ -195,7 +195,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('pembimbing-pkl/get-siswa-xii-unplaced', 'Admin\PembimbingPklController::getSiswaXIIUnplaced', ['filter' => 'role:admin']);
 
     // Pengaturan
-    $routes->get('pengaturan', 'Admin\PengaturanController::index', ['filter' => 'role:admin,kepala_sekolah']);
+    $routes->get('pengaturan', 'Admin\PengaturanController::index', ['filter' => 'role:admin']);
     $routes->post('pengaturan/update', 'Admin\PengaturanController::update', ['filter' => 'role:admin']);
     $routes->post('pengaturan/rollover', 'Admin\PengaturanController::rollover', ['filter' => 'role:admin']);
     $routes->post('pengaturan/revert', 'Admin\PengaturanController::revert', ['filter' => 'role:admin']);
