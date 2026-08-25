@@ -552,6 +552,8 @@ $routes->group('profile', ['filter' => 'auth'], function ($routes) {
 $routes->get('files/jurnal/(:segment)', 'FileController::jurnalFoto/$1');
 $routes->get('files/jurnal-piket/(:segment)', 'FileController::jurnalPiketFoto/$1');
 $routes->get('uploads/jurnal-piket/(:segment)', 'FileController::jurnalPiketFoto/$1');
+$routes->get('files/jurnal-wali/(:segment)', 'FileController::jurnalWaliFoto/$1');
+$routes->get('uploads/jurnal-wali/(:segment)', 'FileController::jurnalWaliFoto/$1');
 $routes->get('files/jurnal-pkl/(:segment)', 'FileController::jurnalPklFoto/$1');
 $routes->get('files/pkl-progress/(:segment)', 'FileController::pklProgressFoto/$1');
 $routes->get('files/absensi-guru/(:segment)/(:segment)/(:segment)/(:segment)', 'FileController::absensiGuruFoto/$1/$2/$3/$4');

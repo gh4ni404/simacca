@@ -45,9 +45,60 @@ class JurnalGuruWaliService
     }
 
     /**
+     * Handle upload & optimize foto dokumentasi
+     */
+    public function handleUploadFoto($file): ?string
+    {
+        if (!$file || !$file->isValid() || $file->hasMoved() || $file->getError() === UPLOAD_ERR_NO_FILE) {
+            return null;
+        }
+
+        $validMimes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+        $mimeType = $file->getMimeType();
+        if (!in_array($mimeType, $validMimes)) {
+            throw new \RuntimeException('Format file foto tidak didukung. Gunakan format JPG, JPEG, PNG, atau WEBP.');
+        }
+
+        if ($file->getSizeByUnit('mb') > 5) {
+            throw new \RuntimeException('Ukuran file foto melebihi batas 5MB.');
+        }
+
+        $uploadPath = WRITEPATH . 'uploads/jurnal_wali';
+        if (!is_dir($uploadPath)) {
+            mkdir($uploadPath, 0777, true);
+        }
+
+        $fotoName = 'jurnal_wali_' . time() . '_' . uniqid() . '.' . $file->getExtension();
+        $file->move($uploadPath, $fotoName);
+
+        $filePath = $uploadPath . '/' . $fotoName;
+        if (file_exists($filePath)) {
+            helper('image');
+            if (function_exists('optimize_image')) {
+                optimize_image($filePath, $filePath);
+            }
+        }
+
+        return $fotoName;
+    }
+
+    /**
+     * Safely delete physical photo file
+     */
+    private function removeFotoFile(?string $filename): void
+    {
+        if (!empty($filename)) {
+            $path = WRITEPATH . 'uploads/jurnal_wali/' . basename($filename);
+            if (file_exists($path)) {
+                @unlink($path);
+            }
+        }
+    }
+
+    /**
      * Create a new journal entry
      */
-    public function createJurnal(array $data): array
+    public function createJurnal(array $data, $file = null): array
     {
         $this->db->transBegin();
 
@@ -67,16 +118,22 @@ class JurnalGuruWaliService
                 return ['success' => false, 'message' => 'Catatan bimbingan wajib diisi.'];
             }
 
+            $fotoName = null;
+            if ($file && $file->isValid()) {
+                $fotoName = $this->handleUploadFoto($file);
+            }
+
             $insertData = [
-                'guru_id'         => $guruId,
-                'siswa_id'        => $siswaId,
-                'tahun_ajaran'    => $data['tahun_ajaran'] ?? get_active_tahun_ajaran(),
-                'tanggal'         => $data['tanggal'],
-                'jenis_bimbingan' => $data['jenis_bimbingan'] ?? 'Akademik',
-                'catatan'         => $data['catatan'],
-                'tindak_lanjut'   => $data['tindak_lanjut'] ?? null,
-                'created_at'      => date('Y-m-d H:i:s'),
-                'updated_at'      => date('Y-m-d H:i:s'),
+                'guru_id'          => $guruId,
+                'siswa_id'         => $siswaId,
+                'tahun_ajaran'     => $data['tahun_ajaran'] ?? get_active_tahun_ajaran(),
+                'tanggal'          => $data['tanggal'],
+                'jenis_bimbingan'  => $data['jenis_bimbingan'] ?? 'Akademik',
+                'catatan'          => $data['catatan'],
+                'tindak_lanjut'    => $data['tindak_lanjut'] ?? null,
+                'foto_dokumentasi' => $fotoName,
+                'created_at'       => date('Y-m-d H:i:s'),
+                'updated_at'       => date('Y-m-d H:i:s'),
             ];
 
             $insertId = $this->jurnalModel->insert($insertData);
@@ -104,7 +161,7 @@ class JurnalGuruWaliService
     /**
      * Update an existing journal entry
      */
-    public function updateJurnal(int $id, int $guruId, array $data): array
+    public function updateJurnal(int $id, int $guruId, array $data, $file = null, bool $hapusFoto = false): array
     {
         $this->db->transBegin();
 
@@ -114,13 +171,25 @@ class JurnalGuruWaliService
                 return ['success' => false, 'message' => 'Data jurnal tidak ditemukan atau bukan milik Anda.'];
             }
 
+            $fotoName = $existing['foto_dokumentasi'] ?? null;
+            if ($hapusFoto) {
+                $this->removeFotoFile($fotoName);
+                $fotoName = null;
+            }
+
+            if ($file && $file->isValid()) {
+                $this->removeFotoFile($fotoName);
+                $fotoName = $this->handleUploadFoto($file);
+            }
+
             $updateData = [
-                'tanggal'         => $data['tanggal'] ?? $existing['tanggal'],
-                'siswa_id'        => !empty($data['siswa_id']) ? (int) $data['siswa_id'] : $existing['siswa_id'],
-                'jenis_bimbingan' => $data['jenis_bimbingan'] ?? $existing['jenis_bimbingan'],
-                'catatan'         => $data['catatan'] ?? $existing['catatan'],
-                'tindak_lanjut'   => array_key_exists('tindak_lanjut', $data) ? $data['tindak_lanjut'] : $existing['tindak_lanjut'],
-                'updated_at'      => date('Y-m-d H:i:s'),
+                'tanggal'          => $data['tanggal'] ?? $existing['tanggal'],
+                'siswa_id'         => !empty($data['siswa_id']) ? (int) $data['siswa_id'] : $existing['siswa_id'],
+                'jenis_bimbingan'  => $data['jenis_bimbingan'] ?? $existing['jenis_bimbingan'],
+                'catatan'          => $data['catatan'] ?? $existing['catatan'],
+                'tindak_lanjut'    => array_key_exists('tindak_lanjut', $data) ? $data['tindak_lanjut'] : $existing['tindak_lanjut'],
+                'foto_dokumentasi' => $fotoName,
+                'updated_at'       => date('Y-m-d H:i:s'),
             ];
 
             $this->jurnalModel->update($id, $updateData);

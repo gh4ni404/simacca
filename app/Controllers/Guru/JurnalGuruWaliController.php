@@ -90,7 +90,9 @@ class JurnalGuruWaliController extends BaseController
             'tahun_ajaran'    => get_active_tahun_ajaran(),
         ];
 
-        $result = $this->jurnalService->createJurnal($payload);
+        $file = $this->request->getFile('foto_dokumentasi');
+
+        $result = $this->jurnalService->createJurnal($payload, $file);
         $result['csrf_token'] = csrf_token();
         $result['csrf_hash']  = csrf_hash();
 
@@ -130,7 +132,10 @@ class JurnalGuruWaliController extends BaseController
             'tindak_lanjut'   => $this->request->getPost('tindak_lanjut'),
         ];
 
-        $result = $this->jurnalService->updateJurnal((int) $id, (int) $guru['id'], $payload);
+        $file = $this->request->getFile('foto_dokumentasi');
+        $hapusFoto = (bool) $this->request->getPost('hapus_foto');
+
+        $result = $this->jurnalService->updateJurnal((int) $id, (int) $guru['id'], $payload, $file, $hapusFoto);
         $result['csrf_token'] = csrf_token();
         $result['csrf_hash']  = csrf_hash();
 

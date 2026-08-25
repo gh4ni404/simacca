@@ -91,6 +91,15 @@
         }
         .text-center { text-align: center; }
         .text-right { text-align: right; }
+        .dokumentasi-img {
+            max-width: 75px;
+            max-height: 75px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            display: block;
+            margin: 0 auto;
+        }
         .signature-section {
             margin-top: 30px;
             display: flex;
@@ -177,17 +186,18 @@
         <thead>
             <tr>
                 <th style="width: 4%;">No</th>
-                <th style="width: 12%;">Tanggal</th>
-                <th style="width: 22%;">Nama Siswa (NIS / Kelas)</th>
-                <th style="width: 14%;">Jenis Bimbingan</th>
-                <th style="width: 26%;">Catatan / Observasi</th>
-                <th style="width: 22%;">Tindak Lanjut / Solusi</th>
+                <th style="width: 11%;">Tanggal</th>
+                <th style="width: 20%;">Nama Siswa (NIS / Kelas)</th>
+                <th style="width: 12%;">Jenis Bimbingan</th>
+                <th style="width: 21%;">Catatan / Observasi</th>
+                <th style="width: 18%;">Tindak Lanjut / Solusi</th>
+                <th style="width: 14%;">Dokumentasi</th>
             </tr>
         </thead>
         <tbody>
             <?php if (empty($jurnalList)): ?>
                 <tr>
-                    <td colspan="6" class="text-center" style="padding: 15px;">
+                    <td colspan="7" class="text-center" style="padding: 15px;">
                         <em>Tidak ada riwayat bimbingan pada filter yang dipilih.</em>
                     </td>
                 </tr>
@@ -205,6 +215,13 @@
                         </td>
                         <td><?= nl2br(esc($j['catatan'])) ?></td>
                         <td><?= nl2br(esc($j['tindak_lanjut'] ?: '-')) ?></td>
+                        <td class="text-center">
+                            <?php if (!empty($j['foto_dokumentasi'])): ?>
+                                <img src="<?= base_url('files/jurnal-wali/' . esc($j['foto_dokumentasi'])) ?>" alt="Dokumentasi" class="dokumentasi-img">
+                            <?php else: ?>
+                                <span style="color: #999;">-</span>
+                            <?php endif; ?>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             <?php endif; ?>
