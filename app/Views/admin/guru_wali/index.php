@@ -1,6 +1,6 @@
 <?= $this->extend(get_device_layout()) ?>
 
-<?= $this->section('content') ?>
+<?= $this->section('content') ?> 
 <div class="space-y-6">
 
     <!-- Flash Messages -->
