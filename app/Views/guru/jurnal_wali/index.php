@@ -1,4 +1,4 @@
-<?= $this->extend(get_device_layout()) ?>
+<?= $this->extend(get_device_layout()) ?> 
 
 <?= $this->section('content') ?>
 <div class="space-y-6">
@@ -87,7 +87,7 @@
                 <p class="text-xs text-gray-400">Dokumentasikan sesi bimbingan individual siswa secara berkala</p>
             </div>
 
-            <form action="<?= base_url('guru/jurnal-wali/simpan') ?>" method="POST" enctype="multipart/form-data" class="space-y-4">
+            <form action="<?= base_url('guru/jurnal-wali/simpan') ?>" method="POST" enctype="multipart/form-data" class="space-y-4" id="createForm">
                 <?= csrf_field() ?>
 
                 <!-- Row 1: Tanggal & Siswa -->
@@ -148,33 +148,60 @@
                     <textarea name="tindak_lanjut" rows="2" placeholder="Rencana aksi, arahan, atau solusi yang disepakati bersama siswa..." class="w-full text-xs rounded-xl border border-gray-200 bg-white focus:border-blue-500 px-3.5 py-2.5 shadow-sm resize-none"></textarea>
                 </div>
 
-                <!-- Row 4: Dokumentasi Foto -->
+                <!-- Row 4: Dokumentasi Foto (Kamera & File Picker dengan Kompresi Otomatis) -->
                 <div>
                     <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
                         <span>Dokumentasi Foto <span class="text-gray-400 font-normal lowercase">(opsional)</span></span>
-                        <span class="text-[11px] text-gray-400 font-normal">Max 5MB (JPG, PNG, WEBP)</span>
+                        <span class="text-[11px] text-gray-400 font-normal">Max 2MB • Dikompres otomatis</span>
                     </label>
                     
-                    <div class="border border-dashed border-gray-300 rounded-xl p-3.5 bg-gray-50/50 hover:bg-blue-50/20 hover:border-blue-300 transition-colors" id="createDropzone">
-                        <input type="file" name="foto_dokumentasi" id="createFotoInput" accept="image/jpeg,image/png,image/jpg,image/webp" class="hidden" onchange="handleCreatePhotoSelect(this)">
+                    <div class="border border-dashed border-gray-300 rounded-2xl p-4 bg-gray-50/50 hover:border-blue-400 transition-colors" id="createDropzone">
+                        <input type="file" name="foto_dokumentasi" id="createFotoInput" accept="image/*" class="hidden" onchange="handleCreatePhotoSelect(this)">
                         
-                        <!-- Upload placeholder -->
-                        <div id="createUploadPlaceholder" class="flex items-center justify-between gap-3">
+                        <!-- Camera Live View Box -->
+                        <div id="createCameraContainer" class="hidden mb-3 p-3 bg-gray-900 rounded-xl space-y-3">
+                            <div class="relative overflow-hidden rounded-lg bg-black">
+                                <video id="createVideo" autoplay playsinline class="w-full h-52 md:h-64 object-cover"></video>
+                                <span class="absolute top-2 left-2 px-2 py-0.5 bg-rose-600/90 text-white text-[10px] font-bold rounded-md flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span> KAMERA AKTIF
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-center gap-2">
+                                <button type="button" onclick="takeCreateSnapshot()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow transition flex items-center gap-2">
+                                    <i class="fas fa-circle text-rose-400"></i> Ambil Foto
+                                </button>
+                                <button type="button" onclick="switchCreateCamera()" class="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold rounded-xl transition flex items-center gap-1.5">
+                                    <i class="fas fa-sync-alt"></i> Putar
+                                </button>
+                                <button type="button" onclick="stopCreateCamera()" class="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 text-xs font-semibold rounded-xl transition flex items-center gap-1.5">
+                                    <i class="fas fa-times"></i> Tutup
+                                </button>
+                            </div>
+                            <canvas id="createCanvas" class="hidden"></canvas>
+                        </div>
+
+                        <!-- Upload & Camera Choice Placeholder -->
+                        <div id="createUploadPlaceholder" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                             <div class="flex items-center space-x-3 min-w-0">
                                 <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-base flex-shrink-0">
                                     <i class="fas fa-camera"></i>
                                 </div>
                                 <div class="min-w-0">
-                                    <p class="text-xs font-semibold text-gray-700 truncate">Unggah Foto Dokumentasi</p>
-                                    <p class="text-[11px] text-gray-400 truncate">Bukti foto saat sesi bimbingan / konsultasi</p>
+                                    <p class="text-xs font-semibold text-gray-800 truncate">Ambil atau Unggah Foto</p>
+                                    <p class="text-[11px] text-gray-400 truncate">Foto sesi bimbingan / konsultasi dengan siswa</p>
                                 </div>
                             </div>
-                            <button type="button" onclick="document.getElementById('createFotoInput').click()" class="px-3 py-1.5 text-xs font-semibold bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl shadow-sm transition flex-shrink-0">
-                                <i class="fas fa-upload mr-1 text-blue-600"></i> Pilih Foto
-                            </button>
+                            <div class="flex items-center gap-2 flex-shrink-0">
+                                <button type="button" onclick="startCreateCamera()" class="px-3 py-1.5 text-xs font-semibold bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl shadow-sm transition flex items-center gap-1.5">
+                                    <i class="fas fa-camera"></i> Kamera
+                                </button>
+                                <button type="button" onclick="document.getElementById('createFotoInput').click()" class="px-3 py-1.5 text-xs font-semibold bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl shadow-sm transition flex items-center gap-1.5">
+                                    <i class="fas fa-upload text-blue-600"></i> Pilih File
+                                </button>
+                            </div>
                         </div>
 
-                        <!-- Preview Container -->
+                        <!-- Preview Container with compression info -->
                         <div id="createPreviewContainer" class="hidden flex items-center justify-between gap-3">
                             <div class="flex items-center space-x-3 min-w-0">
                                 <img id="createPreviewImg" src="" alt="Preview" class="w-12 h-12 rounded-xl object-cover border border-gray-200 shadow-sm flex-shrink-0">
@@ -184,8 +211,8 @@
                                 </div>
                             </div>
                             <div class="flex items-center gap-1.5 flex-shrink-0">
-                                <button type="button" onclick="document.getElementById('createFotoInput').click()" class="px-2.5 py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-50 rounded-xl border border-blue-200">
-                                    Ganti
+                                <button type="button" onclick="startCreateCamera()" class="px-2.5 py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-50 rounded-xl border border-blue-200">
+                                    Foto Ulang
                                 </button>
                                 <button type="button" onclick="removeCreatePhoto()" class="px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl border border-rose-200">
                                     Hapus
@@ -383,7 +410,7 @@
             <div>
                 <label class="block text-xs font-bold text-gray-700 uppercase mb-1 flex items-center justify-between">
                     <span>Dokumentasi Foto</span>
-                    <span class="text-[10px] text-gray-400 font-normal lowercase">Max 5MB (JPG, PNG, WEBP)</span>
+                    <span class="text-[10px] text-gray-400 font-normal">Max 2MB • Dikompres otomatis</span>
                 </label>
 
                 <!-- Existing Photo Preview -->
@@ -403,18 +430,45 @@
                     </button>
                 </div>
 
-                <!-- Upload New / Replacement Photo -->
-                <div class="border border-dashed border-gray-300 rounded-xl p-2.5 bg-gray-50/50 hover:bg-blue-50/20 transition-colors">
-                    <input type="file" name="foto_dokumentasi" id="editFotoInput" accept="image/jpeg,image/png,image/jpg,image/webp" class="hidden" onchange="handleEditPhotoSelect(this)">
+                <!-- Camera Live View Box for Edit Modal -->
+                <div id="editCameraContainer" class="hidden mb-2.5 p-3 bg-gray-900 rounded-xl space-y-3">
+                    <div class="relative overflow-hidden rounded-lg bg-black">
+                        <video id="editVideo" autoplay playsinline class="w-full h-44 object-cover"></video>
+                        <span class="absolute top-2 left-2 px-2 py-0.5 bg-rose-600/90 text-white text-[10px] font-bold rounded-md flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span> KAMERA AKTIF
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-center gap-2">
+                        <button type="button" onclick="takeEditSnapshot()" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow transition flex items-center gap-1.5">
+                            <i class="fas fa-circle text-rose-400"></i> Ambil Foto
+                        </button>
+                        <button type="button" onclick="switchEditCamera()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold rounded-xl transition flex items-center gap-1">
+                            <i class="fas fa-sync-alt"></i> Putar
+                        </button>
+                        <button type="button" onclick="stopEditCamera()" class="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-200 text-xs font-semibold rounded-xl transition flex items-center gap-1">
+                            <i class="fas fa-times"></i> Batal
+                        </button>
+                    </div>
+                    <canvas id="editCanvas" class="hidden"></canvas>
+                </div>
+
+                <!-- Upload New / Replacement Photo Controls -->
+                <div class="border border-dashed border-gray-300 rounded-xl p-3 bg-gray-50/50 hover:border-blue-400 transition-colors">
+                    <input type="file" name="foto_dokumentasi" id="editFotoInput" accept="image/*" class="hidden" onchange="handleEditPhotoSelect(this)">
                     
-                    <div id="editUploadPlaceholder" class="flex items-center justify-between gap-2">
-                        <div class="flex items-center space-x-2.5 min-w-0">
+                    <div id="editUploadPlaceholder" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div class="flex items-center space-x-2 min-w-0">
                             <i class="fas fa-camera text-gray-400 text-sm flex-shrink-0"></i>
                             <span class="text-xs text-gray-600 truncate" id="editUploadLabel">Unggah / ganti foto</span>
                         </div>
-                        <button type="button" onclick="document.getElementById('editFotoInput').click()" class="px-3 py-1 text-xs font-semibold bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-lg shadow-sm flex-shrink-0">
-                            Pilih File
-                        </button>
+                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                            <button type="button" onclick="startEditCamera()" class="px-2.5 py-1 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm">
+                                <i class="fas fa-camera mr-1"></i> Kamera
+                            </button>
+                            <button type="button" onclick="document.getElementById('editFotoInput').click()" class="px-2.5 py-1 text-xs font-semibold bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-lg shadow-sm">
+                                <i class="fas fa-upload mr-1 text-blue-600"></i> Pilih File
+                            </button>
+                        </div>
                     </div>
 
                     <div id="editPreviewContainer" class="hidden flex items-center justify-between gap-2">
@@ -422,7 +476,7 @@
                             <img id="editPreviewImg" src="" alt="Preview Baru" class="w-10 h-10 rounded-lg object-cover border border-gray-200 flex-shrink-0">
                             <div class="min-w-0">
                                 <p id="editFileName" class="text-xs font-bold text-gray-800 truncate"></p>
-                                <p class="text-[10px] text-emerald-600 font-medium">Foto baru terpilih</p>
+                                <p id="editFileSize" class="text-[10px] text-emerald-600 font-medium"></p>
                             </div>
                         </div>
                         <button type="button" onclick="removeEditPhoto()" class="px-2 py-1 text-[11px] font-semibold text-rose-600 hover:bg-rose-50 rounded-lg border border-rose-200 flex-shrink-0">
@@ -468,8 +522,15 @@
 </div>
 <?= $this->endSection() ?>
 
+<?= view('components/upload_script') ?>
+
 <?= $this->section('scripts') ?>
 <script>
+let createStream = null;
+let editStream = null;
+let createFacingMode = 'environment';
+let editFacingMode = 'environment';
+
 function selectStudent(id) {
     document.getElementById('formSiswaId').value = id;
     document.getElementById('formCatatan').focus();
@@ -483,29 +544,124 @@ function filterMentees(query) {
     });
 }
 
-// Handle create photo selection
+// -------------------------------------------------------------
+// CAMERA HANDLING: CREATE FORM
+// -------------------------------------------------------------
+async function startCreateCamera() {
+    try {
+        stopCreateCamera();
+        const constraints = {
+            video: {
+                facingMode: createFacingMode,
+                width: { ideal: 1920 },
+                height: { ideal: 1080 }
+            }
+        };
+        createStream = await navigator.mediaDevices.getUserMedia(constraints);
+        const videoEl = document.getElementById('createVideo');
+        videoEl.srcObject = createStream;
+        document.getElementById('createCameraContainer').classList.remove('hidden');
+        document.getElementById('createUploadPlaceholder').classList.add('hidden');
+    } catch (err) {
+        console.error('Error starting camera:', err);
+        alert('Tidak dapat mengakses kamera. Pastikan Anda telah memberikan izin kamera pada peramban/browser.');
+    }
+}
+
+function stopCreateCamera() {
+    if (createStream) {
+        createStream.getTracks().forEach(track => track.stop());
+        createStream = null;
+    }
+    const container = document.getElementById('createCameraContainer');
+    if (container) container.classList.add('hidden');
+    const placeholder = document.getElementById('createUploadPlaceholder');
+    const preview = document.getElementById('createPreviewContainer');
+    if (placeholder && (!preview || preview.classList.contains('hidden'))) {
+        placeholder.classList.remove('hidden');
+    }
+}
+
+function switchCreateCamera() {
+    createFacingMode = createFacingMode === 'environment' ? 'user' : 'environment';
+    startCreateCamera();
+}
+
+function takeCreateSnapshot() {
+    const video = document.getElementById('createVideo');
+    const canvas = document.getElementById('createCanvas');
+    if (!video || !canvas || video.videoWidth === 0) return;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob(function(blob) {
+        if (!blob) return;
+        const originalFile = new File([blob], 'kamera_dokumentasi_' + Date.now() + '.jpg', {
+            type: 'image/jpeg',
+            lastModified: Date.now()
+        });
+
+        // Apply compression utility
+        compressImage(originalFile, function(compressedFile) {
+            const input = document.getElementById('createFotoInput');
+            const dt = new DataTransfer();
+            dt.items.add(compressedFile);
+            input.files = dt.files;
+
+            const origKb = (originalFile.size / 1024).toFixed(1);
+            const compKb = (compressedFile.size / 1024).toFixed(1);
+
+            document.getElementById('createPreviewImg').src = URL.createObjectURL(compressedFile);
+            document.getElementById('createFileName').textContent = compressedFile.name;
+            document.getElementById('createFileSize').textContent = compKb + ' KB' + (compressedFile.size < originalFile.size ? ' (dikompres dari ' + origKb + ' KB)' : '');
+
+            stopCreateCamera();
+            document.getElementById('createUploadPlaceholder').classList.add('hidden');
+            document.getElementById('createPreviewContainer').classList.remove('hidden');
+        });
+    }, 'image/jpeg', 0.9);
+}
+
+// -------------------------------------------------------------
+// FILE PICKER HANDLING: CREATE FORM
+// -------------------------------------------------------------
 function handleCreatePhotoSelect(input) {
     if (input.files && input.files[0]) {
         const file = input.files[0];
-        if (file.size > 5 * 1024 * 1024) {
-            alert('Ukuran file foto melebihi 5MB. Silakan pilih foto dengan ukuran lebih kecil.');
-            input.value = '';
-            return;
+        if (file.size > 2 * 1024 * 1024) {
+            alert('Ukuran file foto melebihi batas 2MB. Sistem akan mengompres foto secara otomatis.');
         }
 
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('createPreviewImg').src = e.target.result;
+        compressImage(file, function(compressedFile) {
+            if (compressedFile.size > 2 * 1024 * 1024) {
+                alert('Foto masih melebihi 2MB setelah kompresi. Silakan gunakan foto lain.');
+                input.value = '';
+                return;
+            }
+
+            const dt = new DataTransfer();
+            dt.items.add(compressedFile);
+            input.files = dt.files;
+
+            const origKb = (file.size / 1024).toFixed(1);
+            const compKb = (compressedFile.size / 1024).toFixed(1);
+
+            document.getElementById('createPreviewImg').src = URL.createObjectURL(compressedFile);
             document.getElementById('createFileName').textContent = file.name;
-            document.getElementById('createFileSize').textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+            document.getElementById('createFileSize').textContent = compKb + ' KB' + (compressedFile.size < file.size ? ' (dikompres dari ' + origKb + ' KB)' : '');
+
+            stopCreateCamera();
             document.getElementById('createUploadPlaceholder').classList.add('hidden');
             document.getElementById('createPreviewContainer').classList.remove('hidden');
-        };
-        reader.readAsDataURL(file);
+        });
     }
 }
 
 function removeCreatePhoto() {
+    stopCreateCamera();
     const input = document.getElementById('createFotoInput');
     input.value = '';
     document.getElementById('createPreviewImg').src = '';
@@ -513,35 +669,136 @@ function removeCreatePhoto() {
     document.getElementById('createUploadPlaceholder').classList.remove('hidden');
 }
 
-// Handle edit photo selection
-function handleEditPhotoSelect(input) {
-    if (input.files && input.files[0]) {
-        const file = input.files[0];
-        if (file.size > 5 * 1024 * 1024) {
-            alert('Ukuran file foto melebihi 5MB. Silakan pilih foto dengan ukuran lebih kecil.');
-            input.value = '';
-            return;
-        }
+// -------------------------------------------------------------
+// CAMERA HANDLING: EDIT FORM
+// -------------------------------------------------------------
+async function startEditCamera() {
+    try {
+        stopEditCamera();
+        const constraints = {
+            video: {
+                facingMode: editFacingMode,
+                width: { ideal: 1920 },
+                height: { ideal: 1080 }
+            }
+        };
+        editStream = await navigator.mediaDevices.getUserMedia(constraints);
+        const videoEl = document.getElementById('editVideo');
+        videoEl.srcObject = editStream;
+        document.getElementById('editCameraContainer').classList.remove('hidden');
+        document.getElementById('editUploadPlaceholder').classList.add('hidden');
+    } catch (err) {
+        console.error('Error starting camera:', err);
+        alert('Tidak dapat mengakses kamera. Pastikan Anda telah memberikan izin kamera pada peramban/browser.');
+    }
+}
 
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('editPreviewImg').src = e.target.result;
-            document.getElementById('editFileName').textContent = file.name;
-            document.getElementById('editUploadPlaceholder').classList.add('hidden');
-            document.getElementById('editPreviewContainer').classList.remove('hidden');
-            
-            // Uncheck delete existing photo if user selects new photo
+function stopEditCamera() {
+    if (editStream) {
+        editStream.getTracks().forEach(track => track.stop());
+        editStream = null;
+    }
+    const container = document.getElementById('editCameraContainer');
+    if (container) container.classList.add('hidden');
+    const placeholder = document.getElementById('editUploadPlaceholder');
+    const preview = document.getElementById('editPreviewContainer');
+    if (placeholder && (!preview || preview.classList.contains('hidden'))) {
+        placeholder.classList.remove('hidden');
+    }
+}
+
+function switchEditCamera() {
+    editFacingMode = editFacingMode === 'environment' ? 'user' : 'environment';
+    startEditCamera();
+}
+
+function takeEditSnapshot() {
+    const video = document.getElementById('editVideo');
+    const canvas = document.getElementById('editCanvas');
+    if (!video || !canvas || video.videoWidth === 0) return;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob(function(blob) {
+        if (!blob) return;
+        const originalFile = new File([blob], 'kamera_edit_' + Date.now() + '.jpg', {
+            type: 'image/jpeg',
+            lastModified: Date.now()
+        });
+
+        // Apply compression utility
+        compressImage(originalFile, function(compressedFile) {
+            const input = document.getElementById('editFotoInput');
+            const dt = new DataTransfer();
+            dt.items.add(compressedFile);
+            input.files = dt.files;
+
+            const origKb = (originalFile.size / 1024).toFixed(1);
+            const compKb = (compressedFile.size / 1024).toFixed(1);
+
+            document.getElementById('editPreviewImg').src = URL.createObjectURL(compressedFile);
+            document.getElementById('editFileName').textContent = compressedFile.name;
+            document.getElementById('editFileSize').textContent = compKb + ' KB' + (compressedFile.size < originalFile.size ? ' (dikompres dari ' + origKb + ' KB)' : '');
+
             const deleteCb = document.getElementById('editHapusFoto');
             if (deleteCb) {
                 deleteCb.checked = false;
                 toggleDeletePhoto(false);
             }
-        };
-        reader.readAsDataURL(file);
+
+            stopEditCamera();
+            document.getElementById('editUploadPlaceholder').classList.add('hidden');
+            document.getElementById('editPreviewContainer').classList.remove('hidden');
+        });
+    }, 'image/jpeg', 0.9);
+}
+
+// -------------------------------------------------------------
+// FILE PICKER HANDLING: EDIT FORM
+// -------------------------------------------------------------
+function handleEditPhotoSelect(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        if (file.size > 2 * 1024 * 1024) {
+            alert('Ukuran file foto melebihi batas 2MB. Sistem akan mengompres foto secara otomatis.');
+        }
+
+        compressImage(file, function(compressedFile) {
+            if (compressedFile.size > 2 * 1024 * 1024) {
+                alert('Foto masih melebihi 2MB setelah kompresi. Silakan gunakan foto lain.');
+                input.value = '';
+                return;
+            }
+
+            const dt = new DataTransfer();
+            dt.items.add(compressedFile);
+            input.files = dt.files;
+
+            const origKb = (file.size / 1024).toFixed(1);
+            const compKb = (compressedFile.size / 1024).toFixed(1);
+
+            document.getElementById('editPreviewImg').src = URL.createObjectURL(compressedFile);
+            document.getElementById('editFileName').textContent = file.name;
+            document.getElementById('editFileSize').textContent = compKb + ' KB' + (compressedFile.size < file.size ? ' (dikompres dari ' + origKb + ' KB)' : '');
+
+            const deleteCb = document.getElementById('editHapusFoto');
+            if (deleteCb) {
+                deleteCb.checked = false;
+                toggleDeletePhoto(false);
+            }
+
+            stopEditCamera();
+            document.getElementById('editUploadPlaceholder').classList.add('hidden');
+            document.getElementById('editPreviewContainer').classList.remove('hidden');
+        });
     }
 }
 
 function removeEditPhoto() {
+    stopEditCamera();
     const input = document.getElementById('editFotoInput');
     input.value = '';
     document.getElementById('editPreviewImg').src = '';
@@ -561,6 +818,9 @@ function toggleDeletePhoto(checked) {
 }
 
 function openEditModal(id, tanggal, siswaId, jenis, catatan, tindakLanjut, fotoDokumentasi) {
+    stopCreateCamera();
+    stopEditCamera();
+
     document.getElementById('editForm').action = '<?= base_url('guru/jurnal-wali/update') ?>/' + id;
     document.getElementById('editTanggal').value = tanggal;
     document.getElementById('editSiswaId').value = siswaId;
@@ -568,7 +828,6 @@ function openEditModal(id, tanggal, siswaId, jenis, catatan, tindakLanjut, fotoD
     document.getElementById('editCatatan').value = catatan;
     document.getElementById('editTindakLanjut').value = tindakLanjut;
 
-    // Reset photo inputs
     removeEditPhoto();
     const deleteCb = document.getElementById('editHapusFoto');
     if (deleteCb) {
@@ -594,6 +853,7 @@ function openEditModal(id, tanggal, siswaId, jenis, catatan, tindakLanjut, fotoD
 }
 
 function closeEditModal() {
+    stopEditCamera();
     document.getElementById('editModal').classList.add('hidden');
 }
 
@@ -611,5 +871,11 @@ function closePhotoModal(event) {
         document.getElementById('photoModalImg').src = '';
     }
 }
+
+// Stop camera streams when user leaves or hides page
+window.addEventListener('beforeunload', () => {
+    stopCreateCamera();
+    stopEditCamera();
+});
 </script>
 <?= $this->endSection() ?>

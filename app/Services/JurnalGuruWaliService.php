@@ -56,7 +56,7 @@ class JurnalGuruWaliService
         helper(['security', 'image']);
 
         $allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
-        $validation   = validate_file_upload($file, $allowedTypes, 5242880); // 5MB
+        $validation   = validate_file_upload($file, $allowedTypes, 2097152); // 2MB
 
         if (!$validation['valid']) {
             throw new \RuntimeException($validation['error']);
