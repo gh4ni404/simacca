@@ -1,4 +1,4 @@
-<?= $this->extend(get_device_layout()) ?> 
+<?= $this->extend(get_device_layout()) ?>
 
 <?= $this->section('content') ?>
 <div class="space-y-6">
