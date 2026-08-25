@@ -329,6 +329,12 @@ if (!function_exists('get_sidebar_menu')) {
                     'url' => '/guru/jurnal-piket',
                     'active' => ['guru/jurnal-piket']
                 ],
+                [
+                    'title' => 'Jurnal Guru Wali',
+                    'icon' => 'fas fa-hands-helping',
+                    'url' => '/guru/jurnal-wali',
+                    'active' => ['guru/jurnal-wali*']
+                ],
 
                 [
                     'title' => 'Praktik Kerja Lapangan',
@@ -388,6 +394,12 @@ if (!function_exists('get_sidebar_menu')) {
                     'url' => 'walikelas/izin'
                 ],
                 [
+                    'title' => 'Jurnal Guru Wali',
+                    'icon' => 'fas fa-hands-helping',
+                    'url' => '/guru/jurnal-wali',
+                    'active' => ['guru/jurnal-wali*']
+                ],
+                [
                     'title' => 'Laporan',
                     'icon' => 'fas fa-chart-bar',
                     'url' => '/walikelas/laporan'
@@ -416,6 +428,10 @@ if (!function_exists('get_sidebar_menu')) {
                         [
                             'title' => 'Jurnal KBM',
                             'url' => '/guru/jurnal'
+                        ],
+                        [
+                            'title' => 'Jurnal Guru Wali',
+                            'url' => '/guru/jurnal-wali'
                         ]
                     ]
                 ],

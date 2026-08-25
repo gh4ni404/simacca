@@ -389,6 +389,13 @@ $routes->group('guru', ['filter' => 'role:guru_mapel,wakakur,tendik'], function 
     // Laporan Absensi Shalat
     $routes->get('laporan/absensi-shalat', 'Guru\LaporanAbsensiShalatController::index');
     $routes->get('laporan/absensi-shalat/print', 'Guru\LaporanAbsensiShalatController::print');
+
+    // Jurnal Guru Wali (Bimbingan Siswa Personal)
+    $routes->get('jurnal-wali', 'Guru\JurnalGuruWaliController::index', ['as' => 'guru.jurnal_wali']);
+    $routes->post('jurnal-wali/simpan', 'Guru\JurnalGuruWaliController::store');
+    $routes->post('jurnal-wali/update/(:num)', 'Guru\JurnalGuruWaliController::update/$1');
+    $routes->post('jurnal-wali/hapus/(:num)', 'Guru\JurnalGuruWaliController::delete/$1');
+    $routes->get('jurnal-wali/cetak', 'Guru\JurnalGuruWaliController::print');
 });
 
 // Wali Kelas Routes

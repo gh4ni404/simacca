@@ -40,9 +40,9 @@ class GuruWaliSiswaModel extends Model
     ];
 
     /**
-     * Get all active students for a given academic year with their assigned Guru Wali (if any)
+     * Get all active students with their assigned Guru Wali (continuous mentorship)
      */
-    public function getSiswaWithGuruWali(string $tahunAjaran, array $filters = []): array
+    public function getSiswaWithGuruWali(?string $tahunAjaran = null, array $filters = []): array
     {
         $db = \Config\Database::connect();
         $builder = $db->table('siswa s')
@@ -69,13 +69,16 @@ class GuruWaliSiswaModel extends Model
             ')
             ->join('kelas k', 'k.id = s.kelas_id', 'left')
             ->join('users u_s', 'u_s.id = s.user_id', 'left')
-            ->join('guru_wali_siswa gws', "gws.siswa_id = s.id AND gws.tahun_ajaran = '{$tahunAjaran}' AND gws.deleted_at IS NULL", 'left')
+            ->join('guru_wali_siswa gws', "gws.siswa_id = s.id AND gws.deleted_at IS NULL", 'left')
             ->join('guru g', 'g.id = gws.guru_id AND g.deleted_at IS NULL', 'left')
             ->join('users u_g', 'u_g.id = g.user_id', 'left')
             ->join('mata_pelajaran mp', 'mp.id = g.mata_pelajaran_id', 'left')
-            ->where('s.tahun_ajaran', $tahunAjaran)
             ->where('s.deleted_at IS NULL')
             ->where('u_s.is_active', 1);
+
+        if (!empty($tahunAjaran)) {
+            $builder->where('s.tahun_ajaran', $tahunAjaran);
+        }
 
         // Apply filters
         if (!empty($filters['kelas_id'])) {
@@ -120,7 +123,7 @@ class GuruWaliSiswaModel extends Model
     /**
      * Get summary of all teachers and the count of their assigned students
      */
-    public function getGuruWaliSummary(string $tahunAjaran, ?string $search = null): array
+    public function getGuruWaliSummary(?string $tahunAjaran = null, ?string $search = null): array
     {
         $db = \Config\Database::connect();
         
@@ -133,11 +136,13 @@ class GuruWaliSiswaModel extends Model
                 u.profile_photo,
                 u.email,
                 mp.nama_mapel,
-                COUNT(gws.id) as total_siswa_wali
+                COUNT(DISTINCT gws.siswa_id) as total_siswa_wali
             ')
             ->join('users u', 'u.id = g.user_id', 'left')
             ->join('mata_pelajaran mp', 'mp.id = g.mata_pelajaran_id', 'left')
-            ->join('guru_wali_siswa gws', "gws.guru_id = g.id AND gws.tahun_ajaran = '{$tahunAjaran}' AND gws.deleted_at IS NULL", 'left')
+            ->join('guru_wali_siswa gws', "gws.guru_id = g.id AND gws.deleted_at IS NULL", 'left')
+            ->join('siswa s', 's.id = gws.siswa_id AND s.deleted_at IS NULL', 'left')
+            ->join('users u_s', 'u_s.id = s.user_id AND u_s.is_active = 1', 'left')
             ->where('g.deleted_at IS NULL')
             ->where('u.is_active', 1)
             ->groupBy('g.id');
@@ -158,12 +163,12 @@ class GuruWaliSiswaModel extends Model
     }
 
     /**
-     * Get list of students assigned to a specific Guru Wali
+     * Get list of active students assigned to a specific Guru Wali until graduation
      */
-    public function getSiswaByGuru(int $guruId, string $tahunAjaran): array
+    public function getSiswaByGuru(int $guruId, ?string $tahunAjaran = null): array
     {
         $db = \Config\Database::connect();
-        return $db->table('guru_wali_siswa gws')
+        $builder = $db->table('guru_wali_siswa gws')
             ->select('
                 gws.id as mapping_id,
                 gws.keterangan,
@@ -172,6 +177,8 @@ class GuruWaliSiswaModel extends Model
                 s.nis,
                 s.nama_lengkap as nama_siswa,
                 s.jenis_kelamin,
+                s.tahun_ajaran,
+                k.id as kelas_id,
                 k.nama_kelas,
                 k.tingkat,
                 k.jurusan,
@@ -182,10 +189,15 @@ class GuruWaliSiswaModel extends Model
             ->join('kelas k', 'k.id = s.kelas_id', 'left')
             ->join('users u', 'u.id = s.user_id', 'left')
             ->where('gws.guru_id', $guruId)
-            ->where('gws.tahun_ajaran', $tahunAjaran)
             ->where('gws.deleted_at IS NULL')
             ->where('s.deleted_at IS NULL')
-            ->orderBy('k.nama_kelas ASC, s.nama_lengkap ASC')
+            ->where('u.is_active', 1);
+
+        if (!empty($tahunAjaran)) {
+            $builder->where('s.tahun_ajaran', $tahunAjaran);
+        }
+
+        return $builder->orderBy('k.tingkat ASC, k.nama_kelas ASC, s.nama_lengkap ASC')
             ->get()
             ->getResultArray();
     }
@@ -193,33 +205,44 @@ class GuruWaliSiswaModel extends Model
     /**
      * Get statistics for Guru Wali monitoring
      */
-    public function getStats(string $tahunAjaran): array
+    public function getStats(?string $tahunAjaran = null): array
     {
         $db = \Config\Database::connect();
 
-        // Total active students in this academic year
-        $totalSiswa = $db->table('siswa s')
+        // Total active students
+        $totalSiswaQuery = $db->table('siswa s')
             ->join('users u', 'u.id = s.user_id', 'left')
-            ->where('s.tahun_ajaran', $tahunAjaran)
             ->where('s.deleted_at IS NULL')
-            ->where('u.is_active', 1)
-            ->countAllResults();
+            ->where('u.is_active', 1);
 
-        // Total assigned students
-        $totalAssigned = $db->table('guru_wali_siswa gws')
+        if (!empty($tahunAjaran)) {
+            $totalSiswaQuery->where('s.tahun_ajaran', $tahunAjaran);
+        }
+        $totalSiswa = $totalSiswaQuery->countAllResults();
+
+        // Total assigned active students
+        $totalAssignedQuery = $db->table('guru_wali_siswa gws')
             ->join('siswa s', 's.id = gws.siswa_id')
-            ->where('gws.tahun_ajaran', $tahunAjaran)
+            ->join('users u', 'u.id = s.user_id', 'left')
             ->where('gws.deleted_at IS NULL')
             ->where('s.deleted_at IS NULL')
-            ->countAllResults();
+            ->where('u.is_active', 1);
+
+        if (!empty($tahunAjaran)) {
+            $totalAssignedQuery->where('s.tahun_ajaran', $tahunAjaran);
+        }
+        $totalAssigned = $totalAssignedQuery->countAllResults();
 
         $totalUnassigned = max(0, $totalSiswa - $totalAssigned);
 
         // Total distinct teachers who have at least 1 student
         $totalGuruWali = $db->table('guru_wali_siswa gws')
             ->select('COUNT(DISTINCT gws.guru_id) as total')
-            ->where('gws.tahun_ajaran', $tahunAjaran)
+            ->join('siswa s', 's.id = gws.siswa_id')
+            ->join('users u', 'u.id = s.user_id', 'left')
             ->where('gws.deleted_at IS NULL')
+            ->where('s.deleted_at IS NULL')
+            ->where('u.is_active', 1)
             ->get()
             ->getRowArray()['total'] ?? 0;
 
@@ -245,22 +268,22 @@ class GuruWaliSiswaModel extends Model
     }
 
     /**
-     * Assign or update a student to a Guru Wali for an academic year
+     * Assign or update a student to a Guru Wali (continuous mentorship)
      */
-    public function assignSiswa(int $siswaId, int $guruId, string $tahunAjaran, ?string $keterangan = null): bool
+    public function assignSiswa(int $siswaId, int $guruId, ?string $tahunAjaran = null, ?string $keterangan = null): bool
     {
-        // Check if there is an existing record (including soft-deleted)
+        // Check if there is an existing record for this student (including soft-deleted)
         $existing = $this->withDeleted()
             ->where('siswa_id', $siswaId)
-            ->where('tahun_ajaran', $tahunAjaran)
             ->first();
 
         if ($existing) {
             return (bool) $this->update($existing['id'], [
-                'guru_id'    => $guruId,
-                'keterangan' => $keterangan ?? $existing['keterangan'],
-                'deleted_at' => null,
-                'updated_at' => date('Y-m-d H:i:s'),
+                'guru_id'      => $guruId,
+                'tahun_ajaran' => $tahunAjaran ?? $existing['tahun_ajaran'],
+                'keterangan'   => $keterangan ?? $existing['keterangan'],
+                'deleted_at'   => null,
+                'updated_at'   => date('Y-m-d H:i:s'),
             ]);
         }
 
@@ -277,10 +300,9 @@ class GuruWaliSiswaModel extends Model
     /**
      * Unassign a student from their Guru Wali
      */
-    public function unassignSiswa(int $siswaId, string $tahunAjaran): bool
+    public function unassignSiswa(int $siswaId, ?string $tahunAjaran = null): bool
     {
         return (bool) $this->where('siswa_id', $siswaId)
-            ->where('tahun_ajaran', $tahunAjaran)
             ->delete();
     }
 }

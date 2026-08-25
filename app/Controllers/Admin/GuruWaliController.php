@@ -308,8 +308,17 @@ class GuruWaliController extends BaseController
             return redirect()->to('/admin/guru-wali');
         }
 
-        $pengaturanModel = new \App\Models\PengaturanModel();
-        $sekolahInfo = $pengaturanModel->first() ?? [];
+        $settingModel = new \App\Models\SettingModel();
+        $sekolahInfo = [
+            'nama_sekolah'        => $settingModel->get('nama_sekolah') ?: 'SMK NEGERI 1 SIMACCA',
+            'alamat'              => $settingModel->get('alamat_sekolah') ?: 'Jl. Pendidikan No. 1',
+            'telepon'             => $settingModel->get('telepon_sekolah') ?: '-',
+            'email'               => $settingModel->get('email_sekolah') ?: '-',
+            'website'             => $settingModel->get('website_sekolah') ?: 'https://simacca.sch.id',
+            'kepala_sekolah'      => $settingModel->get('kepala_sekolah_nama') ?: 'Kepala Sekolah',
+            'nip_kepala_sekolah'  => $settingModel->get('kepala_sekolah_nip') ?: '-',
+            'kota'                => $settingModel->get('kota_sekolah') ?: 'Kota',
+        ];
 
         $data = [
             'title'        => 'Cetak Daftar Guru Wali & Siswa Binaan',
