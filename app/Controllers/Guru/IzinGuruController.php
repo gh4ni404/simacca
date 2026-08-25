@@ -103,7 +103,7 @@ class IzinGuruController extends BaseController
             'tanggal_selesai' => 'required|valid_date',
             'jenis_izin' => 'required|in_list[izin,sakit,cuti,dinas_luar,lainnya]',
             'alasan' => 'required|min_length[10]',
-            'berkas' => 'permit_empty|uploaded[berkas]|max_size[berkas,2048]|ext_in[berkas,pdf,jpg,jpeg,png]'
+            'berkas' => 'permit_empty|uploaded[berkas]|max_size[berkas,1024]|ext_in[berkas,pdf,jpg,jpeg,png]'
         ];
 
         if (!$this->validate($rules)) {

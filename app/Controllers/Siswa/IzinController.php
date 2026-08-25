@@ -150,7 +150,7 @@ class IzinController extends BaseController
                 'application/pdf'
             ];
             
-            $validation = validate_file_upload($berkas, $allowedTypes, 2097152); // 2MB
+            $validation = validate_file_upload($berkas, $allowedTypes, 1048576); // 1MB
             
             if (!$validation['valid']) {
                 log_message('error', '[IZIN SISWA] File validation failed: ' . $validation['error']);

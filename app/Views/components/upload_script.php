@@ -143,7 +143,7 @@ function fallbackCompress(file, callback) {
  */
 function previewAndCompress(input, options) {
     const opts = Object.assign({
-        maxSizeMB: 5,
+        maxSizeMB: 1,
         previewId: 'preview',
         containerId: 'previewContainer',
         fileNameId: 'fileName',

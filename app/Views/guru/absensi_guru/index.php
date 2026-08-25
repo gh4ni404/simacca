@@ -1245,7 +1245,7 @@
                                         <p class="text-base text-gray-700 font-semibold mb-1">
                                             Upload foto selfie untuk check-in
                                         </p>
-                                        <p class="text-sm text-gray-500">Format: JPG, PNG (Max 5MB)</p>
+                                        <p class="text-sm text-gray-500">Format: JPG, PNG (Max 1MB)</p>
                                     </div>
                                 </label>
                             </div>
@@ -1412,7 +1412,7 @@
                                         <p class="text-base text-gray-700 font-semibold mb-1">
                                             Upload foto untuk check-out (opsional)
                                         </p>
-                                        <p class="text-sm text-gray-500">Format: JPG, PNG (Max 5MB)</p>
+                                        <p class="text-sm text-gray-500">Format: JPG, PNG (Max 1MB)</p>
                                     </div>
                                 </label>
                             </div>

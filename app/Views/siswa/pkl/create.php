@@ -1162,7 +1162,7 @@
     // ═══════════════════════════════════════════════
     function previewImage(input) {
         previewAndCompress(input, {
-            maxSizeMB: 5,
+            maxSizeMB: 1,
             previewId: 'preview',
             containerId: 'previewContainer',
             fileNameId: 'fileName',

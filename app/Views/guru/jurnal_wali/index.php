@@ -152,7 +152,7 @@
                 <div>
                     <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
                         <span>Dokumentasi Foto <span class="text-gray-400 font-normal lowercase">(opsional)</span></span>
-                        <span class="text-[11px] text-gray-400 font-normal">Max 2MB • Dikompres otomatis</span>
+                        <span class="text-[11px] text-gray-400 font-normal">Max 1MB • Dikompres otomatis</span>
                     </label>
                     
                     <div class="border border-dashed border-gray-300 rounded-2xl p-4 bg-gray-50/50 hover:border-blue-400 transition-colors" id="createDropzone">
@@ -410,7 +410,7 @@
             <div>
                 <label class="block text-xs font-bold text-gray-700 uppercase mb-1 flex items-center justify-between">
                     <span>Dokumentasi Foto</span>
-                    <span class="text-[10px] text-gray-400 font-normal">Max 2MB • Dikompres otomatis</span>
+                    <span class="text-[10px] text-gray-400 font-normal">Max 1MB • Dikompres otomatis</span>
                 </label>
 
                 <!-- Existing Photo Preview -->
@@ -630,13 +630,13 @@ function takeCreateSnapshot() {
 function handleCreatePhotoSelect(input) {
     if (input.files && input.files[0]) {
         const file = input.files[0];
-        if (file.size > 2 * 1024 * 1024) {
-            alert('Ukuran file foto melebihi batas 2MB. Sistem akan mengompres foto secara otomatis.');
+        if (file.size > 1 * 1024 * 1024) {
+            alert('Ukuran file foto melebihi batas 1MB. Sistem akan mengompres foto secara otomatis.');
         }
 
         compressImage(file, function(compressedFile) {
-            if (compressedFile.size > 2 * 1024 * 1024) {
-                alert('Foto masih melebihi 2MB setelah kompresi. Silakan gunakan foto lain.');
+            if (compressedFile.size > 1 * 1024 * 1024) {
+                alert('Foto masih melebihi 1MB setelah kompresi. Silakan gunakan foto lain.');
                 input.value = '';
                 return;
             }
@@ -761,13 +761,13 @@ function takeEditSnapshot() {
 function handleEditPhotoSelect(input) {
     if (input.files && input.files[0]) {
         const file = input.files[0];
-        if (file.size > 2 * 1024 * 1024) {
-            alert('Ukuran file foto melebihi batas 2MB. Sistem akan mengompres foto secara otomatis.');
+        if (file.size > 1 * 1024 * 1024) {
+            alert('Ukuran file foto melebihi batas 1MB. Sistem akan mengompres foto secara otomatis.');
         }
 
         compressImage(file, function(compressedFile) {
-            if (compressedFile.size > 2 * 1024 * 1024) {
-                alert('Foto masih melebihi 2MB setelah kompresi. Silakan gunakan foto lain.');
+            if (compressedFile.size > 1 * 1024 * 1024) {
+                alert('Foto masih melebihi 1MB setelah kompresi. Silakan gunakan foto lain.');
                 input.value = '';
                 return;
             }

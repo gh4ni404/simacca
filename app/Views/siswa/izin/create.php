@@ -193,7 +193,7 @@ function displayFileName(input) {
     if (input.files && input.files[0]) {
         const file = input.files[0];
         const fileSize = (file.size / 1024 / 1024).toFixed(2);
-        if (fileSize > 2) { alert('Ukuran file terlalu besar! Maksimal 2MB'); input.value = ''; fileName.textContent = ''; return; }
+        if (fileSize > 1) { alert('Ukuran file terlalu besar! Maksimal 1MB'); input.value = ''; fileName.textContent = ''; return; }
         if (file.type.startsWith('image/')) {
             compressImage(file, function(compressedFile) {
                 const dt = new DataTransfer();

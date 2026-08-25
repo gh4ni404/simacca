@@ -108,7 +108,7 @@
                                     <i class="fas fa-camera"></i>
                                 </div>
                                 <p class="text-sm font-bold text-gray-700">Klik untuk mengunggah foto dokumentasi</p>
-                                <p class="text-xs text-gray-400 mt-1">Format: JPG, JPEG, PNG, WEBP &bull; Maksimal: 2 MB per foto &bull; Maksimal 4 foto</p>
+                                <p class="text-xs text-gray-400 mt-1">Format: JPG, JPEG, PNG, WEBP &bull; Maksimal: 1 MB per foto &bull; Maksimal 4 foto</p>
                             </div>
                         </label>
 
@@ -354,11 +354,11 @@ async function addFiles(fileList) {
                 file = await compressImage(file, 900);
             }
 
-            if (file.size > 2 * 1024 * 1024) {
+            if (file.size > 1 * 1024 * 1024) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Ukuran Foto Terlalu Besar',
-                    html: '<p class="text-sm text-gray-600">File <b>' + file.name + '</b> masih melebihi batas 2 MB setelah kompresi.</p>',
+                    html: '<p class="text-sm text-gray-600">File <b>' + file.name + '</b> masih melebihi batas 1 MB setelah kompresi.</p>',
                     confirmButtonColor: '#4F46E5',
                     customClass: {
                         popup: 'rounded-2xl shadow-2xl border border-gray-100',

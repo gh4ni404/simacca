@@ -124,7 +124,7 @@ class JurnalController extends BaseController
         $rules = [
             'absensi_id' => 'required|numeric',
             'kegiatan_pembelajaran' => 'required',
-            'foto_dokumentasi' => 'permit_empty|uploaded[foto_dokumentasi]|max_size[foto_dokumentasi,5120]|is_image[foto_dokumentasi]'
+            'foto_dokumentasi' => 'permit_empty|uploaded[foto_dokumentasi]|max_size[foto_dokumentasi,1024]|is_image[foto_dokumentasi]'
         ];
 
         if (!$this->validate($rules)) {
@@ -161,7 +161,7 @@ class JurnalController extends BaseController
                 'image/gif'
             ];
             
-            $validation = validate_file_upload($file, $allowedTypes, 5242880); // 5MB
+            $validation = validate_file_upload($file, $allowedTypes, 1048576); // 1MB
             
             if (!$validation['valid']) {
                 session()->setFlashdata('error', '📁 ' . $validation['error']);
@@ -361,10 +361,10 @@ class JurnalController extends BaseController
             log_message('info', '[JURNAL UPDATE] Processing file upload - Name: ' . $file->getName() . ', Size: ' . $file->getSize() . ', Type: ' . $file->getMimeType());
             
             // Additional validation for file size and type
-            if ($file->getSize() > 5242880) {
+            if ($file->getSize() > 1048576) {
                 $sizeMB = round($file->getSize() / 1048576, 2);
                 log_message('error', '[JURNAL UPDATE] File too large: ' . $file->getSize());
-                session()->setFlashdata('error', '📦 File kegedean nih (' . $sizeMB . 'MB). Maks 5MB ya. Kompres atau pilih file lain 😅');
+                session()->setFlashdata('error', '📦 File kegedean nih (' . $sizeMB . 'MB). Maks 1MB ya. Kompres atau pilih file lain 😅');
                 return redirect()->back()->withInput();
             }
             
@@ -376,7 +376,7 @@ class JurnalController extends BaseController
                 'image/gif'
             ];
             
-            $validation = validate_file_upload($file, $allowedTypes, 5242880); // 5MB
+            $validation = validate_file_upload($file, $allowedTypes, 1048576); // 1MB
             
             if (!$validation['valid']) {
                 log_message('error', '[JURNAL UPDATE] File validation failed: ' . $validation['error']);

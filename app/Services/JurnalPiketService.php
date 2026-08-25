@@ -173,9 +173,9 @@ class JurnalPiketService extends BaseService
                         return $this->errorResponse('Validasi gagal: Format foto harus JPG, JPEG, PNG, atau WEBP.', $err);
                     }
 
-                    if ($file->getSizeByUnit('mb') > 2) {
-                        $err = ['foto_dokumentasi' => 'Ukuran file foto melebihi batas 2MB. Silakan pilih foto dengan ukuran lebih kecil.'];
-                        return $this->errorResponse('Validasi gagal: Ukuran file foto melebihi 2MB.', $err);
+                    if ($file->getSize() > 1048576) {
+                        $err = ['foto_dokumentasi' => 'Ukuran file foto melebihi batas 1MB. Silakan pilih foto dengan ukuran lebih kecil.'];
+                        return $this->errorResponse('Validasi gagal: Ukuran file foto melebihi 1MB.', $err);
                     }
 
                     $uploadPath = WRITEPATH . 'uploads/jurnal_piket';
@@ -312,9 +312,9 @@ class JurnalPiketService extends BaseService
                         return $this->errorResponse('Validasi gagal: Format foto harus JPG, JPEG, PNG, atau WEBP.', $err);
                     }
 
-                    if ($file->getSizeByUnit('mb') > 2) {
-                        $err = ['foto_dokumentasi' => 'Ukuran file foto melebihi batas 2MB. Silakan pilih foto dengan ukuran lebih kecil.'];
-                        return $this->errorResponse('Validasi gagal: Ukuran file foto melebihi 2MB.', $err);
+                    if ($file->getSize() > 1048576) {
+                        $err = ['foto_dokumentasi' => 'Ukuran file foto melebihi batas 1MB. Silakan pilih foto dengan ukuran lebih kecil.'];
+                        return $this->errorResponse('Validasi gagal: Ukuran file foto melebihi 1MB.', $err);
                     }
 
                     if (!is_dir($uploadPath)) {

@@ -381,9 +381,9 @@ class JurnalKbmService extends BaseService
                 return $this->error('Tipe file tidak didukung. Hanya JPG, JPEG, dan PNG yang diperbolehkan');
             }
 
-            // Validate file size (max 5MB)
-            if ($file->getSize() > 5242880) {
-                return $this->error('Ukuran file terlalu besar. Maksimal 5MB');
+            // Validate file size (max 1MB)
+            if ($file->getSize() > 1048576) {
+                return $this->error('Ukuran file terlalu besar. Maksimal 1MB');
             }
 
             // Delete old foto if exists
