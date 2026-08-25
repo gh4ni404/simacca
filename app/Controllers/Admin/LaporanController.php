@@ -28,8 +28,9 @@ class LaporanController extends BaseController
         $this->jadwalModel = new JadwalMengajarModel();
         $this->dashboardModel = new DashboardModel();
 
-        // Cek role admin
-        if (!session()->get('isLoggedIn') || session()->get('role') !== 'admin') {
+        // Cek role admin & kepala sekolah
+        $role = session()->get('role');
+        if (!session()->get('isLoggedIn') || !in_array($role, ['admin', 'kepala_sekolah'])) {
             return redirect()->to('/access-denied');
         }
     }

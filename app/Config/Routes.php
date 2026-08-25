@@ -269,6 +269,12 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('jurnal-piket/detail/(:num)', 'Admin\JurnalPiketController::detail/$1', ['filter' => 'role:admin,kepala_sekolah']);
     $routes->get('jurnal-piket/print', 'Admin\JurnalPiketController::print', ['filter' => 'role:admin,kepala_sekolah']);
 
+    // Laporan Admin
+    $routes->get('laporan/absensi', 'Admin\LaporanController::absensi', ['filter' => 'role:admin,kepala_sekolah']);
+    $routes->get('laporan/absensi-detail', 'Admin\LaporanController::absensiDetail', ['filter' => 'role:admin,kepala_sekolah']);
+    $routes->get('laporan/absensi-detail/print', 'Admin\LaporanController::printAbsensiDetail', ['filter' => 'role:admin,kepala_sekolah']);
+    $routes->get('laporan/statistik', 'Admin\LaporanController::statistik', ['filter' => 'role:admin,kepala_sekolah']);
+
     // Laporan Absensi Shalat
     $routes->get('laporan/absensi-shalat', 'Admin\LaporanAbsensiShalatController::index', ['filter' => 'role:admin,kepala_sekolah']);
     $routes->get('laporan/absensi-shalat/print', 'Admin\LaporanAbsensiShalatController::print', ['filter' => 'role:admin,kepala_sekolah']);
