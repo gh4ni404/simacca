@@ -133,6 +133,17 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('kelas/export', 'Admin\KelasController::export', ['filter' => 'role:admin']);
     $routes->get('kelas/statistics', 'Admin\KelasController::statistics', ['filter' => 'role:admin,kepala_sekolah']);
 
+    // Master Guru Wali (Pembimbing Siswa Personal)
+    $routes->get('guru-wali', 'Admin\GuruWaliController::index', ['filter' => 'role:admin,kepala_sekolah']);
+    $routes->post('guru-wali/assign', 'Admin\GuruWaliController::assign', ['filter' => 'role:admin']);
+    $routes->post('guru-wali/bulk-assign', 'Admin\GuruWaliController::bulkAssign', ['filter' => 'role:admin']);
+    $routes->post('guru-wali/auto-distribute', 'Admin\GuruWaliController::autoDistribute', ['filter' => 'role:admin']);
+    $routes->post('guru-wali/unassign/(:num)', 'Admin\GuruWaliController::unassign/$1', ['filter' => 'role:admin']);
+    $routes->post('guru-wali/bulk-unassign', 'Admin\GuruWaliController::bulkUnassign', ['filter' => 'role:admin']);
+    $routes->get('guru-wali/siswa-by-guru/(:num)', 'Admin\GuruWaliController::getSiswaByGuru/$1', ['filter' => 'role:admin,kepala_sekolah']);
+    $routes->get('guru-wali/print', 'Admin\GuruWaliController::print', ['filter' => 'role:admin,kepala_sekolah']);
+    $routes->get('guru-wali/export', 'Admin\GuruWaliController::export', ['filter' => 'role:admin,kepala_sekolah']);
+
     // Mata Pelajaran Management
     $routes->get('mata-pelajaran', 'Admin\MataPelajaranController::index', ['filter' => 'role:admin,kepala_sekolah']);
     $routes->get('mata-pelajaran/tambah', 'Admin\MataPelajaranController::create', ['filter' => 'role:admin']);

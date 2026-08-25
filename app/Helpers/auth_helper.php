@@ -171,6 +171,10 @@ if (!function_exists('get_sidebar_menu')) {
                             'title' => 'Data Kelas',
                             'url' => '/admin/kelas'
                         ],
+                        [
+                            'title' => 'Data Guru Wali',
+                            'url' => '/admin/guru-wali'
+                        ],
                     ]
                 ],
                 [
@@ -564,6 +568,10 @@ if (!function_exists('get_sidebar_menu')) {
                         [
                             'title' => 'Data Kelas & Rombel',
                             'url' => '/admin/kelas',
+                        ],
+                        [
+                            'title' => 'Data Guru Wali',
+                            'url' => '/admin/guru-wali',
                         ],
                         [
                             'title' => 'Jadwal Mengajar',
