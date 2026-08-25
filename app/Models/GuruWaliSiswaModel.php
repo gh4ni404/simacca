@@ -44,8 +44,7 @@ class GuruWaliSiswaModel extends Model
      */
     public function getSiswaWithGuruWali(?string $tahunAjaran = null, array $filters = []): array
     {
-        $db = \Config\Database::connect();
-        $builder = $db->table('siswa s')
+        $builder = $this->db->table('siswa s')
             ->select('
                 s.id as siswa_id,
                 s.nis,
@@ -125,9 +124,7 @@ class GuruWaliSiswaModel extends Model
      */
     public function getGuruWaliSummary(?string $tahunAjaran = null, ?string $search = null): array
     {
-        $db = \Config\Database::connect();
-        
-        $builder = $db->table('guru g')
+        $builder = $this->db->table('guru g')
             ->select('
                 g.id as guru_id,
                 g.nip,
@@ -167,8 +164,7 @@ class GuruWaliSiswaModel extends Model
      */
     public function getSiswaByGuru(int $guruId, ?string $tahunAjaran = null): array
     {
-        $db = \Config\Database::connect();
-        $builder = $db->table('guru_wali_siswa gws')
+        $builder = $this->db->table('guru_wali_siswa gws')
             ->select('
                 gws.id as mapping_id,
                 gws.keterangan,
@@ -207,10 +203,8 @@ class GuruWaliSiswaModel extends Model
      */
     public function getStats(?string $tahunAjaran = null): array
     {
-        $db = \Config\Database::connect();
-
         // Total active students
-        $totalSiswaQuery = $db->table('siswa s')
+        $totalSiswaQuery = $this->db->table('siswa s')
             ->join('users u', 'u.id = s.user_id', 'left')
             ->where('s.deleted_at IS NULL')
             ->where('u.is_active', 1);
@@ -221,7 +215,7 @@ class GuruWaliSiswaModel extends Model
         $totalSiswa = $totalSiswaQuery->countAllResults();
 
         // Total assigned active students
-        $totalAssignedQuery = $db->table('guru_wali_siswa gws')
+        $totalAssignedQuery = $this->db->table('guru_wali_siswa gws')
             ->join('siswa s', 's.id = gws.siswa_id')
             ->join('users u', 'u.id = s.user_id', 'left')
             ->where('gws.deleted_at IS NULL')
@@ -236,7 +230,7 @@ class GuruWaliSiswaModel extends Model
         $totalUnassigned = max(0, $totalSiswa - $totalAssigned);
 
         // Total distinct teachers who have at least 1 student
-        $totalGuruWali = $db->table('guru_wali_siswa gws')
+        $totalGuruWali = $this->db->table('guru_wali_siswa gws')
             ->select('COUNT(DISTINCT gws.guru_id) as total')
             ->join('siswa s', 's.id = gws.siswa_id')
             ->join('users u', 'u.id = s.user_id', 'left')
@@ -247,7 +241,7 @@ class GuruWaliSiswaModel extends Model
             ->getRowArray()['total'] ?? 0;
 
         // Total active teachers available
-        $totalGuruAvailable = $db->table('guru g')
+        $totalGuruAvailable = $this->db->table('guru g')
             ->join('users u', 'u.id = g.user_id', 'left')
             ->where('g.deleted_at IS NULL')
             ->where('u.is_active', 1)

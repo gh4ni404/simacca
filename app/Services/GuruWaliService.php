@@ -308,9 +308,23 @@ class GuruWaliService
                 ->get()
                 ->getResultArray();
 
-            // Hydrate each teacher with their student list
+            // Fetch all assigned students in a single query (eliminates N+1 queries)
+            $allStudents = $this->guruWaliModel->getSiswaWithGuruWali($tahunAjaran, [
+                'status'  => 'assigned',
+                'guru_id' => $guruId ?: null,
+            ]);
+
+            $studentsByGuru = [];
+            foreach ($allStudents as $s) {
+                if (!empty($s['guru_id'])) {
+                    $s['keterangan'] = $s['keterangan'] ?? ($s['mapping_keterangan'] ?? null);
+                    $studentsByGuru[$s['guru_id']][] = $s;
+                }
+            }
+
+            // Hydrate each teacher with their student list in memory
             foreach ($guruWaliList as &$gw) {
-                $gw['siswa'] = $this->guruWaliModel->getSiswaByGuru((int) $gw['guru_id'], $tahunAjaran);
+                $gw['siswa'] = $studentsByGuru[$gw['guru_id']] ?? [];
             }
 
             return [

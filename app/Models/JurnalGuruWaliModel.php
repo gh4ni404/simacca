@@ -50,8 +50,7 @@ class JurnalGuruWaliModel extends Model
      */
     public function getJurnalByGuru(int $guruId, array $filters = []): array
     {
-        $db = \Config\Database::connect();
-        $builder = $db->table('jurnal_guru_wali jgw')
+        $builder = $this->db->table('jurnal_guru_wali jgw')
             ->select('
                 jgw.id,
                 jgw.guru_id,

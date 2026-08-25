@@ -53,14 +53,13 @@ class JurnalGuruWaliService
             return null;
         }
 
-        $validMimes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
-        $mimeType = $file->getMimeType();
-        if (!in_array($mimeType, $validMimes)) {
-            throw new \RuntimeException('Format file foto tidak didukung. Gunakan format JPG, JPEG, PNG, atau WEBP.');
-        }
+        helper(['security', 'image']);
 
-        if ($file->getSizeByUnit('mb') > 5) {
-            throw new \RuntimeException('Ukuran file foto melebihi batas 5MB.');
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+        $validation   = validate_file_upload($file, $allowedTypes, 5242880); // 5MB
+
+        if (!$validation['valid']) {
+            throw new \RuntimeException($validation['error']);
         }
 
         $uploadPath = WRITEPATH . 'uploads/jurnal_wali';
@@ -68,15 +67,12 @@ class JurnalGuruWaliService
             mkdir($uploadPath, 0777, true);
         }
 
-        $fotoName = 'jurnal_wali_' . time() . '_' . uniqid() . '.' . $file->getExtension();
+        $fotoName = $file->getRandomName();
         $file->move($uploadPath, $fotoName);
 
         $filePath = $uploadPath . '/' . $fotoName;
         if (file_exists($filePath)) {
-            helper('image');
-            if (function_exists('optimize_image')) {
-                optimize_image($filePath, $filePath);
-            }
+            optimize_jurnal_photo($filePath, $filePath);
         }
 
         return $fotoName;
