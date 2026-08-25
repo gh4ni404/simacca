@@ -124,7 +124,7 @@ class JurnalGuruWaliService
                 'siswa_id'         => $siswaId,
                 'tahun_ajaran'     => $data['tahun_ajaran'] ?? get_active_tahun_ajaran(),
                 'tanggal'          => $data['tanggal'],
-                'jenis_bimbingan'  => $data['jenis_bimbingan'] ?? 'Akademik',
+                'jenis_bimbingan'  => $data['jenis_bimbingan'] ?? 'Pendampingan Akademik',
                 'catatan'          => $data['catatan'],
                 'tindak_lanjut'    => $data['tindak_lanjut'] ?? null,
                 'foto_dokumentasi' => $fotoName,
@@ -233,12 +233,19 @@ class JurnalGuruWaliService
     /**
      * Get complete printable data for PDF / Print view
      */
-    public function getPrintData(int $guruId, array $filters = []): array
+    public function getPrintData(?int $guruId = null, array $filters = []): array
     {
         try {
-            $guru = $this->guruModel->find($guruId);
-            if (!$guru) {
-                return ['success' => false, 'message' => 'Data guru tidak ditemukan'];
+            $effectiveGuruId = $guruId ?? ($filters['guru_id'] ?? null);
+            $guru = null;
+            $siswaBinaan = [];
+
+            if (!empty($effectiveGuruId)) {
+                $guru = $this->guruModel->find((int) $effectiveGuruId);
+                if (!$guru) {
+                    return ['success' => false, 'message' => 'Data guru tidak ditemukan'];
+                }
+                $siswaBinaan = $this->getSiswaBinaan((int) $effectiveGuruId);
             }
 
             $sekolahInfo = [
@@ -251,8 +258,8 @@ class JurnalGuruWaliService
                 'nip_kepala_sekolah'  => $this->settingModel->get('kepala_sekolah_nip') ?: '-',
                 'kota'                => $this->settingModel->get('kota_sekolah') ?: 'Kota',
             ];
-            $siswaBinaan   = $this->getSiswaBinaan($guruId);
-            $jurnalList    = $this->getJurnalList($guruId, $filters);
+
+            $jurnalList    = $this->jurnalModel->getJurnalList($effectiveGuruId ? (int) $effectiveGuruId : null, $filters);
             $selectedSiswa = null;
 
             if (!empty($filters['siswa_id'])) {
@@ -270,6 +277,7 @@ class JurnalGuruWaliService
                     'jurnalList'    => $jurnalList,
                     'selectedSiswa' => $selectedSiswa,
                     'filters'       => $filters,
+                    'tahunAjaran'   => $filters['tahun_ajaran'] ?? get_active_tahun_ajaran(),
                 ],
             ];
         } catch (\Throwable $e) {

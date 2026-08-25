@@ -84,7 +84,7 @@ class JurnalGuruWaliController extends BaseController
             'guru_id'         => (int) $guru['id'],
             'siswa_id'        => (int) $this->request->getPost('siswa_id'),
             'tanggal'         => $this->request->getPost('tanggal') ?: date('Y-m-d'),
-            'jenis_bimbingan' => $this->request->getPost('jenis_bimbingan') ?: 'Akademik',
+            'jenis_bimbingan' => $this->request->getPost('jenis_bimbingan') ?: 'Pendampingan Akademik',
             'catatan'         => $this->request->getPost('catatan'),
             'tindak_lanjut'   => $this->request->getPost('tindak_lanjut'),
             'tahun_ajaran'    => get_active_tahun_ajaran(),

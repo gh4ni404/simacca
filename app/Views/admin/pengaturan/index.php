@@ -772,8 +772,8 @@
                 var file = e.target.files[0];
                 if (!file) return;
 
-                if (file.size > 1 * 1024 * 1024) {
-                    alert('Ukuran file maksimal 1MB.');
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Ukuran file maksimal 2MB.');
                     logoInput.value = '';
                     return;
                 }

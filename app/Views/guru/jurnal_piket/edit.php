@@ -223,7 +223,7 @@ function handleFileSelect(input) {
     input.value = ''; // Reset input so the same files can be re-selected if removed
 }
 
-function compressImage(file, targetSizeKb = 900, quality = 0.8) {
+function compressImage(file, targetSizeKb = 1024, quality = 0.8) {
     return new Promise((resolve) => {
         if (!file.type.startsWith('image/') || file.size <= targetSizeKb * 1024) {
             resolve(file);
@@ -351,8 +351,8 @@ async function addFiles(fileList) {
             }
 
             // Perform compression if needed
-            if (file.size > 900 * 1024) {
-                file = await compressImage(file, 900);
+            if (file.size > 1024 * 1024) {
+                file = await compressImage(file, 1024);
             }
 
             if (file.size > 1 * 1024 * 1024) {

@@ -142,6 +142,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('guru-wali/bulk-unassign', 'Admin\GuruWaliController::bulkUnassign', ['filter' => 'role:admin']);
     $routes->get('guru-wali/siswa-by-guru/(:num)', 'Admin\GuruWaliController::getSiswaByGuru/$1', ['filter' => 'role:admin,kepala_sekolah']);
     $routes->get('guru-wali/print', 'Admin\GuruWaliController::print', ['filter' => 'role:admin,kepala_sekolah']);
+    $routes->get('guru-wali/jurnal/cetak', 'Admin\GuruWaliController::printJurnal', ['filter' => 'role:admin,kepala_sekolah']);
     $routes->get('guru-wali/export', 'Admin\GuruWaliController::export', ['filter' => 'role:admin,kepala_sekolah']);
 
     // Mata Pelajaran Management

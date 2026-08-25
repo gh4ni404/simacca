@@ -24,8 +24,11 @@
                 </p>
             </div>
             <div class="flex flex-wrap items-center gap-2.5">
+                <button type="button" onclick="openPrintJurnalFilterModal()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl transition-all shadow-md flex items-center gap-2">
+                    <i class="fas fa-print"></i> Cetak Jurnal Bimbingan
+                </button>
                 <a href="<?= base_url('admin/guru-wali/print?tahun_ajaran=' . urlencode($tahunAjaran)) ?>" target="_blank" class="px-4 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-semibold text-xs rounded-xl transition-all border border-white/20 flex items-center gap-2 shadow-sm">
-                    <i class="fas fa-print"></i> Cetak Rekap
+                    <i class="fas fa-file-alt"></i> Cetak SK / Rekap
                 </a>
                 <a href="<?= base_url('admin/guru-wali/export?tahun_ajaran=' . urlencode($tahunAjaran)) ?>" class="px-4 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-semibold text-xs rounded-xl transition-all border border-white/20 flex items-center gap-2 shadow-sm">
                     <i class="fas fa-file-excel"></i> Export CSV
@@ -342,9 +345,14 @@
                             <span class="text-xs text-gray-400 block">Siswa Binaan:</span>
                             <span class="text-lg font-black text-gray-800"><?= (int)$t['total_siswa_wali'] ?> Siswa</span>
                         </div>
-                        <button type="button" onclick="viewTeacherMentees(<?= (int)$t['guru_id'] ?>, '<?= esc(addslashes($t['nama_lengkap'])) ?>')" class="px-3 py-1.5 bg-slate-100 hover:bg-teal-50 text-slate-700 hover:text-teal-700 text-xs font-bold rounded-xl transition-colors">
-                            Lihat Siswa
-                        </button>
+                        <div class="flex items-center gap-1.5">
+                            <a href="<?= base_url('admin/guru-wali/jurnal/cetak?guru_id=' . (int)$t['guru_id'] . '&tahun_ajaran=' . urlencode($tahunAjaran)) ?>" target="_blank" class="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold rounded-xl transition flex items-center gap-1" title="Cetak Jurnal Bimbingan Guru Ini">
+                                <i class="fas fa-print"></i> Jurnal
+                            </a>
+                            <button type="button" onclick="viewTeacherMentees(<?= (int)$t['guru_id'] ?>, '<?= esc(addslashes($t['nama_lengkap'])) ?>')" class="px-3 py-1.5 bg-slate-100 hover:bg-teal-50 text-slate-700 hover:text-teal-700 text-xs font-bold rounded-xl transition-colors">
+                                Siswa
+                            </button>
+                        </div>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -474,6 +482,78 @@
         <div id="tmListContainer" class="max-h-72 overflow-y-auto space-y-2 text-xs">
             <p class="text-gray-400 text-center py-4">Memuat data...</p>
         </div>
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
+            <a id="tmPrintJurnalBtn" href="#" target="_blank" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-sm transition flex items-center gap-1.5">
+                <i class="fas fa-print"></i> Cetak Jurnal Bimbingan
+            </a>
+            <button type="button" onclick="document.getElementById('teacherMenteesModal').classList.add('hidden')" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-xl">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Filter Cetak Jurnal Guru Wali -->
+<div id="printJurnalFilterModal" class="fixed inset-0 z-50 bg-black/50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+            <h3 class="text-base font-bold text-gray-900 flex items-center gap-2">
+                <i class="fas fa-print text-blue-600"></i> Cetak Jurnal Bimbingan
+            </h3>
+            <button type="button" onclick="document.getElementById('printJurnalFilterModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form action="<?= base_url('admin/guru-wali/jurnal/cetak') ?>" method="GET" target="_blank" class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Guru Wali</label>
+                <select name="guru_id" class="w-full text-xs rounded-xl border border-gray-200 p-2.5 focus:border-blue-500 font-medium">
+                    <option value="">-- Semua Guru Wali (Rekapitulasi) --</option>
+                    <?php foreach ($availableGuru as $g): ?>
+                        <option value="<?= $g['id'] ?>"><?= esc($g['nama_lengkap']) ?> (<?= esc($g['nama_mapel'] ?? 'Guru') ?>)</option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Tahun Ajaran</label>
+                <select name="tahun_ajaran" class="w-full text-xs rounded-xl border border-gray-200 p-2.5 focus:border-blue-500 font-medium">
+                    <?php foreach ($tahunAjaranList as $ta): ?>
+                        <option value="<?= $ta ?>" <?= $ta === $tahunAjaran ? 'selected' : '' ?>><?= $ta ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Dari Tanggal</label>
+                    <input type="date" name="start_date" class="w-full text-xs rounded-xl border border-gray-200 p-2.5">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Sampai Tanggal</label>
+                    <input type="date" name="end_date" class="w-full text-xs rounded-xl border border-gray-200 p-2.5">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Jenis Bimbingan</label>
+                <select name="jenis_bimbingan" class="w-full text-xs rounded-xl border border-gray-200 p-2.5 focus:border-blue-500">
+                    <option value="">-- Semua Jenis Bimbingan --</option>
+                    <option value="Pendampingan Akademik">1. Pendampingan Akademik</option>
+                    <option value="Pengembangan Kompetensi">2. Pengembangan Kompetensi</option>
+                    <option value="Keterampilan">3. Keterampilan</option>
+                    <option value="Karakter Murid">4. Karakter Murid</option>
+                </select>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
+                <button type="button" onclick="document.getElementById('printJurnalFilterModal').classList.add('hidden')" class="px-4 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded-xl">Batal</button>
+                <button type="submit" onclick="document.getElementById('printJurnalFilterModal').classList.add('hidden')" class="px-5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md flex items-center gap-1.5">
+                    <i class="fas fa-print"></i> Buka Cetak / PDF
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -564,6 +644,7 @@ function submitBulkUnassign() {
 
 async function viewTeacherMentees(guruId, guruNama) {
     document.getElementById('tmTeacherName').textContent = 'Siswa Binaan: ' + guruNama;
+    document.getElementById('tmPrintJurnalBtn').href = `<?= base_url('admin/guru-wali/jurnal/cetak') ?>?guru_id=${guruId}&tahun_ajaran=<?= urlencode($tahunAjaran) ?>`;
     const container = document.getElementById('tmListContainer');
     container.innerHTML = '<p class="text-gray-400 text-center py-4">Memuat data...</p>';
     document.getElementById('teacherMenteesModal').classList.remove('hidden');
@@ -586,6 +667,10 @@ async function viewTeacherMentees(guruId, guruNama) {
     } catch (e) {
         container.innerHTML = '<p class="text-rose-500 text-center py-4">Gagal memuat data.</p>';
     }
+}
+
+function openPrintJurnalFilterModal() {
+    document.getElementById('printJurnalFilterModal').classList.remove('hidden');
 }
 </script>
 <?= $this->endSection() ?>

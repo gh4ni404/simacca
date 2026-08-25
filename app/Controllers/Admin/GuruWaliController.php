@@ -332,6 +332,37 @@ class GuruWaliController extends BaseController
     }
 
     /**
+     * Official Printable Jurnal Guru Wali for Admin & Kepala Sekolah
+     */
+    public function printJurnal()
+    {
+        $guruId      = $this->request->getGet('guru_id') ? (int) $this->request->getGet('guru_id') : null;
+        $tahunAjaran = $this->request->getGet('tahun_ajaran') ?: get_active_tahun_ajaran();
+
+        $filters = [
+            'guru_id'         => $guruId,
+            'siswa_id'        => $this->request->getGet('siswa_id'),
+            'jenis_bimbingan' => $this->request->getGet('jenis_bimbingan'),
+            'start_date'      => $this->request->getGet('start_date'),
+            'end_date'        => $this->request->getGet('end_date'),
+            'tahun_ajaran'    => $tahunAjaran,
+        ];
+
+        $jurnalService = new \App\Services\JurnalGuruWaliService();
+        $result = $jurnalService->getPrintData($guruId, $filters);
+
+        if (!$result['success']) {
+            session()->setFlashdata('error', $result['message']);
+            return redirect()->to('/admin/guru-wali');
+        }
+
+        $data = $result['data'];
+        $data['title'] = 'Cetak Jurnal Guru Wali - ' . ($data['guru']['nama_lengkap'] ?? 'Rekapitulasi Sekolah');
+
+        return view('guru/jurnal_wali/print', $data);
+    }
+
+    /**
      * Export Guru Wali mapping to CSV
      */
     public function export()

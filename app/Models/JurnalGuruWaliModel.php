@@ -46,9 +46,9 @@ class JurnalGuruWaliModel extends Model
     ];
 
     /**
-     * Get journal entries for a specific Guru with student & class info
+     * Get journal entries with student, class, & teacher info
      */
-    public function getJurnalByGuru(int $guruId, array $filters = []): array
+    public function getJurnalList(?int $guruId = null, array $filters = []): array
     {
         $builder = $this->db->table('jurnal_guru_wali jgw')
             ->select('
@@ -76,8 +76,16 @@ class JurnalGuruWaliModel extends Model
             ->join('kelas k', 'k.id = s.kelas_id', 'left')
             ->join('users u_s', 'u_s.id = s.user_id', 'left')
             ->join('guru g', 'g.id = jgw.guru_id', 'left')
-            ->where('jgw.guru_id', $guruId)
             ->where('jgw.deleted_at IS NULL');
+
+        $effectiveGuruId = $guruId ?? ($filters['guru_id'] ?? null);
+        if (!empty($effectiveGuruId)) {
+            $builder->where('jgw.guru_id', (int) $effectiveGuruId);
+        }
+
+        if (!empty($filters['tahun_ajaran'])) {
+            $builder->where('jgw.tahun_ajaran', $filters['tahun_ajaran']);
+        }
 
         if (!empty($filters['siswa_id'])) {
             $builder->where('jgw.siswa_id', (int) $filters['siswa_id']);
@@ -100,6 +108,7 @@ class JurnalGuruWaliModel extends Model
             $builder->groupStart()
                 ->like('s.nama_lengkap', $search)
                 ->orLike('s.nis', $search)
+                ->orLike('g.nama_lengkap', $search)
                 ->orLike('jgw.catatan', $search)
                 ->orLike('jgw.tindak_lanjut', $search)
                 ->orLike('jgw.jenis_bimbingan', $search)
@@ -109,5 +118,13 @@ class JurnalGuruWaliModel extends Model
         return $builder->orderBy('jgw.tanggal DESC, jgw.id DESC')
             ->get()
             ->getResultArray();
+    }
+
+    /**
+     * Alias for getJurnalList with required or optional guruId
+     */
+    public function getJurnalByGuru(?int $guruId = null, array $filters = []): array
+    {
+        return $this->getJurnalList($guruId, $filters);
     }
 }

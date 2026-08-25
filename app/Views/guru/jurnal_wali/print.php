@@ -158,27 +158,46 @@
     <!-- JUDUL DOKUMEN -->
     <div class="doc-title">
         <h3>JURNAL BIMBINGAN GURU WALI</h3>
-        <p>Laporan Rekam Jejak Bimbingan Personal Peserta Didik</p>
+        <p>Laporan Rekam Jejak Bimbingan Personal Peserta Didik • Tahun Ajaran: <strong><?= esc($tahunAjaran ?? '-') ?></strong></p>
     </div>
 
     <!-- PROFIL GURU WALI & FILTER -->
     <table class="info-table">
-        <tr>
-            <td class="label">Nama Guru Wali</td>
-            <td class="sep">:</td>
-            <td><strong><?= esc($guru['nama_lengkap']) ?></strong></td>
-            <td class="label">Total Siswa Binaan</td>
-            <td class="sep">:</td>
-            <td><?= count($siswaBinaan) ?> Orang</td>
-        </tr>
-        <tr>
-            <td class="label">NIP</td>
-            <td class="sep">:</td>
-            <td><?= esc($guru['nip'] ?: '-') ?></td>
-            <td class="label">Siswa Difilter</td>
-            <td class="sep">:</td>
-            <td><?= !empty($selectedSiswa) ? esc($selectedSiswa['nama_lengkap'] . ' (' . ($selectedSiswa['nama_kelas'] ?? '-') . ')') : 'Semua Siswa Binaan' ?></td>
-        </tr>
+        <?php if (!empty($guru)): ?>
+            <tr>
+                <td class="label">Nama Guru Wali</td>
+                <td class="sep">:</td>
+                <td><strong><?= esc($guru['nama_lengkap']) ?></strong></td>
+                <td class="label">Total Siswa Binaan</td>
+                <td class="sep">:</td>
+                <td><?= count($siswaBinaan) ?> Orang</td>
+            </tr>
+            <tr>
+                <td class="label">NIP</td>
+                <td class="sep">:</td>
+                <td><?= esc($guru['nip'] ?: '-') ?></td>
+                <td class="label">Siswa Difilter</td>
+                <td class="sep">:</td>
+                <td><?= !empty($selectedSiswa) ? esc($selectedSiswa['nama_lengkap'] . ' (' . ($selectedSiswa['nama_kelas'] ?? '-') . ')') : 'Semua Siswa Binaan' ?></td>
+            </tr>
+        <?php else: ?>
+            <tr>
+                <td class="label">Guru Wali</td>
+                <td class="sep">:</td>
+                <td><strong>Semua Guru Wali (Rekapitulasi Sekolah)</strong></td>
+                <td class="label">Total Catatan</td>
+                <td class="sep">:</td>
+                <td><strong><?= count($jurnalList) ?> Kegiatan</strong></td>
+            </tr>
+            <tr>
+                <td class="label">Tahun Ajaran</td>
+                <td class="sep">:</td>
+                <td><?= esc($tahunAjaran ?? '-') ?></td>
+                <td class="label">Filter Siswa</td>
+                <td class="sep">:</td>
+                <td><?= !empty($selectedSiswa) ? esc($selectedSiswa['nama_lengkap'] . ' (' . ($selectedSiswa['nama_kelas'] ?? '-') . ')') : 'Semua Siswa' ?></td>
+            </tr>
+        <?php endif; ?>
     </table>
 
     <!-- TABEL DATA JURNAL -->
@@ -186,18 +205,21 @@
         <thead>
             <tr>
                 <th style="width: 4%;">No</th>
-                <th style="width: 11%;">Tanggal</th>
-                <th style="width: 20%;">Nama Siswa (NIS / Kelas)</th>
+                <th style="width: 10%;">Tanggal</th>
+                <?php if (empty($guru)): ?>
+                    <th style="width: 15%;">Guru Wali</th>
+                <?php endif; ?>
+                <th style="<?= empty($guru) ? 'width: 17%;' : 'width: 20%;' ?>">Nama Siswa (NIS / Kelas)</th>
                 <th style="width: 12%;">Jenis Bimbingan</th>
-                <th style="width: 21%;">Catatan / Observasi</th>
-                <th style="width: 18%;">Tindak Lanjut / Solusi</th>
-                <th style="width: 14%;">Dokumentasi</th>
+                <th style="<?= empty($guru) ? 'width: 18%;' : 'width: 21%;' ?>">Catatan / Observasi</th>
+                <th style="<?= empty($guru) ? 'width: 15%;' : 'width: 18%;' ?>">Tindak Lanjut</th>
+                <th style="width: 12%;">Dokumentasi</th>
             </tr>
         </thead>
         <tbody>
             <?php if (empty($jurnalList)): ?>
                 <tr>
-                    <td colspan="7" class="text-center" style="padding: 15px;">
+                    <td colspan="<?= empty($guru) ? 8 : 7 ?>" class="text-center" style="padding: 15px;">
                         <em>Tidak ada riwayat bimbingan pada filter yang dipilih.</em>
                     </td>
                 </tr>
@@ -206,6 +228,12 @@
                     <tr>
                         <td class="text-center"><?= $idx + 1 ?></td>
                         <td class="text-center font-mono"><?= date('d/m/Y', strtotime($j['tanggal'])) ?></td>
+                        <?php if (empty($guru)): ?>
+                            <td>
+                                <strong><?= esc($j['nama_guru'] ?? '-') ?></strong><br>
+                                <span style="font-size: 7.5pt; color: #555;">NIP: <?= esc($j['guru_nip'] ?: '-') ?></span>
+                            </td>
+                        <?php endif; ?>
                         <td>
                             <strong><?= esc($j['nama_siswa']) ?></strong><br>
                             <span style="font-size: 7.5pt; color: #555;">NIS: <?= esc($j['nis']) ?> • <?= esc($j['nama_kelas'] ?? '-') ?></span>
@@ -239,11 +267,11 @@
             </p>
         </div>
         <div class="signature-box">
-            <p><?= esc($sekolahInfo['kota'] ?? 'Kota') ?>, <?= date('d F Y') ?><br>Guru Wali,</p>
+            <p><?= esc($sekolahInfo['kota'] ?? 'Kota') ?>, <?= date('d F Y') ?><br><?= !empty($guru) ? 'Guru Wali,' : 'Koordinator Guru Wali / Admin,' ?></p>
             <div class="signature-space"></div>
             <p>
-                <strong><u><?= esc($guru['nama_lengkap']) ?></u></strong><br>
-                NIP. <?= esc($guru['nip'] ?: '-') ?>
+                <strong><u><?= !empty($guru) ? esc($guru['nama_lengkap']) : 'Koordinator Bimbingan' ?></u></strong><br>
+                <?= !empty($guru) ? 'NIP. ' . esc($guru['nip'] ?: '-') : '' ?>
             </p>
         </div>
     </div>

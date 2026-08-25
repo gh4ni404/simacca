@@ -16,8 +16,17 @@
             </p>
         </div>
         <div>
-            <a href="<?= base_url('guru/jurnal-wali/cetak' . (!empty($filters['siswa_id']) ? '?siswa_id=' . (int)$filters['siswa_id'] : '')) ?>" target="_blank" class="inline-flex items-center px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 font-semibold text-xs rounded-xl border border-gray-300 shadow-sm transition-all">
-                <i class="fas fa-print mr-2 text-blue-600"></i> Preview & Cetak PDF
+            <?php
+            $printParams = http_build_query(array_filter([
+                'siswa_id'        => $filters['siswa_id'] ?? null,
+                'jenis_bimbingan' => $filters['jenis_bimbingan'] ?? null,
+                'start_date'      => $filters['start_date'] ?? null,
+                'end_date'        => $filters['end_date'] ?? null,
+            ]));
+            $printUrl = base_url('guru/jurnal-wali/cetak' . ($printParams ? '?' . $printParams : ''));
+            ?>
+            <a href="<?= $printUrl ?>" target="_blank" class="inline-flex items-center px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 font-semibold text-xs rounded-xl border border-gray-300 shadow-sm transition-all">
+                <i class="fas fa-print mr-2 text-blue-600"></i> Preview & Cetak Jurnal
             </a>
         </div>
     </div>
@@ -121,14 +130,10 @@
                             Jenis Bimbingan <span class="text-rose-500">*</span>
                         </label>
                         <select name="jenis_bimbingan" required class="w-full text-xs rounded-xl border border-gray-200 bg-white focus:border-blue-500 px-3.5 py-2.5 font-medium text-gray-800 shadow-sm">
-                            <option value="Akademik" selected>Akademik</option>
-                            <option value="Kedisiplinan">Kedisiplinan & Tata Tertib</option>
-                            <option value="Pribadi">Pribadi</option>
-                            <option value="Sosial">Sosial & Pertemanan</option>
-                            <option value="Karir">Karir & Minat Bakat</option>
-                            <option value="Kehadiran">Kehadiran & Absensi</option>
-                            <option value="Prestasi">Pengembangan Prestasi</option>
-                            <option value="Lainnya">Lainnya</option>
+                            <option value="Pendampingan Akademik" selected>1. Pendampingan Akademik</option>
+                            <option value="Pengembangan Kompetensi">2. Pengembangan Kompetensi</option>
+                            <option value="Keterampilan">3. Keterampilan</option>
+                            <option value="Karakter Murid">4. Karakter Murid</option>
                         </select>
                     </div>
 
@@ -252,10 +257,10 @@
                     <?php endforeach; ?>
                 </select>
 
-                <select name="jenis_bimbingan" onchange="this.form.submit()" class="text-xs rounded-xl border border-gray-200 bg-slate-50 px-3 py-1.5">
-                    <option value="">Semua Jenis</option>
+                <select name="jenis_bimbingan" onchange="this.form.submit()" class="text-xs rounded-xl border border-gray-200 bg-slate-50 px-3 py-1.5 font-medium">
+                    <option value="">Semua Jenis Bimbingan</option>
                     <?php 
-                    $jenisOptions = ['Akademik', 'Kedisiplinan', 'Pribadi', 'Sosial', 'Karir', 'Kehadiran', 'Prestasi', 'Lainnya'];
+                    $jenisOptions = ['Pendampingan Akademik', 'Pengembangan Kompetensi', 'Keterampilan', 'Karakter Murid'];
                     foreach ($jenisOptions as $opt): 
                     ?>
                         <option value="<?= $opt ?>" <?= (!empty($filters['jenis_bimbingan']) && $filters['jenis_bimbingan'] == $opt) ? 'selected' : '' ?>><?= $opt ?></option>
@@ -304,7 +309,16 @@
                                     <p class="text-[10px] text-gray-400 font-normal"><?= esc($j['nama_kelas'] ?? '-') ?> • <?= esc($j['nis']) ?></p>
                                 </td>
                                 <td class="px-4 py-3.5 text-center whitespace-nowrap">
-                                    <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
+                                    <?php
+                                    $badgeColor = match($j['jenis_bimbingan'] ?? '') {
+                                        'Pendampingan Akademik'   => 'bg-blue-50 text-blue-700 border-blue-100',
+                                        'Pengembangan Kompetensi' => 'bg-indigo-50 text-indigo-700 border-indigo-100',
+                                        'Keterampilan'            => 'bg-amber-50 text-amber-700 border-amber-100',
+                                        'Karakter Murid'          => 'bg-emerald-50 text-emerald-700 border-emerald-100',
+                                        default                   => 'bg-slate-50 text-slate-700 border-slate-200',
+                                    };
+                                    ?>
+                                    <span class="px-2.5 py-1 rounded-full text-[11px] font-bold border <?= $badgeColor ?>">
                                         <?= esc($j['jenis_bimbingan']) ?>
                                     </span>
                                 </td>
@@ -388,7 +402,7 @@
                 <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Jenis Bimbingan</label>
                 <select name="jenis_bimbingan" id="editJenis" required class="w-full text-xs rounded-xl border border-gray-200 p-2.5">
                     <?php 
-                    $jenisOptions = ['Akademik', 'Kedisiplinan', 'Pribadi', 'Sosial', 'Karir', 'Kehadiran', 'Prestasi', 'Lainnya'];
+                    $jenisOptions = ['Pendampingan Akademik', 'Pengembangan Kompetensi', 'Keterampilan', 'Karakter Murid'];
                     foreach ($jenisOptions as $opt): 
                     ?>
                         <option value="<?= $opt ?>"><?= $opt ?></option>
