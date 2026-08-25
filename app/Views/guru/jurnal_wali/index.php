@@ -522,9 +522,8 @@
 </div>
 <?= $this->endSection() ?>
 
-<?= view('components/upload_script') ?>
-
 <?= $this->section('scripts') ?>
+<?= view('components/upload_script') ?>
 <script>
 let createStream = null;
 let editStream = null;
