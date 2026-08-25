@@ -130,10 +130,10 @@
                             Jenis Bimbingan <span class="text-rose-500">*</span>
                         </label>
                         <select name="jenis_bimbingan" required class="w-full text-xs rounded-xl border border-gray-200 bg-white focus:border-blue-500 px-3.5 py-2.5 font-medium text-gray-800 shadow-sm">
-                            <option value="Pendampingan Akademik" selected>1. Pendampingan Akademik</option>
-                            <option value="Pengembangan Kompetensi">2. Pengembangan Kompetensi</option>
-                            <option value="Keterampilan">3. Keterampilan</option>
-                            <option value="Karakter Murid">4. Karakter Murid</option>
+                            <option value="Pendampingan Akademik" selected>Pendampingan Akademik</option>
+                            <option value="Pengembangan Kompetensi">Pengembangan Kompetensi</option>
+                            <option value="Keterampilan">Keterampilan</option>
+                            <option value="Karakter Murid">Karakter Murid</option>
                         </select>
                     </div>
 

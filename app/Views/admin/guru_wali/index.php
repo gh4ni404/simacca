@@ -540,10 +540,10 @@
                 <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Jenis Bimbingan</label>
                 <select name="jenis_bimbingan" class="w-full text-xs rounded-xl border border-gray-200 p-2.5 focus:border-blue-500">
                     <option value="">-- Semua Jenis Bimbingan --</option>
-                    <option value="Pendampingan Akademik">1. Pendampingan Akademik</option>
-                    <option value="Pengembangan Kompetensi">2. Pengembangan Kompetensi</option>
-                    <option value="Keterampilan">3. Keterampilan</option>
-                    <option value="Karakter Murid">4. Karakter Murid</option>
+                    <option value="Pendampingan Akademik">Pendampingan Akademik</option>
+                    <option value="Pengembangan Kompetensi">Pengembangan Kompetensi</option>
+                    <option value="Keterampilan">Keterampilan</option>
+                    <option value="Karakter Murid">Karakter Murid</option>
                 </select>
             </div>
 
