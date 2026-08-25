@@ -12,7 +12,7 @@
             </div>
             <button onclick="this.parentElement.remove()" class="text-emerald-400 hover:text-emerald-600"><i class="fas fa-times"></i></button>
         </div>
-    <?php endif; ?>
+    <?php endif; ?> 
 
     <?php if (session()->getFlashdata('error')): ?>
         <div class="bg-rose-50 border-l-4 border-rose-500 p-4 rounded-r-xl shadow-sm flex items-center justify-between transition-all">
