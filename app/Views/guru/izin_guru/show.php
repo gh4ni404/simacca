@@ -97,7 +97,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-500 mb-1">Diajukan Pada</label>
                         <p class="text-lg font-semibold text-gray-900">
-                            <?= date('d F Y, H:i', strtotime($izin['created_at'])) ?> WIB
+                            <?= date('d F Y, H:i', strtotime($izin['created_at'])) ?> WITA
                         </p>
                     </div>
 
@@ -113,7 +113,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-500 mb-1">Tanggal Diproses</label>
                             <p class="text-lg font-semibold text-gray-900">
-                                <?= $izin['tanggal_disetujui'] ? date('d F Y, H:i', strtotime($izin['tanggal_disetujui'])) . ' WIB' : '-' ?>
+                                <?= $izin['tanggal_disetujui'] ? date('d F Y, H:i', strtotime($izin['tanggal_disetujui'])) . ' WITA' : '-' ?>
                             </p>
                         </div>
                     <?php endif; ?>

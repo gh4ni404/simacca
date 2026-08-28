@@ -12,7 +12,7 @@
     <table style="width: 100%; border-collapse: collapse;">
         <tr>
             <td style="padding: 5px 0; font-weight: 600; width: 150px;">Waktu Perubahan</td>
-            <td style="padding: 5px 0;">: <?= esc($changeTime) ?> WIB</td>
+            <td style="padding: 5px 0;">: <?= esc($changeTime) ?> WITA</td>
         </tr>
         <?php if (isset($oldEmail)): ?>
         <tr>

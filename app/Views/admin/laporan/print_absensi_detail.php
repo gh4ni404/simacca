@@ -617,7 +617,7 @@
         <table style="width: 100%;">
             <tr>
                 <td style="width: 50%;"><strong>Total Jadwal:</strong> <?= $totalStats['total_jadwal']; ?> | <strong>Hari Efektif:</strong> <?= count($laporanPerHari); ?></td>
-                <td style="width: 50%; text-align: right;"><strong>Tanggal Cetak:</strong> <?= date('d/m/Y H:i'); ?> WIB</td>
+                <td style="width: 50%; text-align: right;"><strong>Tanggal Cetak:</strong> <?= date('d/m/Y H:i'); ?> WITA</td>
             </tr>
         </table>
     </div>

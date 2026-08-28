@@ -24,7 +24,7 @@
         </span>
         <span class="flex items-center">
             <i class="fas fa-clock mr-1.5"></i>
-            <?= date('H:i') ?> WIB
+            <?= date('H:i') ?> WITA
         </span>
     </div>
 </div>

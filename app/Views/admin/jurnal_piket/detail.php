@@ -79,9 +79,9 @@
             </div>
 
             <div class="p-4 bg-gray-50 border-t border-gray-100 text-xs text-gray-500 flex justify-between items-center">
-                <span>Dibuat: <?= date('d/m/Y H:i', strtotime($jurnal['created_at'])) ?> WIB</span>
+                <span>Dibuat: <?= date('d/m/Y H:i', strtotime($jurnal['created_at'])) ?> WITA</span>
                 <?php if ($jurnal['updated_at'] && $jurnal['updated_at'] !== $jurnal['created_at']): ?>
-                    <span>Diperbarui: <?= date('d/m/Y H:i', strtotime($jurnal['updated_at'])) ?> WIB</span>
+                    <span>Diperbarui: <?= date('d/m/Y H:i', strtotime($jurnal['updated_at'])) ?> WITA</span>
                 <?php endif; ?>
             </div>
         </div>

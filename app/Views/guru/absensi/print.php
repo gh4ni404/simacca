@@ -218,7 +218,7 @@
                 <td>Pertemuan Ke</td>
                 <td>: <?= $absensi['pertemuan_ke'] ?></td>
                 <td>Jam</td>
-                <td>: <?= date('H:i', strtotime($absensi['created_at'])) ?> WIB</td>
+                <td>: <?= date('H:i', strtotime($absensi['created_at'])) ?> WITA</td>
             </tr>
         </table>
     </div>

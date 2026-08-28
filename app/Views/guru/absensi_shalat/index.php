@@ -106,11 +106,11 @@
                                         data-jam-tutup="<?= esc($s['jam_tutup']) ?>" 
                                         data-durasi="<?= esc($s['durasi_maks']) ?>"
                                         <?= $isSelected ? 'selected' : '' ?>>
-                                    🕌 <?= esc($s['nama_sesi']) ?> (<?= esc($s['jam_mulai']) ?> - <?= esc($s['jam_tutup']) ?> WIB) — Max <?= esc($s['durasi_maks']) ?> Menit <?= $isSelected ? '⚡ (Otomatis Jam Sekarang)' : '' ?>
+                                    🕌 <?= esc($s['nama_sesi']) ?> (<?= esc($s['jam_mulai']) ?> - <?= esc($s['jam_tutup']) ?> WITA) — Max <?= esc($s['durasi_maks']) ?> Menit <?= $isSelected ? '⚡ (Otomatis Jam Sekarang)' : '' ?>
                                 </option>
                             <?php endforeach; ?>
                         <?php else: ?>
-                            <option value="Shalat Dzuhur" data-jam-mulai="11:30" data-jam-tutup="13:30" data-durasi="45">🕌 Shalat Dzuhur (11:30 - 13:30 WIB) — Max 45 Menit</option>
+                            <option value="Shalat Dzuhur" data-jam-mulai="11:30" data-jam-tutup="13:30" data-durasi="45">🕌 Shalat Dzuhur (11:30 - 13:30 WITA) — Max 45 Menit</option>
                         <?php endif; ?>
                     </select>
 

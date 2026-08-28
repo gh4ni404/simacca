@@ -9,7 +9,7 @@
 <div class="info-box">
     <p style="margin: 0;"><strong>Detail Pengiriman:</strong></p>
     <ul style="margin: 10px 0 0; padding-left: 20px;">
-        <li>Waktu Pengiriman: <strong><?= esc($timestamp) ?> WIB</strong></li>
+        <li>Waktu Pengiriman: <strong><?= esc($timestamp) ?> WITA</strong></li>
         <li>Status: <strong style="color: #28a745;">Berhasil</strong></li>
     </ul>
 </div>

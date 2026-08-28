@@ -383,7 +383,7 @@
                 <tr>
                     <td>Tanggal Cetak</td>
                     <td>:</td>
-                    <td><?= date('d F Y, H:i') ?> WIB</td>
+                    <td><?= date('d F Y, H:i') ?> WITA</td>
                 </tr>
             </table>
         </div>
@@ -487,7 +487,7 @@
         <!-- Footer -->
         <div class="footer">
             <p>Dokumen ini dicetak secara elektronik dan sah tanpa tanda tangan basah.</p>
-            <p>Dicetak pada: <?= date('d F Y, H:i:s') ?> WIB</p>
+            <p>Dicetak pada: <?= date('d F Y, H:i:s') ?> WITA</p>
         </div>
     </div>
 

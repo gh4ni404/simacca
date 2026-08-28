@@ -26,7 +26,7 @@
                 </div>
                 <div class="text-sm">
                     <i class="fas fa-clock mr-2"></i>
-                    <?= date('H:i') ?> WIB
+                    <?= date('H:i') ?> WITA
                 </div>
             </div>
         </div>

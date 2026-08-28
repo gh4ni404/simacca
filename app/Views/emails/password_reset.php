@@ -23,7 +23,7 @@
     <strong>⚠️ Penting:</strong>
     <ul style="margin: 10px 0 0; padding-left: 20px;">
         <li>Link ini hanya berlaku selama <strong>1 jam</strong></li>
-        <li>Link akan expire pada: <strong><?= esc($validUntil) ?> WIB</strong></li>
+        <li>Link akan expire pada: <strong><?= esc($validUntil) ?> WITA</strong></li>
         <li>Link hanya bisa digunakan <strong>satu kali</strong></li>
     </ul>
 </div>

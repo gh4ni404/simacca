@@ -20,7 +20,7 @@
         </tr>
         <tr>
             <td style="padding: 5px 0; font-weight: 600;">Waktu Perubahan</td>
-            <td style="padding: 5px 0;">: <?= esc($changeTime) ?> WIB</td>
+            <td style="padding: 5px 0;">: <?= esc($changeTime) ?> WITA</td>
         </tr>
         <tr>
             <td style="padding: 5px 0; font-weight: 600;">Diubah oleh</td>

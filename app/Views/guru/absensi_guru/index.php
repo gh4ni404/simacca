@@ -619,7 +619,7 @@
                                 </div>
                                 <div>
                                     <p class="font-semibold text-gray-800">Waktu Check-In</p>
-                                    <p class="text-sm text-gray-600">06:00 - 10:00 WIB</p>
+                                    <p class="text-sm text-gray-600">06:00 - 10:00 WITA</p>
                                 </div>
                             </div>
 
@@ -629,7 +629,7 @@
                                 </div>
                                 <div>
                                     <p class="font-semibold text-gray-800">Batas Tepat Waktu</p>
-                                    <p class="text-sm text-gray-600">Sebelum 07:15 WIB</p>
+                                    <p class="text-sm text-gray-600">Sebelum 07:15 WITA</p>
                                 </div>
                             </div>
 
@@ -639,7 +639,7 @@
                                 </div>
                                 <div>
                                     <p class="font-semibold text-gray-800">Batas Terlambat</p>
-                                    <p class="text-sm text-gray-600">07:15 - 10:00 WIB</p>
+                                    <p class="text-sm text-gray-600">07:15 - 10:00 WITA</p>
                                 </div>
                             </div>
 
