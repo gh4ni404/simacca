@@ -67,7 +67,13 @@ class JurnalGuruWaliService
             mkdir($uploadPath, 0777, true);
         }
 
+        $tempPath   = $file->getTempName();
+        $tempDir    = dirname($tempPath);
+        $clientName = $file->getClientName();
+        $fileSize   = $file->getSize();
+
         $fotoName = $file->getRandomName();
+        log_message('info', "[JURNAL WALI FOTO UPLOAD] Temp Dir: {$tempDir} | Temp File: {$tempPath} | Original: {$clientName} ({$fileSize} bytes) -> Destination: {$uploadPath}/{$fotoName}");
         $file->move($uploadPath, $fotoName);
 
         $filePath = $uploadPath . '/' . $fotoName;

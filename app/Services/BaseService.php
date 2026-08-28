@@ -200,7 +200,7 @@ abstract class BaseService
      * @param array $errors Additional errors (if code is provided)
      * @return array
      */
-    protected function errorResponse(string $message, $codeOrErrors = 400, array $errors = []): array
+    protected function errorResponse(string $message, $codeOrErrors = 400, array $errors = [], array $extra = []): array
     {
         $response = [
             'success' => false,
@@ -215,6 +215,10 @@ abstract class BaseService
         // Otherwise treat it as errors array (backward compatibility)
         else if (is_array($codeOrErrors)) {
             $response['errors'] = !empty($codeOrErrors) ? $codeOrErrors : $this->errors;
+        }
+
+        if (!empty($extra)) {
+            $response = array_merge($response, $extra);
         }
 
         return $response;

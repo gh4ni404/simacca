@@ -109,23 +109,62 @@ class JurnalPiketController extends BaseController
 
         $files = $this->request->getFileMultiple('foto_dokumentasi');
 
+        log_message('error', sprintf(
+            '[JURNAL_PIKET_DEBUG] store() - Request diterima: Guru ID=%s, Tanggal=%s, Files count=%d, OS Temp Dir=%s, upload_tmp_dir ini=%s',
+            $guru['id'] ?? 'null',
+            $tanggal,
+            !empty($files) ? count($files) : 0,
+            sys_get_temp_dir(),
+            ini_get('upload_tmp_dir') ?: 'N/A'
+        ));
+
+        if (!empty($files)) {
+            foreach ($files as $idx => $f) {
+                if ($f) {
+                    $tPath = method_exists($f, 'getTempName') ? $f->getTempName() : 'N/A';
+                    $tDir  = (!empty($tPath) && $tPath !== 'N/A') ? dirname($tPath) : sys_get_temp_dir();
+                    log_message('error', sprintf(
+                        '[JURNAL_PIKET_DEBUG] store() - File #%d: Name=%s, Size=%d bytes, Mime=%s, TempDir=%s, TempFile=%s, Error=%d (%s)',
+                        $idx,
+                        $f->getClientName(),
+                        $f->getSize(),
+                        $f->getMimeType(),
+                        $tDir,
+                        $tPath,
+                        $f->getError(),
+                        $f->getErrorString()
+                    ));
+                }
+            }
+        }
+
         $result = $this->jurnalPiketService->create($data, $files);
+        log_message('error', '[JURNAL_PIKET_DEBUG] store() - Hasil create(): ' . json_encode($result));
+
+        $uploadInfo = $result['data']['upload_info'] ?? $result['upload_info'] ?? [
+            'temp_dir_default'   => sys_get_temp_dir(),
+            'upload_tmp_dir_ini' => ini_get('upload_tmp_dir') ?: 'OS Default (' . sys_get_temp_dir() . ')',
+        ];
 
         if ($this->request->isAJAX() || str_contains($this->request->getHeaderLine('Accept'), 'application/json')) {
             if (!$result['success']) {
                 return $this->response->setJSON([
-                    'success'    => false,
-                    'message'    => $result['message'],
-                    'errors'     => $result['errors'] ?? [],
-                    'csrf_token' => csrf_token(),
-                    'csrf_hash'  => csrf_hash(),
+                    'success'     => false,
+                    'message'     => $result['message'],
+                    'errors'      => $result['errors'] ?? [],
+                    'upload_info' => $uploadInfo,
+                    'csrf_token'  => csrf_token(),
+                    'csrf_hash'   => csrf_hash(),
                 ]);
             }
 
             session()->setFlashdata('success', 'Jurnal piket berhasil disimpan');
+            session()->setFlashdata('upload_info', $uploadInfo);
+
             return $this->response->setJSON([
                 'success'      => true,
                 'message'      => 'Jurnal piket berhasil disimpan',
+                'upload_info'  => $uploadInfo,
                 'redirect_url' => base_url('guru/jurnal-piket'),
                 'csrf_token'   => csrf_token(),
                 'csrf_hash'    => csrf_hash(),
@@ -133,14 +172,14 @@ class JurnalPiketController extends BaseController
         }
 
         if (!$result['success']) {
-            $redirect = redirect()->back()->withInput()->with('error', $result['message']);
+            $redirect = redirect()->back()->withInput()->with('error', $result['message'])->with('upload_info', $uploadInfo);
             if (!empty($result['errors'])) {
                 $redirect->with('errors', $result['errors']);
             }
             return $redirect;
         }
 
-        return redirect()->to('/guru/jurnal-piket')->with('success', 'Jurnal piket berhasil disimpan');
+        return redirect()->to('/guru/jurnal-piket')->with('success', 'Jurnal piket berhasil disimpan')->with('upload_info', $uploadInfo);
     }
 
     /**
@@ -236,23 +275,63 @@ class JurnalPiketController extends BaseController
 
         $files = $this->request->getFileMultiple('foto_dokumentasi');
 
+        log_message('error', sprintf(
+            '[JURNAL_PIKET_DEBUG] update() - Request update ID=%d diterima: Guru ID=%s, Tanggal=%s, Files count=%d, OS Temp Dir=%s, upload_tmp_dir ini=%s',
+            $id,
+            $guru['id'] ?? 'null',
+            $tanggal,
+            !empty($files) ? count($files) : 0,
+            sys_get_temp_dir(),
+            ini_get('upload_tmp_dir') ?: 'N/A'
+        ));
+
+        if (!empty($files)) {
+            foreach ($files as $idx => $f) {
+                if ($f) {
+                    $tPath = method_exists($f, 'getTempName') ? $f->getTempName() : 'N/A';
+                    $tDir  = (!empty($tPath) && $tPath !== 'N/A') ? dirname($tPath) : sys_get_temp_dir();
+                    log_message('error', sprintf(
+                        '[JURNAL_PIKET_DEBUG] update() - File #%d: Name=%s, Size=%d bytes, Mime=%s, TempDir=%s, TempFile=%s, Error=%d (%s)',
+                        $idx,
+                        $f->getClientName(),
+                        $f->getSize(),
+                        $f->getMimeType(),
+                        $tDir,
+                        $tPath,
+                        $f->getError(),
+                        $f->getErrorString()
+                    ));
+                }
+            }
+        }
+
         $result = $this->jurnalPiketService->update((int) $id, $data, $files);
+        log_message('error', '[JURNAL_PIKET_DEBUG] update() - Hasil update(): ' . json_encode($result));
+
+        $uploadInfo = $result['data']['upload_info'] ?? $result['upload_info'] ?? [
+            'temp_dir_default'   => sys_get_temp_dir(),
+            'upload_tmp_dir_ini' => ini_get('upload_tmp_dir') ?: 'OS Default (' . sys_get_temp_dir() . ')',
+        ];
 
         if ($this->request->isAJAX() || str_contains($this->request->getHeaderLine('Accept'), 'application/json')) {
             if (!$result['success']) {
                 return $this->response->setJSON([
-                    'success'    => false,
-                    'message'    => $result['message'],
-                    'errors'     => $result['errors'] ?? [],
-                    'csrf_token' => csrf_token(),
-                    'csrf_hash'  => csrf_hash(),
+                    'success'     => false,
+                    'message'     => $result['message'],
+                    'errors'      => $result['errors'] ?? [],
+                    'upload_info' => $uploadInfo,
+                    'csrf_token'  => csrf_token(),
+                    'csrf_hash'   => csrf_hash(),
                 ]);
             }
 
             session()->setFlashdata('success', 'Jurnal piket berhasil diperbarui');
+            session()->setFlashdata('upload_info', $uploadInfo);
+
             return $this->response->setJSON([
                 'success'      => true,
                 'message'      => 'Jurnal piket berhasil diperbarui',
+                'upload_info'  => $uploadInfo,
                 'redirect_url' => base_url('guru/jurnal-piket'),
                 'csrf_token'   => csrf_token(),
                 'csrf_hash'    => csrf_hash(),
@@ -260,14 +339,14 @@ class JurnalPiketController extends BaseController
         }
 
         if (!$result['success']) {
-            $redirect = redirect()->back()->withInput()->with('error', $result['message']);
+            $redirect = redirect()->back()->withInput()->with('error', $result['message'])->with('upload_info', $uploadInfo);
             if (!empty($result['errors'])) {
                 $redirect->with('errors', $result['errors']);
             }
             return $redirect;
         }
 
-        return redirect()->to('/guru/jurnal-piket')->with('success', 'Jurnal piket berhasil diperbarui');
+        return redirect()->to('/guru/jurnal-piket')->with('success', 'Jurnal piket berhasil diperbarui')->with('upload_info', $uploadInfo);
     }
 
     /**

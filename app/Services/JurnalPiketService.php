@@ -152,16 +152,48 @@ class JurnalPiketService extends BaseService
 
         // Handle photo upload
         $uploadedPhotos = [];
+        $uploadInfo = [
+            'temp_dir_default'   => sys_get_temp_dir(),
+            'upload_tmp_dir_ini' => ini_get('upload_tmp_dir') ?: 'OS Default (' . sys_get_temp_dir() . ')',
+            'files_received'     => 0,
+            'valid_files_count'  => 0,
+            'files_detail'       => [],
+            'uploaded_photos'    => [],
+        ];
+
         if (!empty($files)) {
+            $uploadInfo['files_received'] = count($files);
             $validFilesCount = 0;
             foreach ($files as $file) {
-                if ($file && $file->isValid() && $file->getError() !== UPLOAD_ERR_NO_FILE) {
+                if (!$file) continue;
+                $tempPath = method_exists($file, 'getTempName') ? $file->getTempName() : null;
+                $tempDir  = !empty($tempPath) ? dirname($tempPath) : sys_get_temp_dir();
+                $isValid  = method_exists($file, 'isValid') ? $file->isValid() : false;
+                $errCode  = method_exists($file, 'getError') ? $file->getError() : null;
+                $errMsg   = method_exists($file, 'getErrorString') ? $file->getErrorString() : null;
+
+                $uploadInfo['files_detail'][] = [
+                    'client_name' => method_exists($file, 'getClientName') ? $file->getClientName() : 'unknown',
+                    'size'        => method_exists($file, 'getSize') ? $file->getSize() : 0,
+                    'mime_type'   => method_exists($file, 'getMimeType') ? $file->getMimeType() : null,
+                    'temp_file'   => $tempPath,
+                    'temp_dir'    => $tempDir,
+                    'is_valid'    => $isValid,
+                    'error_code'  => $errCode,
+                    'error_msg'   => $errMsg,
+                ];
+
+                if ($isValid && $errCode !== UPLOAD_ERR_NO_FILE) {
                     $validFilesCount++;
                 }
             }
+            $uploadInfo['valid_files_count'] = $validFilesCount;
+
+            log_message('error', "[JURNAL_PIKET_DEBUG] JurnalPiketService::create() - Temp Dir: {$uploadInfo['temp_dir_default']}, Upload tmp ini: {$uploadInfo['upload_tmp_dir_ini']}, Files received: {$uploadInfo['files_received']}, Valid files: {$validFilesCount}");
 
             if ($validFilesCount > 4) {
-                return $this->errorResponse('Validasi gagal: Jumlah foto melebihi batas maksimal 4 foto.');
+                log_message('error', "[JURNAL_PIKET_DEBUG] JurnalPiketService::create() - Valid files count exceeds limit 4: {$validFilesCount}");
+                return $this->errorResponse('Validasi gagal: Jumlah foto melebihi batas maksimal 4 foto.', 422, [], ['upload_info' => $uploadInfo]);
             }
 
             foreach ($files as $file) {
@@ -170,13 +202,20 @@ class JurnalPiketService extends BaseService
                     $mimeType = $file->getMimeType();
                     if (!in_array($mimeType, $validMimes)) {
                         $err = ['foto_dokumentasi' => 'Format file foto tidak didukung. Gunakan format JPG, JPEG, PNG, atau WEBP.'];
-                        return $this->errorResponse('Validasi gagal: Format foto harus JPG, JPEG, PNG, atau WEBP.', $err);
+                        log_message('error', "[JURNAL_PIKET_DEBUG] JurnalPiketService::create() - Invalid MIME: {$mimeType}");
+                        return $this->errorResponse('Validasi gagal: Format foto harus JPG, JPEG, PNG, atau WEBP.', $err, [], ['upload_info' => $uploadInfo]);
                     }
 
                     if ($file->getSize() > 1048576) {
                         $err = ['foto_dokumentasi' => 'Ukuran file foto melebihi batas 1MB. Silakan pilih foto dengan ukuran lebih kecil.'];
-                        return $this->errorResponse('Validasi gagal: Ukuran file foto melebihi 1MB.', $err);
+                        log_message('error', "[JURNAL_PIKET_DEBUG] JurnalPiketService::create() - File size exceeds 1MB: {$file->getSize()} bytes");
+                        return $this->errorResponse('Validasi gagal: Ukuran file foto melebihi 1MB.', $err, [], ['upload_info' => $uploadInfo]);
                     }
+
+                    $tempPath   = $file->getTempName();
+                    $tempDir    = !empty($tempPath) ? dirname($tempPath) : sys_get_temp_dir();
+                    $clientName = $file->getClientName();
+                    $fileSize   = $file->getSize();
 
                     $uploadPath = WRITEPATH . 'uploads/jurnal_piket';
                     if (!is_dir($uploadPath)) {
@@ -184,6 +223,8 @@ class JurnalPiketService extends BaseService
                     }
 
                     $fotoName = $file->getRandomName();
+                    log_message('error', "[JURNAL_PIKET_DEBUG] JurnalPiketService::create() - Moving photo: '{$clientName}' from Temp [{$tempDir}/{$tempPath}] to Target [{$uploadPath}/{$fotoName}]");
+                    $this->log('info', "[JURNAL PIKET FOTO UPLOAD] Temp Dir: {$tempDir} | Temp File: {$tempPath} | Original: {$clientName} ({$fileSize} bytes) -> Destination: {$uploadPath}/{$fotoName}");
                     $file->move($uploadPath, $fotoName);
 
                     $filePath = $uploadPath . '/' . $fotoName;
@@ -194,16 +235,21 @@ class JurnalPiketService extends BaseService
                         }
                     }
                     $uploadedPhotos[] = $fotoName;
+                    $uploadInfo['uploaded_photos'][] = $fotoName;
                 } elseif ($file && !$file->isValid() && $file->getError() !== UPLOAD_ERR_NO_FILE) {
-                    $err = ['foto_dokumentasi' => 'Gagal mengunggah file foto: ' . $file->getErrorString()];
-                    return $this->errorResponse('Validasi gagal: Gagal mengunggah file foto dokumentasi.', $err);
+                    $tempPath = method_exists($file, 'getTempName') ? $file->getTempName() : 'N/A';
+                    $tempDir  = !empty($tempPath) && $tempPath !== 'N/A' ? dirname($tempPath) : sys_get_temp_dir();
+                    $err = ['foto_dokumentasi' => 'Gagal mengunggah file foto (' . $file->getClientName() . '): ' . $file->getErrorString() . ' (Error code: ' . $file->getError() . ')'];
+                    log_message('error', "[JURNAL_PIKET_DEBUG] JurnalPiketService::create() - File upload invalid: Name={$file->getClientName()}, Error={$file->getError()} ({$file->getErrorString()}), TempDir={$tempDir}");
+                    return $this->errorResponse('Validasi gagal: Gagal mengunggah file foto dokumentasi.', $err, [], ['upload_info' => $uploadInfo]);
                 }
             }
         }
 
         $fotoNamesString = !empty($uploadedPhotos) ? implode(',', $uploadedPhotos) : null;
+        log_message('error', "[JURNAL_PIKET_DEBUG] JurnalPiketService::create() - Final foto_dokumentasi string: " . ($fotoNamesString ?: 'null'));
 
-        return $this->executeInTransaction(function () use ($data, $fotoNamesString) {
+        $txResult = $this->executeInTransaction(function () use ($data, $fotoNamesString, $uploadInfo) {
             $insertData = [
                 'guru_id'          => $data['guru_id'],
                 'tanggal'          => $data['tanggal'],
@@ -223,10 +269,21 @@ class JurnalPiketService extends BaseService
                 throw new \Exception('Gagal menyimpan jurnal piket');
             }
 
+            log_message('error', "[JURNAL_PIKET_DEBUG] JurnalPiketService::create() - Jurnal piket created successfully: ID={$id}, guru_id={$data['guru_id']}, tanggal={$data['tanggal']}");
             $this->log('info', "Jurnal piket created: ID={$id}, guru_id={$data['guru_id']}, tanggal={$data['tanggal']}");
 
-            return ['id' => $id];
+            return [
+                'id'               => $id,
+                'foto_dokumentasi' => $fotoNamesString,
+                'upload_info'      => $uploadInfo,
+            ];
         });
+
+        if (!$txResult['success']) {
+            $txResult['upload_info'] = $uploadInfo;
+        }
+
+        return $txResult;
     }
 
     /**
@@ -283,21 +340,55 @@ class JurnalPiketService extends BaseService
         foreach ($photosToDelete as $ptd) {
             if (!empty($ptd) && file_exists($uploadPath . '/' . $ptd)) {
                 @unlink($uploadPath . '/' . $ptd);
+                log_message('error', "[JURNAL_PIKET_DEBUG] JurnalPiketService::update() - Deleted old photo: {$ptd}");
             }
         }
+
+        $uploadInfo = [
+            'temp_dir_default'   => sys_get_temp_dir(),
+            'upload_tmp_dir_ini' => ini_get('upload_tmp_dir') ?: 'OS Default (' . sys_get_temp_dir() . ')',
+            'files_received'     => 0,
+            'valid_files_count'  => 0,
+            'keep_photos_count'  => count($keepPhotos),
+            'files_detail'       => [],
+            'uploaded_photos'    => $keepPhotos,
+        ];
 
         // Validate file count (keep + new)
         $validFilesCount = 0;
         if (!empty($files)) {
+            $uploadInfo['files_received'] = count($files);
             foreach ($files as $file) {
-                if ($file && $file->isValid() && $file->getError() !== UPLOAD_ERR_NO_FILE) {
+                if (!$file) continue;
+                $tempPath = method_exists($file, 'getTempName') ? $file->getTempName() : null;
+                $tempDir  = !empty($tempPath) ? dirname($tempPath) : sys_get_temp_dir();
+                $isValid  = method_exists($file, 'isValid') ? $file->isValid() : false;
+                $errCode  = method_exists($file, 'getError') ? $file->getError() : null;
+                $errMsg   = method_exists($file, 'getErrorString') ? $file->getErrorString() : null;
+
+                $uploadInfo['files_detail'][] = [
+                    'client_name' => method_exists($file, 'getClientName') ? $file->getClientName() : 'unknown',
+                    'size'        => method_exists($file, 'getSize') ? $file->getSize() : 0,
+                    'mime_type'   => method_exists($file, 'getMimeType') ? $file->getMimeType() : null,
+                    'temp_file'   => $tempPath,
+                    'temp_dir'    => $tempDir,
+                    'is_valid'    => $isValid,
+                    'error_code'  => $errCode,
+                    'error_msg'   => $errMsg,
+                ];
+
+                if ($isValid && $errCode !== UPLOAD_ERR_NO_FILE) {
                     $validFilesCount++;
                 }
             }
         }
+        $uploadInfo['valid_files_count'] = $validFilesCount;
+
+        log_message('error', "[JURNAL_PIKET_DEBUG] JurnalPiketService::update() - ID={$id}: Keep=" . count($keepPhotos) . ", New valid files={$validFilesCount}, Total=" . (count($keepPhotos) + $validFilesCount));
 
         if (count($keepPhotos) + $validFilesCount > 4) {
-            return $this->errorResponse('Validasi gagal: Total foto (foto lama + foto baru) melebihi batas maksimal 4 foto.');
+            log_message('error', "[JURNAL_PIKET_DEBUG] JurnalPiketService::update() - Exceeds 4 photos limit: Keep=" . count($keepPhotos) . ", New={$validFilesCount}");
+            return $this->errorResponse('Validasi gagal: Total foto (foto lama + foto baru) melebihi batas maksimal 4 foto.', 422, [], ['upload_info' => $uploadInfo]);
         }
 
         // Handle new photo uploads
@@ -309,19 +400,28 @@ class JurnalPiketService extends BaseService
                     $mimeType = $file->getMimeType();
                     if (!in_array($mimeType, $validMimes)) {
                         $err = ['foto_dokumentasi' => 'Format file foto tidak didukung. Gunakan format JPG, JPEG, PNG, atau WEBP.'];
-                        return $this->errorResponse('Validasi gagal: Format foto harus JPG, JPEG, PNG, atau WEBP.', $err);
+                        log_message('error', "[JURNAL_PIKET_DEBUG] JurnalPiketService::update() - Invalid MIME: {$mimeType}");
+                        return $this->errorResponse('Validasi gagal: Format foto harus JPG, JPEG, PNG, atau WEBP.', $err, [], ['upload_info' => $uploadInfo]);
                     }
 
                     if ($file->getSize() > 1048576) {
                         $err = ['foto_dokumentasi' => 'Ukuran file foto melebihi batas 1MB. Silakan pilih foto dengan ukuran lebih kecil.'];
-                        return $this->errorResponse('Validasi gagal: Ukuran file foto melebihi 1MB.', $err);
+                        log_message('error', "[JURNAL_PIKET_DEBUG] JurnalPiketService::update() - File size exceeds 1MB: {$file->getSize()} bytes");
+                        return $this->errorResponse('Validasi gagal: Ukuran file foto melebihi 1MB.', $err, [], ['upload_info' => $uploadInfo]);
                     }
+
+                    $tempPath   = $file->getTempName();
+                    $tempDir    = !empty($tempPath) ? dirname($tempPath) : sys_get_temp_dir();
+                    $clientName = $file->getClientName();
+                    $fileSize   = $file->getSize();
 
                     if (!is_dir($uploadPath)) {
                         mkdir($uploadPath, 0777, true);
                     }
 
                     $fotoName = $file->getRandomName();
+                    log_message('error', "[JURNAL_PIKET_DEBUG] JurnalPiketService::update() - Moving photo: '{$clientName}' from Temp [{$tempDir}/{$tempPath}] to Target [{$uploadPath}/{$fotoName}]");
+                    $this->log('info', "[JURNAL PIKET FOTO UPDATE] Temp Dir: {$tempDir} | Temp File: {$tempPath} | Original: {$clientName} ({$fileSize} bytes) -> Destination: {$uploadPath}/{$fotoName}");
                     $file->move($uploadPath, $fotoName);
 
                     $filePath = $uploadPath . '/' . $fotoName;
@@ -332,16 +432,21 @@ class JurnalPiketService extends BaseService
                         }
                     }
                     $uploadedPhotos[] = $fotoName;
+                    $uploadInfo['uploaded_photos'][] = $fotoName;
                 } elseif ($file && !$file->isValid() && $file->getError() !== UPLOAD_ERR_NO_FILE) {
-                    $err = ['foto_dokumentasi' => 'Gagal mengunggah file foto: ' . $file->getErrorString()];
-                    return $this->errorResponse('Validasi gagal: Gagal mengunggah file foto dokumentasi.', $err);
+                    $tempPath = method_exists($file, 'getTempName') ? $file->getTempName() : 'N/A';
+                    $tempDir  = !empty($tempPath) && $tempPath !== 'N/A' ? dirname($tempPath) : sys_get_temp_dir();
+                    $err = ['foto_dokumentasi' => 'Gagal mengunggah file foto (' . $file->getClientName() . '): ' . $file->getErrorString() . ' (Error code: ' . $file->getError() . ')'];
+                    log_message('error', "[JURNAL_PIKET_DEBUG] JurnalPiketService::update() - File upload invalid: Name={$file->getClientName()}, Error={$file->getError()} ({$file->getErrorString()}), TempDir={$tempDir}");
+                    return $this->errorResponse('Validasi gagal: Gagal mengunggah file foto dokumentasi.', $err, [], ['upload_info' => $uploadInfo]);
                 }
             }
         }
 
         $fotoNamesString = !empty($uploadedPhotos) ? implode(',', $uploadedPhotos) : null;
+        log_message('error', "[JURNAL_PIKET_DEBUG] JurnalPiketService::update() - Final updated foto_dokumentasi string: " . ($fotoNamesString ?: 'null'));
 
-        return $this->executeInTransaction(function () use ($id, $data, $fotoNamesString) {
+        $txResult = $this->executeInTransaction(function () use ($id, $data, $fotoNamesString, $uploadInfo) {
             $updateData = [
                 'tanggal'          => $data['tanggal'],
                 'rincian_tugas'    => $data['rincian_tugas'] ?? null,
@@ -353,10 +458,21 @@ class JurnalPiketService extends BaseService
 
             $this->jurnalPiketModel->update($id, $updateData);
 
+            log_message('error', "[JURNAL_PIKET_DEBUG] JurnalPiketService::update() - Jurnal piket ID={$id} updated successfully in database");
             $this->log('info', "Jurnal piket updated: ID={$id}");
 
-            return ['id' => $id];
+            return [
+                'id'               => $id,
+                'foto_dokumentasi' => $fotoNamesString,
+                'upload_info'      => $uploadInfo,
+            ];
         });
+
+        if (!$txResult['success']) {
+            $txResult['upload_info'] = $uploadInfo;
+        }
+
+        return $txResult;
     }
 
     /**

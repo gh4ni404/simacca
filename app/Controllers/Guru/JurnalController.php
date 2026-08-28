@@ -171,6 +171,10 @@ class JurnalController extends BaseController
             // Generate unique filename
             $fotoName = 'jurnal_' . time() . '_' . uniqid() . '.' . $file->getExtension();
             
+            $tempPath = $file->getTempName();
+            $tempDir  = dirname($tempPath);
+            log_message('info', "[JURNAL KBM FOTO UPLOAD] Temp Dir: {$tempDir} | Temp File: {$tempPath} | Original: {$file->getClientName()} ({$file->getSize()} bytes) -> Destination: " . WRITEPATH . "uploads/jurnal/{$fotoName}");
+            
             // Move file to uploads directory
             try {
                 $file->move(WRITEPATH . 'uploads/jurnal', $fotoName);
@@ -398,7 +402,9 @@ class JurnalController extends BaseController
             // Generate unique filename
             $fotoName = 'jurnal_' . time() . '_' . uniqid() . '.' . $file->getExtension();
             
-            log_message('info', '[JURNAL UPDATE] Generated filename: ' . $fotoName);
+            $tempPath = $file->getTempName();
+            $tempDir  = dirname($tempPath);
+            log_message('info', "[JURNAL KBM FOTO UPDATE] Temp Dir: {$tempDir} | Temp File: {$tempPath} | Original: {$file->getClientName()} ({$file->getSize()} bytes) -> Destination: " . WRITEPATH . "uploads/jurnal/{$fotoName}");
             
             // Move file to uploads directory
             try {

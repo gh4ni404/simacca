@@ -488,6 +488,7 @@ document.getElementById('jurnalForm').addEventListener('submit', async function(
         });
 
         const data = await response.json();
+        console.log('[JURNAL PIKET CREATE RESPONSE]', data);
 
         // Update CSRF token if returned
         if (data.csrf_token && data.csrf_hash) {
