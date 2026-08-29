@@ -128,59 +128,30 @@ foreach ($writableDirs as $dir) {
 // Check 3: Public directory
 printHeader('Checking Public Directory');
 $checks++;
-$publicFound = false;
-$publicPath = '';
-$possiblePublicDirs = [
-    '../simacca_public',
-    '../public_html',
-    'public',
-    'simacca_public',
-    '../public',
-];
-
-foreach ($possiblePublicDirs as $pDir) {
-    if (file_exists(__DIR__ . '/' . $pDir . '/index.php')) {
-        $publicFound = true;
-        $publicPath = $pDir;
-        break;
-    }
+if (file_exists(__DIR__ . '/../simacca_public/index.php')) {
+    checkmark('../simacca_public/index.php exists');
+} else {
+    error('../simacca_public/index.php NOT found');
+    $errors[] = 'Ensure public directory is properly set up';
 }
 
-if ($publicFound) {
-    checkmark($publicPath . '/index.php exists');
-    
-    // Check if index.php references the correct Paths.php when parallel
-    $indexContent = file_get_contents(__DIR__ . '/' . $publicPath . '/index.php');
-    if (str_starts_with($publicPath, '..') && !str_contains($indexContent, 'simacca/app/Config/Paths.php') && !str_contains($indexContent, '../simacca')) {
-        warning($publicPath . '/index.php: Pastikan baris Paths.php mengarah ke ../simacca/app/Config/Paths.php karena folder sejajar.');
-    }
-
-    if (file_exists(__DIR__ . '/' . $publicPath . '/.htaccess')) {
-        checkmark($publicPath . '/.htaccess exists');
-    } else {
-        warning($publicPath . '/.htaccess NOT found (might cause routing issues)');
-        $warnings[] = 'Create .htaccess in ' . $publicPath . ' directory for Apache';
-    }
+if (file_exists(__DIR__ . '/../simacca_public/.htaccess')) {
+    checkmark('../simacca_public/.htaccess exists');
 } else {
-    error('Folder public / simacca_public NOT found');
-    $errors[] = 'Ensure public directory (public/ atau ../simacca_public/ sejajar) is properly set up with index.php';
+    warning('../simacca_public/.htaccess NOT found (might cause routing issues)');
+    $warnings[] = 'Create .htaccess in ../simacca_public/ directory for Apache';
 }
 
 // Check 4: Database config
 printHeader('Checking Database Configuration');
 $checks++;
-if (file_exists(__DIR__ . '/vendor/autoload.php')) {
-    require_once __DIR__ . '/vendor/autoload.php';
-}
-
-if (isset($envContent) && 
-    preg_match('/database\.default\.hostname\s*=\s*([^\r\n]+)/i', $envContent, $hostMatch) && 
-    preg_match('/database\.default\.database\s*=\s*([^\r\n]+)/i', $envContent, $dbMatch) &&
-    trim($hostMatch[1]) !== '' && trim($dbMatch[1]) !== '') {
-    checkmark('Database configuration found in .env: ' . trim($dbMatch[1]));
+require_once __DIR__ . '/app/Config/Database.php';
+$dbConfig = new \Config\Database();
+if ($dbConfig->default['hostname'] && $dbConfig->default['database']) {
+    checkmark('Database configuration found');
 } else {
-    error('Database configuration incomplete in .env');
-    $errors[] = 'Configure database.default.hostname and database.default.database in .env';
+    error('Database configuration incomplete');
+    $errors[] = 'Configure database settings in .env';
 }
 
 // Check 5: Security settings
