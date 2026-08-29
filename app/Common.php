@@ -17,27 +17,27 @@
 if (!function_exists('get_simacca_temp_dir')) {
     /**
      * Mendapatkan direktori temporary SIMACCA.
-     * Memprioritaskan direktori tmp yang sejajar dengan SIMACCA (../tmp atau /home/user/tmp),
-     * atau direktori tmp internal SIMACCA (writable/tmp).
+     * Memprioritaskan direktori tmp internal SIMACCA (writable/tmp),
+     * atau direktori tmp yang sejajar dengan SIMACCA (../tmp).
      *
      * @return string
      */
     function get_simacca_temp_dir(): string
     {
-        // 1. Cek folder tmp sejajar dengan simacca (../tmp)
+        // 1. Cek folder tmp internal simacca (writable/tmp)
+        $simaccaTmp = defined('WRITEPATH') ? WRITEPATH . 'tmp' : __DIR__ . '/../writable/tmp';
+        if (is_dir($simaccaTmp) || @mkdir($simaccaTmp, 0777, true)) {
+            $real = realpath($simaccaTmp);
+            return $real ? $real : str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $simaccaTmp);
+        }
+
+        // 2. Cek folder tmp sejajar dengan simacca (../tmp)
         $siblingTmp = defined('ROOTPATH')
             ? rtrim(dirname(rtrim(ROOTPATH, '/\\')), '/\\') . DIRECTORY_SEPARATOR . 'tmp'
             : dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'tmp';
         if (is_dir($siblingTmp) && is_writable($siblingTmp)) {
             $real = realpath($siblingTmp);
             return $real ? $real : str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $siblingTmp);
-        }
-
-        // 2. Cek folder tmp internal simacca (writable/tmp)
-        $simaccaTmp = defined('WRITEPATH') ? WRITEPATH . 'tmp' : __DIR__ . '/../writable/tmp';
-        if (is_dir($simaccaTmp) || @mkdir($simaccaTmp, 0777, true)) {
-            $real = realpath($simaccaTmp);
-            return $real ? $real : str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $simaccaTmp);
         }
 
         // 3. Fallback ke direktori temp sistem operasi
