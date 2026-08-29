@@ -149,9 +149,26 @@ if (file_exists(__DIR__ . '/../simacca_public/.htaccess')) {
 // Check 4: Database config
 printHeader('Checking Database Configuration');
 $checks++;
-require_once __DIR__ . '/app/Config/Database.php';
-$dbConfig = new \Config\Database();
-if ($dbConfig->default['hostname'] && $dbConfig->default['database']) {
+$dbConfigured = false;
+if (file_exists(__DIR__ . '/.env')) {
+    $envContent = file_get_contents(__DIR__ . '/.env');
+    $hasHost = preg_match('/database\.default\.hostname\s*=\s*[^\s]+/i', $envContent);
+    $hasDb   = preg_match('/database\.default\.database\s*=\s*[^\s]+/i', $envContent);
+    if ($hasHost && $hasDb) {
+        $dbConfigured = true;
+    }
+}
+if (!$dbConfigured && file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require_once __DIR__ . '/vendor/autoload.php';
+    if (class_exists(\Config\Database::class)) {
+        $dbConfig = new \Config\Database();
+        if (!empty($dbConfig->default['hostname']) && !empty($dbConfig->default['database'])) {
+            $dbConfigured = true;
+        }
+    }
+}
+
+if ($dbConfigured) {
     checkmark('Database configuration found');
 } else {
     error('Database configuration incomplete');

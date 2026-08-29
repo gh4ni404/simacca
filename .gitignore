@@ -63,6 +63,9 @@ writable/uploads/**/*
 writable/debugbar/*
 !writable/debugbar/index.html
 
+writable/tmp/*
+!writable/tmp/index.html
+
 php_errors.log
 
 #-------------------------
@@ -129,6 +132,11 @@ _modules/*
 /public/*
 !/public/css/
 !/public/css/*.css
+!/public/.htaccess
+!/public/.user.ini
+!/public/index.php
+!/public/robots.txt
+!/public/favicon.ico
 
 error_log
 /error_log
