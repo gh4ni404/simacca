@@ -128,30 +128,45 @@ foreach ($writableDirs as $dir) {
 // Check 3: Public directory
 printHeader('Checking Public Directory');
 $checks++;
-if (file_exists(__DIR__ . '/simacca_public/index.php')) {
-    checkmark('simacca_public/index.php exists');
-} else {
-    error('simacca_public/index.php NOT found');
-    $errors[] = 'Ensure public directory is properly set up';
+$publicFound = false;
+$publicPath = '';
+$possiblePublicDirs = ['public', 'simacca_public', '../public_html'];
+foreach ($possiblePublicDirs as $pDir) {
+    if (file_exists(__DIR__ . '/' . $pDir . '/index.php')) {
+        $publicFound = true;
+        $publicPath = $pDir;
+        break;
+    }
 }
 
-if (file_exists(__DIR__ . '/simacca_public/.htaccess')) {
-    checkmark('simacca_public/.htaccess exists');
+if ($publicFound) {
+    checkmark($publicPath . '/index.php exists');
+    if (file_exists(__DIR__ . '/' . $publicPath . '/.htaccess')) {
+        checkmark($publicPath . '/.htaccess exists');
+    } else {
+        warning($publicPath . '/.htaccess NOT found (might cause routing issues)');
+        $warnings[] = 'Create .htaccess in ' . $publicPath . ' directory for Apache';
+    }
 } else {
-    warning('simacca_public/.htaccess NOT found (might cause routing issues)');
-    $warnings[] = 'Create .htaccess in public directory for Apache';
+    error('public/index.php NOT found');
+    $errors[] = 'Ensure public directory (public/ or simacca_public/) is properly set up with index.php';
 }
 
 // Check 4: Database config
 printHeader('Checking Database Configuration');
 $checks++;
-require_once __DIR__ . '/app/Config/Database.php';
-$dbConfig = new \Config\Database();
-if ($dbConfig->default['hostname'] && $dbConfig->default['database']) {
-    checkmark('Database configuration found');
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require_once __DIR__ . '/vendor/autoload.php';
+}
+
+if (isset($envContent) && 
+    preg_match('/database\.default\.hostname\s*=\s*([^\r\n]+)/i', $envContent, $hostMatch) && 
+    preg_match('/database\.default\.database\s*=\s*([^\r\n]+)/i', $envContent, $dbMatch) &&
+    trim($hostMatch[1]) !== '' && trim($dbMatch[1]) !== '') {
+    checkmark('Database configuration found in .env: ' . trim($dbMatch[1]));
 } else {
-    error('Database configuration incomplete');
-    $errors[] = 'Configure database settings in .env';
+    error('Database configuration incomplete in .env');
+    $errors[] = 'Configure database.default.hostname and database.default.database in .env';
 }
 
 // Check 5: Security settings
