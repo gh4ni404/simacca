@@ -130,7 +130,14 @@ printHeader('Checking Public Directory');
 $checks++;
 $publicFound = false;
 $publicPath = '';
-$possiblePublicDirs = ['public', 'simacca_public', '../public_html'];
+$possiblePublicDirs = [
+    '../simacca_public',
+    '../public_html',
+    'public',
+    'simacca_public',
+    '../public',
+];
+
 foreach ($possiblePublicDirs as $pDir) {
     if (file_exists(__DIR__ . '/' . $pDir . '/index.php')) {
         $publicFound = true;
@@ -141,6 +148,13 @@ foreach ($possiblePublicDirs as $pDir) {
 
 if ($publicFound) {
     checkmark($publicPath . '/index.php exists');
+    
+    // Check if index.php references the correct Paths.php when parallel
+    $indexContent = file_get_contents(__DIR__ . '/' . $publicPath . '/index.php');
+    if (str_starts_with($publicPath, '..') && !str_contains($indexContent, 'simacca/app/Config/Paths.php') && !str_contains($indexContent, '../simacca')) {
+        warning($publicPath . '/index.php: Pastikan baris Paths.php mengarah ke ../simacca/app/Config/Paths.php karena folder sejajar.');
+    }
+
     if (file_exists(__DIR__ . '/' . $publicPath . '/.htaccess')) {
         checkmark($publicPath . '/.htaccess exists');
     } else {
@@ -148,8 +162,8 @@ if ($publicFound) {
         $warnings[] = 'Create .htaccess in ' . $publicPath . ' directory for Apache';
     }
 } else {
-    error('public/index.php NOT found');
-    $errors[] = 'Ensure public directory (public/ or simacca_public/) is properly set up with index.php';
+    error('Folder public / simacca_public NOT found');
+    $errors[] = 'Ensure public directory (public/ atau ../simacca_public/ sejajar) is properly set up with index.php';
 }
 
 // Check 4: Database config
