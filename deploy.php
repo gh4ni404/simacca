@@ -119,13 +119,14 @@ $writableDirs = ['writable', 'writable/cache', 'writable/logs', 'writable/sessio
 foreach ($writableDirs as $dir) {
     $fullDirPath = __DIR__ . '/' . $dir;
     if (!is_dir($fullDirPath)) {
-        @mkdir($fullDirPath, 0755, true);
+        @mkdir($fullDirPath, 0777, true);
     }
+    @chmod($fullDirPath, 0777);
     if (is_writable($fullDirPath)) {
-        checkmark($dir . ' is writable');
+        checkmark($dir . ' is writable (chmod 777)');
     } else {
         error($dir . ' is NOT writable');
-        $errors[] = 'Make ' . $dir . ' writable: chmod 755 ' . $dir;
+        $errors[] = 'Make ' . $dir . ' writable: chmod -R 777 ' . $dir;
     }
 }
 
@@ -144,6 +145,22 @@ if (file_exists(__DIR__ . '/../simacca_public/.htaccess')) {
 } else {
     warning('../simacca_public/.htaccess NOT found (might cause routing issues)');
     $warnings[] = 'Create .htaccess in ../simacca_public/ directory for Apache';
+}
+
+if (file_exists(__DIR__ . '/../simacca_public/.user.ini')) {
+    $userIni = file_get_contents(__DIR__ . '/../simacca_public/.user.ini');
+    if (preg_match('/upload_tmp_dir\s*=\s*(\/[^\r\n]+)/i', $userIni, $m)) {
+        $configuredTmpDir = trim($m[1], " \"'");
+        if (is_dir($configuredTmpDir) && is_writable($configuredTmpDir)) {
+            checkmark('../simacca_public/.user.ini upload_tmp_dir is set to absolute path: ' . $configuredTmpDir);
+        } else {
+            warning('../simacca_public/.user.ini upload_tmp_dir (' . $configuredTmpDir . ') is not writable or does not exist');
+            $warnings[] = 'Ensure ' . $configuredTmpDir . ' exists and is writable: chmod 777 ' . $configuredTmpDir;
+        }
+    } elseif (preg_match('/upload_tmp_dir\s*=\s*\.\./i', $userIni)) {
+        error('../simacca_public/.user.ini upload_tmp_dir uses relative path (PHP-FPM will fail with Error Code 6)');
+        $errors[] = 'Update ../simacca_public/.user.ini: upload_tmp_dir = ' . __DIR__ . '/writable/tmp';
+    }
 }
 
 // Check 4: Database config
