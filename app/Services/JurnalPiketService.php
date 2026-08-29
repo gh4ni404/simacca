@@ -152,9 +152,12 @@ class JurnalPiketService extends BaseService
 
         // Handle photo upload
         $uploadedPhotos = [];
+        $defaultTempDir = function_exists('get_simacca_temp_dir') ? get_simacca_temp_dir() : sys_get_temp_dir();
+        $uploadTmpIni   = function_exists('get_simacca_upload_tmp_dir') ? get_simacca_upload_tmp_dir() : (ini_get('upload_tmp_dir') ?: $defaultTempDir);
+
         $uploadInfo = [
-            'temp_dir_default'   => sys_get_temp_dir(),
-            'upload_tmp_dir_ini' => ini_get('upload_tmp_dir') ?: 'OS Default (' . sys_get_temp_dir() . ')',
+            'temp_dir_default'   => $defaultTempDir,
+            'upload_tmp_dir_ini' => $uploadTmpIni,
             'files_received'     => 0,
             'valid_files_count'  => 0,
             'files_detail'       => [],
@@ -167,7 +170,7 @@ class JurnalPiketService extends BaseService
             foreach ($files as $file) {
                 if (!$file) continue;
                 $tempPath = method_exists($file, 'getTempName') ? $file->getTempName() : null;
-                $tempDir  = !empty($tempPath) ? dirname($tempPath) : sys_get_temp_dir();
+                $tempDir  = !empty($tempPath) ? dirname($tempPath) : $defaultTempDir;
                 $isValid  = method_exists($file, 'isValid') ? $file->isValid() : false;
                 $errCode  = method_exists($file, 'getError') ? $file->getError() : null;
                 $errMsg   = method_exists($file, 'getErrorString') ? $file->getErrorString() : null;
@@ -213,7 +216,7 @@ class JurnalPiketService extends BaseService
                     }
 
                     $tempPath   = $file->getTempName();
-                    $tempDir    = !empty($tempPath) ? dirname($tempPath) : sys_get_temp_dir();
+                    $tempDir    = !empty($tempPath) ? dirname($tempPath) : $defaultTempDir;
                     $clientName = $file->getClientName();
                     $fileSize   = $file->getSize();
 
@@ -238,7 +241,7 @@ class JurnalPiketService extends BaseService
                     $uploadInfo['uploaded_photos'][] = $fotoName;
                 } elseif ($file && !$file->isValid() && $file->getError() !== UPLOAD_ERR_NO_FILE) {
                     $tempPath = method_exists($file, 'getTempName') ? $file->getTempName() : 'N/A';
-                    $tempDir  = !empty($tempPath) && $tempPath !== 'N/A' ? dirname($tempPath) : sys_get_temp_dir();
+                    $tempDir  = !empty($tempPath) && $tempPath !== 'N/A' ? dirname($tempPath) : $defaultTempDir;
                     $err = ['foto_dokumentasi' => 'Gagal mengunggah file foto (' . $file->getClientName() . '): ' . $file->getErrorString() . ' (Error code: ' . $file->getError() . ')'];
                     log_message('error', "[JURNAL_PIKET_DEBUG] JurnalPiketService::create() - File upload invalid: Name={$file->getClientName()}, Error={$file->getError()} ({$file->getErrorString()}), TempDir={$tempDir}");
                     return $this->errorResponse('Validasi gagal: Gagal mengunggah file foto dokumentasi.', $err, [], ['upload_info' => $uploadInfo]);
@@ -344,9 +347,12 @@ class JurnalPiketService extends BaseService
             }
         }
 
+        $defaultTempDir = function_exists('get_simacca_temp_dir') ? get_simacca_temp_dir() : sys_get_temp_dir();
+        $uploadTmpIni   = function_exists('get_simacca_upload_tmp_dir') ? get_simacca_upload_tmp_dir() : (ini_get('upload_tmp_dir') ?: $defaultTempDir);
+
         $uploadInfo = [
-            'temp_dir_default'   => sys_get_temp_dir(),
-            'upload_tmp_dir_ini' => ini_get('upload_tmp_dir') ?: 'OS Default (' . sys_get_temp_dir() . ')',
+            'temp_dir_default'   => $defaultTempDir,
+            'upload_tmp_dir_ini' => $uploadTmpIni,
             'files_received'     => 0,
             'valid_files_count'  => 0,
             'keep_photos_count'  => count($keepPhotos),
@@ -361,7 +367,7 @@ class JurnalPiketService extends BaseService
             foreach ($files as $file) {
                 if (!$file) continue;
                 $tempPath = method_exists($file, 'getTempName') ? $file->getTempName() : null;
-                $tempDir  = !empty($tempPath) ? dirname($tempPath) : sys_get_temp_dir();
+                $tempDir  = !empty($tempPath) ? dirname($tempPath) : $defaultTempDir;
                 $isValid  = method_exists($file, 'isValid') ? $file->isValid() : false;
                 $errCode  = method_exists($file, 'getError') ? $file->getError() : null;
                 $errMsg   = method_exists($file, 'getErrorString') ? $file->getErrorString() : null;
@@ -411,7 +417,7 @@ class JurnalPiketService extends BaseService
                     }
 
                     $tempPath   = $file->getTempName();
-                    $tempDir    = !empty($tempPath) ? dirname($tempPath) : sys_get_temp_dir();
+                    $tempDir    = !empty($tempPath) ? dirname($tempPath) : $defaultTempDir;
                     $clientName = $file->getClientName();
                     $fileSize   = $file->getSize();
 
@@ -435,7 +441,7 @@ class JurnalPiketService extends BaseService
                     $uploadInfo['uploaded_photos'][] = $fotoName;
                 } elseif ($file && !$file->isValid() && $file->getError() !== UPLOAD_ERR_NO_FILE) {
                     $tempPath = method_exists($file, 'getTempName') ? $file->getTempName() : 'N/A';
-                    $tempDir  = !empty($tempPath) && $tempPath !== 'N/A' ? dirname($tempPath) : sys_get_temp_dir();
+                    $tempDir  = !empty($tempPath) && $tempPath !== 'N/A' ? dirname($tempPath) : $defaultTempDir;
                     $err = ['foto_dokumentasi' => 'Gagal mengunggah file foto (' . $file->getClientName() . '): ' . $file->getErrorString() . ' (Error code: ' . $file->getError() . ')'];
                     log_message('error', "[JURNAL_PIKET_DEBUG] JurnalPiketService::update() - File upload invalid: Name={$file->getClientName()}, Error={$file->getError()} ({$file->getErrorString()}), TempDir={$tempDir}");
                     return $this->errorResponse('Validasi gagal: Gagal mengunggah file foto dokumentasi.', $err, [], ['upload_info' => $uploadInfo]);

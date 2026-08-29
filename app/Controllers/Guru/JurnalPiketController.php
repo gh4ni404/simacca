@@ -110,19 +110,20 @@ class JurnalPiketController extends BaseController
         $files = $this->request->getFileMultiple('foto_dokumentasi');
 
         log_message('error', sprintf(
-            '[JURNAL_PIKET_DEBUG] store() - Request diterima: Guru ID=%s, Tanggal=%s, Files count=%d, OS Temp Dir=%s, upload_tmp_dir ini=%s',
+            '[JURNAL_PIKET_DEBUG] store() - Request diterima: Guru ID=%s, Tanggal=%s, Files count=%d, Temp Dir=%s, upload_tmp_dir ini=%s',
             $guru['id'] ?? 'null',
             $tanggal,
             !empty($files) ? count($files) : 0,
-            sys_get_temp_dir(),
-            ini_get('upload_tmp_dir') ?: 'N/A'
+            function_exists('get_simacca_temp_dir') ? get_simacca_temp_dir() : sys_get_temp_dir(),
+            function_exists('get_simacca_upload_tmp_dir') ? get_simacca_upload_tmp_dir() : (ini_get('upload_tmp_dir') ?: 'N/A')
         ));
 
         if (!empty($files)) {
+            $defaultTempDir = function_exists('get_simacca_temp_dir') ? get_simacca_temp_dir() : sys_get_temp_dir();
             foreach ($files as $idx => $f) {
                 if ($f) {
                     $tPath = method_exists($f, 'getTempName') ? $f->getTempName() : 'N/A';
-                    $tDir  = (!empty($tPath) && $tPath !== 'N/A') ? dirname($tPath) : sys_get_temp_dir();
+                    $tDir  = (!empty($tPath) && $tPath !== 'N/A') ? dirname($tPath) : $defaultTempDir;
                     log_message('error', sprintf(
                         '[JURNAL_PIKET_DEBUG] store() - File #%d: Name=%s, Size=%d bytes, Mime=%s, TempDir=%s, TempFile=%s, Error=%d (%s)',
                         $idx,
@@ -142,8 +143,8 @@ class JurnalPiketController extends BaseController
         log_message('error', '[JURNAL_PIKET_DEBUG] store() - Hasil create(): ' . json_encode($result));
 
         $uploadInfo = $result['data']['upload_info'] ?? $result['upload_info'] ?? [
-            'temp_dir_default'   => sys_get_temp_dir(),
-            'upload_tmp_dir_ini' => ini_get('upload_tmp_dir') ?: 'OS Default (' . sys_get_temp_dir() . ')',
+            'temp_dir_default'   => function_exists('get_simacca_temp_dir') ? get_simacca_temp_dir() : sys_get_temp_dir(),
+            'upload_tmp_dir_ini' => function_exists('get_simacca_upload_tmp_dir') ? get_simacca_upload_tmp_dir() : (ini_get('upload_tmp_dir') ?: 'N/A'),
         ];
 
         if ($this->request->isAJAX() || str_contains($this->request->getHeaderLine('Accept'), 'application/json')) {
@@ -276,20 +277,21 @@ class JurnalPiketController extends BaseController
         $files = $this->request->getFileMultiple('foto_dokumentasi');
 
         log_message('error', sprintf(
-            '[JURNAL_PIKET_DEBUG] update() - Request update ID=%d diterima: Guru ID=%s, Tanggal=%s, Files count=%d, OS Temp Dir=%s, upload_tmp_dir ini=%s',
+            '[JURNAL_PIKET_DEBUG] update() - Request update ID=%d diterima: Guru ID=%s, Tanggal=%s, Files count=%d, Temp Dir=%s, upload_tmp_dir ini=%s',
             $id,
             $guru['id'] ?? 'null',
             $tanggal,
             !empty($files) ? count($files) : 0,
-            sys_get_temp_dir(),
-            ini_get('upload_tmp_dir') ?: 'N/A'
+            function_exists('get_simacca_temp_dir') ? get_simacca_temp_dir() : sys_get_temp_dir(),
+            function_exists('get_simacca_upload_tmp_dir') ? get_simacca_upload_tmp_dir() : (ini_get('upload_tmp_dir') ?: 'N/A')
         ));
 
         if (!empty($files)) {
+            $defaultTempDir = function_exists('get_simacca_temp_dir') ? get_simacca_temp_dir() : sys_get_temp_dir();
             foreach ($files as $idx => $f) {
                 if ($f) {
                     $tPath = method_exists($f, 'getTempName') ? $f->getTempName() : 'N/A';
-                    $tDir  = (!empty($tPath) && $tPath !== 'N/A') ? dirname($tPath) : sys_get_temp_dir();
+                    $tDir  = (!empty($tPath) && $tPath !== 'N/A') ? dirname($tPath) : $defaultTempDir;
                     log_message('error', sprintf(
                         '[JURNAL_PIKET_DEBUG] update() - File #%d: Name=%s, Size=%d bytes, Mime=%s, TempDir=%s, TempFile=%s, Error=%d (%s)',
                         $idx,
@@ -309,8 +311,8 @@ class JurnalPiketController extends BaseController
         log_message('error', '[JURNAL_PIKET_DEBUG] update() - Hasil update(): ' . json_encode($result));
 
         $uploadInfo = $result['data']['upload_info'] ?? $result['upload_info'] ?? [
-            'temp_dir_default'   => sys_get_temp_dir(),
-            'upload_tmp_dir_ini' => ini_get('upload_tmp_dir') ?: 'OS Default (' . sys_get_temp_dir() . ')',
+            'temp_dir_default'   => function_exists('get_simacca_temp_dir') ? get_simacca_temp_dir() : sys_get_temp_dir(),
+            'upload_tmp_dir_ini' => function_exists('get_simacca_upload_tmp_dir') ? get_simacca_upload_tmp_dir() : (ini_get('upload_tmp_dir') ?: 'N/A'),
         ];
 
         if ($this->request->isAJAX() || str_contains($this->request->getHeaderLine('Accept'), 'application/json')) {

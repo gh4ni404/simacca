@@ -115,9 +115,13 @@ if (file_exists(__DIR__ . '/.env')) {
 // Check 2: Writable directories
 printHeader('Checking Directory Permissions');
 $checks++;
-$writableDirs = ['writable', 'writable/cache', 'writable/logs', 'writable/session', 'writable/uploads'];
+$writableDirs = ['writable', 'writable/cache', 'writable/logs', 'writable/session', 'writable/uploads', 'writable/tmp'];
 foreach ($writableDirs as $dir) {
-    if (is_writable(__DIR__ . '/' . $dir)) {
+    $fullDirPath = __DIR__ . '/' . $dir;
+    if (!is_dir($fullDirPath)) {
+        @mkdir($fullDirPath, 0755, true);
+    }
+    if (is_writable($fullDirPath)) {
         checkmark($dir . ' is writable');
     } else {
         error($dir . ' is NOT writable');
