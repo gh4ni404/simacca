@@ -1,0 +1,7 @@
+tunnel: 0958554b-1e80-49b4-a292-03db1dd27535
+credentials-file: /etc/cloudflared/0958554b-1e80-49b4-a292-03db1dd27535.json
+
+ingress:
+  - hostname: simacca-alt.smkn8bone.sch.id
+    service: http://webserver:80
+  - service: http_status:404
