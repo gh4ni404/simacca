@@ -56,6 +56,8 @@ class AuthFilter implements FilterInterface
      */
     private function autoLoginFromCookie(string $token): bool
     {
+        helper(['setting', 'auth']);
+
         $rememberModel = new \App\Models\RememberTokenModel();
         $userId = $rememberModel->validateToken($token);
 
