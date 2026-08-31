@@ -8,8 +8,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <?php $faviconLogo = get_logo_sekolah(); ?>
     <?php if ($faviconLogo): ?>
-        <link rel="shortcut icon" type="image/png" href="<?= base_url('files/logo/' . $faviconLogo) ?>">
+        <link rel="icon" type="image/png" href="<?= base_url('files/logo/' . $faviconLogo) ?>?v=<?= time() ?>">
+        <link rel="shortcut icon" type="image/png" href="<?= base_url('files/logo/' . $faviconLogo) ?>?v=<?= time() ?>">
+        <link rel="apple-touch-icon" href="<?= base_url('files/logo/' . $faviconLogo) ?>">
     <?php else: ?>
+        <link rel="icon" type="image/png" href="<?= base_url('favicon.ico') ?>">
         <link rel="shortcut icon" type="image/png" href="<?= base_url('favicon.ico') ?>">
     <?php endif; ?>
     

@@ -18,8 +18,24 @@ class App extends BaseConfig
      */
     // Base URL - will be overridden by .env in production
     // Development: http://localhost:8080/
-    // Production: https://simacca.smkn8bone.sch.id/
-    public string $baseURL = 'http://localhost:8080/';
+    public string $baseURL = 'https://simacca-alt.smkn8bone.sch.id/';
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        // Auto-detect baseURL dynamically based on incoming request host (works for both localhost & Cloudflare domain)
+        $host = !empty($_SERVER['HTTP_X_FORWARDED_HOST']) 
+            ? $_SERVER['HTTP_X_FORWARDED_HOST'] 
+            : (!empty($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '');
+
+        if (!empty($host)) {
+            $proto = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
+                     (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+                     ? 'https' : 'http';
+            $this->baseURL = $proto . '://' . rtrim($host, '/') . '/';
+        }
+    }
 
     /**
      * Allowed Hostnames in the Site URL other than the hostname in the baseURL.

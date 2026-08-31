@@ -237,7 +237,12 @@ class FileController extends BaseController
         $filepath = WRITEPATH . 'uploads/logo/' . $filename;
 
         if (!file_exists($filepath)) {
-            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Logo tidak ditemukan');
+            $files = glob(WRITEPATH . 'uploads/logo/*.{jpg,jpeg,png,gif,webp,svg}', GLOB_BRACE);
+            if (!empty($files)) {
+                $filepath = $files[0];
+            } else {
+                throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Logo tidak ditemukan');
+            }
         }
 
         $finfo = finfo_open(FILEINFO_MIME_TYPE);

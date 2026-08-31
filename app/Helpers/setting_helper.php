@@ -176,7 +176,16 @@ if (!function_exists('get_logo_sekolah')) {
     function get_logo_sekolah(): ?string
     {
         $settingModel = model(SettingModel::class);
-        return $settingModel->get('logo_sekolah') ?: null;
+        $logo = $settingModel->get('logo_sekolah');
+        if ($logo && file_exists(WRITEPATH . 'uploads/logo/' . $logo)) {
+            return $logo;
+        }
+        // Fallback: auto-detect existing logo in writable/uploads/logo/
+        $files = glob(WRITEPATH . 'uploads/logo/*.{jpg,jpeg,png,gif,webp,svg}', GLOB_BRACE);
+        if (!empty($files)) {
+            return basename($files[0]);
+        }
+        return $logo ?: null;
     }
 }
 
