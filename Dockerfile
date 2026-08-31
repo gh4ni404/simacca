@@ -47,3 +47,10 @@ RUN git config --global --add safe.directory /var/www/html
 WORKDIR /var/www/html
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Salin kode aplikasi ke dalam image untuk deployment mandiri (standalone image)
+COPY . /var/www/html
+
+# Atur hak akses folder writable untuk PHP-FPM
+RUN chown -R www-data:www-data /var/www/html/writable \
+ && chmod -R 775 /var/www/html/writable

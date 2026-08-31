@@ -145,3 +145,9 @@ error_log
 # Node.js
 # -------------------------
 node_modules/
+
+# -------------------------
+# Cloudflare & Docker exports
+# -------------------------
+cloudflare/*.json
+*.tar
