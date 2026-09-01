@@ -1,80 +1,162 @@
 # 🚀 Panduan Deployment Docker & Perintah CLI (PC Target)
 
-Panduan ini ditujukan untuk menjalankan aplikasi **SIMACCA** di PC Server / Target menggunakan **Pre-built Docker Image** dan **Cloudflare Tunnel**, tanpa perlu memodifikasi kode atau memasang PHP/Composer di OS Host PC tersebut.
+Panduan ini ditujukan untuk menjalankan aplikasi **SIMACCA** di PC Server / Target menggunakan **Docker Image** dan **Cloudflare Tunnel**, tanpa perlu memodifikasi kode atau memasang PHP/Composer di OS Host PC tersebut.
 
 ---
 
 ## 📋 Daftar Isi
-1. [Struktur File di PC Target](#1-struktur-file-di-pc-target)
-2. [Langkah Persiapan & Menjalankan](#2-langkah-persiapan--menjalankan)
-3. [Perintah Manajemen Docker](#3-perintah-manajemen-docker)
-4. [Kumpulan Perintah PHP Spark di Dalam Container](#4-kumpulan-perintah-php-spark-di-dalam-container)
-5. [Backup & Pemeliharaan Data](#5-backup--pemeliharaan-data)
-6. [Troubleshooting](#6-troubleshooting)
+1. [Metode 1 (Rekomendasi Utama): Distribusi via Docker Hub (Online Pull)](#1-metode-1-rekomendasi-utama-distribusi-via-docker-hub-online-pull)
+2. [Metode 2: Distribusi Offline via File .tar (Flashdisk / LAN)](#2-metode-2-distribusi-offline-via-file-tar-flashdisk--lan)
+3. [Struktur File di PC Target](#3-struktur-file-di-pc-target)
+4. [Sinkronisasi File Upload & Izin Folder (PENTING)](#4-sinkronisasi-file-upload--izin-folder-penting)
+5. [Perintah Manajemen Docker](#5-perintah-manajemen-docker)
+6. [Kumpulan Perintah PHP Spark di Dalam Container](#6-kumpulan-perintah-php-spark-di-dalam-container)
+7. [Setup Cronjob di PC Target (Opsional)](#7-setup-cronjob-di-pc-target-opsional)
+8. [Troubleshooting & Solusi Masalah Nyata](#8-troubleshooting--solusi-masalah-nyata)
 
 ---
 
-## 1. Struktur File di PC Target
+## 1. Metode 1 (Rekomendasi Utama): Distribusi via Docker Hub (Online Pull)
 
-Di PC target, buat sebuah direktori (misal: `~/simacca`) dan letakkan file-file berikut:
+Dengan Docker Hub, proses deployment di PC target sangat cepat dan ringan karena hanya perlu menarik (*pull*) image yang sudah di-compile.
+
+### A. Di PC Asal (Build & Push ke Docker Hub)
+
+1. **Login ke Docker Hub**:
+   ```bash
+   docker login
+   ```
+   *(Masukkan username dan password / Access Token Docker Hub).*
+
+2. **Build & Tag Image**:
+   ```bash
+   docker build -t gh4ni404/simacca-app:latest .
+   ```
+
+3. **Push Image ke Docker Hub**:
+   ```bash
+   docker push gh4ni404/simacca-app:latest
+   ```
+
+4. **Siapkan Backup File Upload (Opsional tapi Direkomendasikan)**:
+   Agar foto profil guru/siswa dan logo sekolah lama langsung tampil di PC target:
+   ```bash
+   # Pilihan Ringan: Hanya foto profil & logo (±3.3 MB)
+   tar -czvf profile_uploads.tar.gz -C writable/uploads profile logo
+
+   # Atau Pilihan Lengkap: Semua foto jurnal, progress, absensi (±600 MB)
+   tar -czvf uploads_backup.tar.gz -C writable uploads
+   ```
+
+---
+
+### B. Di PC Target (Tarik Image & Jalankan)
+
+1. **Buat folder project di Linux Home PC target (WSL)**:
+   ```bash
+   mkdir -p ~/simacca/cloudflare ~/simacca/writable/uploads
+   cd ~/simacca
+   ```
+
+2. **Salin file-file konfigurasi berikut ke `~/simacca`**:
+   * `docker-compose.yaml` (salin dari `docker-compose.prod.yaml`, pastikan nama image `gh4ni404/simacca-app:latest`)
+   * `nginx.conf`
+   * `.env` (berisi konfigurasi database cPanel & domain baseURL)
+   * Folder `cloudflare/` (berisi file `config.yml` dan `<tunnel-id>.json`)
+   * File arsip upload: `profile_uploads.tar.gz` atau `uploads_backup.tar.gz`
+
+3. **Ekstrak File Upload & Set Izin Folder**:
+   ```bash
+   cd ~/simacca
+   sudo chmod -R 777 writable
+   tar -xzvf uploads_backup.tar.gz -C writable/
+   sudo chmod -R 777 writable
+   ```
+
+4. **Tarik Image & Jalankan Container**:
+   ```bash
+   docker compose pull
+   docker compose up -d
+   ```
+
+5. **Cek Status Semua Container**:
+   ```bash
+   docker compose ps
+   ```
+   *(Pastikan service `app`, `webserver`, dan `tunnel` berstatus `Up` / `running`).*
+
+---
+
+## 2. Metode 2: Distribusi Offline via File .tar (Flashdisk / LAN)
+
+Gunakan metode ini jika PC target tidak memiliki koneksi internet untuk mengunduh image dari Docker Hub.
+
+### A. Di PC Asal
+1. **Export Image Docker**:
+   ```bash
+   docker save -o simacca-app.tar gh4ni404/simacca-app:latest
+   ```
+2. Salin `simacca-app.tar`, `docker-compose.prod.yaml` (rename jadi `docker-compose.yaml`), `nginx.conf`, `.env`, folder `cloudflare/`, dan `uploads_backup.tar.gz` ke Flashdisk/LAN.
+
+### B. Di PC Target
+1. **Masuk ke folder project**:
+   ```bash
+   mkdir -p ~/simacca/cloudflare ~/simacca/writable/uploads
+   cd ~/simacca
+   ```
+2. **Load Image & Jalankan**:
+   ```bash
+   docker load -i simacca-app.tar
+   sudo chmod -R 777 writable
+   tar -xzvf uploads_backup.tar.gz -C writable/
+   sudo chmod -R 777 writable
+   docker compose up -d
+   ```
+
+---
+
+## 3. Struktur File di PC Target
+
+Pastikan struktur direktori di `~/simacca` pada PC target seperti berikut:
 
 ```text
 simacca/
-├── simacca-app.tar              # File image hasil export (docker save)
-├── docker-compose.yaml          # File compose production (dari docker-compose.prod.yaml)
+├── docker-compose.yaml          # File compose (image: gh4ni404/simacca-app:latest)
 ├── nginx.conf                   # Konfigurasi reverse proxy & fastcgi
-├── .env                         # Konfigurasi environment & database
-├── cloudflare/                  # Folder kredensial Cloudflare Tunnel
+├── .env                         # Konfigurasi environment & database cPanel
+├── cloudflare/                  # Kredensial Cloudflare Tunnel
 │   ├── config.yml
 │   └── 0958554b-1e80-49b4-a292-03db1dd27535.json
 └── writable/
-    └── uploads/                 # Penyimpanan upload pengguna (persisten)
+    └── uploads/                 # Foto profil, jurnal, logo (persisten di harddisk)
+        ├── absensi_guru/
+        ├── izin/
+        ├── jurnal/
+        ├── jurnal_piket/
+        ├── jurnal_pkl/
+        ├── jurnal_wali/
+        ├── logo/
+        ├── pkl_progress/
+        └── profile/
 ```
 
 ---
 
-## 2. Langkah Persiapan & Menjalankan
+## 4. Sinkronisasi File Upload & Izin Folder (PENTING)
 
-### A. Di PC Development (Asal)
-1. **Export Image Docker**:
+1. **Mengapa file upload berada di host (Volume)?**
+   Folder `writable/uploads` sengaja tidak dimasukkan ke dalam Image Docker agar image tetap ringan dan data foto yang di-upload oleh user tidak hilang saat container di-restart atau di-pull ulang.
+2. **Izin Folder (`Permission Denied`)**:
+   Karena PHP di dalam Docker berjalan sebagai user `www-data` (UID 82), selalu pastikan folder `writable` memiliki izin tulis penuh:
    ```bash
-   docker save -o simacca-app.tar simacca-app:latest
+   sudo chmod -R 777 ~/simacca/writable
    ```
-2. Salin file `simacca-app.tar`, `docker-compose.prod.yaml` (rename jadi `docker-compose.yaml`), `nginx.conf`, `.env`, folder `cloudflare/`, dan folder `writable/uploads` ke Flashdisk / Harddisk Eksternal / Jaringan LAN.
 
 ---
 
-### B. Di PC Target (Server)
-1. **Pastikan Docker & Docker Compose sudah terpasang**:
-   *(Jika menggunakan Windows WSL 2 dan belum terinstal, ikuti [Panduan Instalasi Docker di WSL](docs/guides/PANDUAN_INSTALL_DOCKER_WSL.md))*
-   ```bash
-   docker --version
-   docker compose version
-   ```
-2. **Masuk ke direktori aplikasi**:
-   ```bash
-   cd ~/simacca
-   ```
-3. **Load Image Docker**:
-   ```bash
-   docker load -i simacca-app.tar
-   ```
-4. **Nyalakan Seluruh Service (App + Nginx + Cloudflare Tunnel)**:
-   ```bash
-   docker compose up -d
-   ```
-5. **Cek Status Container**:
-   ```bash
-   docker compose ps
-   ```
+## 5. Perintah Manajemen Docker
 
-Aplikasi langsung dapat diakses di:
-* **Lokal**: `http://localhost:8081`
-* **Online**: `https://simacca-alt.smkn8bone.sch.id`
-
----
-
-## 3. Perintah Manajemen Docker
+Jalankan perintah ini dari folder `~/simacca`:
 
 | Kebutuhan | Perintah |
 | :--- | :--- |
@@ -83,127 +165,84 @@ Aplikasi langsung dapat diakses di:
 | **Melihat log webserver (Nginx)** | `docker compose logs -f webserver` |
 | **Melihat log Cloudflare Tunnel** | `docker compose logs -f tunnel` |
 | **Restart semua service** | `docker compose restart` |
-| **Menghentikan service** | `docker compose stop` |
+| **Restart service tertentu** | `docker compose restart app` / `docker compose restart webserver` |
+| **Update aplikasi (Tarik Image Baru)** | `docker compose pull app && docker compose up -d app` |
+| **Menghentikan sementara** | `docker compose stop` |
 | **Menyalakan kembali** | `docker compose start` |
 | **Mematikan & melepas container** | `docker compose down` |
-| **Masuk ke dalam terminal container PHP** | `docker compose exec app sh` |
+| **Masuk ke terminal container PHP** | `docker compose exec app sh` |
 
 ---
 
-## 4. Kumpulan Perintah PHP Spark di Dalam Container
+## 6. Kumpulan Perintah PHP Spark di Dalam Container
 
-Untuk menjalankan perintah CodeIgniter 4 CLI (`spark`), gunakan awalan:
+Jalankan perintah dari terminal PC target dengan format:
 ```bash
 docker compose exec app php spark <perintah>
 ```
-*(Atau `docker exec -it simacca_app php spark <perintah>`)*
+
+### 🧹 A. Pemeliharaan & Cache
+* **Membersihkan Cache**: `docker compose exec app php spark cache:clear`
+* **Membersihkan Session Expired**: `docker compose exec app php spark session:cleanup`
+* **Membersihkan Token Expired**: `docker compose exec app php spark token:cleanup`
+
+### ⏰ B. Otomasi SIMACCA
+* **Tandai Guru Alpha**: `docker compose exec app php spark absensi:mark-alpha-guru`
+* **Update Kelengkapan Profil**: `docker compose exec app php spark profile:set-completion`
+* **Tes Email**: `docker compose exec app php spark email:test penerima@email.com`
+* **Diagnostik SMTP**: `docker compose exec app php spark email:diagnostics`
+
+### 🔧 C. Database & Migrasi
+* **Jalankan Migrasi**: `docker compose exec app php spark migrate`
+* **Status Migrasi**: `docker compose exec app php spark migrate:status`
 
 ---
 
-### 🔧 A. Perintah Database & Migrasi
+## 7. Setup Cronjob di PC Target (Opsional)
 
-* **Menjalankan migrasi database**:
-  ```bash
-  docker compose exec app php spark migrate
-  ```
-* **Melihat status migrasi**:
-  ```bash
-  docker compose exec app php spark migrate:status
-  ```
-* **Menjalankan Seeder database**:
-  ```bash
-  docker compose exec app php spark db:seed <NamaSeeder>
-  ```
-
----
-
-### 🧹 B. Perintah Maintenance, Cache & Session
-
-* **Membersihkan Cache Aplikasi**:
-  ```bash
-  docker compose exec app php spark cache:clear
-  ```
-* **Membersihkan Sesi Kadaluarsa (Session Cleanup)**:
-  ```bash
-  docker compose exec app php spark session:cleanup
-  ```
-* **Membersihkan Token Remember-Me / Reset Password Expired**:
-  ```bash
-  docker compose exec app php spark token:cleanup
-  ```
-
----
-
-### ⏰ C. Perintah Otomasi & Cronjob SIMACCA
-
-* **Menandai Otomatis Guru Alpha (Absensi Harian)**:
-  ```bash
-  docker compose exec app php spark absensi:mark-alpha-guru
-  ```
-* **Memperbarui Persentase Kelengkapan Profil Pengguna**:
-  ```bash
-  docker compose exec app php spark profile:set-completion
-  ```
-* **Diagnostik & Cek Pengaturan Email**:
-  ```bash
-  docker compose exec app php spark email:diagnostics
-  ```
-* **Mengirim Email Uji Coba**:
-  ```bash
-  docker compose exec app php spark email:test penerima@email.com
-  ```
-
----
-
-### 🔍 D. Perintah Diagnostik & Informasi
-
-* **Melihat daftar seluruh Route yang terdaftar**:
-  ```bash
-  docker compose exec app php spark routes
-  ```
-* **Mengecek profil Wakakur**:
-  ```bash
-  docker compose exec app php spark wakakur:check-profile
-  ```
-* **Mengecek jadwal Wakakur**:
-  ```bash
-  docker compose exec app php spark wakakur:check-schedule
-  ```
-* **Menampilkan daftar seluruh perintah Spark**:
-  ```bash
-  docker compose exec app php spark list
-  ```
-
----
-
-## 5. Setup Cronjob di PC Target (Opsional)
-
-Jika di PC target ingin menjalankan pembersihan sesi dan penandaan alpha secara otomatis setiap hari, Anda bisa menambahkan cronjob di Host OS (`crontab -e`):
-
+Tambahkan di Host OS (`crontab -e`):
 ```cron
 # Bersihkan sesi kadaluarsa setiap hari pukul 01:00 WITA
-0 1 * * * cd /home/user/simacca && docker compose exec -T app php spark session:cleanup >> /var/log/simacca_cron.log 2>&1
+0 1 * * * cd /home/smkn_8_bone/simacca && docker compose exec -T app php spark session:cleanup >> /var/log/simacca_cron.log 2>&1
 
-# Bersihkan token remember-me kadaluarsa setiap hari pukul 02:00 WITA
-0 2 * * * cd /home/user/simacca && docker compose exec -T app php spark token:cleanup >> /var/log/simacca_cron.log 2>&1
+# Bersihkan token kadaluarsa setiap hari pukul 02:00 WITA
+0 2 * * * cd /home/smkn_8_bone/simacca && docker compose exec -T app php spark token:cleanup >> /var/log/simacca_cron.log 2>&1
 
 # Tandai guru alpha setiap hari Senin-Jumat pukul 16:30 WITA
-30 16 * * 1-5 cd /home/user/simacca && docker compose exec -T app php spark absensi:mark-alpha-guru >> /var/log/simacca_cron.log 2>&1
+30 16 * * 1-5 cd /home/smkn_8_bone/simacca && docker compose exec -T app php spark absensi:mark-alpha-guru >> /var/log/simacca_cron.log 2>&1
 ```
-*(Catatan: flag `-T` diperlukan saat menjalankan docker compose di dalam cron).*
 
 ---
 
-## 6. Troubleshooting
+## 8. Troubleshooting & Solusi Masalah Nyata
 
-1. **Aplikasi menampilkan error database connection**:
-   * Cek host database di `.env`. Jika database di host PC target (luar docker), gunakan `database.default.hostname = host.docker.internal` dan pastikan port MySQL host terbuka/dapat diakses.
-2. **File upload tidak bisa disimpan (Permission Denied)**:
-   * Jalankan di PC target:
-     ```bash
-     docker compose exec app chown -R www-data:www-data /var/www/html/writable
-     docker compose exec app chmod -R 775 /var/www/html/writable
-     ```
-3. **Cloudflare Tunnel tidak konek**:
-   * Periksa log tunnel: `docker compose logs tunnel`
-   * Pastikan file credential JSON di folder `cloudflare/` memiliki permission baca: `chmod 644 cloudflare/*.json`.
+### 1. Error `mkdir(): Permission denied` saat Upload Foto
+* **Penyebab**: Folder upload baru belum dibuat atau folder `writable` dimiliki oleh user Linux host sehingga PHP (`www-data`) tidak bisa menulis.
+* **Solusi**:
+  ```bash
+  sudo chmod -R 777 ~/simacca/writable
+  ```
+
+### 2. Foto Profil / Logo Sekolah Menampilkan 404 (Tidak Ditemukan)
+* **Penyebab**: Database merujuk pada file gambar asli yang belum disalin ke PC target.
+* **Solusi**: Ekstrak arsip `profile_uploads.tar.gz` atau `uploads_backup.tar.gz` ke dalam `~/simacca/writable/`:
+  ```bash
+  sudo chmod -R 777 ~/simacca/writable
+  tar -xzvf uploads_backup.tar.gz -C writable/
+  sudo chmod -R 777 ~/simacca/writable
+  ```
+
+### 3. Redirect Localhost (Misal `localhost:8081`) Mengarah ke `localhost/login` (Port Hilang)
+* **Penyebab**: FastCGI Nginx menggunakan variabel `$host` yang memotong port.
+* **Solusi**: Pastikan di `nginx.conf` menggunakan `$http_host`:
+  ```nginx
+  fastcgi_param HTTP_X_FORWARDED_HOST $http_host;
+  ```
+  Lalu restart webserver: `docker compose restart webserver`.
+
+### 4. Cloudflare Tunnel Error / Bad Gateway 502
+* **Penyebab**: Service `webserver` belum siap atau file kredensial tunnel tidak terbaca.
+* **Solusi**:
+  1. Cek log: `docker compose logs -f tunnel`
+  2. Pastikan file JSON di `cloudflare/` memiliki izin baca: `chmod 644 cloudflare/*.json`
+  3. Pastikan `config.yml` mengarah ke service Nginx internal: `service: http://webserver:80`.

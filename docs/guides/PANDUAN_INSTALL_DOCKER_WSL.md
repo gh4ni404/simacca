@@ -1,10 +1,6 @@
 # 🐧 Panduan Lengkap Instalasi Docker di WSL 2 (Windows Subsystem for Linux)
 
-Panduan ini berisi langkah demi langkah untuk menginstal dan mengkonfigurasi **Docker & Docker Compose** di dalam lingkungan **WSL 2 (Ubuntu/Debian)** pada sistem operasi Windows.
-
-Terdapat 2 metode yang dapat dipilih:
-* **Metode 1 (Direkomendasikan)**: **Docker Engine Native di WSL 2** *(Ringan, hemat RAM, cepat, tanpa perlu install Docker Desktop).*
-* **Metode 2**: **Docker Desktop for Windows** *(Berbasis GUI Windows dengan integrasi WSL 2 backend).*
+Panduan ini berisi langkah demi langkah untuk menginstal dan mengonfigurasi **Docker Engine & Docker Compose Plugin** di dalam lingkungan **WSL 2 (Ubuntu)** pada sistem operasi Windows.
 
 ---
 
@@ -25,13 +21,13 @@ Buka **PowerShell (Run as Administrator)** di Windows, lalu jalankan:
    wsl --set-default-version 2
    ```
 
-3. **Buka terminal Ubuntu di WSL**, lalu lanjutkan ke salah satu metode di bawah.
+3. **Buka terminal Ubuntu di WSL**, lalu lanjutkan ke langkah instalasi di bawah.
 
 ---
 
-## ⚡ Metode 1: Instalasi Docker Engine Native di WSL 2 (Sangat Direkomendasikan)
+## ⚡ Instalasi Docker Engine Native di WSL 2 (Sangat Direkomendasikan)
 
-Metode ini memasang Docker langsung di dalam kernel Linux WSL 2. **Kelebihan**: Tidak memakan resource RAM besar seperti Docker Desktop dan tidak memerlukan lisensi.
+Metode ini memasang Docker langsung di dalam kernel Linux WSL 2. **Kelebihan**: Sangat ringan, hemat RAM (tidak perlu Docker Desktop GUI), stabil, dan cepat.
 
 Buka terminal **Ubuntu di WSL** Anda:
 
@@ -66,20 +62,20 @@ sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin d
 ```bash
 sudo usermod -aG docker $USER
 ```
-*(Setelah menjalankan perintah di atas, tutup terminal WSL dan buka kembali agar izin user aktif, atau jalankan `newgrp docker`).*
+*(Setelah perintah ini, jalankan `newgrp docker` atau tutup terminal WSL lalu buka kembali agar izin user aktif).*
 
-### Langkah 6: Aktifkan Systemd di WSL (Agar Docker Otomatis Start)
+### Langkah 6: Aktifkan Systemd di WSL (Agar Docker Otomatis Berjalan saat WSL Nyala)
 WSL 2 versi modern sudah mendukung **systemd**. Cek konfigurasi `/etc/wsl.conf`:
 
 ```bash
 sudo nano /etc/wsl.conf
 ```
-Pastikan ada konfigurasi berikut:
+Tambahkan/pastikan ada konfigurasi berikut:
 ```ini
 [boot]
 systemd=true
 ```
-*(Simpan dengan `Ctrl + O`, `Enter`, lalu `Ctrl + X`).*
+*(Tekan `Ctrl + O`, `Enter` untuk menyimpan, lalu `Ctrl + X` untuk keluar).*
 
 Di PowerShell Windows, restart WSL sekali saja:
 ```powershell
@@ -98,45 +94,22 @@ docker run hello-world
 
 ---
 
-## 🖥️ Metode 2: Menggunakan Docker Desktop for Windows
+## 📂 Tips Penting: Penempatan Folder Project di WSL
 
-Jika Anda lebih menyukai tampilan grafis (GUI) di Windows:
+> [!IMPORTANT]
+> **Selalu letakkan folder project di Linux Home filesystem (`~/simacca` atau `/home/$USER/simacca`), BUKAN di `/mnt/c/Users/...`!**
+> 
+> * **Kecepatan**: Operasi file di Linux native (`~`) hingga **5x - 10x lebih cepat** daripada mengakses partisi Windows (`/mnt/c/`).
+> * **Izin File**: Izin Linux (`chmod`, `chown`, symlink) bekerja 100% sempurna di native Linux.
 
-1. **Download Installer**:
-   Unduh Docker Desktop dari website resmi: [https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/)
-2. **Install di Windows**:
-   Jalankan file installer `.exe`. Pastikan opsi **"Use WSL 2 instead of Hyper-V"** dicentang saat instalasi.
-3. **Konfigurasi Integrasi WSL**:
-   * Buka aplikasi **Docker Desktop**.
-   * Masuk ke **Settings (ikon roda gigi) > Resources > WSL Integration**.
-   * Centang **"Enable integration with my default WSL distro"**.
-   * Aktifkan toggle distro **Ubuntu** Anda.
-   * Klik **Apply & Restart**.
-4. **Verifikasi di Terminal WSL**:
-   Buka terminal Ubuntu WSL dan jalankan:
-   ```bash
-   docker --version
-   docker compose version
-   ```
+Untuk berpindah ke folder project Linux:
+```bash
+cd ~
+mkdir -p ~/simacca
+cd ~/simacca
+```
 
 ---
 
-## 💡 Tips & Trik Optimasi WSL 2 untuk Docker
-
-### 1. Membatasi Penggunaan RAM oleh WSL 2 (Agar Windows Tidak Berat)
-Secara default, WSL 2 bisa menggunakan hingga 50% atau lebih dari total RAM Windows Anda. Anda bisa membatasinya dengan membuat file `.wslconfig` di Windows:
-
-1. Buka Run di Windows (`Win + R`), ketik `%USERPROFILE%` lalu tekan Enter.
-2. Buat file bernama `.wslconfig` (jika belum ada), lalu isi konfigurasi ini:
-   ```ini
-   [wsl2]
-   memory=4GB       # Batas maksimal RAM untuk WSL (sesuaikan misal 4GB / 6GB)
-   processors=4     # Jumlah core CPU yang dialokasikan
-   ```
-3. Restart WSL melalui PowerShell: `wsl --shutdown`.
-
----
-
-## 🎯 Langkah Selanjutnya
-Setelah Docker terpasang di WSL:
-Ikuti panduan deployment SIMACCA di [DOCKER_DEPLOYMENT_GUIDE.md](../../DOCKER_DEPLOYMENT_GUIDE.md) untuk menyalakan container aplikasi!
+## 🎯 Langkah Selanjutnya: Menjalankan SIMACCA
+Setelah Docker siap di WSL, lanjutkan ke panduan deployment di [DOCKER_DEPLOYMENT_GUIDE.md](../../DOCKER_DEPLOYMENT_GUIDE.md) untuk menarik image dari Docker Hub dan menjalankan aplikasi!
