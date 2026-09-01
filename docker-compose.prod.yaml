@@ -2,7 +2,7 @@ name: simacca
 
 services:
   app:
-    image: simacca-app:latest
+    image: gh4ni404/simacca-app:latest
     container_name: simacca_app
     restart: unless-stopped
     extra_hosts:

@@ -151,3 +151,5 @@ node_modules/
 # -------------------------
 cloudflare/*.json
 *.tar
+env copy
+*.env
