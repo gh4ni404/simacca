@@ -153,5 +153,8 @@ node_modules/
 # -------------------------
 cloudflare/*.json
 *.tar
+*.tar.gz
+*.zip
+writable.zip
 env copy
 *.env
