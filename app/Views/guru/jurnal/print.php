@@ -342,6 +342,11 @@
                     <td class="colon">:</td>
                     <td class="value"><?= esc($mapelInfo['nama_mapel']) ?></td>
                 </tr>
+                <tr>
+                    <td class="label">Tahun Ajaran</td>
+                    <td class="colon">:</td>
+                    <td class="value"><?= esc($tahunAjaran ?? get_active_tahun_ajaran()) ?></td>
+                </tr>
                 <?php if ($bulan && $tahun): ?>
                     <tr>
                         <td class="label">Periode</td>

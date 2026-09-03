@@ -33,9 +33,11 @@ class JurnalController extends BaseController
         // Get filter dari request
         $startDate = $this->request->getGet('start_date');
         $endDate = $this->request->getGet('end_date');
+        $activeTahunAjaran = get_active_tahun_ajaran();
+        $selectedTahunAjaran = $this->request->getGet('tahun_ajaran') ?: $activeTahunAjaran;
 
-        // Get jurnal by guru using service
-        $result = $this->jurnalService->getJurnalByGuru($guru['id'], $startDate, $endDate);
+        // Get jurnal by guru using service with tahun_ajaran filter
+        $result = $this->jurnalService->getJurnalByGuru($guru['id'], $startDate, $endDate, $selectedTahunAjaran);
         
         if (!$result['success']) {
             return redirect()->to('/guru/dashboard')->with('error', $result['message']);
@@ -66,7 +68,10 @@ class JurnalController extends BaseController
             'guru' => $guru,
             'kelasList' => array_values($kelasList),
             'startDate' => $startDate,
-            'endDate' => $endDate
+            'endDate' => $endDate,
+            'activeTahunAjaran' => $activeTahunAjaran,
+            'selectedTahunAjaran' => $selectedTahunAjaran,
+            'tahunAjaranList' => get_tahun_ajaran_list()
         ];
 
         return view('guru/jurnal/index', $data);
@@ -138,8 +143,16 @@ class JurnalController extends BaseController
             return redirect()->back()->withInput();
         }
 
-        // Cek apakah sudah ada jurnal untuk absensi ini
         $absensiId = $this->request->getPost('absensi_id');
+        
+        // Cek kepemilikan absensi
+        $userId = session()->get('user_id') ?? session()->get('userId');
+        $absensi = $this->absensiModel->find($absensiId);
+        if (!$absensi || $absensi['created_by'] != $userId) {
+            return redirect()->to('/guru/jurnal')->with('error', 'Kamu nggak punya akses ke absensi ini 🔐');
+        }
+
+        // Cek apakah sudah ada jurnal untuk absensi ini
         if ($this->jurnalService->isJurnalExist($absensiId)) {
             $existingResult = $this->jurnalService->getJurnalByAbsensi($absensiId);
             if ($existingResult['success']) {
@@ -279,11 +292,15 @@ class JurnalController extends BaseController
             return redirect()->to('/guru/dashboard')->with('error', 'Data guru nggak ketemu 🤔');
         }
 
-        // Get jurnal for this kelas AND this guru only (security-safe)
-        $result = $this->jurnalService->getJurnalByGuruAndKelas($guru['id'], $kelasId);
+        $activeTahunAjaran = get_active_tahun_ajaran();
+        $selectedTahunAjaran = $this->request->getGet('tahun_ajaran') ?: $activeTahunAjaran;
+
+        // Get jurnal for this kelas AND this guru only (security-safe) with tahun_ajaran
+        $result = $this->jurnalService->getJurnalByGuruAndKelas($guru['id'], $kelasId, $selectedTahunAjaran);
 
         if (!$result['success'] || empty($result['data'])) {
-            return redirect()->to('/guru/jurnal')->with('error', 'Data jurnal nggak ketemu untuk kelas ini 🤔');
+            return redirect()->to('/guru/jurnal?tahun_ajaran=' . urlencode($selectedTahunAjaran))
+                ->with('error', 'Data jurnal nggak ketemu untuk kelas ini pada tahun ajaran ' . $selectedTahunAjaran . ' 🤔');
         }
 
         $jurnalList = $result['data'];
@@ -292,6 +309,7 @@ class JurnalController extends BaseController
             'title' => 'Daftar Pertemuan - ' . $jurnalList[0]['nama_kelas'],
             'guru' => $guru,
             'jurnalList' => $jurnalList,
+            'tahunAjaran' => $selectedTahunAjaran,
             'kelas' => [
                 'id' => $kelasId,
                 'nama_kelas' => $jurnalList[0]['nama_kelas'],
@@ -334,6 +352,15 @@ class JurnalController extends BaseController
 
         $jurnal = $jurnalResult['data'];
         log_message('info', '[JURNAL UPDATE] Jurnal found: ' . json_encode($jurnal));
+
+        // Cek kepemilikan absensi / jurnal
+        $userId = session()->get('user_id') ?? session()->get('userId');
+        $absensi = $this->absensiModel->find($jurnal['absensi_id']);
+        if ($absensi && $absensi['created_by'] != $userId) {
+            log_message('error', '[JURNAL UPDATE] Unauthorized user ' . $userId . ' for jurnal ' . $jurnalId);
+            session()->setFlashdata('error', 'Kamu nggak punya akses untuk mengedit jurnal ini 🔐');
+            return redirect()->to('/guru/jurnal');
+        }
 
         // Prepare update data
         $data = [
@@ -493,6 +520,8 @@ class JurnalController extends BaseController
         // Get filters from query params or URL segment
         $bulan = $this->request->getGet('bulan');
         $tahun = $this->request->getGet('tahun');
+        $activeTahunAjaran = get_active_tahun_ajaran();
+        $tahunAjaran = $this->request->getGet('tahun_ajaran') ?: $activeTahunAjaran;
 
         // Set date range if month and year provided
         $startDate = null;
@@ -507,12 +536,11 @@ class JurnalController extends BaseController
             return redirect()->to('/guru/jurnal')->with('error', 'Pilih kelas dulu ya buat cetak jurnal 😊');
         }
 
-        // SECURITY FIX: Get jurnal filtered by BOTH guru AND kelas
-        // First get all jurnal by this guru
-        $result = $this->jurnalService->getJurnalByGuru($guru['id'], $startDate, $endDate);
+        // SECURITY FIX: Get jurnal filtered by BOTH guru AND kelas AND tahun_ajaran
+        $result = $this->jurnalService->getJurnalByGuru($guru['id'], $startDate, $endDate, $tahunAjaran);
         
         if (!$result['success']) {
-            return redirect()->to('/guru/jurnal')->with('error', $result['message']);
+            return redirect()->to('/guru/jurnal?tahun_ajaran=' . urlencode($tahunAjaran))->with('error', $result['message']);
         }
 
         // Filter by the specific kelas
@@ -530,7 +558,7 @@ class JurnalController extends BaseController
         $mapelInfo = !empty($jurnalList) ? ['nama_mapel' => $jurnalList[0]['nama_mapel']] : null;
 
         if (empty($jurnalList)) {
-            return redirect()->to('/guru/jurnal')->with('error', 'Nggak ada data jurnal yang bisa dicetak 🤔');
+            return redirect()->to('/guru/jurnal?tahun_ajaran=' . urlencode($tahunAjaran))->with('error', 'Nggak ada data jurnal yang bisa dicetak 🤔');
         }
 
         $data = [
@@ -541,6 +569,7 @@ class JurnalController extends BaseController
             'mapelInfo' => $mapelInfo,
             'bulan' => $bulan,
             'tahun' => $tahun,
+            'tahunAjaran' => $tahunAjaran,
             'request' => $this->request
         ];
 

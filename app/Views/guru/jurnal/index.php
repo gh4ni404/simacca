@@ -23,7 +23,13 @@
                             Jurnal Kegiatan Belajar Mengajar
                         </span>
                     </h1>
-                    <p class="text-gray-600 mt-2">Kelola jurnal pembelajaran per kelas dengan mudah</p>
+                    <div class="flex flex-wrap items-center gap-2 mt-2">
+                        <p class="text-gray-600">Kelola jurnal pembelajaran per kelas dengan mudah</p>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
+                            <i class="fas fa-calendar-check mr-1.5 text-indigo-600"></i>
+                            TA Aktif: <?= esc($activeTahunAjaran ?? get_active_tahun_ajaran()) ?>
+                        </span>
+                    </div>
                 </div>
                 <div class="mt-4 md:mt-0">
                     <nav class="text-sm text-gray-600 bg-white px-4 py-3 rounded-lg shadow-sm">
@@ -47,18 +53,31 @@
                     <i class="fas fa-filter mr-3"></i>
                     Filter Jurnal
                 </h2>
-                <p class="text-indigo-100 mt-1">Cari jurnal berdasarkan periode tanggal</p>
+                <p class="text-indigo-100 mt-1">Cari jurnal berdasarkan tahun ajaran dan periode tanggal</p>
             </div>
             <div class="p-6">
-                <form method="GET" action="<?= base_url('guru/jurnal') ?>" class="flex flex-col md:flex-row gap-4">
-                    <div class="flex-1">
+                <form method="GET" action="<?= base_url('guru/jurnal') ?>" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-calendar-alt text-indigo-600 mr-1"></i>
+                            Tahun Ajaran
+                        </label>
+                        <select name="tahun_ajaran" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-medium bg-white">
+                            <?php foreach ($tahunAjaranList as $ta): ?>
+                                <option value="<?= esc($ta) ?>" <?= ($selectedTahunAjaran === $ta) ? 'selected' : '' ?>>
+                                    <?= esc($ta) ?><?= ($ta === $activeTahunAjaran) ? ' (Aktif)' : '' ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div>
                         <?= form_input('start_date', 'Tanggal Mulai', $startDate ?? '', ['type' => 'date']) ?>
                     </div>
-                    <div class="flex-1">
+                    <div>
                         <?= form_input('end_date', 'Tanggal Akhir', $endDate ?? '', ['type' => 'date']) ?>
                     </div>
-                    <div class="flex items-end gap-3">
-                        <?= button('primary', 'Filter', 'search', ['type' => 'submit', 'class' => 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md hover:shadow-xl transform hover:-translate-y-0.5']) ?>
+                    <div class="flex items-center gap-2">
+                        <?= button('primary', 'Filter', 'search', ['type' => 'submit', 'class' => 'w-full justify-center bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md hover:shadow-xl transform hover:-translate-y-0.5']) ?>
                         <?= button_link('secondary', 'Reset', 'redo', base_url('guru/jurnal'), ['class' => 'shadow-md']) ?>
                     </div>
                 </form>
@@ -74,7 +93,9 @@
                             <i class="fas fa-list mr-3"></i>
                             Daftar Jurnal KBM per Kelas
                         </h2>
-                        <p class="text-indigo-100 mt-1">Jurnal pembelajaran dikelompokkan berdasarkan kelas</p>
+                        <p class="text-indigo-100 mt-1">
+                            Tahun Ajaran: <strong class="text-white"><?= esc($selectedTahunAjaran) ?></strong>
+                        </p>
                     </div>
                     <div class="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-xl">
                         <p class="text-sm opacity-90">Total Kelas</p>
@@ -85,7 +106,7 @@
 
             <div class="p-6">
                 <?php if (empty($kelasList)): ?>
-                    <?= empty_state('book-open', 'Belum Ada Jurnal KBM', 'Jurnal KBM akan otomatis tersedia setelah Anda melakukan absensi siswa. Silakan buat absensi terlebih dahulu.', 'Ke Halaman Absensi', base_url('guru/absensi')) ?>
+                    <?= empty_state('book-open', 'Belum Ada Jurnal KBM', 'Belum ada data jurnal KBM untuk tahun ajaran ' . esc($selectedTahunAjaran) . '. Jurnal KBM akan otomatis tersedia setelah Anda melakukan absensi siswa.', 'Ke Halaman Absensi', base_url('guru/absensi')) ?>
                 <?php else: ?>
                     <!-- Table Desktop -->
                     <div class="hidden md:block overflow-x-auto">
@@ -124,7 +145,7 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <?= button_link('info', 'Lihat Pertemuan', 'eye', base_url('guru/jurnal/show/' . $kelas['kelas_id']), ['class' => 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-md hover:shadow-lg transform hover:-translate-y-0.5']) ?>
+                                    <?= button_link('info', 'Lihat Pertemuan', 'eye', base_url('guru/jurnal/show/' . $kelas['kelas_id']) . '?tahun_ajaran=' . urlencode($selectedTahunAjaran), ['class' => 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-md hover:shadow-lg transform hover:-translate-y-0.5']) ?>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -165,7 +186,7 @@
                                 </div>
                             </div>
 
-                            <?= button_link('info', 'Lihat Pertemuan', 'eye', base_url('guru/jurnal/show/' . $kelas['kelas_id']), ['class' => 'w-full justify-center bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-md']) ?>
+                            <?= button_link('info', 'Lihat Pertemuan', 'eye', base_url('guru/jurnal/show/' . $kelas['kelas_id']) . '?tahun_ajaran=' . urlencode($selectedTahunAjaran), ['class' => 'w-full justify-center bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-md']) ?>
                         </div>
                         <?php endforeach; ?>
                     </div>

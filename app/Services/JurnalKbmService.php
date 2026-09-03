@@ -66,6 +66,10 @@ class JurnalKbmService extends BaseService
                 $builder->where('jadwal_mengajar.mata_pelajaran_id', $filters['mapel_id']);
             }
 
+            if (!empty($filters['tahun_ajaran'])) {
+                $builder->where('jadwal_mengajar.tahun_ajaran', $filters['tahun_ajaran']);
+            }
+
             if (!empty($filters['start_date'])) {
                 $builder->where('absensi.tanggal >=', $filters['start_date']);
             }
@@ -136,12 +140,13 @@ class JurnalKbmService extends BaseService
      * @param int $guruId
      * @param string|null $startDate
      * @param string|null $endDate
+     * @param string|null $tahunAjaran
      * @return array
      */
-    public function getJurnalByGuru(int $guruId, ?string $startDate = null, ?string $endDate = null): array
+    public function getJurnalByGuru(int $guruId, ?string $startDate = null, ?string $endDate = null, ?string $tahunAjaran = null): array
     {
         try {
-            $jurnal = $this->jurnalModel->getByGuru($guruId, $startDate, $endDate);
+            $jurnal = $this->jurnalModel->getByGuru($guruId, $startDate, $endDate, $tahunAjaran);
 
             return $this->success($jurnal);
         } catch (\Exception $e) {
@@ -156,12 +161,13 @@ class JurnalKbmService extends BaseService
      * @param int $kelasId
      * @param string|null $startDate
      * @param string|null $endDate
+     * @param string|null $tahunAjaran
      * @return array
      */
-    public function getJurnalByKelas(int $kelasId, ?string $startDate = null, ?string $endDate = null): array
+    public function getJurnalByKelas(int $kelasId, ?string $startDate = null, ?string $endDate = null, ?string $tahunAjaran = null): array
     {
         try {
-            $jurnal = $this->jurnalModel->getByKelas($kelasId, $startDate, $endDate);
+            $jurnal = $this->jurnalModel->getByKelas($kelasId, $startDate, $endDate, $tahunAjaran);
 
             return $this->success($jurnal);
         } catch (\Exception $e) {
@@ -175,12 +181,13 @@ class JurnalKbmService extends BaseService
      * 
      * @param int $guruId
      * @param int $kelasId
+     * @param string|null $tahunAjaran
      * @return array
      */
-    public function getJurnalByGuruAndKelas(int $guruId, int $kelasId): array
+    public function getJurnalByGuruAndKelas(int $guruId, int $kelasId, ?string $tahunAjaran = null): array
     {
         try {
-            $jurnal = $this->jurnalModel->getByGuruAndKelas($guruId, $kelasId);
+            $jurnal = $this->jurnalModel->getByGuruAndKelas($guruId, $kelasId, $tahunAjaran);
 
             return $this->success($jurnal);
         } catch (\Exception $e) {
@@ -485,6 +492,10 @@ class JurnalKbmService extends BaseService
 
             if (!empty($filters['kelas_id'])) {
                 $builder->where('jadwal_mengajar.kelas_id', $filters['kelas_id']);
+            }
+
+            if (!empty($filters['tahun_ajaran'])) {
+                $builder->where('jadwal_mengajar.tahun_ajaran', $filters['tahun_ajaran']);
             }
 
             if (!empty($filters['start_date'])) {

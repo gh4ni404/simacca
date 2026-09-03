@@ -418,6 +418,10 @@ class LaporanService extends BaseService
                 $builder->where('jadwal_mengajar.mata_pelajaran_id', $filters['mapel_id']);
             }
 
+            if (!empty($filters['tahun_ajaran'])) {
+                $builder->where('jadwal_mengajar.tahun_ajaran', $filters['tahun_ajaran']);
+            }
+
             if (!empty($filters['start_date'])) {
                 $builder->where('absensi.tanggal >=', $filters['start_date']);
             }

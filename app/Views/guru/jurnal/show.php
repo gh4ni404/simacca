@@ -84,7 +84,7 @@
         <!-- Header Section -->
         <div class="mb-8 animate-fade-in-up">
             <div class="flex items-center mb-4">
-                <a href="<?= base_url('guru/jurnal') ?>" 
+                <a href="<?= base_url('guru/jurnal' . (!empty($tahunAjaran) ? '?tahun_ajaran=' . urlencode($tahunAjaran) : '')) ?>" 
                    class="mr-4 p-2 rounded-lg bg-white text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200 shadow-sm">
                     <i class="fas fa-arrow-left text-xl"></i>
                 </a>
@@ -95,7 +95,13 @@
                             Daftar Pertemuan
                         </span>
                     </h1>
-                    <p class="text-gray-600 mt-2"><?= esc($kelas['nama_kelas']) ?> - <?= esc($kelas['nama_mapel']) ?></p>
+                    <div class="flex flex-wrap items-center gap-2 mt-2">
+                        <p class="text-gray-600"><?= esc($kelas['nama_kelas']) ?> - <?= esc($kelas['nama_mapel']) ?></p>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
+                            <i class="fas fa-calendar-alt mr-1 text-indigo-600"></i>
+                            TA: <?= esc($tahunAjaran ?? get_active_tahun_ajaran()) ?>
+                        </span>
+                    </div>
                 </div>
             </div>
             
@@ -105,7 +111,7 @@
                     <i class="fas fa-home mr-1"></i>Dashboard
                 </a>
                 <i class="fas fa-chevron-right mx-3 text-gray-400 text-xs"></i>
-                <a href="<?= base_url('guru/jurnal') ?>" class="hover:text-indigo-600 transition-colors">Jurnal KBM</a>
+                <a href="<?= base_url('guru/jurnal' . (!empty($tahunAjaran) ? '?tahun_ajaran=' . urlencode($tahunAjaran) : '')) ?>" class="hover:text-indigo-600 transition-colors">Jurnal KBM</a>
                 <i class="fas fa-chevron-right mx-3 text-gray-400 text-xs"></i>
                 <span class="text-gray-800 font-medium">Daftar Pertemuan</span>
             </nav>
@@ -120,7 +126,7 @@
                     </div>
                     <div>
                         <h2 class="text-2xl font-bold"><?= esc($kelas['nama_kelas']) ?></h2>
-                        <p class="text-indigo-100 mt-1"><?= esc($kelas['nama_mapel']) ?></p>
+                        <p class="text-indigo-100 mt-1"><?= esc($kelas['nama_mapel']) ?> • Tahun Ajaran <?= esc($tahunAjaran ?? get_active_tahun_ajaran()) ?></p>
                     </div>
                 </div>
                 <div class="flex items-center gap-4">
@@ -128,7 +134,7 @@
                         <p class="text-sm opacity-90">Total Pertemuan</p>
                         <p class="text-4xl font-bold"><?= count($jurnalList) ?></p>
                     </div>
-                    <a href="<?= base_url('guru/jurnal/print/' . $kelas['id']) ?>" 
+                    <a href="<?= base_url('guru/jurnal/print/' . $kelas['id']) . (!empty($tahunAjaran) ? '?tahun_ajaran=' . urlencode($tahunAjaran) : '') ?>" 
                        target="_blank"
                        class="flex items-center gap-2 bg-white text-indigo-600 hover:bg-indigo-50 px-6 py-3 rounded-xl font-semibold shadow-lg transition-all hover:scale-105">
                         <i class="fas fa-print text-xl"></i>
@@ -204,8 +210,8 @@
                         <?php endif; ?>
                     </div>
 
-                    <!-- Timestamp -->
-                    <div class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200 text-xs text-gray-500">
+                    <!-- Timestamp & Info -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 mt-6 pt-4 border-t border-gray-200 text-xs text-gray-500">
                         <div class="flex items-center">
                             <i class="fas fa-calendar-plus mr-2"></i>
                             Dibuat: <?= date('d/m/Y H:i', strtotime($jurnal['created_at'])) ?>
@@ -222,7 +228,7 @@
 
         <!-- Back Button -->
         <div class="mt-8 text-center">
-            <a href="<?= base_url('guru/jurnal') ?>" 
+            <a href="<?= base_url('guru/jurnal' . (!empty($tahunAjaran) ? '?tahun_ajaran=' . urlencode($tahunAjaran) : '')) ?>" 
                class="inline-flex items-center px-8 py-4 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all font-semibold shadow-md">
                 <i class="fas fa-arrow-left mr-2"></i>
                 Kembali ke Daftar Kelas
