@@ -237,7 +237,13 @@ class FileController extends BaseController
         $filepath = WRITEPATH . 'uploads/logo/' . $filename;
 
         if (!file_exists($filepath)) {
-            $files = glob(WRITEPATH . 'uploads/logo/*.{jpg,jpeg,png,gif,webp,svg}', GLOB_BRACE);
+            $files = [];
+            foreach (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'] as $ext) {
+                $matched = glob(WRITEPATH . 'uploads/logo/*.' . $ext);
+                if (!empty($matched)) {
+                    $files = array_merge($files, $matched);
+                }
+            }
             if (!empty($files)) {
                 $filepath = $files[0];
             } else {
@@ -310,6 +316,168 @@ class FileController extends BaseController
         
         // Output file directly
         readfile($filepath);
+        exit;
+    }
+
+    /**
+     * Serve public assets from public/assets/
+     * Fallback for Docker / containerized environments where Nginx doesn't have public directory mounted
+     */
+    public function publicAssets(...$segments)
+    {
+        if (empty($segments)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Asset tidak ditemukan');
+        }
+
+        // Join all URL segments to form relative path
+        $path = implode('/', $segments);
+
+        // Sanitize path to prevent directory traversal
+        $path = str_replace(['../', '..\\'], '', $path);
+        $path = ltrim($path, '/\\');
+
+        $filepath = FCPATH . 'assets/' . $path;
+        $realAssetsDir = realpath(FCPATH . 'assets');
+        $realFilePath = realpath($filepath);
+
+        if (!$realFilePath || !$realAssetsDir || !str_starts_with($realFilePath, $realAssetsDir) || !is_file($realFilePath)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Asset tidak ditemukan: ' . esc($path));
+        }
+
+        // Map extension to correct MIME type
+        $ext = strtolower(pathinfo($realFilePath, PATHINFO_EXTENSION));
+        $mimeTypes = [
+            'css'   => 'text/css',
+            'js'    => 'application/javascript',
+            'png'   => 'image/png',
+            'jpg'   => 'image/jpeg',
+            'jpeg'  => 'image/jpeg',
+            'gif'   => 'image/gif',
+            'webp'  => 'image/webp',
+            'svg'   => 'image/svg+xml',
+            'ico'   => 'image/x-icon',
+            'woff'  => 'font/woff',
+            'woff2' => 'font/woff2',
+            'ttf'   => 'font/ttf',
+            'eot'   => 'application/vnd.ms-fontobject',
+            'json'  => 'application/json',
+            'map'   => 'application/json',
+        ];
+
+        if (isset($mimeTypes[$ext])) {
+            $mimeType = $mimeTypes[$ext];
+        } else {
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mimeType = finfo_file($finfo, $realFilePath) ?: 'application/octet-stream';
+            finfo_close($finfo);
+        }
+
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        header('Content-Type: ' . $mimeType);
+        header('Content-Length: ' . filesize($realFilePath));
+        header('Cache-Control: public, max-age=31536000, immutable');
+        header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 31536000) . ' GMT');
+
+        readfile($realFilePath);
+        exit;
+    }
+
+    /**
+     * Serve favicon.ico from public directory with fallback to school logo
+     */
+    public function favicon()
+    {
+        $filepath = FCPATH . 'favicon.ico';
+        if (!is_file($filepath)) {
+            $logo = function_exists('get_logo_sekolah') ? get_logo_sekolah() : null;
+            if ($logo && is_file(WRITEPATH . 'uploads/logo/' . $logo)) {
+                $filepath = WRITEPATH . 'uploads/logo/' . $logo;
+            } else {
+                throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Favicon tidak ditemukan');
+            }
+        }
+
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $filepath) ?: 'image/x-icon';
+        finfo_close($finfo);
+
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        header('Content-Type: ' . $mimeType);
+        header('Content-Length: ' . filesize($filepath));
+        header('Cache-Control: public, max-age=31536000');
+        header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 31536000) . ' GMT');
+
+        readfile($filepath);
+        exit;
+    }
+
+    /**
+     * Serve robots.txt from public directory
+     */
+    public function robots()
+    {
+        $filepath = FCPATH . 'robots.txt';
+        if (!is_file($filepath)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Robots.txt tidak ditemukan');
+        }
+
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        header('Content-Type: text/plain; charset=UTF-8');
+        header('Content-Length: ' . filesize($filepath));
+        header('Cache-Control: public, max-age=86400');
+
+        readfile($filepath);
+        exit;
+    }
+
+    /**
+     * Serve generic uploaded files from writable/uploads/
+     * Fallback for uploads that are accessed via /uploads/ or /writable/uploads/
+     */
+    public function writableUploads(...$segments)
+    {
+        if (empty($segments)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('File tidak ditemukan');
+        }
+
+        // Join all URL segments to form relative path
+        $path = implode('/', $segments);
+
+        // Sanitize path to prevent directory traversal
+        $path = str_replace(['../', '..\\'], '', $path);
+        $path = ltrim($path, '/\\');
+
+        $filepath = WRITEPATH . 'uploads/' . $path;
+        $realUploadsDir = realpath(WRITEPATH . 'uploads');
+        $realFilePath = realpath($filepath);
+
+        if (!$realFilePath || !$realUploadsDir || !str_starts_with($realFilePath, $realUploadsDir) || !is_file($realFilePath)) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('File tidak ditemukan: ' . esc($path));
+        }
+
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $realFilePath) ?: 'application/octet-stream';
+        finfo_close($finfo);
+
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        header('Content-Type: ' . $mimeType);
+        header('Content-Length: ' . filesize($realFilePath));
+        header('Cache-Control: public, max-age=31536000');
+        header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 31536000) . ' GMT');
+
+        readfile($realFilePath);
         exit;
     }
 }

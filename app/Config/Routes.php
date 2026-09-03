@@ -561,6 +561,13 @@ $routes->get('files/absensi-guru/(:segment)/(:segment)/(:segment)/(:segment)', '
 $routes->get('files/logo/(:segment)', 'FileController::logoSekolah/$1');
 $routes->get('profile-photo/(:segment)', 'FileController::profilePhoto/$1');
 
+// Static Assets & Generic Uploads Routes (Fallback for Docker standalone deployment where Nginx doesn't mount public assets)
+$routes->get('assets/(:any)', 'FileController::publicAssets/$1');
+$routes->get('favicon.ico', 'FileController::favicon');
+$routes->get('robots.txt', 'FileController::robots');
+$routes->get('writable/uploads/(:any)', 'FileController::writableUploads/$1');
+$routes->get('uploads/(:any)', 'FileController::writableUploads/$1');
+
 // Layout Switcher Routes (for testing and manual switching)
 $routes->group('layout', function ($routes) {
     $routes->get('desktop', 'LayoutSwitcher::desktop');

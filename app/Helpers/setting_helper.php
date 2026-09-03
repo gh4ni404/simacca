@@ -181,7 +181,13 @@ if (!function_exists('get_logo_sekolah')) {
             return $logo;
         }
         // Fallback: auto-detect existing logo in writable/uploads/logo/
-        $files = glob(WRITEPATH . 'uploads/logo/*.{jpg,jpeg,png,gif,webp,svg}', GLOB_BRACE);
+        $files = [];
+        foreach (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'] as $ext) {
+            $matched = glob(WRITEPATH . 'uploads/logo/*.' . $ext);
+            if (!empty($matched)) {
+                $files = array_merge($files, $matched);
+            }
+        }
         if (!empty($files)) {
             return basename($files[0]);
         }

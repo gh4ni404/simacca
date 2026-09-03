@@ -246,3 +246,17 @@ Tambahkan di Host OS (`crontab -e`):
   1. Cek log: `docker compose logs -f tunnel`
   2. Pastikan file JSON di `cloudflare/` memiliki izin baca: `chmod 644 cloudflare/*.json`
   3. Pastikan `config.yml` mengarah ke service Nginx internal: `service: http://webserver:80`.
+
+### 5. Gambar Asset Publik (`assets/images/sekolah.png` / `provinsi.png`) Menampilkan 404 pada Laporan Cetak
+* **Penyebab**: Di PC target, Nginx (`nginx:alpine`) tidak me-mount folder `public` host karena seluruh asset statis telah ter-bundling di dalam container PHP (`simacca_app`). Nginx mengoper request ke PHP-FPM, dan CodeIgniter kini telah dilengkapi fallback route otomatis untuk menyajikan asset tersebut.
+* **Solusi**:
+  1. Di PC Asal: Build & push image terbaru ke Docker Hub:
+     ```bash
+     docker build -t gh4ni404/simacca-app:latest .
+     docker push gh4ni404/simacca-app:latest
+     ```
+  2. Di PC Target: Tarik image terbaru dan restart container:
+     ```bash
+     docker compose pull app
+     docker compose up -d app
+     ```
