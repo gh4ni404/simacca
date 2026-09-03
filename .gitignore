@@ -130,6 +130,8 @@ _modules/*
 
 # Ubah aturan /public/ menjadi seperti ini:
 /public/*
+!/public/assets/
+!/public/assets/**
 !/public/css/
 !/public/css/*.css
 !/public/.htaccess
