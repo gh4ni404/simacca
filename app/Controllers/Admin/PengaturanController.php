@@ -61,6 +61,14 @@ class PengaturanController extends BaseController
         $data['absensiShalatDurasiMaks'] = get_absensi_shalat_durasi_maks();
         $data['absensiShalatSesiList']   = get_absensi_shalat_sesi_list();
 
+        $guruModel = new \App\Models\GuruModel();
+        $data['guruList'] = $guruModel->select('guru.id, guru.nama_lengkap, guru.nip')
+            ->join('users', 'users.id = guru.user_id')
+            ->where('users.is_active', 1)
+            ->orderBy('guru.nama_lengkap', 'ASC')
+            ->findAll();
+        $data['petugasKhususShalatId'] = get_absensi_shalat_petugas_khusus_id();
+
         return view('admin/pengaturan/index', $data);
     }
 
@@ -602,4 +610,31 @@ class PengaturanController extends BaseController
         session()->setFlashdata('success', 'Sesi shalat berhasil dihapus.');
         return redirect()->to('/admin/pengaturan#jam-absensi-shalat');
     }
+
+    /**
+     * Update petugas khusus QR absensi shalat harian
+     */
+    public function updatePetugasKhususShalat()
+    {
+        $guruId = $this->request->getPost('guru_id');
+        $guruId = (!empty($guruId) && is_numeric($guruId)) ? (int) $guruId : null;
+
+        $result = set_absensi_shalat_petugas_khusus_id($guruId);
+
+        if ($result) {
+            if ($guruId) {
+                $guruModel = new \App\Models\GuruModel();
+                $guru = $guruModel->find($guruId);
+                $namaGuru = $guru ? $guru['nama_lengkap'] : 'Guru terpilih';
+                session()->setFlashdata('success', "Petugas khusus QR shalat harian berhasil disetel ke '{$namaGuru}'. Guru ini dapat menampilkan QR shalat setiap hari.");
+            } else {
+                session()->setFlashdata('success', 'Petugas khusus QR shalat harian dinonaktifkan. Portal QR kini hanya dapat dibuka sesuai jadwal piket harian.');
+            }
+        } else {
+            session()->setFlashdata('error', 'Gagal menyimpan pengaturan petugas khusus shalat.');
+        }
+
+        return redirect()->to('/admin/pengaturan#jam-absensi-shalat');
+    }
 }
+

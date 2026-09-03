@@ -226,6 +226,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->post('pengaturan/simpan-sesi-shalat', 'Admin\PengaturanController::simpanSesiShalat', ['filter' => 'role:admin']);
     $routes->post('pengaturan/update-sesi-shalat/(:num)', 'Admin\PengaturanController::updateSesiShalat/$1', ['filter' => 'role:admin']);
     $routes->get('pengaturan/hapus-sesi-shalat/(:num)', 'Admin\PengaturanController::hapusSesiShalat/$1', ['filter' => 'role:admin']);
+    $routes->post('pengaturan/update-petugas-khusus-shalat', 'Admin\PengaturanController::updatePetugasKhususShalat', ['filter' => 'role:admin']);
 
     // Arsip Jurnal PKL (Task-Oriented)
     $routes->get('jurnal-pkl-archive', 'Admin\PklArchiveController::index', ['filter' => 'role:admin,kepala_sekolah']);

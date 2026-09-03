@@ -43,6 +43,31 @@
         </div>
     </div>
 
+    <?php
+    $petugasKhususDetail = get_absensi_shalat_petugas_khusus_detail();
+    ?>
+    <?php if ($petugasKhususDetail): ?>
+    <div class="mb-6 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10 border border-emerald-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                <i class="fas fa-user-shield text-lg"></i>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-800">Petugas Khusus QR Shalat Harian:</span>
+                    <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[11px] font-bold rounded-full">Akses Setiap Hari</span>
+                </div>
+                <p class="text-sm font-bold text-gray-800 mt-0.5">
+                    <?= esc($petugasKhususDetail['nama_lengkap']) ?>
+                    <?= !empty($petugasKhususDetail['nip']) ? '<span class="text-xs font-normal text-gray-500">(NIP: ' . esc($petugasKhususDetail['nip']) . ')</span>' : '' ?>
+                </p>
+            </div>
+        </div>
+        <a href="<?= base_url('admin/pengaturan#jam-absensi-shalat') ?>" class="text-xs font-semibold text-emerald-700 hover:text-emerald-900 bg-white hover:bg-emerald-50 border border-emerald-300 px-3 py-1.5 rounded-lg transition self-start sm:self-center flex items-center gap-1.5 whitespace-nowrap shadow-sm">
+            <i class="fas fa-cog"></i> Ubah Petugas
+        </a>
+    </div>
+    <?php endif; ?>
 
     <!-- Stats -->
     <?php

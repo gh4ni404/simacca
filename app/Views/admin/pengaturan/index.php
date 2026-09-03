@@ -585,6 +585,39 @@
         </div>
 
         <div class="p-4 md:p-6 space-y-6">
+            <!-- Petugas Khusus QR Shalat Harian -->
+            <form action="<?= base_url('admin/pengaturan/update-petugas-khusus-shalat') ?>" method="post" class="p-4 bg-emerald-50/60 rounded-xl border border-emerald-200">
+                <?= csrf_field() ?>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                    <p class="text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fas fa-user-shield text-emerald-600"></i> Petugas Khusus QR Shalat Harian (Akses Setiap Hari)
+                    </p>
+                    <span class="text-[11px] text-emerald-700 bg-emerald-100/80 px-2.5 py-0.5 rounded-full font-medium">
+                        Bypass Jadwal Harian
+                    </span>
+                </div>
+                <p class="text-xs text-gray-600 mb-3">
+                    Pilih 1 guru/petugas yang berwenang membuka dan menampilkan QR code absensi shalat <strong>setiap hari kerja</strong>, terlepas dari jadwal piket hariannya. Guru piket harian lainnya tetap dapat membuka portal QR pada hari jadwal tugasnya masing-masing.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-3 items-end sm:items-center">
+                    <div class="flex-1 w-full">
+                        <select name="guru_id" class="w-full px-3.5 py-2.5 bg-white border border-emerald-300 rounded-lg text-sm text-gray-800 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 font-medium">
+                            <option value="">-- Hanya Guru Piket Sesuai Jadwal Harian (Default / Tidak Ada) --</option>
+                            <?php if (!empty($guruList)): ?>
+                                <?php foreach ($guruList as $g): ?>
+                                    <option value="<?= $g['id'] ?>" <?= (!empty($petugasKhususShalatId) && (int)$petugasKhususShalatId === (int)$g['id']) ? 'selected' : '' ?>>
+                                        <?= esc($g['nama_lengkap']) ?><?= !empty($g['nip']) ? ' (NIP: ' . esc($g['nip']) . ')' : '' ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 whitespace-nowrap">
+                        <i class="fas fa-save"></i> Simpan Petugas Khusus
+                    </button>
+                </div>
+            </form>
+
             <!-- Global Default Timings -->
             <form action="<?= base_url('admin/pengaturan/update-absensi-shalat-jam') ?>" method="post" class="p-4 bg-gray-50/70 rounded-xl border border-gray-100">
                 <?= csrf_field() ?>

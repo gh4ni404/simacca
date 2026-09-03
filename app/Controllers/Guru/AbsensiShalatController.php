@@ -53,6 +53,8 @@ class AbsensiShalatController extends BaseController
         $todayAttendance = $this->absensiShalatModel->getTodayAttendance();
         $sesiList        = get_absensi_shalat_sesi_list();
         $autoDetected    = $this->autoDetectSesiShalat($sesiList, date('H:i'));
+        $petugasKhususId = get_absensi_shalat_petugas_khusus_id();
+        $isPetugasKhusus = (!empty($petugasKhususId) && (int)$petugasKhususId === (int)$guru['id']);
 
         $data = [
             'title'            => 'Absensi Shalat',
@@ -64,6 +66,7 @@ class AbsensiShalatController extends BaseController
             'todayAttendance'  => $todayAttendance,
             'sesiList'         => $sesiList,
             'autoDetectedSesi' => $autoDetected,
+            'isPetugasKhusus'  => $isPetugasKhusus,
         ];
 
         return view('guru/absensi_shalat/index', $data);
@@ -518,14 +521,60 @@ class AbsensiShalatController extends BaseController
     }
 
     /**
-     * Helper to get active guru piket record for today
+     * Helper to get active guru piket record for today (or for designated Petugas Khusus Shalat)
      */
     private function getGuruPiketForSession(int $guruId): ?array
     {
         $hariIni = strtolower($this->getHariIndo(date('l')));
         $tahunAjaran = get_active_tahun_ajaran();
         $semester = $this->determineSemester();
+        $petugasKhususId = get_absensi_shalat_petugas_khusus_id();
 
+        // 1. If this guru is designated by admin as Petugas Khusus QR Shalat Harian
+        if (!empty($petugasKhususId) && (int)$petugasKhususId === $guruId) {
+            // Check if there is an active guru_piket entry on today's day
+            $res = $this->guruPiketModel
+                ->where('guru_id', $guruId)
+                ->where('LOWER(hari)', $hariIni)
+                ->where('tahun_ajaran', $tahunAjaran)
+                ->where('semester', $semester)
+                ->where('is_active', 1)
+                ->first();
+
+            if ($res) {
+                return $res;
+            }
+
+            // Otherwise, look for ANY active guru_piket entry for this guru in current semester
+            $resAny = $this->guruPiketModel
+                ->where('guru_id', $guruId)
+                ->where('tahun_ajaran', $tahunAjaran)
+                ->where('semester', $semester)
+                ->where('is_active', 1)
+                ->first();
+
+            if ($resAny) {
+                return $resAny;
+            }
+
+            // Fallback: auto-create a guru_piket record for this teacher on today's day
+            $newPiketId = $this->guruPiketModel->insert([
+                'guru_id'       => $guruId,
+                'hari'          => $hariIni,
+                'tahun_ajaran'  => $tahunAjaran,
+                'semester'      => $semester,
+                'keterangan'    => 'Petugas Khusus QR Shalat Harian',
+                'rincian_tugas' => 'Penanggung Jawab dan Petugas Khusus QR Code Absensi Shalat Harian',
+                'is_active'     => 1,
+                'created_at'    => date('Y-m-d H:i:s'),
+            ]);
+
+            if ($newPiketId) {
+                return $this->guruPiketModel->find($newPiketId);
+            }
+        }
+
+        // 2. Standard check: teacher must have an active piket schedule on today's day
         $res = $this->guruPiketModel
             ->where('guru_id', $guruId)
             ->where('LOWER(hari)', $hariIni)

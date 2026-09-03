@@ -482,3 +482,35 @@ if (!function_exists('set_absensi_shalat_sesi_list')) {
     }
 }
 
+if (!function_exists('get_absensi_shalat_petugas_khusus_id')) {
+    function get_absensi_shalat_petugas_khusus_id(): ?int
+    {
+        $settingModel = model(SettingModel::class);
+        $val = $settingModel->get('absensi_shalat_petugas_khusus_id');
+        return !empty($val) && is_numeric($val) ? (int) $val : null;
+    }
+}
+
+if (!function_exists('set_absensi_shalat_petugas_khusus_id')) {
+    function set_absensi_shalat_petugas_khusus_id(?int $guruId): bool
+    {
+        $settingModel = model(SettingModel::class);
+        $val = !empty($guruId) ? (string) $guruId : '';
+        return $settingModel->setSetting('absensi_shalat_petugas_khusus_id', $val);
+    }
+}
+
+if (!function_exists('get_absensi_shalat_petugas_khusus_detail')) {
+    function get_absensi_shalat_petugas_khusus_detail(): ?array
+    {
+        $petugasId = get_absensi_shalat_petugas_khusus_id();
+        if (!$petugasId) {
+            return null;
+        }
+
+        $guruModel = new \App\Models\GuruModel();
+        return $guruModel->find($petugasId);
+    }
+}
+
+

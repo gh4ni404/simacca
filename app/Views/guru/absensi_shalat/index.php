@@ -4,10 +4,18 @@
 <div class="bg-white rounded-xl shadow p-6 mb-6">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-            <h2 class="text-2xl font-bold text-gray-800">
-                <i class="fas fa-mosque text-green-600 mr-2"></i>Absensi Shalat
-            </h2>
-            <p class="text-gray-600">QR Code akan di-refresh otomatis setiap 15 detik</p>
+            <div class="flex flex-wrap items-center gap-2">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-mosque text-green-600 mr-2"></i>Absensi Shalat
+                </h2>
+                <?php if (!empty($isPetugasKhusus)): ?>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-sm">
+                        <i class="fas fa-user-shield mr-1.5 text-emerald-600"></i>
+                        Petugas Khusus QR (Akses Setiap Hari)
+                    </span>
+                <?php endif; ?>
+            </div>
+            <p class="text-gray-600 mt-1">QR Code akan di-refresh otomatis setiap 15 detik</p>
         </div>
         <div class="flex items-center gap-2">
             <a href="<?= base_url('/scan') ?>" target="_blank" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-xl transition-colors shadow flex items-center gap-1.5">
