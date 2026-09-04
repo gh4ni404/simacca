@@ -127,7 +127,6 @@ class JurnalPiketController extends BaseController
             return $this->response->setJSON([
                 'success'      => true,
                 'message'      => 'Jurnal piket berhasil disimpan',
-                'upload_info'  => $uploadInfo,
                 'redirect_url' => base_url('guru/jurnal-piket'),
                 'csrf_token'   => csrf_token(),
                 'csrf_hash'    => csrf_hash(),
@@ -135,14 +134,14 @@ class JurnalPiketController extends BaseController
         }
 
         if (!$result['success']) {
-            $redirect = redirect()->back()->withInput()->with('error', $result['message'])->with('upload_info', $uploadInfo);
+            $redirect = redirect()->back()->withInput()->with('error', $result['message']);
             if (!empty($result['errors'])) {
                 $redirect->with('errors', $result['errors']);
             }
             return $redirect;
         }
 
-        return redirect()->to('/guru/jurnal-piket')->with('success', 'Jurnal piket berhasil disimpan')->with('upload_info', $uploadInfo);
+        return redirect()->to('/guru/jurnal-piket')->with('success', 'Jurnal piket berhasil disimpan');
     }
 
     /**
@@ -256,7 +255,6 @@ class JurnalPiketController extends BaseController
             return $this->response->setJSON([
                 'success'      => true,
                 'message'      => 'Jurnal piket berhasil diperbarui',
-                'upload_info'  => $uploadInfo,
                 'redirect_url' => base_url('guru/jurnal-piket'),
                 'csrf_token'   => csrf_token(),
                 'csrf_hash'    => csrf_hash(),
@@ -264,14 +262,14 @@ class JurnalPiketController extends BaseController
         }
 
         if (!$result['success']) {
-            $redirect = redirect()->back()->withInput()->with('error', $result['message'])->with('upload_info', $uploadInfo);
+            $redirect = redirect()->back()->withInput()->with('error', $result['message']);
             if (!empty($result['errors'])) {
                 $redirect->with('errors', $result['errors']);
             }
             return $redirect;
         }
 
-        return redirect()->to('/guru/jurnal-piket')->with('success', 'Jurnal piket berhasil diperbarui')->with('upload_info', $uploadInfo);
+        return redirect()->to('/guru/jurnal-piket')->with('success', 'Jurnal piket berhasil diperbarui');
     }
 
     /**
