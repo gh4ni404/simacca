@@ -373,14 +373,15 @@ class AbsensiModel extends Model
                 SUM(CASE WHEN ad.status = "sakit" THEN 1 ELSE 0 END) as jumlah_sakit,
                 SUM(CASE WHEN ad.status = "izin" THEN 1 ELSE 0 END) as jumlah_izin,
                 SUM(CASE WHEN ad.status = "alpa" THEN 1 ELSE 0 END) as jumlah_alpa')
-            ->join('jadwal_mengajar jm', 'jm.id = a.jadwal_mengajar_id')
+            ->join('jadwal_mengajar jm', 'jm.id = a.jadwal_mengajar_id AND jm.deleted_at IS NULL')
             ->join('kelas k', 'k.id = jm.kelas_id')
             ->join('guru g', 'g.id = jm.guru_id')
             ->join('mata_pelajaran mp', 'mp.id = jm.mata_pelajaran_id')
             ->join('guru wk', 'wk.id = k.wali_kelas_id', 'left')
             ->join('guru gp', 'gp.id = a.guru_pengganti_id', 'left')
-            ->join('jurnal_kbm jk', 'jk.absensi_id = a.id', 'left')
+            ->join('jurnal_kbm jk', 'jk.absensi_id = a.id AND jk.deleted_at IS NULL', 'left')
             ->join('absensi_detail ad', 'ad.absensi_id = a.id', 'left')
+            ->where('a.deleted_at IS NULL')
             ->where('a.tanggal >=', $from)
             ->where('a.tanggal <=', $to);
 
@@ -446,10 +447,11 @@ class AbsensiModel extends Model
                 ->join('guru g', 'g.id = jm.guru_id')
                 ->join('mata_pelajaran mp', 'mp.id = jm.mata_pelajaran_id')
                 ->join('guru wk', 'wk.id = k.wali_kelas_id', 'left')
-                ->join('absensi a', 'a.jadwal_mengajar_id = jm.id AND a.tanggal = "' . $tanggal . '"', 'left')
+                ->join('absensi a', 'a.jadwal_mengajar_id = jm.id AND a.tanggal = "' . $tanggal . '" AND a.deleted_at IS NULL', 'left')
                 ->join('guru gp', 'gp.id = a.guru_pengganti_id', 'left')
-                ->join('jurnal_kbm jk', 'jk.absensi_id = a.id', 'left')
+                ->join('jurnal_kbm jk', 'jk.absensi_id = a.id AND jk.deleted_at IS NULL', 'left')
                 ->join('absensi_detail ad', 'ad.absensi_id = a.id', 'left')
+                ->where('jm.deleted_at IS NULL')
                 ->where('jm.hari', $dayName);
 
             if ($kelasId) {

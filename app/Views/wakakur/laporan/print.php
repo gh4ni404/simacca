@@ -420,7 +420,7 @@
             ? $tanggal
             : (is_numeric($tanggal) ? (int) $tanggal : strtotime((string) $tanggal));
         ?>
-        <strong>Tanggal:</strong> <?= $formatter->format($dateValue); ?>
+        <strong>Tanggal:</strong> <?= $formatter->format($dateValue); ?> &nbsp;|&nbsp; <strong>Tahun Ajaran:</strong> <?= esc($tahunAjaran ?? get_active_tahun_ajaran()); ?>
         <?php if ($kelasId): ?>
             <br><strong>Kelas:</strong> <?= esc($kelasList[$kelasId] ?? '-'); ?>
             <?php /**else:*/ ?>

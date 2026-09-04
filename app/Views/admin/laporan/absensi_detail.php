@@ -9,6 +9,7 @@
         <h3 class="text-lg font-semibold mb-2">SISTEM INFORMASI AKADEMIK</h3>
         <div class="border-t-2 border-b-2 border-black py-1 inline-block px-8">
             <p class="text-sm">Tanggal: <?= ($tanggal instanceof \DateTimeInterface) ? $tanggal->format('d/m/Y') : date('d/m/Y', strtotime($tanggal)); ?></p>
+            <p class="text-sm">Tahun Ajaran: <?= esc($tahunAjaran ?? get_active_tahun_ajaran()); ?></p>
             <?php if ($kelasId): ?>
                 <p class="text-sm">Kelas: <?= esc($kelasList[$kelasId] ?? '-'); ?></p>
             <?php else: ?>
@@ -20,7 +21,7 @@
 
 <div class="mb-6 no-print">
     <h1 class="text-2xl font-bold text-gray-800 mb-2">Laporan Absensi Detail</h1>
-    <p class="text-gray-600">Laporan absensi lengkap dengan detail kehadiran per sesi pembelajaran</p>
+    <p class="text-gray-600">Laporan absensi lengkap dengan detail kehadiran per sesi pembelajaran • Tahun Ajaran <?= esc($tahunAjaran ?? get_active_tahun_ajaran()); ?></p>
 </div>
 
 <!-- Filter -->
@@ -57,7 +58,7 @@
     <div class="p-6 border-b border-gray-200 no-print">
         <div class="flex justify-between items-center">
             <h2 class="text-lg font-semibold text-gray-800">Detail Absensi Pembelajaran</h2>
-            <span class="text-sm text-gray-500">Tanggal: <?= ($tanggal instanceof \DateTimeInterface) ? $tanggal->format('d/m/Y') : date('d/m/Y', strtotime($tanggal)); ?></span>
+            <span class="text-sm text-gray-500">Tanggal: <?= ($tanggal instanceof \DateTimeInterface) ? $tanggal->format('d/m/Y') : date('d/m/Y', strtotime($tanggal)); ?> (T.A. <?= esc($tahunAjaran ?? get_active_tahun_ajaran()); ?>)</span>
         </div>
         <?php if (!empty($laporanPerHari)): ?>
             <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">

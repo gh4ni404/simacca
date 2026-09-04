@@ -204,7 +204,7 @@ class AbsensiDetailModel extends Model
     /**
      * Rekap per kelas untuk periode tanggal tertentu
      */
-    public function getRekapPerKelas(string $from, string $to, ?int $kelasId = null): array
+    public function getRekapPerKelas(string $from, string $to, ?int $kelasId = null, ?string $tahunAjaran = null): array
     {
         $builder = $this->db->table('absensi_detail ad')
             ->select('k.nama_kelas, 
@@ -213,17 +213,22 @@ class AbsensiDetailModel extends Model
                 SUM(CASE WHEN ad.status = "sakit" THEN 1 ELSE 0 END) as sakit,
                 SUM(CASE WHEN ad.status = "alpa" THEN 1 ELSE 0 END) as alpa,
                 COUNT(*) as total_sesi')
-            ->join('absensi a', 'a.id = ad.absensi_id')
-            ->join('jadwal_mengajar jm', 'jm.id = a.jadwal_mengajar_id')
+            ->join('absensi a', 'a.id = ad.absensi_id AND a.deleted_at IS NULL')
+            ->join('jadwal_mengajar jm', 'jm.id = a.jadwal_mengajar_id AND jm.deleted_at IS NULL')
             ->join('kelas k', 'k.id = jm.kelas_id')
             ->where('a.tanggal >=', $from)
-            ->where('a.tanggal <=', $to)
-            ->groupBy('k.id')
-            ->orderBy('k.nama_kelas', 'ASC');
+            ->where('a.tanggal <=', $to);
 
         if (!empty($kelasId)) {
             $builder->where('k.id', $kelasId);
         }
+
+        if (!empty($tahunAjaran)) {
+            $builder->where('jm.tahun_ajaran', $tahunAjaran);
+        }
+
+        $builder->groupBy('k.id')
+            ->orderBy('k.nama_kelas', 'ASC');
 
         $rows = $builder->get()->getResultArray();
         foreach ($rows as &$r) {
@@ -242,18 +247,24 @@ class AbsensiDetailModel extends Model
      * 
      * @param string $tanggal Tanggal yang dicek
      * @param int|null $kelasId Filter kelas (null = semua kelas)
+     * @param string|null $tahunAjaran Filter tahun ajaran aktif
      * @return array Statistik per siswa dengan kategori kehadiran
      */
-    public function getStatistikPerSiswa(string $tanggal, ?int $kelasId = null): array
+    public function getStatistikPerSiswa(string $tanggal, ?int $kelasId = null, ?string $tahunAjaran = null): array
     {
         // Step 1: Hitung total jadwal yang sudah terisi PER KELAS pada tanggal tersebut
         $builderJadwalPerKelas = $this->db->table('absensi a')
             ->select('jm.kelas_id, COUNT(DISTINCT a.id) as total_jadwal_terisi')
-            ->join('jadwal_mengajar jm', 'jm.id = a.jadwal_mengajar_id')
+            ->join('jadwal_mengajar jm', 'jm.id = a.jadwal_mengajar_id AND jm.deleted_at IS NULL')
+            ->where('a.deleted_at IS NULL')
             ->where('a.tanggal', $tanggal);
         
         if ($kelasId) {
             $builderJadwalPerKelas->where('jm.kelas_id', $kelasId);
+        }
+
+        if ($tahunAjaran) {
+            $builderJadwalPerKelas->where('jm.tahun_ajaran', $tahunAjaran);
         }
         
         $builderJadwalPerKelas->groupBy('jm.kelas_id');
@@ -319,6 +330,10 @@ class AbsensiDetailModel extends Model
         if ($kelasId) {
             $builderAllSiswa->where('s.kelas_id', $kelasId);
         }
+
+        if ($tahunAjaran) {
+            $builderAllSiswa->where('s.tahun_ajaran', $tahunAjaran);
+        }
         
         $allSiswaData = $builderAllSiswa->get()->getResultArray();
 
@@ -330,13 +345,17 @@ class AbsensiDetailModel extends Model
                 SUM(CASE WHEN ad.status = "sakit" THEN 1 ELSE 0 END) as total_sakit,
                 SUM(CASE WHEN ad.status = "izin" THEN 1 ELSE 0 END) as total_izin,
                 SUM(CASE WHEN ad.status = "alpa" THEN 1 ELSE 0 END) as total_alpa')
-            ->join('absensi a', 'a.id = ad.absensi_id')
+            ->join('absensi a', 'a.id = ad.absensi_id AND a.deleted_at IS NULL')
             ->join('siswa s', 's.id = ad.siswa_id AND s.deleted_at IS NULL')
             ->where('a.tanggal', $tanggal)
             ->whereIn('s.kelas_id', $kelasYangAdaJadwal);
 
         if ($kelasId) {
             $builderStats->where('s.kelas_id', $kelasId);
+        }
+
+        if ($tahunAjaran) {
+            $builderStats->where('s.tahun_ajaran', $tahunAjaran);
         }
 
         $builderStats->groupBy('s.id');

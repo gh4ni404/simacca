@@ -9,6 +9,7 @@
         <h3 class="text-lg font-semibold mb-2">SISTEM INFORMASI AKADEMIK</h3>
         <div class="border-t-2 border-b-2 border-black py-1 inline-block px-8">
             <p class="text-sm">Tanggal: <?= ($tanggal instanceof \DateTimeInterface) ? $tanggal->format('d/m/Y') : date('d/m/Y', strtotime($tanggal)); ?></p>
+            <p class="text-sm">Tahun Ajaran: <?= esc($tahunAjaran ?? get_active_tahun_ajaran()); ?></p>
             <?php if ($kelasId): ?>
                 <p class="text-sm">Kelas: <?= esc($kelasList[$kelasId] ?? '-'); ?></p>
             <?php else: ?>
@@ -25,7 +26,7 @@
             <h1 class="text-3xl font-bold mb-2">Laporan Absensi Detail</h1>
             <p class="text-green-100 flex items-center">
                 <i class="fas fa-chart-bar mr-2"></i>
-                Laporan detail seluruh absensi pembelajaran
+                Laporan detail seluruh absensi pembelajaran • Tahun Ajaran <?= esc($tahunAjaran ?? get_active_tahun_ajaran()); ?>
             </p>
         </div>
         <div class="hidden md:block">

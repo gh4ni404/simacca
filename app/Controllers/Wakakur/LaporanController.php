@@ -50,12 +50,13 @@ class LaporanController extends BaseController
 
         $tanggal = $this->request->getGet('tanggal') ?: date('Y-m-d');
         $kelasId = $this->request->getGet('kelas_id');
+        $tahunAjaran = get_active_tahun_ajaran();
 
         // Data filter & referensi
-        $kelasList = $this->kelasModel->getListKelas(get_active_tahun_ajaran());
+        $kelasList = $this->kelasModel->getListKelas($tahunAjaran);
 
         // Ambil data laporan per hari (1 tanggal saja)
-        $laporanPerHari = $this->absensiModel->getLaporanAbsensiPerHari($tanggal, $tanggal, $kelasId ?? null);
+        $laporanPerHari = $this->absensiModel->getLaporanAbsensiPerHari($tanggal, $tanggal, $kelasId ? (int)$kelasId : null, $tahunAjaran);
 
         // Hitung statistik
         $totalStats = [
@@ -97,6 +98,7 @@ class LaporanController extends BaseController
             'kelasList' => $kelasList,
             'laporanPerHari' => $laporanPerHari,
             'totalStats' => $totalStats,
+            'tahunAjaran' => $tahunAjaran,
         ];
 
         return view('wakakur/laporan/index', $data);
@@ -116,12 +118,13 @@ class LaporanController extends BaseController
 
         $tanggal = $this->request->getGet('tanggal') ?: date('Y-m-d');
         $kelasId = $this->request->getGet('kelas_id');
+        $tahunAjaran = get_active_tahun_ajaran();
 
         // Data filter & referensi
-        $kelasList = $this->kelasModel->getListKelas(get_active_tahun_ajaran());
+        $kelasList = $this->kelasModel->getListKelas($tahunAjaran);
 
         // Ambil data laporan per hari dengan semua jadwal
-        $laporanPerHari = $this->absensiModel->getLaporanAbsensiPerHari($tanggal, $tanggal, $kelasId ?? null);
+        $laporanPerHari = $this->absensiModel->getLaporanAbsensiPerHari($tanggal, $tanggal, $kelasId ? (int)$kelasId : null, $tahunAjaran);
 
         // Hitung total statistik
         $totalStats = [
@@ -156,7 +159,7 @@ class LaporanController extends BaseController
         $totalStats['percentage_isi'] = $totalStats['total_jadwal'] > 0 ? round(($totalStats['jadwal_sudah_isi'] / $totalStats['total_jadwal']) * 100, 2) : 0;
 
         // Get statistik per siswa (student-centric approach)
-        $siswaStats = $this->absensiDetailModel->getStatistikPerSiswa($tanggal, $kelasId);
+        $siswaStats = $this->absensiDetailModel->getStatistikPerSiswa($tanggal, $kelasId ? (int)$kelasId : null, $tahunAjaran);
 
         $data = [
             'title' => 'Cetak Laporan Absensi Detail - Wakakur',
@@ -167,6 +170,7 @@ class LaporanController extends BaseController
             'laporanPerHari' => $laporanPerHari,
             'totalStats' => $totalStats,
             'siswaStats' => $siswaStats, // NEW: Student-centric statistics
+            'tahunAjaran' => $tahunAjaran,
         ];
 
         return view('wakakur/laporan/print', $data);
