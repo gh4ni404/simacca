@@ -480,7 +480,7 @@
                         <h3>PEMERINTAH PROVINSI SULAWESI SELATAN</h3>
                         <h3>DINAS PENDIDIKAN</h3>
                         <h3>CABANG DINAS PENDIDIKAN WILAYAH III</h3>
-                        <h2>UPT SMKN 8 BONE</h2>
+                        <h2><?= esc(function_exists('get_nama_sekolah') ? get_nama_sekolah() : 'UPT SMKN 8 BONE') ?></h2>
                         <p><em>Alamat: Jln. Poros Bone – Sengkang Welado Kec. Ajangale Kode Pos 92755</em></p>
                         <p><em>Email: smkn8bone@gmail.com &bull; Website: smkn8bone.sch.id</em></p>
                     </div>
@@ -582,7 +582,7 @@
                         <div class="signature-box">
                             <div class="title">
                                 Mengetahui,<br>
-                                Kepala UPT SMKN 8 Bone
+                                Kepala <?= esc(function_exists('get_nama_sekolah') ? get_nama_sekolah() : 'UPT SMKN 8 Bone') ?>
                             </div>
                             <div class="name"><?= function_exists('get_kepala_sekolah_nama') && get_kepala_sekolah_nama() ? esc(get_kepala_sekolah_nama()) : '_______________________' ?></div>
                             <div class="nip">NIP. <?= function_exists('get_kepala_sekolah_nip') && get_kepala_sekolah_nip() ? esc(get_kepala_sekolah_nip()) : '........................................' ?></div>

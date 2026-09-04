@@ -49,6 +49,7 @@ class PengaturanController extends BaseController
             'jurnalPklRequiredDays' => get_jurnal_pkl_required_days(),
         ];
 
+        $data['namaSekolah']        = get_nama_sekolah();
         $data['logoSekolah']        = get_logo_sekolah();
         $data['kepalaSekolahNama']  = get_kepala_sekolah_nama();
         $data['kepalaSekolahNip']   = get_kepala_sekolah_nip();
@@ -303,6 +304,31 @@ class PengaturanController extends BaseController
         set_kepala_sekolah_nip($nip);
 
         session()->setFlashdata('success', 'Data Kepala Sekolah berhasil diperbarui.');
+        return redirect()->to('/admin/pengaturan');
+    }
+
+    public function updateNamaSekolah()
+    {
+        $nama = trim($this->request->getPost('nama_sekolah') ?? '');
+
+        if ($nama === '') {
+            session()->setFlashdata('error', 'Nama Sekolah tidak boleh kosong.');
+            return redirect()->to('/admin/pengaturan');
+        }
+
+        if (strlen($nama) > 150) {
+            session()->setFlashdata('error', 'Nama Sekolah maksimal 150 karakter.');
+            return redirect()->to('/admin/pengaturan');
+        }
+
+        $result = set_nama_sekolah($nama);
+
+        if ($result) {
+            session()->setFlashdata('success', 'Nama Sekolah berhasil diperbarui menjadi ' . $nama);
+        } else {
+            session()->setFlashdata('error', 'Gagal memperbarui Nama Sekolah.');
+        }
+
         return redirect()->to('/admin/pengaturan');
     }
 

@@ -255,7 +255,7 @@ class JurnalGuruWaliService
             }
 
             $sekolahInfo = [
-                'nama_sekolah'        => $this->settingModel->get('nama_sekolah') ?: 'SMK NEGERI 1 SIMACCA',
+                'nama_sekolah'        => function_exists('get_nama_sekolah') ? get_nama_sekolah() : 'SMKN 8 BONE',
                 'alamat'              => $this->settingModel->get('alamat_sekolah') ?: 'Jl. Pendidikan No. 1',
                 'telepon'             => $this->settingModel->get('telepon_sekolah') ?: '-',
                 'email'               => $this->settingModel->get('email_sekolah') ?: '-',

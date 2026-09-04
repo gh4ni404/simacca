@@ -21,7 +21,7 @@ class TvDisplayController extends BaseController
     public function index()
     {
         $settings      = $this->getSettingsMap();
-        $namaSekolah   = $settings['nama_sekolah'] ?? 'SMK NEGERI 1 SIMACCA';
+        $namaSekolah   = function_exists('get_nama_sekolah') ? get_nama_sekolah() : ($settings['nama_sekolah'] ?? 'SMKN 8 BONE');
         $alamatSekolah = $settings['alamat_sekolah'] ?? 'Sistem Informasi Manajemen & Aktivitas Sekolah';
         $logoSekolah   = function_exists('get_logo_sekolah') ? get_logo_sekolah() : null;
 
@@ -488,7 +488,7 @@ class TvDisplayController extends BaseController
      */
     protected function generateTickerItems(array $stats, array $settings = []): array
     {
-        $namaSekolah  = $settings['nama_sekolah'] ?? 'SMK NEGERI 1 SIMACCA';
+        $namaSekolah  = function_exists('get_nama_sekolah') ? get_nama_sekolah() : ($settings['nama_sekolah'] ?? 'SMKN 8 BONE');
         $customTicker = $settings['tv_ticker_message'] ?? null;
 
         $tickers = [];

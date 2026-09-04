@@ -223,6 +223,7 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     $routes->get('pengaturan/download-logo', 'Admin\PengaturanController::downloadLogo', ['filter' => 'role:admin']);
     $routes->post('pengaturan/delete-logo', 'Admin\PengaturanController::deleteLogo', ['filter' => 'role:admin']);
     $routes->post('pengaturan/update-kepala-sekolah', 'Admin\PengaturanController::updateKepalaSekolah', ['filter' => 'role:admin']);
+    $routes->post('pengaturan/update-nama-sekolah', 'Admin\PengaturanController::updateNamaSekolah', ['filter' => 'role:admin']);
     $routes->post('pengaturan/tambah-hari-libur', 'Admin\PengaturanController::storeHariLibur', ['filter' => 'role:admin']);
     $routes->post('pengaturan/hapus-hari-libur/(:num)', 'Admin\PengaturanController::deleteHariLibur/$1', ['filter' => 'role:admin']);
     $routes->post('pengaturan/import-hari-libur-nasional', 'Admin\PengaturanController::importHariLiburNasional', ['filter' => 'role:admin']);

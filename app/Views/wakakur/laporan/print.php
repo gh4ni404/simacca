@@ -390,7 +390,7 @@
                 <h3>PEMERINTAH PROPINSI SULAWESI SELATAN</h1>
                     <h3>DINAS PENDIDIKAN</h2>
                         <h3>CABANG DINAS PENDIDIKAN WILAYAH III</h3>
-                        <h2>UPT SMKN 8 BONE</h2>
+                        <h2><?= esc(function_exists('get_nama_sekolah') ? get_nama_sekolah() : 'UPT SMKN 8 BONE') ?></h2>
                         <p><em>Alamat : Jln. Poros Bone – Sengkang Welado Kec. Ajangale Kode Pos 92755</em></p>
                         <p><em>Email : smkn8bone@gmail.com</em></p>
             </div>

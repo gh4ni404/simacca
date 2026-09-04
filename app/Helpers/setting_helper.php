@@ -289,6 +289,23 @@ if (!function_exists('get_pkl_status_style')) {
 }
 
 
+if (!function_exists('get_nama_sekolah')) {
+    function get_nama_sekolah(): string
+    {
+        $settingModel = model(SettingModel::class);
+        $nama = $settingModel->get('nama_sekolah');
+        return !empty($nama) ? $nama : 'SMKN 8 BONE';
+    }
+}
+
+if (!function_exists('set_nama_sekolah')) {
+    function set_nama_sekolah(string $nama): bool
+    {
+        $settingModel = model(SettingModel::class);
+        return $settingModel->setSetting('nama_sekolah', $nama);
+    }
+}
+
 if (!function_exists('get_kepala_sekolah_nama')) {
     function get_kepala_sekolah_nama(): string
     {

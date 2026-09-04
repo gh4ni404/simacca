@@ -20,7 +20,7 @@
     <div class="flex flex-col md:flex-row justify-between items-center">
         <div>
             <h2 class="text-2xl font-bold"><?= get_greeting(); ?>, <?= session()->get('nama_lengkap'); ?>!</h2>
-            <p class="mt-2 opacity-90">Selamat datang di Sistem Monitoring Absensi dan Catatan Cara Ajar SMKN 8 BONE</p>
+            <p class="mt-2 opacity-90">Selamat datang di Sistem Monitoring Absensi dan Catatan Cara Ajar <?= esc(function_exists('get_nama_sekolah') ? get_nama_sekolah() : 'SMKN 8 BONE') ?></p>
             <p class="mt-1 text-sm opacity-80">Terakhir login: <?= date('d M Y H:i'); ?></p>
         </div>
         <div class="mt-4 md:mt-0">

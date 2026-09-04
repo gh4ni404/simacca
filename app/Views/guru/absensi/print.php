@@ -196,7 +196,7 @@
 
     <div class="header">
         <h1>DAFTAR HADIR SISWA</h1>
-        <h2>SMK NEGERI 8 BONE</h2>
+        <h2><?= esc(function_exists('get_nama_sekolah') ? get_nama_sekolah() : 'SMK NEGERI 8 BONE') ?></h2>
         <p>Jl. Contoh No. 123, Bone, Sulawesi Selatan</p>
     </div>
 

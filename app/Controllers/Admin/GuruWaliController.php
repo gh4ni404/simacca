@@ -310,7 +310,7 @@ class GuruWaliController extends BaseController
 
         $settingModel = new \App\Models\SettingModel();
         $sekolahInfo = [
-            'nama_sekolah'        => $settingModel->get('nama_sekolah') ?: 'SMK NEGERI 1 SIMACCA',
+            'nama_sekolah'        => function_exists('get_nama_sekolah') ? get_nama_sekolah() : 'SMKN 8 BONE',
             'alamat'              => $settingModel->get('alamat_sekolah') ?: 'Jl. Pendidikan No. 1',
             'telepon'             => $settingModel->get('telepon_sekolah') ?: '-',
             'email'               => $settingModel->get('email_sekolah') ?: '-',
