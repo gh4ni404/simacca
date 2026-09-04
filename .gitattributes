@@ -1,0 +1,16 @@
+# Enforce LF line endings for shell scripts, configs, and container files
+*.sh text eol=lf
+*.bash text eol=lf
+Dockerfile text eol=lf
+Makefile text eol=lf
+nginx.conf text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+spark text eol=lf
+.env* text eol=lf
+env text eol=lf
+
+# Batch and PowerShell scripts on Windows
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf

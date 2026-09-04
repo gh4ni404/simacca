@@ -9,11 +9,17 @@ Panduan ini ditujukan bagi **developer** yang baru melakukan `clone` repository 
 Setelah melakukan `git clone`, jalankan perintah berikut dari folder root project:
 
 ```bash
-# Opsi A: Menggunakan Makefile (Linux/macOS/WSL)
+# 🐧 Linux / macOS / WSL:
 make dev
 
-# Opsi B: Menggunakan Bash Script langsung
+# 🪟 Windows (Git Bash):
 ./setup-dev.sh
+
+# 🪟 Windows (Command Prompt / CMD):
+setup-dev.bat
+
+# 🪟 Windows (PowerShell):
+.\setup-dev.ps1
 ```
 
 Skrip ini akan secara otomatis:

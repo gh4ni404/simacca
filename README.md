@@ -56,9 +56,11 @@ Jika Anda sudah memasang Docker, Anda tidak perlu menginstal PHP, Composer, atau
 git clone https://github.com/gh4ni404/simacca.git
 cd simacca
 
-# 2. Jalankan 1 perintah setup otomatis
-make dev
-# atau: ./setup-dev.sh
+# 2. Jalankan 1 perintah setup otomatis (Pilih sesuai OS Anda):
+make dev                  # Linux / macOS / WSL
+./setup-dev.sh            # Git Bash di Windows / Linux / macOS
+setup-dev.bat             # Windows Command Prompt (CMD)
+.\setup-dev.ps1           # Windows PowerShell
 ```
 
 Buka browser di **[http://localhost:8081](http://localhost:8081)** (Login: `admin` / `admin123`).  

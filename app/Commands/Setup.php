@@ -164,17 +164,38 @@ class Setup extends BaseCommand
             
             return true;
         } catch (\Throwable $e) {
+            // Coba buat database otomatis jika masalahnya adalah database belum ada di MySQL Server
+            $errorMsg = strtolower($e->getMessage());
+            if (str_contains($errorMsg, 'unknown database') || str_contains($errorMsg, '1049')) {
+                try {
+                    CLI::write("Database '{$db->database}' belum ada. Mencoba membuat secara otomatis...", 'yellow');
+                    $customConfig = config('Database')->default;
+                    $targetDbName = $customConfig['database'];
+                    $customConfig['database'] = '';
+                    $tempDb = \CodeIgniter\Database\Config::connect($customConfig);
+                    $tempForge = \CodeIgniter\Database\Config::forge($tempDb);
+                    if ($tempForge->createDatabase($targetDbName, true)) {
+                        CLI::write("✓ Database '{$targetDbName}' berhasil dibuat secara otomatis!", 'green');
+                        CLI::newLine();
+                        $db->reconnect();
+                        return true;
+                    }
+                } catch (\Throwable $createEx) {
+                    // Fallback to error output
+                }
+            }
+
             CLI::error('✗ Database connection failed!');
             CLI::newLine();
             CLI::write('Error: ' . $e->getMessage(), 'red');
             CLI::newLine();
             CLI::write('Silakan cek konfigurasi di file .env:', 'yellow');
-            CLI::write('  database.default.hostname = localhost', 'white');
-            CLI::write('  database.default.database = simacca_db', 'white');
-            CLI::write('  database.default.username = root', 'white');
-            CLI::write('  database.default.password = ', 'white');
+            CLI::write('  database.default.hostname = ' . ($db->hostname ?: 'localhost'), 'white');
+            CLI::write('  database.default.database = ' . ($db->database ?: 'simacca_db'), 'white');
+            CLI::write('  database.default.username = ' . ($db->username ?: 'root'), 'white');
+            CLI::write('  database.default.password = ' . ($db->password ? '******' : '(kosong)'), 'white');
             CLI::newLine();
-            CLI::write('Pastikan MySQL service berjalan dan database sudah dibuat.', 'yellow');
+            CLI::write('Pastikan service database berjalan dan kredensial sudah sesuai.', 'yellow');
             CLI::newLine();
             
             return false;
