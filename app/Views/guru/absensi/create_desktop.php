@@ -422,7 +422,7 @@
 
             siswaList.forEach((siswa, index) => {
                 const isApprovedIzin = approvedIzinMap[siswa.id];
-                const defaultStatus = isApprovedIzin ? 'izin' : 'hadir';
+                const defaultStatus = isApprovedIzin ? 'izin' : 'alpa';
                 const defaultKeterangan = isApprovedIzin ? `Izin ${isApprovedIzin.jenis}: ${isApprovedIzin.alasan}` : '';
 
                 // Desktop table row

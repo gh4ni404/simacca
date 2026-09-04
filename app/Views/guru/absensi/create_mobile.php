@@ -1,4 +1,4 @@
-﻿<?= $this->extend('templates/mobile_layout') ?>
+<?= $this->extend('templates/mobile_layout') ?>
 
 <?= $this->section('content') ?>
 <div class="min-h-screen bg-gray-50 pb-20">
@@ -406,7 +406,7 @@
 
             siswaList.forEach((siswa, index) => {
                 const isApprovedIzin = approvedIzinMap[siswa.id];
-                const defaultStatus = isApprovedIzin ? 'izin' : 'hadir';
+                const defaultStatus = isApprovedIzin ? 'izin' : 'alpa';
                 const defaultKeterangan = isApprovedIzin ? `Izin ${isApprovedIzin.jenis}: ${isApprovedIzin.alasan}` : '';
 
                 // Mobile card view
