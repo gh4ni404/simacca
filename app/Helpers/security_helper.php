@@ -25,19 +25,6 @@ if (!function_exists('validate_file_upload')) {
             ];
         }
 
-        // Log informasi direktori temporary saat upload file
-        $defaultTempDir = function_exists('get_simacca_temp_dir') ? get_simacca_temp_dir() : sys_get_temp_dir();
-        $tempPath = method_exists($file, 'getTempName') ? $file->getTempName() : null;
-        $tempDir  = !empty($tempPath) ? dirname($tempPath) : $defaultTempDir;
-        log_message('info', sprintf(
-            '[FILE UPLOAD TEMP INFO] File: "%s" | Temp Directory: "%s" | Temp File: "%s" | Size: %s bytes | MIME: %s',
-            $file->getClientName(),
-            $tempDir,
-            $tempPath ?: 'N/A',
-            $file->getSize(),
-            $file->getMimeType()
-        ));
-
         // Check file size
         if ($file->getSize() > $maxSize) {
             $maxSizeMB = round($maxSize / 1048576, 2);

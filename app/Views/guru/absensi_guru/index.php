@@ -1250,8 +1250,6 @@
                                 </label>
                             </div>
                         </div>
-
-                        <input type="hidden" name="foto_base64" id="fotoBase64CheckIn">
                     </div>
 
                     <!-- Notes Section with Tailwind -->
@@ -1417,8 +1415,6 @@
                                 </label>
                             </div>
                         </div>
-
-                        <input type="hidden" name="foto_base64" id="fotoBase64CheckOut">
                     </div>
 
                     <!-- Notes Section with Tailwind -->
@@ -1490,9 +1486,9 @@
             this.startBtn = document.getElementById(`startCamera${prefix}`);
             this.captureBtn = document.getElementById(`capture${prefix}`);
             this.retakeBtn = document.getElementById(`retake${prefix}`);
-            this.base64Input = document.getElementById(`fotoBase64${prefix}`);
             this.stream = null;
             this.photoTaken = false;
+            this.capturedBlob = null;
 
             this.initEventListeners();
         }
@@ -1538,9 +1534,10 @@
             const context = this.canvas.getContext('2d');
             context.drawImage(this.video, 0, 0);
 
-            // Get base64 image
-            const imageData = this.canvas.toDataURL('image/jpeg', 0.8);
-            this.base64Input.value = imageData;
+            // Convert canvas to Blob (efficient binary instead of base64 string)
+            this.canvas.toBlob((blob) => {
+                this.capturedBlob = blob;
+            }, 'image/jpeg', 0.85);
 
             // Stop camera stream
             this.stopCamera();
@@ -1556,7 +1553,7 @@
 
         retakePhoto() {
             this.canvas.style.display = 'none';
-            this.base64Input.value = '';
+            this.capturedBlob = null;
             this.photoTaken = false;
             this.startCamera();
         }
@@ -1576,12 +1573,12 @@
             this.startBtn.style.display = 'block';
             this.captureBtn.style.display = 'none';
             this.retakeBtn.style.display = 'none';
-            this.base64Input.value = '';
+            this.capturedBlob = null;
             this.photoTaken = false;
         }
 
         hasPhoto() {
-            return this.photoTaken || this.base64Input.value !== '';
+            return this.photoTaken && this.capturedBlob !== null;
         }
     }
 
@@ -1664,13 +1661,24 @@
             }
 
             const formData = new FormData(this);
+            if (usingCamera && cameraCheckIn.capturedBlob) {
+                formData.set('foto', cameraCheckIn.capturedBlob, 'selfie_checkin.jpg');
+            }
+
             submitAbsensi('check-in', formData);
         });
 
         // Check-Out Form Submit
         document.getElementById('checkOutForm').addEventListener('submit', function(e) {
             e.preventDefault();
+
+            const usingCamera = document.getElementById('cameraCheckOut')?.checked;
             const formData = new FormData(this);
+
+            if (usingCamera && cameraCheckOut.capturedBlob) {
+                formData.set('foto', cameraCheckOut.capturedBlob, 'selfie_checkout.jpg');
+            }
+
             submitAbsensi('check-out', formData);
         });
 

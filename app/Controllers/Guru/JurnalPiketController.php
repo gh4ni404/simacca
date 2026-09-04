@@ -109,43 +109,7 @@ class JurnalPiketController extends BaseController
 
         $files = $this->request->getFileMultiple('foto_dokumentasi');
 
-        log_message('error', sprintf(
-            '[JURNAL_PIKET_DEBUG] store() - Request diterima: Guru ID=%s, Tanggal=%s, Files count=%d, Temp Dir=%s, upload_tmp_dir ini=%s',
-            $guru['id'] ?? 'null',
-            $tanggal,
-            !empty($files) ? count($files) : 0,
-            function_exists('get_simacca_temp_dir') ? get_simacca_temp_dir() : sys_get_temp_dir(),
-            function_exists('get_simacca_upload_tmp_dir') ? get_simacca_upload_tmp_dir() : (ini_get('upload_tmp_dir') ?: 'N/A')
-        ));
-
-        if (!empty($files)) {
-            $defaultTempDir = function_exists('get_simacca_temp_dir') ? get_simacca_temp_dir() : sys_get_temp_dir();
-            foreach ($files as $idx => $f) {
-                if ($f) {
-                    $tPath = method_exists($f, 'getTempName') ? $f->getTempName() : 'N/A';
-                    $tDir  = (!empty($tPath) && $tPath !== 'N/A') ? dirname($tPath) : $defaultTempDir;
-                    log_message('error', sprintf(
-                        '[JURNAL_PIKET_DEBUG] store() - File #%d: Name=%s, Size=%d bytes, Mime=%s, TempDir=%s, TempFile=%s, Error=%d (%s)',
-                        $idx,
-                        $f->getClientName(),
-                        $f->getSize(),
-                        $f->getMimeType(),
-                        $tDir,
-                        $tPath,
-                        $f->getError(),
-                        $f->getErrorString()
-                    ));
-                }
-            }
-        }
-
         $result = $this->jurnalPiketService->create($data, $files);
-        log_message('error', '[JURNAL_PIKET_DEBUG] store() - Hasil create(): ' . json_encode($result));
-
-        $uploadInfo = $result['data']['upload_info'] ?? $result['upload_info'] ?? [
-            'temp_dir_default'   => function_exists('get_simacca_temp_dir') ? get_simacca_temp_dir() : sys_get_temp_dir(),
-            'upload_tmp_dir_ini' => function_exists('get_simacca_upload_tmp_dir') ? get_simacca_upload_tmp_dir() : (ini_get('upload_tmp_dir') ?: 'N/A'),
-        ];
 
         if ($this->request->isAJAX() || str_contains($this->request->getHeaderLine('Accept'), 'application/json')) {
             if (!$result['success']) {
@@ -153,14 +117,12 @@ class JurnalPiketController extends BaseController
                     'success'     => false,
                     'message'     => $result['message'],
                     'errors'      => $result['errors'] ?? [],
-                    'upload_info' => $uploadInfo,
                     'csrf_token'  => csrf_token(),
                     'csrf_hash'   => csrf_hash(),
                 ]);
             }
 
             session()->setFlashdata('success', 'Jurnal piket berhasil disimpan');
-            session()->setFlashdata('upload_info', $uploadInfo);
 
             return $this->response->setJSON([
                 'success'      => true,
@@ -276,44 +238,7 @@ class JurnalPiketController extends BaseController
 
         $files = $this->request->getFileMultiple('foto_dokumentasi');
 
-        log_message('error', sprintf(
-            '[JURNAL_PIKET_DEBUG] update() - Request update ID=%d diterima: Guru ID=%s, Tanggal=%s, Files count=%d, Temp Dir=%s, upload_tmp_dir ini=%s',
-            $id,
-            $guru['id'] ?? 'null',
-            $tanggal,
-            !empty($files) ? count($files) : 0,
-            function_exists('get_simacca_temp_dir') ? get_simacca_temp_dir() : sys_get_temp_dir(),
-            function_exists('get_simacca_upload_tmp_dir') ? get_simacca_upload_tmp_dir() : (ini_get('upload_tmp_dir') ?: 'N/A')
-        ));
-
-        if (!empty($files)) {
-            $defaultTempDir = function_exists('get_simacca_temp_dir') ? get_simacca_temp_dir() : sys_get_temp_dir();
-            foreach ($files as $idx => $f) {
-                if ($f) {
-                    $tPath = method_exists($f, 'getTempName') ? $f->getTempName() : 'N/A';
-                    $tDir  = (!empty($tPath) && $tPath !== 'N/A') ? dirname($tPath) : $defaultTempDir;
-                    log_message('error', sprintf(
-                        '[JURNAL_PIKET_DEBUG] update() - File #%d: Name=%s, Size=%d bytes, Mime=%s, TempDir=%s, TempFile=%s, Error=%d (%s)',
-                        $idx,
-                        $f->getClientName(),
-                        $f->getSize(),
-                        $f->getMimeType(),
-                        $tDir,
-                        $tPath,
-                        $f->getError(),
-                        $f->getErrorString()
-                    ));
-                }
-            }
-        }
-
         $result = $this->jurnalPiketService->update((int) $id, $data, $files);
-        log_message('error', '[JURNAL_PIKET_DEBUG] update() - Hasil update(): ' . json_encode($result));
-
-        $uploadInfo = $result['data']['upload_info'] ?? $result['upload_info'] ?? [
-            'temp_dir_default'   => function_exists('get_simacca_temp_dir') ? get_simacca_temp_dir() : sys_get_temp_dir(),
-            'upload_tmp_dir_ini' => function_exists('get_simacca_upload_tmp_dir') ? get_simacca_upload_tmp_dir() : (ini_get('upload_tmp_dir') ?: 'N/A'),
-        ];
 
         if ($this->request->isAJAX() || str_contains($this->request->getHeaderLine('Accept'), 'application/json')) {
             if (!$result['success']) {
@@ -321,14 +246,12 @@ class JurnalPiketController extends BaseController
                     'success'     => false,
                     'message'     => $result['message'],
                     'errors'      => $result['errors'] ?? [],
-                    'upload_info' => $uploadInfo,
                     'csrf_token'  => csrf_token(),
                     'csrf_hash'   => csrf_hash(),
                 ]);
             }
 
             session()->setFlashdata('success', 'Jurnal piket berhasil diperbarui');
-            session()->setFlashdata('upload_info', $uploadInfo);
 
             return $this->response->setJSON([
                 'success'      => true,

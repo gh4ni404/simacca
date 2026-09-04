@@ -95,12 +95,11 @@ class AbsensiGuruController extends BaseController
             ]);
         }
 
-        // Check if using base64 or file upload
-        $fotoBase64 = $this->request->getPost('foto_base64');
+        // Get photo file from request (both camera capture and file upload send as multipart 'foto')
         $fotoFile = $this->request->getFile('foto');
         
-        // Validate that at least one photo method is used
-        if (empty($fotoBase64) && (!$fotoFile || !$fotoFile->isValid())) {
+        // Validate that photo is uploaded and valid
+        if (!$fotoFile || !$fotoFile->isValid()) {
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Foto wajib diupload atau diambil pake kamera ya 📷'
@@ -109,19 +108,13 @@ class AbsensiGuruController extends BaseController
 
         // Prepare data
         $data = [
-            'tanggal' => Time::today()->toDateString(),
-            'check_in' => Time::now()->toTimeString(),
-            'catatan' => $this->request->getPost('keterangan_masuk'),
-            'latitude' => $this->request->getPost('latitude'),
+            'tanggal'   => Time::today()->toDateString(),
+            'check_in'  => Time::now()->toTimeString(),
+            'catatan'   => $this->request->getPost('keterangan_masuk'),
+            'latitude'  => $this->request->getPost('latitude'),
             'longitude' => $this->request->getPost('longitude'),
+            'foto'      => $fotoFile,
         ];
-
-        // Handle photo - prioritize base64 from camera
-        if (!empty($fotoBase64)) {
-            $data['foto_base64'] = $fotoBase64;
-        } else {
-            $data['foto'] = $fotoFile;
-        }
 
         // Perform check-in
         $result = $this->absensiGuruService->checkIn($guru['id'], $data);
@@ -153,19 +146,15 @@ class AbsensiGuruController extends BaseController
 
         // Prepare data
         $data = [
-            'check_out' => Time::now()->toTimeString(),
+            'check_out'         => Time::now()->toTimeString(),
             'keterangan_keluar' => $this->request->getPost('keterangan_keluar'),
-            'latitude' => $this->request->getPost('latitude'),
-            'longitude' => $this->request->getPost('longitude'),
+            'latitude'          => $this->request->getPost('latitude'),
+            'longitude'         => $this->request->getPost('longitude'),
         ];
 
         // Handle photo (optional for check-out)
-        $fotoBase64 = $this->request->getPost('foto_base64');
         $fotoFile = $this->request->getFile('foto');
-        
-        if (!empty($fotoBase64)) {
-            $data['foto_base64'] = $fotoBase64;
-        } elseif ($fotoFile && $fotoFile->isValid()) {
+        if ($fotoFile && $fotoFile->isValid()) {
             $data['foto'] = $fotoFile;
         }
 

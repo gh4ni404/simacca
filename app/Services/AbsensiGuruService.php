@@ -81,17 +81,12 @@ class AbsensiGuruService extends BaseService
                 return $this->error('Anda sudah melakukan check-in hari ini');
             }
 
-            // Handle foto upload (base64 or file)
+            // Handle foto upload
             $fotoPath = null;
-            if (isset($data['foto_base64']) && !empty($data['foto_base64'])) {
-                $fotoPath = $this->handleBase64Image($data['foto_base64'], 'check-in', $guruId);
-                if (!$fotoPath) {
-                    return $this->error('Gagal menyimpan foto dari kamera');
-                }
-            } elseif (isset($data['foto']) && $data['foto'] !== null) {
+            if (isset($data['foto']) && $data['foto'] !== null) {
                 $fotoPath = $this->handleFotoUpload($data['foto'], 'check-in', $guruId);
                 if (!$fotoPath) {
-                    return $this->error('Gagal mengupload foto');
+                    return $this->error('Gagal mengupload foto selfie');
                 }
             }
 
@@ -156,14 +151,9 @@ class AbsensiGuruService extends BaseService
                 return $this->error('Anda sudah melakukan check-out hari ini');
             }
 
-            // Handle foto upload (base64 or file)
+            // Handle foto upload (optional for checkout)
             $fotoPath = null;
-            if (isset($data['foto_base64']) && !empty($data['foto_base64'])) {
-                $fotoPath = $this->handleBase64Image($data['foto_base64'], 'check-out', $guruId);
-                if (!$fotoPath) {
-                    return $this->error('Gagal menyimpan foto dari kamera');
-                }
-            } elseif (isset($data['foto']) && $data['foto'] !== null) {
+            if (isset($data['foto']) && $data['foto'] !== null) {
                 $fotoPath = $this->handleFotoUpload($data['foto'], 'check-out', $guruId);
                 if (!$fotoPath) {
                     return $this->error('Gagal mengupload foto');
@@ -264,55 +254,7 @@ class AbsensiGuruService extends BaseService
         }
     }
 
-    /**
-     * Handle base64 image data from camera
-     */
-    protected function handleBase64Image(string $base64Data, string $type, int $guruId): ?string
-    {
-        try {
-            // Create date hierarchy directory structure (YYYY/MM/DD)
-            $year = date('Y');
-            $month = date('m');
-            $day = date('d');
-            $uploadPath = WRITEPATH . "uploads/absensi_guru/{$year}/{$month}/{$day}/";
-            
-            if (!is_dir($uploadPath)) {
-                mkdir($uploadPath, 0755, true);
-            }
 
-            // Remove data:image/jpeg;base64, prefix if exists
-            if (strpos($base64Data, 'data:image') === 0) {
-                $base64Data = preg_replace('/^data:image\/\w+;base64,/', '', $base64Data);
-            }
-
-            // Decode base64
-            $imageData = base64_decode($base64Data);
-            if ($imageData === false) {
-                log_message('error', 'Failed to decode base64 image');
-                return null;
-            }
-
-            // Generate filename with simplified format
-            $timestamp = date('His'); // HourMinuteSecond only
-            $filename = "{$type}_guru{$guruId}_{$timestamp}.jpg";
-            $filepath = $uploadPath . $filename;
-
-            // Save image
-            if (file_put_contents($filepath, $imageData)) {
-                // Optimize image using helper (max 1024px, 85% quality)
-                optimize_image($filepath, $filepath, 1024, 1024, 85);
-                
-                // Return relative path from writable/
-                return "uploads/absensi_guru/{$year}/{$month}/{$day}/{$filename}";
-            }
-
-            return null;
-
-        } catch (\Exception $e) {
-            log_message('error', 'AbsensiGuruService::handleBase64Image - ' . $e->getMessage());
-            return null;
-        }
-    }
 
     /**
      * Check rate limit for anti-fraud protection
