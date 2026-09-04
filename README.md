@@ -47,7 +47,28 @@ SIMACCA adalah sistem informasi berbasis web untuk monitoring absensi siswa dan 
 
 ## 🚀 Quick Start
 
-**Ingin langsung coba? Ikuti 8 langkah ini (waktu: ~5 menit):**
+### 🐳 Opsi 1: Menggunakan Docker (Rekomendasi Utama - 1 Perintah)
+
+Jika Anda sudah memasang Docker, Anda tidak perlu menginstal PHP, Composer, ataupun MySQL di OS lokal:
+
+```bash
+# 1. Clone repository
+git clone https://github.com/gh4ni404/simacca.git
+cd simacca
+
+# 2. Jalankan 1 perintah setup otomatis
+make dev
+# atau: ./setup-dev.sh
+```
+
+Buka browser di **[http://localhost:8081](http://localhost:8081)** (Login: `admin` / `admin123`).  
+📖 **Panduan lengkap Docker Developer** → [docs/guides/DOCKER_DEV_GUIDE.md](docs/guides/DOCKER_DEV_GUIDE.md)
+
+---
+
+### 💻 Opsi 2: Instalasi Manual / Native (PHP & MySQL Lokal)
+
+Ikuti 8 langkah ini jika ingin menjalankan server PHP lokal:
 
 ```bash
 # 1. Clone repository
@@ -85,18 +106,21 @@ php spark serve
 
 ## 📚 Dokumentasi
 
-### 🎯 Untuk Pemula
+### 🎯 Untuk Pemula & Developer
 
 | Dokumen | Deskripsi | Waktu |
-|---------|-----------|-------|
-| [**Quick Start Guide**](docs/guides/QUICK_START.md) | Panduan instalasi super cepat untuk testing | 5 menit |
+|---|---|---|
+| [**Docker Developer Guide**](docs/guides/DOCKER_DEV_GUIDE.md) | Panduan Docker lengkap, shortcut Makefile & troubleshooting | 5 menit |
+| [**Quick Start Guide**](docs/guides/QUICK_START.md) | Panduan instalasi cepat untuk testing | 5 menit |
 | [**System Requirements**](docs/guides/REQUIREMENTS.md) | Cek kebutuhan sistem & compatibility | 5 menit |
 | [**Panduan Instalasi**](docs/guides/PANDUAN_INSTALASI.md) | Panduan instalasi lengkap (Bahasa Indonesia) | 15-30 menit |
+| [**Panduan Docker Target Server**](DOCKER_DEPLOYMENT_GUIDE.md) | Panduan deploy production ke PC Server via Cloudflare | 20 menit |
 
 ### 📖 Panduan Development
 
 | Dokumen | Untuk Siapa? | Waktu |
-|---------|--------------|-------|
+|---|---|---|
+| [**Docker Developer Guide**](docs/guides/DOCKER_DEV_GUIDE.md) | Developer | 5 menit |
 | [**Layouts Complete Guide**](docs/guides/LAYOUTS_COMPLETE_GUIDE.md) | Developer | 20 menit |
 | [**Deployment Guide**](docs/guides/DEPLOYMENT_GUIDE.md) | System Admin | 30-60 menit |
 | [**Gmail App Password Setup**](docs/guides/GMAIL_APP_PASSWORD_SETUP.md) | Admin | 10 menit |

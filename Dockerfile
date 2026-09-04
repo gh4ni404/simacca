@@ -51,6 +51,13 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Salin kode aplikasi ke dalam image untuk deployment mandiri (standalone image)
 COPY . /var/www/html
 
+# Salin dan konfigurasi entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Atur hak akses folder writable untuk PHP-FPM
 RUN chown -R www-data:www-data /var/www/html/writable \
  && chmod -R 775 /var/www/html/writable
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["php-fpm"]

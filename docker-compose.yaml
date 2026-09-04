@@ -1,6 +1,30 @@
 name: simacca
 
 services:
+  # Database Service (MariaDB 10.11)
+  db:
+    image: mariadb:10.11
+    container_name: simacca_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_DATABASE:-simacca_db}
+      MYSQL_USER: ${DB_USERNAME:-simacca_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-simacca_pass}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - simacca_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - simacca_network
+
+  # PHP 8.3 FPM Application Service
   app:
     build:
       context: .
@@ -11,9 +35,13 @@ services:
       - "host.docker.internal:host-gateway"
     volumes:
       - .:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - simacca_network
 
+  # Nginx Webserver Service
   webserver:
     image: nginx:alpine
     container_name: simacca_nginx
@@ -28,10 +56,13 @@ services:
     networks:
       - simacca_network
 
+  # Cloudflare Tunnel Service (Diaktifkan opsional via profile: docker compose --profile tunnel up)
   tunnel:
     image: cloudflare/cloudflared:latest
     container_name: simacca_tunnel
     restart: unless-stopped
+    profiles:
+      - tunnel
     command: tunnel --no-autoupdate run
     volumes:
       - ./cloudflare:/etc/cloudflared:ro
@@ -39,6 +70,10 @@ services:
       - webserver
     networks:
       - simacca_network
+
+volumes:
+  simacca_db_data:
+    driver: local
 
 networks:
   simacca_network:
