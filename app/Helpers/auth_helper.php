@@ -280,6 +280,12 @@ if (!function_exists('get_sidebar_menu')) {
                     ]
                 ],
                 [
+                    'title' => 'TV Live Showcase',
+                    'icon' => 'fas fa-tv',
+                    'url' => '/tv',
+                    'active' => ['tv']
+                ],
+                [
                     'title' => 'Pengaturan',
                     'icon' => 'fas fa-cog',
                     'url' => '/admin/pengaturan',

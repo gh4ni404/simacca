@@ -47,6 +47,12 @@ $routes->get('health', static function () {
     return 'OK';
 });
 
+// TV Show / Digital Signage Routes (Public Showcase for Lobby TV / Display)
+$routes->get('tv', 'TvDisplayController::index', ['as' => 'tv.display']);
+$routes->get('tv/feed', 'TvDisplayController::getFeed', ['as' => 'tv.feed']);
+$routes->get('display/tv', 'TvDisplayController::index');
+
+
 // Auth Routes
 $routes->group('', ['filter' => 'guest'], function ($routes) {
     $routes->get('/login', 'AuthController::login', ['as' => 'login']);

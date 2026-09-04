@@ -308,6 +308,11 @@
                             <p class="text-xs text-gray-500"><?= get_role_name(); ?></p>
                         </div>
                         <div class="flex items-center gap-4">
+                            <a href="<?= base_url('tv'); ?>" target="_blank" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-cyan-50 hover:text-cyan-700 hover:border-cyan-300 border border-slate-200 transition shadow-sm group" title="Buka TV Showcase / Live Display di Tab Baru">
+                                <i class="fas fa-tv text-cyan-600 group-hover:scale-110 transition-transform"></i>
+                                <span>TV Showcase</span>
+                                <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                            </a>
                             <?= $this->renderSection('actions'); ?>
                         </div>
                     </div>
