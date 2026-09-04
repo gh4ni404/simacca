@@ -186,7 +186,7 @@
                             <option value="">Pilih Jurusan</option>
                             <option value="DKV" <?= old('jurusan') == 'DKV' ? 'selected' : '' ?>>DKV (Desain Komunikasi Visual)</option>
                             <option value="MPLB" <?= old('jurusan') == 'MPLB' ? 'selected' : '' ?>>MPLB (Manajemen Perkantoran & Layanan Bisnis)</option>
-                            <option value="AT" <?= old('jurusan') == 'AT' ? 'selected' : '' ?>>AT (Akuntansi)</option>
+                            <option value="AT" <?= old('jurusan') == 'AT' ? 'selected' : '' ?>>AT (Agribisnis Tanaman)</option>
                         </select>
                     </div>
                 </div>

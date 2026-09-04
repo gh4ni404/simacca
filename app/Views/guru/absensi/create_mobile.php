@@ -142,8 +142,8 @@
                                 <i class="fas fa-clock mr-1 text-purple-500"></i>
                                 <span id="jadwalLabel">Jadwal</span> <span class="text-red-500">*</span>
                             </label>
-                            <select id="jadwal_id" name="jadwal_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                                <option value="">Pilih tanggal terlebih dahulu</option>
+                            <select id="jadwal_id" name="jadwal_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value=""></option>
                             </select>
                             <p class="text-xs text-gray-500 mt-1" id="hariInfo">
                                 <i class="fas fa-calendar-day mr-1"></i>
@@ -684,25 +684,130 @@
 </script>
 
 <?php else: ?>
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+/* Select2 Tailwind modern theme */
+.select2-container--default .select2-selection--single {
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    transition: all 0.2s ease-in-out;
+}
+.select2-container--default.select2-container--focus .select2-selection--single,
+.select2-container--default.select2-container--open .select2-selection--single {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    outline: none;
+}
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #1f2937;
+    padding-left: 0.75rem;
+    padding-right: 2rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    width: 100%;
+}
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #9ca3af;
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 100%;
+    right: 8px;
+    display: flex;
+    align-items: center;
+}
+.select2-dropdown {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    z-index: 9999;
+}
+.select2-container--default .select2-search--dropdown {
+    padding: 8px;
+}
+.select2-container--default .select2-search--dropdown .select2-search__field {
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    padding: 8px 10px;
+    font-size: 0.875rem;
+    outline: none;
+}
+.select2-container--default .select2-search--dropdown .select2-search__field:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+.select2-container--default .select2-results__option {
+    padding: 10px 12px;
+    font-size: 0.875rem;
+    color: #374151;
+}
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #3b82f6;
+    color: #fff;
+}
+.select2-container--default .select2-results__option[aria-selected="true"] {
+    background-color: #eff6ff;
+    color: #1d4ed8;
+    font-weight: 600;
+}
+</style>
+
+<!-- jQuery & Select2 JS -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <script>
     // Mode selection state
     let isSubstituteMode = false;
 
+    function initSelect2() {
+        if (typeof jQuery !== 'undefined' && typeof jQuery.fn.select2 !== 'undefined') {
+            if ($('#jadwal_id').data('select2')) {
+                $('#jadwal_id').select2('destroy');
+            }
+            $('#jadwal_id').select2({
+                placeholder: isSubstituteMode ? 'Ketik mapel, kelas, atau nama guru...' : 'Ketik untuk mencari jadwal...',
+                allowClear: true,
+                width: '100%',
+                language: {
+                    noResults: function() {
+                        return isSubstituteMode ? 'Tidak ada jadwal pengganti yang cocok' : 'Tidak ada jadwal yang cocok';
+                    }
+                }
+            });
+        }
+    }
+
+    function handleModeSwitch(substitute) {
+        isSubstituteMode = substitute;
+        updateModeUI();
+        initSelect2();
+        
+        const tanggalInput = document.getElementById('tanggal');
+        if (tanggalInput && tanggalInput.value) {
+            const hari = getDayFromDate(tanggalInput.value);
+            document.getElementById('hari').value = hari;
+            document.getElementById('hariText').textContent = hari;
+            loadJadwalByHari(hari);
+        } else {
+            $('#jadwal_id').html('<option value=""></option>').val('').trigger('change.select2');
+            document.getElementById('hari').value = '';
+            document.getElementById('hariText').textContent = '-';
+        }
+    }
+
     // Handle mode selection
     document.getElementById('modeOwnSchedule').addEventListener('click', function() {
-        isSubstituteMode = false;
-        updateModeUI();
-        // Reset jadwal selection
-        document.getElementById('jadwal_id').innerHTML = '<option value="">Pilih Jadwal</option>';
-        document.getElementById('hari').value = '';
+        handleModeSwitch(false);
     });
 
     document.getElementById('modeSubstitute').addEventListener('click', function() {
-        isSubstituteMode = true;
-        updateModeUI();
-        // Reset jadwal selection
-        document.getElementById('jadwal_id').innerHTML = '<option value="">Pilih Jadwal</option>';
-        document.getElementById('hari').value = '';
+        handleModeSwitch(true);
     });
 
     function updateModeUI() {
@@ -740,16 +845,16 @@
 
     // Function to load jadwal based on hari
     function loadJadwalByHari(hari) {
-        const jadwalSelect = document.getElementById('jadwal_id');
+        const jadwalSelect = $('#jadwal_id');
         
         if (!hari) {
-            jadwalSelect.innerHTML = '<option value="">Pilih tanggal terlebih dahulu</option>';
+            jadwalSelect.html('<option value=""></option>').val('').trigger('change.select2');
             return;
         }
 
-        jadwalSelect.innerHTML = '<option value="">Memuat jadwal...</option>';
+        jadwalSelect.html('<option value="">Memuat jadwal...</option>').val('').trigger('change.select2');
 
-        const url = `<?= base_url('guru/absensi/getJadwalByHari'); ?>?hari=${hari}&substitute=${isSubstituteMode}`;
+        const url = `<?= base_url('guru/absensi/getJadwalByHari'); ?>?hari=${encodeURIComponent(hari)}&substitute=${isSubstituteMode}`;
 
         fetch(url, {
                 headers: {
@@ -758,8 +863,8 @@
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success && data.jadwal.length > 0) {
-                    let options = '<option value="">Pilih Jadwal</option>';
+                if (data.success && data.jadwal && data.jadwal.length > 0) {
+                    let options = '<option value=""></option>';
                     data.jadwal.forEach(jadwal => {
                         const waktu = `${jadwal.jam_mulai.substr(0, 5)} - ${jadwal.jam_selesai.substr(0, 5)}`;
                         if (data.isSubstitute && jadwal.nama_guru) {
@@ -769,26 +874,39 @@
                             options += `<option value="${jadwal.id}">${jadwal.nama_mapel} - ${jadwal.nama_kelas} (${waktu})</option>`;
                         }
                     });
-                    jadwalSelect.innerHTML = options;
-
-                    // auto-redirect when a jadwal is selected
-                    jadwalSelect.addEventListener('change', function() {
-                        const selected = this.value;
-                        if (!selected) return;
-                        const tanggalVal = document.getElementById('tanggal') ? document.getElementById('tanggal').value : '';
-                        const targetUrl = '<?= base_url('guru/absensi/tambah'); ?>?jadwal_id=' + encodeURIComponent(selected) + (tanggalVal ? '&tanggal=' + encodeURIComponent(tanggalVal) : '');
-                        window.location.href = targetUrl;
-                    });
+                    jadwalSelect.html(options).val('').trigger('change.select2');
                 } else {
-                    const noDataMsg = isSubstituteMode ? 'Tidak ada jadwal di hari ini' : 'Tidak ada jadwal untuk hari ini';
-                    jadwalSelect.innerHTML = `<option value="">${noDataMsg}</option>`;
+                    const noDataMsg = isSubstituteMode ? 'Tidak ada jadwal yang dapat digantikan pada hari ini' : 'Tidak ada jadwal untuk hari ini';
+                    jadwalSelect.html(`<option value="">${noDataMsg}</option>`).val('').trigger('change.select2');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                jadwalSelect.innerHTML = '<option value="">Error loading data</option>';
+                jadwalSelect.html('<option value="">Error loading data</option>').val('').trigger('change.select2');
             });
     }
+
+    // Auto-redirect when a jadwal is selected
+    $(document).ready(function() {
+        initSelect2();
+
+        $('#jadwal_id').on('change', function(e) {
+            const selected = $(this).val();
+            if (!selected) return;
+            const tanggalVal = document.getElementById('tanggal') ? document.getElementById('tanggal').value : '';
+            const targetUrl = '<?= base_url('guru/absensi/tambah'); ?>?jadwal_id=' + encodeURIComponent(selected) + (tanggalVal ? '&tanggal=' + encodeURIComponent(tanggalVal) : '');
+            window.location.href = targetUrl;
+        });
+
+        // Trigger on page load if tanggal already set
+        const tanggal = document.getElementById('tanggal').value;
+        if (tanggal) {
+            const hari = getDayFromDate(tanggal);
+            document.getElementById('hari').value = hari;
+            document.getElementById('hariText').textContent = hari;
+            loadJadwalByHari(hari);
+        }
+    });
 
     // Handle tanggal selection - auto detect hari and load jadwal
     document.getElementById('tanggal').addEventListener('change', function() {
@@ -797,7 +915,7 @@
         if (!tanggal) {
             document.getElementById('hari').value = '';
             document.getElementById('hariText').textContent = '-';
-            document.getElementById('jadwal_id').innerHTML = '<option value="">Pilih tanggal terlebih dahulu</option>';
+            $('#jadwal_id').html('<option value=""></option>').val('').trigger('change.select2');
             return;
         }
 
@@ -810,17 +928,6 @@
         
         // Load jadwal for this day
         loadJadwalByHari(hari);
-    });
-
-    // Trigger on page load if tanggal already set
-    window.addEventListener('DOMContentLoaded', function() {
-        const tanggal = document.getElementById('tanggal').value;
-        if (tanggal) {
-            const hari = getDayFromDate(tanggal);
-            document.getElementById('hari').value = hari;
-            document.getElementById('hariText').textContent = hari;
-            loadJadwalByHari(hari);
-        }
     });
 </script>
 <?php endif; ?>

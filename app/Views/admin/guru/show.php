@@ -279,7 +279,7 @@
                 <option value="">Pilih Jurusan</option>
                 <option value="DKV" <?= ($guru['jurusan'] ?? '') == 'DKV' ? 'selected' : '' ?>>DKV (Desain Komunikasi Visual)</option>
                 <option value="MPLB" <?= ($guru['jurusan'] ?? '') == 'MPLB' ? 'selected' : '' ?>>MPLB (Manajemen Perkantoran & Layanan Bisnis)</option>
-                <option value="AT" <?= ($guru['jurusan'] ?? '') == 'AT' ? 'selected' : '' ?>>AT (Akuntansi)</option>
+                <option value="AT" <?= ($guru['jurusan'] ?? '') == 'AT' ? 'selected' : '' ?>>AT (Agribisnis Tanaman)</option>
             </select>
         </div>
 

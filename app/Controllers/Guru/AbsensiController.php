@@ -588,7 +588,7 @@ class AbsensiController extends BaseController
         $isSubstitute = $this->request->getGet('substitute') === 'true';
 
         if ($isSubstitute) {
-            // Get ALL schedules for this day (for substitute teachers)
+            // Get ALL schedules of other teachers for this day (for substitute teachers)
             $jadwal = $this->jadwalModel->select('jadwal_mengajar.*, 
                                                 mata_pelajaran.nama_mapel, 
                                                 kelas.nama_kelas,
@@ -598,6 +598,7 @@ class AbsensiController extends BaseController
                 ->join('guru', 'guru.id = jadwal_mengajar.guru_id')
                 ->where('hari', $hari)
                 ->where('jadwal_mengajar.tahun_ajaran', $tahunAjaran)
+                ->where('jadwal_mengajar.guru_id !=', $guru['id'])
                 ->orderBy('jam_mulai', 'ASC')
                 ->findAll();
         } else {
