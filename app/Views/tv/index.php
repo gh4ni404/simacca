@@ -194,9 +194,9 @@
     <!-- ========================================== -->
     <!-- 1. TOP BAR (HEADER)                       -->
     <!-- ========================================== -->
-    <header class="relative z-20 h-20 px-6 sm:px-8 flex items-center justify-between glass-panel border-b border-white/10 shrink-0">
+    <header class="relative z-20 h-20 px-6 sm:px-8 flex items-center justify-between glass-panel border-b border-white/10 shrink-0 gap-4">
         <!-- Left: Brand & School Logo -->
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 shrink-0">
             <?php if (!empty($logoSekolah)): ?>
                 <img src="<?= base_url('files/logo/' . $logoSekolah) ?>" alt="Logo" class="w-12 h-12 object-contain drop-shadow-md rounded-lg">
             <?php else: ?>
@@ -207,7 +207,7 @@
 
             <div>
                 <div class="flex items-center gap-2.5">
-                    <h1 class="text-xl font-black tracking-tight text-white uppercase font-sans">
+                    <h1 class="text-lg sm:text-xl font-black tracking-tight text-white uppercase font-sans">
                         <?= esc($namaSekolah); ?>
                     </h1>
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/20 text-rose-400 border border-rose-500/30">
@@ -216,13 +216,55 @@
                     </span>
                 </div>
                 <p class="text-xs text-slate-400 font-medium">
-                    <?= esc($alamatSekolah); ?> • <span class="text-cyan-400 font-semibold"><i class="fa-solid fa-shuffle text-[10px] mr-1"></i>Random Showcase (Hari Ini s/d 7 Hari Terakhir)</span>
+                    <?= esc($alamatSekolah); ?> • <span class="text-cyan-400 font-semibold"><i class="fa-solid fa-shuffle text-[10px] mr-1"></i>Random Showcase (7 Hari Terakhir)</span>
                 </p>
             </div>
         </div>
 
+        <!-- Center: Live HUD Stats Chips (Relocated from Sidebar) -->
+        <div class="hidden xl:flex items-center gap-3 shrink-0">
+            <!-- Stat 1: Presensi -->
+            <div class="flex items-center gap-3 px-4 py-2 rounded-2xl bg-slate-900/80 border border-blue-500/30 shadow-lg backdrop-blur-md">
+                <div class="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm shadow">
+                    <i class="fa-solid fa-user-check"></i>
+                </div>
+                <div class="text-left">
+                    <div class="text-[10px] uppercase font-bold text-blue-400 tracking-wider">Presensi Hari Ini</div>
+                    <div class="text-base font-black text-white font-mono leading-tight mt-0.5">
+                        <span id="statAttendance"><?= esc($stats['attendance_rate'] ?? 98); ?>%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stat 2: PKL -->
+            <div class="flex items-center gap-3 px-4 py-2 rounded-2xl bg-slate-900/80 border border-emerald-500/30 shadow-lg backdrop-blur-md">
+                <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm shadow">
+                    <i class="fa-solid fa-building"></i>
+                </div>
+                <div class="text-left">
+                    <div class="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Siswa PKL (DUDI)</div>
+                    <div class="text-base font-black text-white font-mono leading-tight mt-0.5">
+                        <span id="statPkl"><?= esc($stats['active_pkl'] ?? 0); ?></span> <span class="text-[10px] text-slate-400 font-normal">Siswa</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stat 3: Dokumentasi -->
+            <div class="flex items-center gap-3 px-4 py-2 rounded-2xl bg-slate-900/80 border border-purple-500/30 shadow-lg backdrop-blur-md">
+                <div class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm shadow">
+                    <i class="fa-solid fa-camera"></i>
+                </div>
+                <div class="text-left">
+                    <div class="text-[10px] uppercase font-bold text-purple-400 tracking-wider">Dokumentasi</div>
+                    <div class="text-base font-black text-white font-mono leading-tight mt-0.5">
+                        <span id="statDocs"><?= esc($stats['total_docs_7days'] ?? 0); ?></span> <span class="text-[10px] text-slate-400 font-normal">Foto</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Right: Realtime Digital Clock & Controls -->
-        <div class="flex items-center gap-6">
+        <div class="flex items-center gap-6 shrink-0">
             <!-- Digital Clock Display -->
             <div class="text-right">
                 <div id="liveClock" class="text-2xl sm:text-3xl font-bold font-mono text-cyan-400 tracking-wider drop-shadow-[0_0_12px_rgba(6,182,212,0.4)]">
@@ -252,14 +294,14 @@
     </header>
 
     <!-- ========================================== -->
-    <!-- 2. MAIN WORKSPACE (SPLIT 68% : 32%)       -->
+    <!-- 2. MAIN WORKSPACE (FULL-WIDTH CINEMA MODE) -->
     <!-- ========================================== -->
-    <main class="relative z-10 flex-1 px-6 py-4 grid grid-cols-12 gap-6 overflow-hidden items-stretch">
+    <main class="relative z-10 flex-1 min-h-0 px-4 sm:px-6 py-3.5 flex flex-col overflow-hidden">
 
         <!-- ====================================== -->
-        <!-- LEFT: HERO SHOWCASE STAGE (COL-SPAN-8) -->
+        <!-- FULL-SCREEN HERO SHOWCASE STAGE        -->
         <!-- ====================================== -->
-        <section class="col-span-12 lg:col-span-8 flex flex-col justify-between relative rounded-2xl overflow-hidden glass-panel border border-white/10 group shadow-2xl">
+        <section class="w-full flex-1 min-h-0 relative rounded-2xl overflow-hidden glass-panel border border-white/10 group shadow-2xl flex flex-col justify-end">
 
             <!-- Ambient Backdrop Mirror (Blurred) -->
             <div class="absolute inset-0 z-0 overflow-hidden">
@@ -267,8 +309,8 @@
                 <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
             </div>
 
-            <!-- Foreground Hero Media Stage -->
-            <div class="relative z-10 w-full flex-1 flex items-center justify-center overflow-hidden p-3 sm:p-5">
+            <!-- Foreground Hero Media Stage (Full Height Canvas) -->
+            <div class="absolute inset-0 z-10 flex items-center justify-center overflow-hidden p-3 sm:p-5">
                 <div class="relative w-full h-full rounded-xl overflow-hidden shadow-2xl flex items-center justify-center bg-black/40 border border-white/5">
                     <img id="heroMainImg" src="" alt="Dokumentasi SIMACCA" class="w-full h-full object-contain transition-all duration-700">
 
@@ -283,165 +325,85 @@
                 </div>
             </div>
 
-            <!-- Floating Glassmorphism Meta Card -->
-            <div class="relative z-20 mx-4 mb-3 sm:mx-6 sm:mb-4 p-5 sm:p-6 rounded-2xl glass-card border border-white/15 shadow-2xl transition-all duration-500">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <!-- Seamless Lower-Third Gradient Overlay (Like User's Reference Image) -->
+            <div class="relative z-20 w-full pt-16 pb-5 px-6 sm:px-10 bg-gradient-to-t from-[#060911]/95 via-[#060911]/80 to-transparent">
+                <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
                     
-                    <!-- Left Details -->
-                    <div class="flex-1 min-w-0">
-                        <!-- Category Badge & Relative Time -->
-                        <div class="flex items-center gap-3 mb-2 flex-wrap">
-                            <span id="heroBadge" class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider glass-badge border shadow-sm">
-                                <i id="heroBadgeIcon" class="fa-solid fa-chalkboard-user"></i>
-                                <span id="heroBadgeLabel">KBM & Praktik</span>
-                            </span>
-                            
-                            <span class="flex items-center gap-1.5 text-xs font-semibold text-slate-400">
-                                <i class="fa-regular fa-clock text-cyan-400"></i>
-                                <span id="heroTimeAgo">Baru saja</span>
-                            </span>
-
-                            <span class="flex items-center gap-1.5 text-xs font-semibold text-slate-400">
-                                <i class="fa-solid fa-location-dot text-rose-400"></i>
-                                <span id="heroLocation">Area Sekolah</span>
-                            </span>
-                        </div>
-
-                        <!-- Main Activity Title -->
-                        <h2 id="heroTitle" class="text-xl sm:text-2xl md:text-3xl font-extrabold text-white tracking-tight leading-snug line-clamp-2 drop-shadow-sm">
-                            Memuat Dokumentasi Aktivitas...
-                        </h2>
-
-                        <!-- Subtitle (Mapel / DUDI) -->
-                        <p id="heroSubtitle" class="text-sm sm:text-base font-semibold text-cyan-300 mt-1 flex items-center gap-2">
-                            <i class="fa-solid fa-tag text-xs opacity-75"></i>
-                            <span id="heroSubtitleText">SMK Unggulan</span>
-                        </p>
-
-                        <!-- Description Snippet -->
-                        <p id="heroDesc" class="text-xs sm:text-sm text-slate-300 mt-2 line-clamp-2 leading-relaxed">
-                            Deskripsi ringkasan aktivitas dokumentasi siswa dan guru.
-                        </p>
-                    </div>
-
-                    <!-- Right Uploader Chip (Author info) -->
-                    <div class="flex items-center gap-3 shrink-0 p-3 rounded-xl bg-white/5 border border-white/10 md:min-w-[220px]">
-                        <div class="relative">
-                            <img id="heroUploaderAvatar" src="<?= base_url('assets/img/default-avatar.png') ?>" alt="Uploader" class="w-12 h-12 rounded-full object-cover border-2 border-cyan-400/50 shadow-md">
-                            <span id="heroUploaderRoleIcon" class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center border border-white shadow">
+                    <!-- Left: Profile Avatar + 3-Line Structured Activity Info -->
+                    <div class="flex items-start sm:items-center gap-4 sm:gap-6 flex-1 min-w-0">
+                        <!-- Profile Avatar directly alongside 3-Line Info -->
+                        <div class="relative shrink-0">
+                            <img id="heroUploaderAvatar" src="<?= base_url('assets/img/default-avatar.png') ?>" alt="Foto Pengunggah" class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-cyan-400/80 shadow-[0_4px_25px_rgba(0,0,0,0.8)] bg-slate-900">
+                            <span id="heroUploaderRoleIcon" class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center border-2 border-slate-900 shadow">
                                 <i class="fa-solid fa-user-tie"></i>
                             </span>
                         </div>
-                        <div class="min-w-0">
-                            <div class="text-[11px] font-bold uppercase tracking-wider text-cyan-400" id="heroUploaderRole">
-                                Guru Pengampu
+
+                        <!-- 3-Line Structured Activity Info -->
+                        <div class="flex-1 min-w-0">
+                            <!-- Top Metadata Badges -->
+                            <div class="flex items-center gap-2.5 mb-2 flex-wrap">
+                                <span id="heroBadge" class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider glass-badge border shadow-sm">
+                                    <i id="heroBadgeIcon" class="fa-solid fa-shield-halved"></i>
+                                    <span id="heroBadgeLabel">Piket & Ketertiban</span>
+                                </span>
+
+                                <span id="slideCounterBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-white/10 text-cyan-300 border border-white/10 shadow-sm">
+                                    <i class="fa-solid fa-layer-group text-[10px]"></i>
+                                    <span id="slideCounter">1 / 1</span>
+                                </span>
+                                
+                                <span class="flex items-center gap-1.5 text-xs font-semibold text-slate-300">
+                                    <i class="fa-regular fa-clock text-cyan-400"></i>
+                                    <span id="heroTimeAgo">Baru saja</span>
+                                </span>
+
+                                <span class="flex items-center gap-1.5 text-xs font-semibold text-slate-300">
+                                    <i class="fa-solid fa-location-dot text-rose-400"></i>
+                                    <span id="heroLocation">Area Sekolah</span>
+                                </span>
                             </div>
-                            <div class="text-sm font-bold text-white truncate" id="heroUploaderName">
-                                Pengunggah Foto
+
+                            <!-- Line 1: Judul Modul / Aktivitas Utama (Besar, Bold, Putih dengan Drop Shadow) -->
+                            <h2 id="heroTitle" class="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]">
+                                Jurnal Piket Guru
+                            </h2>
+
+                            <!-- Line 2: Kegiatan / Deskripsi Rincian (Sesuai Referensi Gambar) -->
+                            <p id="heroActivity" class="text-base sm:text-lg md:text-xl font-medium text-slate-100 mt-1.5 drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] leading-relaxed">
+                                <span class="font-bold text-cyan-300">Kegiatan:</span> <span id="heroActivityText">Rutinitas pembakaran sampah</span>
+                            </p>
+
+                            <!-- Line 3: Penanggung Jawab / Pelaksana (Sesuai Referensi Gambar) -->
+                            <p id="heroPic" class="text-sm sm:text-base font-normal text-slate-200 mt-1 drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] flex items-center gap-2 flex-wrap">
+                                <span><span class="font-bold text-cyan-400">Penanggung Jawab:</span> <span id="heroPicText">Ashar, S.P.</span></span>
+                                <span class="text-slate-400">•</span>
+                                <span id="heroFormattedDate" class="text-xs sm:text-sm text-slate-300">04 September 2026</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Right Group: Relocated SIMACCA Portal QR Badge -->
+                    <div class="hidden sm:flex items-center gap-2.5 p-2.5 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 shrink-0 shadow-lg">
+                        <div class="w-11 h-11 rounded-xl bg-white p-1 flex items-center justify-center shrink-0 shadow">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=<?= urlencode(base_url()) ?>&color=0b1120" alt="SIMACCA QR" class="w-full h-full object-contain">
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                                <span>SIMACCA Online</span>
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                             </div>
-                            <div class="text-xs text-slate-400 truncate" id="heroFormattedDate">
-                                04 September 2026
-                            </div>
+                            <div class="text-[10px] text-slate-400">Scan Presensi & Jurnal</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Slide Animated Progress Bar -->
-                <div class="w-full bg-slate-800/80 rounded-full h-1.5 mt-4 overflow-hidden border border-white/5">
+                <div class="w-full bg-white/10 rounded-full h-1.5 mt-4 overflow-hidden border border-white/5">
                     <div id="slideProgressBar" class="h-full bg-gradient-to-r from-blue-500 via-cyan-400 to-emerald-400 progress-bar-fill shadow-[0_0_12px_rgba(6,182,212,0.8)]" style="width: 0%;"></div>
                 </div>
             </div>
         </section>
-
-        <!-- ====================================== -->
-        <!-- RIGHT: COMMAND CENTER SIDEBAR (COL-4) -->
-        <!-- ====================================== -->
-        <aside class="col-span-12 lg:col-span-4 flex flex-col gap-4 overflow-hidden">
-
-            <!-- 1. Top Mini Stats Widgets -->
-            <div class="grid grid-cols-3 gap-3 shrink-0">
-                <!-- Stat 1: Kehadiran Hari Ini -->
-                <div class="p-3.5 rounded-2xl glass-card flex flex-col justify-between border-t-2 border-t-blue-500 shadow-lg">
-                    <div class="flex items-center justify-between text-blue-400 text-xs font-bold uppercase">
-                        <span>Presensi</span>
-                        <i class="fa-solid fa-user-check"></i>
-                    </div>
-                    <div class="mt-2">
-                        <div id="statAttendance" class="text-2xl font-black text-white font-mono">
-                            <?= esc($stats['attendance_rate'] ?? 98); ?>%
-                        </div>
-                        <div class="text-[10px] text-slate-400 truncate">Hadir Hari Ini</div>
-                    </div>
-                </div>
-
-                <!-- Stat 2: Siswa PKL Aktif -->
-                <div class="p-3.5 rounded-2xl glass-card flex flex-col justify-between border-t-2 border-t-emerald-500 shadow-lg">
-                    <div class="flex items-center justify-between text-emerald-400 text-xs font-bold uppercase">
-                        <span>PKL</span>
-                        <i class="fa-solid fa-building"></i>
-                    </div>
-                    <div class="mt-2">
-                        <div id="statPkl" class="text-2xl font-black text-white font-mono">
-                            <?= esc($stats['active_pkl'] ?? 0); ?>
-                        </div>
-                        <div class="text-[10px] text-slate-400 truncate">Siswa di Industri</div>
-                    </div>
-                </div>
-
-                <!-- Stat 3: Total Foto 7 Hari -->
-                <div class="p-3.5 rounded-2xl glass-card flex flex-col justify-between border-t-2 border-t-purple-500 shadow-lg">
-                    <div class="flex items-center justify-between text-purple-400 text-xs font-bold uppercase">
-                        <span>Dokumentasi</span>
-                        <i class="fa-solid fa-camera"></i>
-                    </div>
-                    <div class="mt-2">
-                        <div id="statDocs" class="text-2xl font-black text-white font-mono">
-                            <?= esc($stats['total_docs_7days'] ?? 0); ?>
-                        </div>
-                        <div class="text-[10px] text-slate-400 truncate">Foto (7 Hari)</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 2. Upcoming Slides / Up Next Feed Queue -->
-            <div class="flex-1 rounded-2xl glass-panel p-4 flex flex-col overflow-hidden border border-white/10 shadow-xl min-h-0">
-                <!-- Queue Header -->
-                <div class="flex items-center justify-between pb-3 border-b border-white/10 shrink-0">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
-                        <h3 class="text-sm font-bold text-white uppercase tracking-wider">Antrean Tayang Feed</h3>
-                    </div>
-                    <span id="queueCounter" class="text-xs font-mono font-bold text-cyan-400 px-2 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/30">
-                        0 / 0
-                    </span>
-                </div>
-
-                <!-- Scrollable Item Cards Container -->
-                <div id="queueListContainer" class="flex-1 overflow-y-auto mt-3 space-y-2.5 pr-1">
-                    <!-- Dynamic cards injected via JavaScript -->
-                </div>
-            </div>
-
-            <!-- 3. Bottom SIMACCA Portal QR & Motto -->
-            <div class="p-4 rounded-2xl glass-card flex items-center justify-between gap-4 border border-white/10 shrink-0 shadow-lg">
-                <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-xl bg-white p-1.5 flex items-center justify-center shrink-0 shadow">
-                        <!-- Embedded QR code vector pointing to app root -->
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=<?= urlencode(base_url()) ?>&color=0b1120" alt="SIMACCA QR" class="w-full h-full object-contain">
-                    </div>
-                    <div>
-                        <div class="text-xs font-bold text-white">SIMACCA Online</div>
-                        <div class="text-[11px] text-slate-400">Scan untuk presensi & upload jurnal</div>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 bg-emerald-950/60 px-2 py-1 rounded-lg border border-emerald-500/30">
-                        <i class="fa-solid fa-wifi text-[9px]"></i> Online Sync
-                    </span>
-                </div>
-            </div>
-
-        </aside>
 
     </main>
 
@@ -510,35 +472,33 @@
             }
 
             // DOM Element References
-            const liveClockEl        = document.getElementById('liveClock');
-            const liveDateEl         = document.getElementById('liveDate');
-            const heroMainImg        = document.getElementById('heroMainImg');
-            const heroBackdropImg    = document.getElementById('heroBackdropImg');
-            const heroEmptyState     = document.getElementById('heroEmptyState');
-            const heroBadge          = document.getElementById('heroBadge');
-            const heroBadgeIcon      = document.getElementById('heroBadgeIcon');
-            const heroBadgeLabel     = document.getElementById('heroBadgeLabel');
-            const heroTimeAgo        = document.getElementById('heroTimeAgo');
-            const heroLocation       = document.getElementById('heroLocation');
-            const heroTitle          = document.getElementById('heroTitle');
-            const heroSubtitleText   = document.getElementById('heroSubtitleText');
-            const heroDesc           = document.getElementById('heroDesc');
-            const heroUploaderAvatar = document.getElementById('heroUploaderAvatar');
-            const heroUploaderRole   = document.getElementById('heroUploaderRole');
-            const heroUploaderName   = document.getElementById('heroUploaderName');
-            const heroFormattedDate  = document.getElementById('heroFormattedDate');
-            const slideProgressBar   = document.getElementById('slideProgressBar');
-            const queueListContainer = document.getElementById('queueListContainer');
-            const queueCounter       = document.getElementById('queueCounter');
-            const statAttendance     = document.getElementById('statAttendance');
-            const statPkl            = document.getElementById('statPkl');
-            const statDocs           = document.getElementById('statDocs');
-            const btnPlayPause       = document.getElementById('btnPlayPause');
-            const iconPlayPause      = document.getElementById('iconPlayPause');
-            const btnPrev            = document.getElementById('btnPrev');
-            const btnNext            = document.getElementById('btnNext');
-            const btnFullscreen      = document.getElementById('btnFullscreen');
-            const tickerTrack        = document.getElementById('tickerTrack');
+            const liveClockEl          = document.getElementById('liveClock');
+            const liveDateEl           = document.getElementById('liveDate');
+            const heroMainImg          = document.getElementById('heroMainImg');
+            const heroBackdropImg      = document.getElementById('heroBackdropImg');
+            const heroEmptyState       = document.getElementById('heroEmptyState');
+            const heroBadge            = document.getElementById('heroBadge');
+            const heroBadgeIcon        = document.getElementById('heroBadgeIcon');
+            const heroBadgeLabel       = document.getElementById('heroBadgeLabel');
+            const slideCounter         = document.getElementById('slideCounter');
+            const heroTimeAgo          = document.getElementById('heroTimeAgo');
+            const heroLocation         = document.getElementById('heroLocation');
+            const heroTitle            = document.getElementById('heroTitle');
+            const heroActivityText     = document.getElementById('heroActivityText');
+            const heroPicText          = document.getElementById('heroPicText');
+            const heroUploaderAvatar   = document.getElementById('heroUploaderAvatar');
+            const heroUploaderRoleIcon = document.getElementById('heroUploaderRoleIcon');
+            const heroFormattedDate    = document.getElementById('heroFormattedDate');
+            const slideProgressBar     = document.getElementById('slideProgressBar');
+            const statAttendance       = document.getElementById('statAttendance');
+            const statPkl              = document.getElementById('statPkl');
+            const statDocs             = document.getElementById('statDocs');
+            const btnPlayPause         = document.getElementById('btnPlayPause');
+            const iconPlayPause        = document.getElementById('iconPlayPause');
+            const btnPrev              = document.getElementById('btnPrev');
+            const btnNext              = document.getElementById('btnNext');
+            const btnFullscreen        = document.getElementById('btnFullscreen');
+            const tickerTrack          = document.getElementById('tickerTrack');
 
             // 1. Realtime Digital Clock Engine
             function updateClock() {
@@ -582,7 +542,7 @@
                     heroEmptyState.classList.remove('hidden');
                     heroMainImg.classList.add('hidden');
                     heroBackdropImg.style.display = 'none';
-                    queueCounter.textContent = '0 / 0';
+                    if (slideCounter) slideCounter.textContent = '0 / 0';
                     return;
                 }
 
@@ -593,11 +553,13 @@
                 currentIndex = (index + feedItems.length) % feedItems.length;
                 const item = feedItems[currentIndex];
 
-                // Update Queue Counter
-                queueCounter.textContent = `${currentIndex + 1} / ${feedItems.length}`;
+                // Update Slide Counter Badge
+                if (slideCounter) {
+                    slideCounter.textContent = `${currentIndex + 1} / ${feedItems.length}`;
+                }
 
                 // Handle missing image gracefully
-                const heroFallbackSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450"><rect width="800" height="450" fill="%230b1120"/><rect x="20" y="20" width="760" height="410" rx="16" fill="%230f172a" stroke="%231e293b" stroke-width="2"/><circle cx="400" cy="200" r="48" fill="%231e293b"/><path d="M380 185 L420 185 L420 225 L380 225 Z" fill="none" stroke="%2338bdf8" stroke-width="3"/><circle cx="400" cy="205" r="8" fill="%2338bdf8"/><text x="400" y="280" text-anchor="middle" fill="%2394a3b8" font-family="sans-serif" font-size="16" font-weight="600">${encodeURIComponent(item.category_label || 'DOKUMENTASI')}</text></svg>`;
+                const heroFallbackSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450"><rect width="800" height="450" fill="%230b1120"/><rect x="20" y="20" width="760" height="410" rx="16" fill="%230f172a" stroke="%231e293b" stroke-width="2"/><circle cx="400" cy="200" r="48" fill="%231e293b"/><path d="M380 185 L420 185 L420 225 L380 225 Z" fill="none" stroke="%2338bdf8" stroke-width="3"/><circle cx="400" cy="205" r="8" fill="%2338bdf8"/><text x="400" y="280" text-anchor="middle" fill="%2394a3b8" font-family="sans-serif" font-size="16" font-weight="600">${encodeURIComponent(item.headline_title || item.category_label || 'DOKUMENTASI')}</text></svg>`;
 
                 heroMainImg.onerror = function() {
                     this.onerror = null;
@@ -638,26 +600,42 @@
                 heroBadgeLabel.textContent = item.category_label || 'Dokumentasi';
                 heroBadgeIcon.className = `fa-solid ${item.badge_icon || 'fa-camera'}`;
 
-                // Meta text updates
-                heroTimeAgo.textContent = item.time_ago || 'Hari ini';
-                heroLocation.textContent = item.location || 'SIMACCA';
-                heroTitle.textContent = item.title || 'Dokumentasi Aktivitas';
-                heroSubtitleText.textContent = item.subtitle || 'SMK SIMACCA';
-                heroDesc.textContent = item.description || 'Aktivitas pembelajaran dan praktik kejuruan.';
+                // Meta text updates (Clean 3-Line Hierarchy matching User's Mockup)
+                if (heroTimeAgo) heroTimeAgo.textContent = item.time_ago || 'Hari ini';
+                if (heroLocation) heroLocation.textContent = item.location || 'SIMACCA';
+                if (heroTitle) heroTitle.textContent = item.headline_title || item.title || 'Jurnal Dokumentasi Aktivitas';
+                if (heroActivityText) heroActivityText.textContent = item.activity_text || item.title || item.description || 'Aktivitas pembelajaran dan lingkungan sekolah.';
+                if (heroPicText) heroPicText.textContent = item.pic_text || item.uploader_name || 'Civitas Sekolah';
+                if (heroFormattedDate) heroFormattedDate.textContent = item.formatted_date || '';
 
-                // Uploader Info
-                heroUploaderName.textContent = item.uploader_name || 'Pengguna SIMACCA';
-                heroUploaderRole.textContent = item.uploader_role || 'Civitas Sekolah';
-                heroFormattedDate.textContent = item.formatted_date || '';
-
-                if (item.uploader_photo) {
-                    heroUploaderAvatar.src = item.uploader_photo;
-                } else {
-                    heroUploaderAvatar.src = DEFAULT_AVATAR + encodeURIComponent(item.uploader_name || 'SIMACCA');
+                // Uploader Avatar & Role Icon
+                if (heroUploaderAvatar) {
+                    if (item.uploader_photo) {
+                        heroUploaderAvatar.src = item.uploader_photo;
+                    } else {
+                        heroUploaderAvatar.src = DEFAULT_AVATAR + encodeURIComponent(item.uploader_name || 'SIMACCA');
+                    }
                 }
 
-                // Render Sidebar Queue Cards
-                renderQueueList();
+                if (heroUploaderRoleIcon) {
+                    let roleIconClass = 'fa-solid fa-user-tie';
+                    let roleBg = 'bg-blue-600';
+                    if (item.category === 'pkl') {
+                        roleIconClass = 'fa-solid fa-user-graduate';
+                        roleBg = 'bg-emerald-600';
+                    } else if (item.category === 'piket') {
+                        roleIconClass = 'fa-solid fa-shield-halved';
+                        roleBg = 'bg-amber-600';
+                    } else if (item.category === 'wali') {
+                        roleIconClass = 'fa-solid fa-user-group';
+                        roleBg = 'bg-purple-600';
+                    } else if (item.is_pengganti) {
+                        roleIconClass = 'fa-solid fa-people-arrows';
+                        roleBg = 'bg-cyan-600';
+                    }
+                    heroUploaderRoleIcon.className = `absolute -bottom-1 -right-1 w-6 h-6 rounded-full ${roleBg} text-white text-xs flex items-center justify-center border-2 border-slate-900 shadow`;
+                    heroUploaderRoleIcon.innerHTML = `<i class="${roleIconClass}"></i>`;
+                }
 
                 // Preload ahead
                 preloadNextImages();
@@ -666,58 +644,7 @@
                 resetProgressBar();
             }
 
-            // 4. Render Sidebar Up Next Cards
-            function renderQueueList() {
-                if (!queueListContainer) return;
-
-                queueListContainer.innerHTML = feedItems.map((item, idx) => {
-                    const isCurrent = idx === currentIndex;
-                    const cardClass = isCurrent 
-                        ? 'bg-blue-600/25 border-cyan-400/50 shadow-lg scale-[1.02]' 
-                        : 'bg-white/5 hover:bg-white/10 border-white/5';
-                    const activePill = isCurrent 
-                        ? '<span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shrink-0"></span>' 
-                        : '';
-
-                    return `
-                        <div data-index="${idx}" class="queue-item p-2.5 rounded-xl transition-all duration-300 flex items-center gap-3 cursor-pointer border ${cardClass}">
-                            <div class="relative w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-slate-900 border border-white/10 flex items-center justify-center">
-                                <img src="${item.photo_url}" alt="" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');">
-                                <i class="fa-solid ${item.badge_icon || 'fa-image'} text-slate-500 text-lg hidden"></i>
-                                <span class="absolute top-0 right-0 px-1 py-0.5 text-[8px] font-bold uppercase rounded-bl shadow text-white" style="background-color: ${item.badge_color || '#3B82F6'};">
-                                    ${item.category || 'INFO'}
-                                </span>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-1.5">
-                                    ${activePill}
-                                    <span class="text-[11px] font-bold text-slate-400 truncate">${item.category_label || ''}</span>
-                                </div>
-                                <div class="text-xs font-bold text-white truncate mt-0.5">${item.title || ''}</div>
-                                <div class="text-[10px] text-cyan-300 truncate">${item.uploader_name || ''} • ${item.time_ago || ''}</div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-
-                // Auto scroll active item into view smoothly
-                const activeCard = queueListContainer.children[currentIndex];
-                if (activeCard) {
-                    activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }
-            }
-
-            // Click delegation on sidebar queue cards
-            queueListContainer?.addEventListener('click', (e) => {
-                const card = e.target.closest('.queue-item');
-                if (card && card.dataset.index !== undefined) {
-                    const idx = parseInt(card.dataset.index, 10);
-                    renderSlide(idx);
-                    startSlideTimer();
-                }
-            });
-
-            // 5. Progress Bar & Slide Timer Engine
+            // 4. Progress Bar & Slide Timer Engine
             function resetProgressBar() {
                 slideProgressBar.style.width = '0%';
                 slideStartTime = Date.now();
@@ -762,7 +689,7 @@
                 }
             }
 
-            // 6. Silent Background Data Synchronization (No Flicker / Zero Reload)
+            // 5. Silent Background Data Synchronization (No Flicker / Zero Reload)
             async function syncBackgroundFeed() {
                 try {
                     const response = await fetch('<?= base_url('tv/feed') ?>', {
@@ -806,7 +733,7 @@
                         if (newFirstId && newFirstId !== currentFirstId) {
                             renderSlide(0);
                         } else {
-                            renderQueueList();
+                            if (slideCounter) slideCounter.textContent = `${currentIndex + 1} / ${feedItems.length}`;
                         }
                     }
                 } catch (err) {
@@ -814,7 +741,7 @@
                 }
             }
 
-            // 7. Screen Wake Lock (Keeps Smart TV Screen Awake)
+            // 6. Screen Wake Lock (Keeps Smart TV Screen Awake)
             let wakeLock = null;
             async function requestWakeLock() {
                 try {
@@ -835,7 +762,7 @@
             });
             requestWakeLock();
 
-            // 8. Fullscreen Toggle
+            // 7. Fullscreen Toggle
             function toggleFullscreen() {
                 if (!document.fullscreenElement) {
                     document.documentElement.requestFullscreen().catch((err) => {
@@ -848,7 +775,7 @@
                 }
             }
 
-            // 9. Event Listeners & Keyboard Shortcuts
+            // 8. Event Listeners & Keyboard Shortcuts
             btnPlayPause?.addEventListener('click', togglePlayPause);
             btnNext?.addEventListener('click', nextSlide);
             btnPrev?.addEventListener('click', prevSlide);

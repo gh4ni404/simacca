@@ -107,15 +107,20 @@ class TvDisplayController extends BaseController
                     jk.created_at,
                     a.tanggal,
                     a.materi_pembelajaran,
-                    g.nama_lengkap AS guru_nama,
-                    u.profile_photo AS guru_foto,
+                    a.guru_pengganti_id,
+                    g_utama.nama_lengkap AS guru_utama_nama,
+                    u_utama.profile_photo AS guru_utama_foto,
+                    g_pengganti.nama_lengkap AS guru_pengganti_nama,
+                    u_pengganti.profile_photo AS guru_pengganti_foto,
                     mp.nama_mapel,
                     k.nama_kelas
                 ')
                 ->join('absensi a', 'a.id = jk.absensi_id')
-                ->join('guru g', 'g.id = a.created_by OR g.id = a.guru_pengganti_id', 'left')
-                ->join('users u', 'u.id = g.user_id', 'left')
                 ->join('jadwal_mengajar jm', 'jm.id = a.jadwal_mengajar_id', 'left')
+                ->join('guru g_utama', 'g_utama.id = jm.guru_id', 'left')
+                ->join('users u_utama', 'u_utama.id = g_utama.user_id', 'left')
+                ->join('guru g_pengganti', 'g_pengganti.id = a.guru_pengganti_id', 'left')
+                ->join('users u_pengganti', 'u_pengganti.id = g_pengganti.user_id', 'left')
                 ->join('mata_pelajaran mp', 'mp.id = jm.mata_pelajaran_id', 'left')
                 ->join('kelas k', 'k.id = jm.kelas_id', 'left')
                 ->where('jk.foto_dokumentasi IS NOT NULL')
@@ -134,25 +139,45 @@ class TvDisplayController extends BaseController
                     continue;
                 }
 
+                $isPengganti    = !empty($row['guru_pengganti_nama']);
+                $activeGuruNama = $isPengganti ? $row['guru_pengganti_nama'] : ($row['guru_utama_nama'] ?: 'Guru Pengampu');
+                $activeGuruFoto = $isPengganti ? ($row['guru_pengganti_foto'] ?: $row['guru_utama_foto']) : $row['guru_utama_foto'];
+
                 $uploaderPhoto = null;
-                if (!empty($row['guru_foto']) && file_exists($writePath . 'uploads/profile/' . basename($row['guru_foto']))) {
-                    $uploaderPhoto = base_url('profile-photo/' . basename($row['guru_foto']));
+                if (!empty($activeGuruFoto) && file_exists($writePath . 'uploads/profile/' . basename($activeGuruFoto))) {
+                    $uploaderPhoto = base_url('profile-photo/' . basename($activeGuruFoto));
+                }
+
+                if ($isPengganti) {
+                    $picText       = $row['guru_pengganti_nama'] . ' (Pengganti ' . ($row['guru_utama_nama'] ?: 'Guru Utama') . ')' . ($row['nama_kelas'] ? ' • ' . $row['nama_kelas'] : '');
+                    $categoryLabel = 'KBM (GURU PENGGANTI)';
+                    $uploaderRole  = 'Guru Pengganti';
+                    $badgeColor    = '#06B6D4'; // Cyan for substitute
+                } else {
+                    $picText       = ($row['guru_utama_nama'] ?: 'Guru Pengampu') . ($row['nama_kelas'] ? ' (' . $row['nama_kelas'] . ')' : '');
+                    $categoryLabel = 'KBM & PRAKTIK KELAS';
+                    $uploaderRole  = 'Guru Mata Pelajaran';
+                    $badgeColor    = '#3B82F6'; // Royal Blue
                 }
 
                 $allItems[] = [
                     'id'             => 'kbm_' . $row['id'],
                     'category'       => 'kbm',
-                    'category_label' => 'KBM & PRAKTIK KELAS',
-                    'badge_color'    => '#3B82F6', // Royal Blue
-                    'badge_bg'       => 'rgba(59, 130, 246, 0.15)',
-                    'badge_border'   => 'rgba(59, 130, 246, 0.45)',
+                    'category_label' => $categoryLabel,
+                    'headline_title' => !empty($row['nama_mapel']) ? 'Jurnal KBM: ' . $row['nama_mapel'] : 'Jurnal KBM & Pembelajaran',
+                    'activity_text'  => (!empty($row['materi_pembelajaran']) && $row['materi_pembelajaran'] !== '-') ? $row['materi_pembelajaran'] : ($row['kegiatan_pembelajaran'] ?: ($row['nama_mapel'] ?: 'Aktivitas pembelajaran kelas')),
+                    'pic_text'       => $picText,
+                    'is_pengganti'   => $isPengganti,
+                    'badge_color'    => $badgeColor,
+                    'badge_bg'       => $isPengganti ? 'rgba(6, 182, 212, 0.15)' : 'rgba(59, 130, 246, 0.15)',
+                    'badge_border'   => $isPengganti ? 'rgba(6, 182, 212, 0.45)' : 'rgba(59, 130, 246, 0.45)',
                     'badge_icon'     => 'fa-chalkboard-user',
                     'title'          => (!empty($row['materi_pembelajaran']) && $row['materi_pembelajaran'] !== '-') ? $row['materi_pembelajaran'] : ($row['nama_mapel'] ?: 'Kegiatan Pembelajaran'),
-                    'subtitle'       => $row['nama_mapel'] ?: 'Mata Pelajaran Kejuruan',
+                    'subtitle'       => ($row['nama_mapel'] ?: 'Mata Pelajaran Kejuruan') . ($isPengganti ? ' (Guru Pengganti: ' . $row['guru_pengganti_nama'] . ')' : ''),
                     'description'    => $row['kegiatan_pembelajaran'] ?: ($row['catatan_khusus'] ?: 'Dokumentasi pembelajaran interaktif di kelas/laboratorium.'),
                     'location'       => $row['nama_kelas'] ?: 'Ruang Kelas',
-                    'uploader_name'  => $row['guru_nama'] ?: 'Guru Pengampu',
-                    'uploader_role'  => 'Guru Mata Pelajaran',
+                    'uploader_name'  => $activeGuruNama,
+                    'uploader_role'  => $uploaderRole,
                     'uploader_photo' => $uploaderPhoto,
                     'photo_url'      => base_url('files/jurnal/' . $filename),
                     'date_raw'       => $row['tanggal'] ?: date('Y-m-d'),
@@ -162,7 +187,7 @@ class TvDisplayController extends BaseController
                 ];
 
                 $kbmCount++;
-                if ($kbmCount >= 20) break;
+                if ($kbmCount >= 40) break;
             }
         } catch (\Throwable $e) {
             log_message('error', 'TvDisplay Error (KBM): ' . $e->getMessage());
@@ -190,43 +215,12 @@ class TvDisplayController extends BaseController
                 ->join('kelas k', 'k.id = s.kelas_id', 'left')
                 ->join('siswa_pkl sp', 'sp.siswa_id = s.id AND sp.deleted_at IS NULL', 'left')
                 ->join('tempat_pkl tp', 'tp.id = sp.tempat_pkl_id', 'left')
-                ->where('pp.tanggal >=', $sevenDaysAgo)
                 ->where('pp.foto IS NOT NULL')
                 ->where('pp.foto !=', '')
                 ->where('pp.deleted_at IS NULL')
                 ->orderBy('pp.created_at', 'DESC')
                 ->limit(60)
                 ->get()->getResultArray();
-
-            // Fallback if no PKL in last 7 days (e.g. holidays)
-            if (empty($pklRows)) {
-                $pklRows = $db->table('pkl_progress pp')
-                    ->select('
-                        pp.id,
-                        pp.foto,
-                        pp.deskripsi,
-                        pp.langkah_kerja,
-                        pp.tanggal,
-                        pp.created_at,
-                        pt.judul AS task_judul,
-                        s.nama_lengkap AS siswa_nama,
-                        u.profile_photo AS siswa_foto,
-                        k.nama_kelas,
-                        tp.nama_perusahaan
-                    ')
-                    ->join('pkl_tasks pt', 'pt.id = pp.task_id AND pt.deleted_at IS NULL')
-                    ->join('siswa s', 's.id = pt.siswa_id')
-                    ->join('users u', 'u.id = s.user_id', 'left')
-                    ->join('kelas k', 'k.id = s.kelas_id', 'left')
-                    ->join('siswa_pkl sp', 'sp.siswa_id = s.id AND sp.deleted_at IS NULL', 'left')
-                    ->join('tempat_pkl tp', 'tp.id = sp.tempat_pkl_id', 'left')
-                    ->where('pp.foto IS NOT NULL')
-                    ->where('pp.foto !=', '')
-                    ->where('pp.deleted_at IS NULL')
-                    ->orderBy('pp.created_at', 'DESC')
-                    ->limit(30)
-                    ->get()->getResultArray();
-            }
 
             $pklCount = 0;
             foreach ($pklRows as $row) {
@@ -247,6 +241,9 @@ class TvDisplayController extends BaseController
                     'id'             => 'pkl_' . $row['id'],
                     'category'       => 'pkl',
                     'category_label' => 'PKL & MAGANG INDUSTRI',
+                    'headline_title' => 'Laporan PKL & Praktik Industri',
+                    'activity_text'  => $row['task_judul'] ?: ($row['deskripsi'] ?: ($row['langkah_kerja'] ?: 'Aktivitas kerja industri di DUDI')),
+                    'pic_text'       => ($row['siswa_nama'] ?: 'Siswa PKL') . (!empty($row['nama_perusahaan']) ? ' (' . $row['nama_perusahaan'] . ')' : ($row['nama_kelas'] ? ' (' . $row['nama_kelas'] . ')' : '')),
                     'badge_color'    => '#10B981', // Emerald Green
                     'badge_bg'       => 'rgba(16, 185, 129, 0.15)',
                     'badge_border'   => 'rgba(16, 185, 129, 0.45)',
@@ -266,7 +263,7 @@ class TvDisplayController extends BaseController
                 ];
 
                 $pklCount++;
-                if ($pklCount >= 20) break;
+                if ($pklCount >= 40) break;
             }
         } catch (\Throwable $e) {
             log_message('error', 'TvDisplay Error (PKL): ' . $e->getMessage());
@@ -312,6 +309,9 @@ class TvDisplayController extends BaseController
                     'id'             => 'piket_' . $row['id'],
                     'category'       => 'piket',
                     'category_label' => 'PIKET & KETERTIBAN SEKOLAH',
+                    'headline_title' => 'Jurnal Piket Guru',
+                    'activity_text'  => $row['rincian_tugas'] ?: ($row['deskripsi'] ?: ($row['catatan'] ?: 'Pelaksanaan tugas piket kedisiplinan & lingkungan')),
+                    'pic_text'       => $row['guru_nama'] ?: 'Guru Piket Harian',
                     'badge_color'    => '#F59E0B', // Amber
                     'badge_bg'       => 'rgba(245, 158, 11, 0.15)',
                     'badge_border'   => 'rgba(245, 158, 11, 0.45)',
@@ -331,7 +331,7 @@ class TvDisplayController extends BaseController
                 ];
 
                 $piketCount++;
-                if ($piketCount >= 10) break;
+                if ($piketCount >= 20) break;
             }
         } catch (\Throwable $e) {
             log_message('error', 'TvDisplay Error (Piket): ' . $e->getMessage());
@@ -382,6 +382,9 @@ class TvDisplayController extends BaseController
                     'id'             => 'wali_' . $row['id'],
                     'category'       => 'wali',
                     'category_label' => 'BIMBINGAN GURU WALI',
+                    'headline_title' => 'Jurnal Bimbingan Guru Wali',
+                    'activity_text'  => (!empty($row['jenis_bimbingan']) ? 'Bimbingan ' . $row['jenis_bimbingan'] : 'Pendampingan Karakter Siswa') . ($row['catatan'] ? ' - ' . $row['catatan'] : ''),
+                    'pic_text'       => ($row['guru_nama'] ?: 'Guru Wali') . ($row['siswa_nama'] ? ' (Siswa: ' . $row['siswa_nama'] . ')' : ''),
                     'badge_color'    => '#8B5CF6', // Purple
                     'badge_bg'       => 'rgba(139, 92, 246, 0.15)',
                     'badge_border'   => 'rgba(139, 92, 246, 0.45)',
@@ -401,16 +404,21 @@ class TvDisplayController extends BaseController
                 ];
 
                 $waliCount++;
-                if ($waliCount >= 10) break;
+                if ($waliCount >= 20) break;
             }
         } catch (\Throwable $e) {
             log_message('error', 'TvDisplay Error (Guru Wali): ' . $e->getMessage());
         }
 
-        // 5. Randomize (Shuffle) the combined feed items
-        if (!empty($allItems)) {
-            shuffle($allItems);
-        }
+        // 5. Sort all combined feed items in pure chronological order (Latest first)
+        usort($allItems, function ($a, $b) {
+            $timeA = strtotime($a['created_raw'] ?? ($a['date_raw'] ?? '1970-01-01'));
+            $timeB = strtotime($b['created_raw'] ?? ($b['date_raw'] ?? '1970-01-01'));
+            return $timeB <=> $timeA;
+        });
+
+        // Limit active slide deck to top 35 freshest items for optimal memory & smooth rotation
+        $allItems = array_slice($allItems, 0, 35);
 
         // 6. LIVE ATTENDANCE & SUMMARY STATISTICS (Single Aggregation Query)
         $stats = $this->calculateLiveStats($db, $todayDate, count($allItems));
@@ -534,7 +542,7 @@ class TvDisplayController extends BaseController
             return $hours . ' jam yang lalu';
         }
         if ($diff < 172800) {
-            return 'Kemarin, ' . date('H:i', $time) . ' WIB';
+            return 'Kemarin, ' . date('H:i', $time);
         }
 
         $days = floor($diff / 86400);
